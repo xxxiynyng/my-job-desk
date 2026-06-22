@@ -961,7 +961,7 @@ export function JobPostingTable() {
           </div>
 
           {/* 필터 칩 — 탭형, 칩별 카운트 표시 */}
-          <div className="px-3 py-1 border-b border-border flex items-center gap-1.5 flex-wrap">
+          <div className="px-3 py-1.5 border-b border-border flex items-center gap-1.5 flex-wrap">
             {FILTER_CHIPS.map((f, i) =>
               f === "|" ? (
                 <span key={`sep-${i}`} className="w-px h-3.5 bg-border mx-0.5" />
