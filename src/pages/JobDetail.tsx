@@ -185,7 +185,7 @@ function hlKey(section: string, group: string, idx: number) {
 function EssayStatus({ status }: { status: string }) {
   const cls =
     status === "완료" ? "bg-pickd-green-light text-pickd-green" :
-    status === "작성중" ? "bg-pickd-blue-light text-pickd-blue" :
+    status === "작성중" ? "bg-indigo-100 text-indigo-600" :
     status === "초안" ? "bg-pickd-orange-light text-pickd-orange" :
     "bg-muted text-muted-foreground";
   return (
@@ -431,7 +431,7 @@ export default function JobDetail() {
                   }
                 />
                 <SummaryItem label="지원 상태" value={
-                  <span className="px-1.5 py-0.5 rounded bg-pickd-blue-light text-accent-foreground font-medium">
+                  <span className="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
                     {job.status}
                   </span>
                 } />
@@ -454,7 +454,7 @@ export default function JobDetail() {
                           className={cn(
                             "w-2.5 h-2.5 rounded-full transition-colors",
                             e.status === "완료" ? "bg-pickd-green" :
-                            e.status === "작성중" ? "bg-pickd-blue" :
+                            e.status === "작성중" ? "bg-indigo-500" :
                             e.status === "초안" ? "bg-pickd-orange" :
                             "bg-border"
                           )}
@@ -573,34 +573,31 @@ export default function JobDetail() {
             {/* Section 3. 전형 정보 */}
             <section>
               <SectionHeader icon={ListChecks} title="3. 전형 정보" subtitle="Hiring Process" />
-              <div className="border border-border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-muted/40 border-b border-border">
-                      <th className="text-left px-4 py-2 text-[11px] font-medium text-muted-foreground w-[160px]">전형 단계</th>
-                      <th className="text-left px-4 py-2 text-[11px] font-medium text-muted-foreground w-[200px]">일정</th>
-                      <th className="text-left px-4 py-2 text-[11px] font-medium text-muted-foreground">세부 내용</th>
-                      <th className="text-left px-4 py-2 text-[11px] font-medium text-muted-foreground w-[180px]">비고</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {job.process.map((p: any, i: number) => (
-                      <tr key={i} className="border-b border-border/60 last:border-b-0 hover:bg-muted/20">
-                        <td className="px-4 py-2.5 text-[13px] font-medium text-foreground">
-                          <span className="inline-flex items-center gap-2">
-                            <span className="w-5 h-5 rounded bg-muted text-[11px] font-semibold text-muted-foreground flex items-center justify-center">
-                              {i + 1}
-                            </span>
-                            {p.step}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5 text-[13px] text-foreground tabular-nums">{p.schedule}</td>
-                        <td className="px-4 py-2.5 text-[13px] text-foreground">{p.detail}</td>
-                        <td className="px-4 py-2.5 text-[12px] text-muted-foreground">{p.note}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="relative pl-6">
+                {/* 수직 타임라인 선 */}
+                <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border" />
+                <div className="space-y-3">
+                  {job.process.map((p: any, i: number) => (
+                    <div key={i} className="relative flex items-start gap-4 group">
+                      {/* 스텝 번호 */}
+                      <div className="absolute -left-6 flex items-center justify-center w-5 h-5 rounded-full bg-background border-2 border-border group-hover:border-indigo-400 transition-colors mt-2.5">
+                        <span className="text-[10px] font-bold text-muted-foreground group-hover:text-indigo-500 transition-colors">{i + 1}</span>
+                      </div>
+                      <div className="flex-1 border border-border rounded-lg px-4 py-3 hover:bg-muted/20 hover:border-indigo-200 transition-all">
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-semibold text-foreground">{p.step}</p>
+                            <p className="text-[12px] text-muted-foreground mt-0.5">{p.detail}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-[12px] tabular-nums text-foreground/80">{p.schedule}</p>
+                            {p.note && <p className="text-[11px] text-muted-foreground mt-0.5">{p.note}</p>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
 
@@ -674,67 +671,73 @@ export default function JobDetail() {
                   <p className="text-[13px] text-muted-foreground">이 공고는 별도 문항이 없어요</p>
                 </div>
               ) : (
-                <ol className="border border-border rounded-xl overflow-hidden divide-y divide-border/60">
+                <ol className="space-y-3">
                   {job.essays.map((e: any, idx: number) => (
                     <li
                       key={e.no}
                       ref={(el) => { essayRefs.current[idx] = el; }}
                       className={cn(
-                        "group p-5 hover:bg-muted/10 transition-colors",
-                        e.status === "작성중" && "border-l-[3px] border-l-pickd-blue",
-                        e.status === "초안" && "border-l-[3px] border-l-pickd-orange",
-                        e.status === "완료" && "border-l-[3px] border-l-pickd-green",
+                        "rounded-xl border bg-card transition-shadow hover:shadow-sm",
+                        e.status === "작성중" && "border-indigo-200 bg-indigo-50/30",
+                        e.status === "초안" && "border-pickd-orange/30 bg-orange-50/20",
+                        e.status === "완료" && "border-pickd-green/30 bg-green-50/20",
+                        e.status === "미작성" && "border-border",
                       )}
                     >
-                      <div className="flex items-start gap-4">
-                        {/* Status circle */}
-                        <div className={cn(
-                          "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold",
-                          e.status === "완료" ? "bg-pickd-green text-white" :
-                          e.status === "작성중" ? "bg-pickd-blue text-white" :
-                          e.status === "초안" ? "bg-pickd-orange text-white" :
-                          "bg-muted text-muted-foreground"
-                        )}>
-                          {e.status === "완료" ? <Check className="w-3.5 h-3.5" /> : e.no}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          {/* Status + metadata row */}
-                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <EssayStatus status={e.status} />
-                            <span className="text-[11px] text-muted-foreground tabular-nums">
-                              {e.charLimit.toLocaleString()}자 이내
-                            </span>
-                            {e.updated && (
-                              <span className="text-[11px] text-muted-foreground/60">
-                                · 수정 {e.updated}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Question */}
-                          <p className="text-[13px] text-foreground leading-relaxed">
-                            {e.question}
-                          </p>
-
-                          {/* Draft preview */}
-                          {e.preview && (
-                            <div className="mt-2.5 text-[12px] text-muted-foreground leading-relaxed line-clamp-2 bg-muted/40 rounded-md px-2.5 py-1.5 italic border-l-2 border-border/60">
-                              {e.preview}
+                      <div className="p-5">
+                        {/* 상단: 번호 + 상태 + 메타 + 버튼 */}
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn(
+                              "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold",
+                              e.status === "완료" ? "bg-pickd-green text-white" :
+                              e.status === "작성중" ? "bg-indigo-500 text-white" :
+                              e.status === "초안" ? "bg-pickd-orange text-white" :
+                              "bg-muted text-muted-foreground"
+                            )}>
+                              {e.status === "완료" ? <Check className="w-3.5 h-3.5" /> : e.no}
                             </div>
-                          )}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <EssayStatus status={e.status} />
+                              <span className="text-[11px] text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
+                              {e.updated && <span className="text-[11px] text-muted-foreground/50">수정 {e.updated}</span>}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant={e.status === "미작성" ? "outline" : "default"}
+                            className={cn(
+                              "shrink-0 h-7 text-xs gap-1 whitespace-nowrap",
+                              e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                            )}
+                            onClick={() => goToTab3(e.no)}
+                          >
+                            <PenLine className="w-3 h-3" />
+                            {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
+                          </Button>
                         </div>
 
-                        {/* Button — unified label */}
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="shrink-0 h-8 text-xs gap-1.5 whitespace-nowrap self-start mt-0.5"
-                          onClick={() => goToTab3(e.no)}
-                        >
-                          <PenLine className="w-3.5 h-3.5" />
-                          이어서 작성하기
-                        </Button>
+                        {/* 문항 */}
+                        <p className="text-[14px] font-medium text-foreground leading-relaxed pl-9">
+                          {e.question}
+                        </p>
+
+                        {/* 작성 내용 미리보기 */}
+                        {e.preview && (
+                          <div className="mt-3 pl-9">
+                            <div className="relative bg-background border border-border/60 rounded-lg px-4 py-3">
+                              <div className="absolute top-3 left-3 w-0.5 h-[calc(100%-24px)] bg-indigo-300 rounded-full" />
+                              <p className="pl-3 text-[13px] text-foreground/75 leading-relaxed line-clamp-3">
+                                {e.preview}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 미작성 안내 */}
+                        {!e.preview && e.status === "미작성" && (
+                          <p className="mt-2 pl-9 text-[12px] text-muted-foreground/50">아직 작성된 내용이 없어요</p>
+                        )}
                       </div>
                     </li>
                   ))}
