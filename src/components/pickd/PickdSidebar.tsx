@@ -19,7 +19,7 @@ export function PickdSidebar() {
 
   return (
     <aside className="flex flex-col w-[60px] border-r border-border bg-card py-4 items-center shrink-0">
-      <img src="/logo-mark.svg" alt="Pickd" className="w-7 h-7 mb-6" />
+      <NavLink to="/"><img src="/logo-mark.svg" alt="Pickd" className="w-7 h-7 mb-6" /></NavLink>
 
       <nav className="flex flex-col gap-1 flex-1">
         {navItems.map((item) => {

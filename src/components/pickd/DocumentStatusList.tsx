@@ -131,7 +131,7 @@ export function DocumentStatusList() {
           <div className="px-4 py-8 text-center text-xs text-muted-foreground">작성 중인 서류가 없어요.</div>
         ) : view === "card" ? (
           /* ── 카드형 ── */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 p-4">
             {sorted.map((doc) => (
               <Link
                 key={doc.id}
