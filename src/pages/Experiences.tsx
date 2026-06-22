@@ -809,7 +809,7 @@ export default function Experiences() {
         <PickdSidebar />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-10 py-8 max-w-[1400px] mx-auto space-y-6">
+          <div className="px-10 pt-5 pb-8 max-w-[1400px] mx-auto space-y-3">
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -838,7 +838,7 @@ export default function Experiences() {
                 <TabsTrigger value="files" className="text-[13px]">파일함</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="db" className="space-y-7 mt-6 focus-visible:outline-none">
+              <TabsContent value="db" className="space-y-5 mt-4 focus-visible:outline-none">
 
             {/* ── 경험·스펙 목록 ─────────────────────────────────────── */}
             <section>
@@ -1098,7 +1098,7 @@ export default function Experiences() {
                   <table className="w-full text-sm table-fixed">
                     <thead>
                       <tr className="bg-muted/20 border-b border-border text-xs text-muted-foreground">
-                        <th className="w-9 px-3 py-2">
+                        <th className="w-9 px-3 py-2.5">
                           <Checkbox
                             checked={allFilteredSelected}
                             onCheckedChange={toggleSelectAll}
@@ -1237,34 +1237,34 @@ export default function Experiences() {
                           <tr
                             key={i.id}
                             className={cn(
-                              "border-b border-border/50 last:border-0 hover:bg-muted/30 group cursor-pointer",
+                              "border-b border-border/50 hover:bg-muted/30 group cursor-pointer",
                               selected.has(i.id) && "bg-accent/30",
                             )}
                             onClick={() => setDetailId(i.id)}
                           >
-                            <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                            <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={selected.has(i.id)}
                                 onCheckedChange={() => toggleSelect(i.id)}
                                 className="h-3.5 w-3.5"
                               />
                             </td>
-                            {isVisible("type") && <td className="px-3 py-2 text-xs text-muted-foreground">{i.type}</td>}
+                            {isVisible("type") && <td className="px-3 py-2.5 text-xs text-muted-foreground">{i.type}</td>}
                             {isVisible("name") && (
-                              <td className="px-3 py-2 font-medium text-foreground">
+                              <td className="px-3 py-2.5 font-medium text-foreground">
                                 <span className="inline-flex items-center gap-1.5">{i.name}</span>
                               </td>
                             )}
                             {isVisible("org") && (
-                              <td className="px-3 py-2 text-xs text-muted-foreground truncate">{org || "—"}</td>
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground truncate">{org || "—"}</td>
                             )}
                             {isVisible("period") && (
-                              <td className="px-3 py-2 text-xs text-muted-foreground tabular-nums truncate">
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground tabular-nums truncate">
                                 {period || "—"}
                               </td>
                             )}
                             {isVisible("keywords") && (
-                              <td className="px-3 py-2">
+                              <td className="px-3 py-2.5">
                                 <div className="flex flex-wrap gap-1">
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
@@ -1281,13 +1281,13 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("importance") && (
-                              <td className="px-3 py-2 text-[11px] text-muted-foreground">{i.importance ?? "—"}</td>
+                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground">{i.importance ?? "—"}</td>
                             )}
                             {isVisible("updated") && (
-                              <td className="px-3 py-2 text-[11px] text-muted-foreground">{i.updatedAt ?? "—"}</td>
+                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground">{i.updatedAt ?? "—"}</td>
                             )}
                             {isVisible("manage") && (
-                              <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                              <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                                 <ManageIndicator
                                   item={i}
                                   onMerge={() => {
@@ -1363,11 +1363,11 @@ export default function Experiences() {
             </section>
               </TabsContent>
 
-              <TabsContent value="basic-info" className="mt-6 focus-visible:outline-none">
+              <TabsContent value="basic-info" className="mt-4 focus-visible:outline-none">
                 <BasicInfoPanel />
               </TabsContent>
 
-              <TabsContent value="files" className="mt-6 focus-visible:outline-none">
+              <TabsContent value="files" className="mt-4 focus-visible:outline-none">
                 <FilesPanel />
               </TabsContent>
             </Tabs>
@@ -1376,7 +1376,7 @@ export default function Experiences() {
 
         {/* 선택 플로팅 바 */}
         {selected.size > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background rounded-lg px-3 py-2 flex items-center gap-3 shadow-lg">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background rounded-lg px-3 py-2.5 flex items-center gap-3 shadow-lg">
             <span className="text-[12px]">{selected.size}개 선택됨</span>
             <span className="w-px h-4 bg-background/20" />
             <button onClick={() => setMergeOpen(true)} className="text-[11px] hover:text-background/80">
@@ -1725,7 +1725,7 @@ function RepSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-3 py-2.5">
+    <div className="px-3 py-2.5.5">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[10.5px] font-medium text-muted-foreground">{label}</span>
         {onCopyAll && (
@@ -2202,7 +2202,7 @@ function DetailEditor({
                 </button>
               </div>
               <div className="px-4 py-3 space-y-3">
-                <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5">
+                <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5.5">
                   <p className="text-[10px] text-muted-foreground mb-1">AI의 질문</p>
                   <p className="text-[13px] text-foreground leading-snug">{currentQ}</p>
                   <button
@@ -2268,11 +2268,11 @@ function DetailEditor({
                 <div key={f} className="border-t border-border py-3">
                   <div className="text-[11px] text-muted-foreground mb-2">{f}</div>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2 text-[12px] hover:bg-muted/30 cursor-pointer">
+                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-[12px] hover:bg-muted/30 cursor-pointer">
                       <input type="radio" name={f} defaultChecked className="mt-1" />
                       <span>기존 내용 예시</span>
                     </label>
-                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2 text-[12px] hover:bg-muted/30 cursor-pointer">
+                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-[12px] hover:bg-muted/30 cursor-pointer">
                       <input type="radio" name={f} className="mt-1" />
                       <span>새 추출 내용 예시</span>
                     </label>
@@ -2692,7 +2692,7 @@ function SentenceCardView({
         e.dataTransfer.setData("text/plain", card.sentence);
         e.dataTransfer.effectAllowed = "copy";
       }}
-      className="border border-border rounded-md bg-muted/20 px-3 py-2.5 cursor-grab active:cursor-grabbing"
+      className="border border-border rounded-md bg-muted/20 px-3 py-2.5.5 cursor-grab active:cursor-grabbing"
     >
       <p className="text-[10px] text-muted-foreground mb-1">{card.question}</p>
       <p className="text-[12.5px] text-foreground leading-snug">{card.sentence}</p>
@@ -2831,7 +2831,7 @@ function ResizableHead({
   filter?: React.ReactNode;
 }) {
   return (
-    <th style={width ? { width, minWidth: width } : undefined} className="relative text-left px-3 py-2 font-medium">
+    <th style={width ? { width, minWidth: width } : undefined} className="relative text-left px-3 py-2.5 font-medium">
       <span className="inline-flex items-center gap-1">
         <span>{label}</span>
         {filter}
