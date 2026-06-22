@@ -554,26 +554,28 @@ function KanbanView({
                     }}
                     onClick={() => onSelect(job)}
                     className={cn(
-                      "bg-card border border-border border-l-[3px] rounded-lg p-3.5 cursor-grab active:cursor-grabbing hover:border-primary/30 hover:bg-muted/30 transition-colors",
-                      theme.border,
+                      "bg-card border border-border rounded-lg cursor-grab active:cursor-grabbing hover:shadow-sm hover:border-primary/20 transition-all group overflow-hidden",
                     )}
                   >
-                    <div className="flex items-start justify-between gap-1 mb-1">
-                      <span className="text-[12.5px] font-semibold text-foreground truncate">{job.company}</span>
-                      {job.starred && <Star className="w-3 h-3 fill-current text-pickd-orange shrink-0 mt-0.5" />}
+                    {/* 상단 컬러 바 */}
+                    <div className={cn("h-0.5 w-full", theme.dot.replace("bg-", "bg-"))} />
+                    <div className="p-3">
+                      {/* 기업명 + 별표 */}
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="text-[13px] font-bold text-foreground truncate leading-tight">{job.company}</span>
+                        {job.starred && <Star className="w-3 h-3 fill-current text-pickd-orange shrink-0" />}
+                      </div>
+                      {/* 직무 */}
+                      <p className="text-[11px] text-muted-foreground truncate leading-tight">{job.title}</p>
+                      {/* 하단: 고용형태 + D-day / 결과 */}
+                      <div className="flex items-center justify-between mt-2.5 gap-1">
+                        <span className="text-[10px] text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-sm tabular-nums shrink-0">{job.employType}</span>
+                        {col !== "최종 결과" && <DdayChip days={job.dday} size="sm" />}
+                        {col === "최종 결과" && job.finalResult && (
+                          <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
+                        )}
+                      </div>
                     </div>
-                    <p className="text-[11px] text-muted-foreground truncate">{job.title}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{job.employType}</p>
-                    {col !== "최종 결과" && (
-                      <div className="mt-1.5">
-                        <DdayChip days={job.dday} size="sm" />
-                      </div>
-                    )}
-                    {col === "최종 결과" && job.finalResult && (
-                      <div className="mt-1.5">
-                        <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
-                      </div>
-                    )}
                   </div>
                 ))}
                 {colJobs.length === 0 && (
