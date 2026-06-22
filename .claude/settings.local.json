@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/xxxiynyng/Downloads/**)",
+      "Bash(unzip -o \"Design System-handoff.zip\" -d \"Design System-handoff\")",
+      "Bash(xargs ls)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(ls /usr/local/bin/node /opt/homebrew/bin/node ~/.nvm/versions/node/*/bin/node 2>/dev/null | head -3)",
+      "Bash(cp \"/Users/xxxiynyng/Downloads/Design System-handoff/design-system/project/assets/logo-mark.svg\" \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/public/logo-mark.svg\")",
+      "Bash(cp \"/Users/xxxiynyng/Downloads/Design System-handoff/design-system/project/assets/logo-wordmark.svg\" \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/public/logo-wordmark.svg\")",
+      "Bash(cp \"/Users/xxxiynyng/Downloads/Design System-handoff/design-system/project/assets/logo-wordmark-onbrand.svg\" \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/public/logo-wordmark-onbrand.svg\")",
+      "Bash(mkdir -p \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(which bun *)",
+      "Read(//Users/xxxiynyng/.bun/**)",
+      "Read(//Users/xxxiynyng/Library/**)",
+      "Read(//Users/xxxiynyng/.volta/**)",
+      "Read(//Users/xxxiynyng/**)",
+      "Bash(find /usr /opt /Users/xxxiynyng -maxdepth 6 -name \"bun\" -o -name \"node\" 2>/dev/null | grep -v \".app\" | head -10)",
+      "Bash(/Users/xxxiynyng/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node --version)",
+      "Bash(/Users/xxxiynyng/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --version)",
+      "Bash(NODE_DIR=$\\(dirname /Users/xxxiynyng/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node\\) && ls \"$NODE_DIR/../\" 2>/dev/null)",
+      "Bash(find /Users/xxxiynyng -maxdepth 5 -name \"bun\" -type f 2>/dev/null; find /usr/local -name \"bun\" -type f 2>/dev/null; find /opt -name \"bun\" -type f 2>/dev/null)",
+      "Bash(xxd)",
+      "Bash(ls /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/ 2>/dev/null | head -20 && ls /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/ 2>/dev/null | grep -E \"node|bun|npm\" | head -10)",
+      "Bash(/Users/xxxiynyng/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node -e ' *)",
+      "Bash(~/.bun/bin/bun install *)",
+      "Bash(claude plugin *)",
+      "Bash(claude --version)"
+    ]
+  }
+}
