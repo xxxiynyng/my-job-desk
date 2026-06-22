@@ -71,7 +71,7 @@ export default function Calendar() {
       <PickdSidebar />
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={60} minSize={50} maxSize={80}>
+        <ResizablePanel defaultSize={60} minSize={50} maxSize={72}>
           <div className="h-full p-5 flex flex-col min-w-0">
             <MonthlyCalendar
               currentDate={currentDate} selectedDate={selectedDate}
@@ -87,7 +87,7 @@ export default function Calendar() {
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={40} minSize={20}>
+        <ResizablePanel defaultSize={40} minSize={28}>
           <div className="h-full p-5 flex flex-col min-w-0 overflow-hidden">
             <ContextPanel
               selectedDate={selectedDate} tasks={tasks} carriedOverTasks={carriedOver}

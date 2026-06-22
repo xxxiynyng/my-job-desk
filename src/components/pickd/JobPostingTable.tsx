@@ -1005,20 +1005,20 @@ export function JobPostingTable() {
               <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr className="border-b border-border bg-muted/30 text-[12px] text-foreground/70 select-none">
-                    <th className="w-9 px-3 py-2.5">
+                    <th className="w-9 px-3 py-1.5">
                       <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                     </th>
-                    <th className="w-9 px-2 py-2.5 text-center">★</th>
+                    <th className="w-9 px-2 py-1.5 text-center">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-2.5 font-semibold"
+                      className="relative text-left px-3 py-1.5 font-semibold"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
                       기업명 <ResizeHandle onMouseDown={onMouseDown("company")} />
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-2.5 font-semibold"
+                      className="relative text-left px-3 py-1.5 font-semibold"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
                       공고명 <ResizeHandle onMouseDown={onMouseDown("title")} />
@@ -1042,7 +1042,7 @@ export function JobPostingTable() {
                             }}
                             style={{ width: w, minWidth: COL_MIN_WIDTHS[col.key] ?? 60 }}
                             className={cn(
-                              "relative text-left px-3 py-2.5 font-semibold cursor-grab",
+                              "relative text-left px-3 py-1.5 font-semibold cursor-grab",
                               isOver && "bg-primary/10",
                               ["dday", "linked"].includes(col.key) && "text-center",
                             )}
