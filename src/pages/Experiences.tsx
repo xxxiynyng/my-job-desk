@@ -599,6 +599,17 @@ const DEFAULT_EXP_WIDTHS: Record<string, number> = {
   manage: 80,
 };
 
+const MIN_EXP_WIDTHS: Record<string, number> = {
+  type: 56,
+  name: 100,
+  org: 72,
+  period: 72,
+  keywords: 80,
+  importance: 56,
+  updated: 64,
+  manage: 60,
+};
+
 // "전체"와 복붙 아이콘은 렌더에서 별도 처리
 const FILTER_CHIPS: ItemType[] = [...NARRATIVE_TYPES, ...SPEC_TYPES];
 
@@ -674,6 +685,7 @@ export default function Experiences() {
   const { widths: colW, onMouseDown: onResize } = useResizableCols(
     "pickd.experiences.colWidths.v2",
     DEFAULT_EXP_WIDTHS,
+    MIN_EXP_WIDTHS,
   );
 
   const resetCols = () => {
@@ -2843,7 +2855,7 @@ function ResizableHead({
   filter?: React.ReactNode;
 }) {
   return (
-    <th style={width ? { width, minWidth: width } : undefined} className="relative text-left px-3 py-2.5 font-medium">
+    <th style={width ? { width } : undefined} className="relative text-left px-3 py-2.5 font-medium overflow-hidden">
       <span className="inline-flex items-center gap-1">
         <span>{label}</span>
         {filter}

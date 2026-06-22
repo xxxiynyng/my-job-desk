@@ -36,6 +36,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useResizableCols, ResizeHandle } from "@/hooks/useResizableCols";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
@@ -1175,12 +1177,9 @@ export function JobPostingTable() {
                                   style={{ minWidth: COL_MIN_WIDTHS.deadline }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  {/* 날짜 클릭 → inline 편집, 캘린더 아이콘 없음 */}
-                                  <input
-                                    type="date"
+                                  <DeadlinePicker
                                     value={job.deadline}
-                                    onChange={(e) => updateDeadline(job.id, e.target.value)}
-                                    className="bg-transparent border-0 px-0 text-xs text-muted-foreground tabular-nums focus:outline-none focus:text-foreground cursor-pointer w-full"
+                                    onChange={(v) => updateDeadline(job.id, v)}
                                   />
                                 </td>
                               );
@@ -1289,5 +1288,62 @@ export function JobPostingTable() {
         )}
       </div>
     </TooltipProvider>
+  );
+}
+
+// ── DeadlinePicker ────────────────────────────────────────────────
+function DeadlinePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [inputVal, setInputVal] = useState(value);
+
+  useEffect(() => { setInputVal(value); }, [value]);
+
+  const selected = value ? new Date(value + "T00:00:00") : undefined;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setInputVal(v);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) onChange(v);
+  };
+
+  const handleInputBlur = () => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(inputVal)) onChange(inputVal);
+    else setInputVal(value);
+  };
+
+  const handleDaySelect = (day: Date | undefined) => {
+    if (!day) return;
+    const iso = day.toLocaleDateString("sv-SE");
+    onChange(iso);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="text-xs text-muted-foreground tabular-nums hover:text-foreground transition-colors text-left w-full truncate">
+          {value || "—"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start" onClick={(e) => e.stopPropagation()}>
+        <div className="px-3 pt-3 pb-1">
+          <input
+            type="text"
+            value={inputVal}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            placeholder="YYYY-MM-DD"
+            className="w-full h-7 px-2 text-xs border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={handleDaySelect}
+          month={selected}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

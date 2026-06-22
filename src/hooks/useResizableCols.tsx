@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export function useResizableCols(
   storageKey: string,
   defaults: Record<string, number>,
+  minWidths?: Record<string, number>,
 ) {
   const [widths, setWidths] = useState<Record<string, number>>(() => {
     if (typeof window === "undefined") return defaults;
@@ -38,7 +39,8 @@ export function useResizableCols(
       const onMove = (ev: MouseEvent) => {
         if (!dragRef.current) return;
         const dx = ev.clientX - dragRef.current.startX;
-        const next = Math.max(60, dragRef.current.startW + dx);
+        const min = minWidths?.[dragRef.current.key] ?? 60;
+        const next = Math.max(min, dragRef.current.startW + dx);
         setWidths((p) => ({ ...p, [dragRef.current!.key]: next }));
       };
       const onUp = () => {
