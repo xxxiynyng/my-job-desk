@@ -850,7 +850,7 @@ export default function Experiences() {
                 <TabsTrigger value="files" className="text-[13px]">파일함</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="db" className="space-y-5 mt-4 focus-visible:outline-none">
+              <TabsContent value="db" className="space-y-5 mt-6 focus-visible:outline-none">
 
             {/* ── 경험·스펙 목록 ─────────────────────────────────────── */}
             <section>
@@ -1387,11 +1387,11 @@ export default function Experiences() {
             </section>
               </TabsContent>
 
-              <TabsContent value="basic-info" className="mt-4 focus-visible:outline-none">
+              <TabsContent value="basic-info" className="mt-6 focus-visible:outline-none">
                 <BasicInfoPanel />
               </TabsContent>
 
-              <TabsContent value="files" className="mt-4 focus-visible:outline-none">
+              <TabsContent value="files" className="mt-6 focus-visible:outline-none">
                 <FilesPanel />
               </TabsContent>
             </Tabs>
