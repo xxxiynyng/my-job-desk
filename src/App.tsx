@@ -8,6 +8,7 @@ import JobDetail from "./pages/JobDetail.tsx";
 import Experiences from "./pages/Experiences.tsx";
 import AICover from "./pages/AICover.tsx";
 import Settings from "./pages/Settings.tsx";
+import Calendar from "./pages/Calendar.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/files" element={<Navigate to="/experiences?tab=files" replace />} />
           <Route path="/ai-cover" element={<AICover />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/calendar" element={<Calendar />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

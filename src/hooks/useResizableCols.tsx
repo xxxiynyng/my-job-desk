@@ -38,7 +38,7 @@ export function useResizableCols(
       const onMove = (ev: MouseEvent) => {
         if (!dragRef.current) return;
         const dx = ev.clientX - dragRef.current.startX;
-        const next = Math.max(60, dragRef.current.startW + dx);
+        const next = Math.max(defaults[dragRef.current!.key] ?? 60, dragRef.current.startW + dx);
         setWidths((p) => ({ ...p, [dragRef.current!.key]: next }));
       };
       const onUp = () => {

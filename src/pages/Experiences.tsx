@@ -820,11 +820,11 @@ export default function Experiences() {
               </div>
               {activeTab === "db" && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setImportOpen(true)}>
-                    <Sparkles className="w-3.5 h-3.5" /> 자소서에서 추출
+                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3" onClick={() => setImportOpen(true)}>
+                    <Sparkles className="w-3 h-3" /> 자소서에서 추출
                   </Button>
-                  <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setExcelOpen(true)}>
-                    <Download className="w-3.5 h-3.5" /> Excel 내보내기
+                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3" onClick={() => setExcelOpen(true)}>
+                    <Download className="w-3 h-3" /> Excel 내보내기
                   </Button>
                 </div>
               )}
@@ -844,18 +844,18 @@ export default function Experiences() {
             <section>
               {/* Toolbar */}
               <div className="flex items-center gap-2 flex-wrap mb-3">
-                <Button size="sm" className="h-8 text-xs" onClick={() => setEntryOpen(true)}>
-                  <Plus className="w-3.5 h-3.5" /> 경험 추가
+                <Button size="sm" className="h-7 text-[12px] px-3" onClick={() => setEntryOpen(true)}>
+                  <Plus className="w-3 h-3" /> 경험 추가
                 </Button>
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex items-center gap-1.5">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                     <Input
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="항목명 검색"
-                      className="h-8 w-40 pl-7 text-xs border-border"
+                      className="h-7 w-36 pl-6 text-[12px] border-border"
                     />
                   </div>
                   {/* Filter */}
@@ -866,13 +866,13 @@ export default function Experiences() {
                           <button
                             aria-label="필터"
                             className={cn(
-                              "relative inline-flex items-center justify-center w-7 h-7 rounded-md border border-border hover:bg-muted",
+                              "relative inline-flex items-center justify-center w-6 h-6 rounded border border-border hover:bg-muted",
                               activeFilterCount > 0
                                 ? "text-foreground bg-accent/40"
                                 : "text-muted-foreground hover:text-foreground",
                             )}
                           >
-                            <Filter className="w-3.5 h-3.5" />
+                            <Filter className="w-3 h-3" />
                             {activeFilterCount > 0 && (
                               <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px] text-center">
                                 {activeFilterCount}
@@ -936,9 +936,9 @@ export default function Experiences() {
                           <DropdownMenuTrigger asChild>
                             <button
                               aria-label="표시할 컬럼"
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
+                              className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
                             >
-                              <Columns3 className="w-3.5 h-3.5" />
+                              <Columns3 className="w-3 h-3" />
                             </button>
                           </DropdownMenuTrigger>
                         </TooltipTrigger>
@@ -972,18 +972,18 @@ export default function Experiences() {
                     </DropdownMenu>
                   )}
                   {/* View toggle — 복붙 포함 */}
-                  <div className="inline-flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-md border border-border">
+                  <div className="inline-flex items-center gap-px bg-muted/50 p-px rounded border border-border">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => setView("list")}
                           className={cn(
-                            "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                            "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                             view === "list" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                           )}
                           aria-label="리스트형"
                         >
-                          <LayoutList className="w-3.5 h-3.5" />
+                          <LayoutList className="w-3 h-3" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">리스트형</TooltipContent>
@@ -993,12 +993,12 @@ export default function Experiences() {
                         <button
                           onClick={() => setView("card")}
                           className={cn(
-                            "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                            "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                             view === "card" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                           )}
                           aria-label="카드형"
                         >
-                          <LayoutGrid className="w-3.5 h-3.5" />
+                          <LayoutGrid className="w-3 h-3" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">카드형</TooltipContent>
@@ -1016,12 +1016,12 @@ export default function Experiences() {
                               document.exitFullscreen();
                             }
                           }}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          className="inline-flex items-center justify-center w-6 h-6 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                           aria-label={isFullscreen ? "전체화면 종료" : "전체화면"}
                         >
                           {isFullscreen
-                            ? <X className="w-3.5 h-3.5" />
-                            : <ExternalLink className="w-3.5 h-3.5" />}
+                            ? <X className="w-3 h-3" />
+                            : <ExternalLink className="w-3 h-3" />}
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">{isFullscreen ? "전체화면 종료" : "전체화면 확장"}</TooltipContent>
@@ -1031,12 +1031,12 @@ export default function Experiences() {
               </div>
 
               {/* Filter chips */}
-              <div className="flex items-center gap-1.5 flex-wrap mb-4">
+              <div className="flex items-center gap-1 flex-wrap mb-3">
                 {/* 전체 */}
                 <button
                   onClick={() => setActiveFilter("전체")}
                   className={cn(
-                    "px-2.5 py-1 rounded-md text-[11px] border transition-colors",
+                    "h-6 px-2 inline-flex items-center rounded text-[11px] border transition-colors",
                     activeFilter === "전체" && view !== "paste"
                       ? "bg-accent text-accent-foreground border-accent"
                       : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1051,7 +1051,7 @@ export default function Experiences() {
                     <button
                       onClick={() => setView((v) => v === "paste" ? "list" : "paste")}
                       className={cn(
-                        "inline-flex items-center justify-center w-[26px] h-[26px] rounded-md border transition-colors",
+                        "inline-flex items-center justify-center w-6 h-6 rounded border transition-colors",
                         view === "paste"
                           ? "bg-accent text-accent-foreground border-accent"
                           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1065,7 +1065,7 @@ export default function Experiences() {
                 </Tooltip>
 
                 {/* 구분선 */}
-                <span className="w-px h-4 bg-border/60 mx-0.5" />
+                <span className="w-px h-3.5 bg-border/60 mx-0.5" />
 
                 {/* 유형 필터 */}
                 {FILTER_CHIPS.map((f) => (
@@ -1073,7 +1073,7 @@ export default function Experiences() {
                     key={f}
                     onClick={() => setActiveFilter(f)}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-[11px] border transition-colors",
+                      "h-6 px-2 inline-flex items-center rounded text-[11px] border transition-colors",
                       activeFilter === f
                         ? "bg-accent text-accent-foreground border-accent"
                         : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1249,42 +1249,54 @@ export default function Experiences() {
                                 className="h-3.5 w-3.5"
                               />
                             </td>
-                            {isVisible("type") && <td className="px-3 py-2.5 text-xs text-muted-foreground">{i.type}</td>}
+                            {isVisible("type") && (
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
+                                <span className="block truncate">{i.type}</span>
+                              </td>
+                            )}
                             {isVisible("name") && (
-                              <td className="px-3 py-2.5 font-medium text-foreground">
-                                <span className="inline-flex items-center gap-1.5">{i.name}</span>
+                              <td className="px-3 py-2.5 font-medium text-foreground overflow-hidden">
+                                <span className="flex items-center gap-1.5 min-w-0">
+                                  <span className="truncate">{i.name}</span>
+                                </span>
                               </td>
                             )}
                             {isVisible("org") && (
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground truncate">{org || "—"}</td>
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
+                                <span className="block truncate">{org || "—"}</span>
+                              </td>
                             )}
                             {isVisible("period") && (
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground tabular-nums truncate">
-                                {period || "—"}
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground tabular-nums overflow-hidden">
+                                <span className="block truncate">{period || "—"}</span>
                               </td>
                             )}
                             {isVisible("keywords") && (
-                              <td className="px-3 py-2.5">
-                                <div className="flex flex-wrap gap-1">
+                              <td className="px-3 py-2.5 overflow-hidden">
+                                <div className="flex flex-nowrap gap-1 overflow-hidden">
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
                                       key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground/70"
+                                      className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground/70 shrink-0"
                                     >
                                       {k}
                                     </span>
                                   ))}
                                   {i.keywords.length > 3 && (
-                                    <span className="text-[10px] text-muted-foreground">+{i.keywords.length - 3}</span>
+                                    <span className="text-[10px] text-muted-foreground shrink-0">+{i.keywords.length - 3}</span>
                                   )}
                                 </div>
                               </td>
                             )}
                             {isVisible("importance") && (
-                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground">{i.importance ?? "—"}</td>
+                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground overflow-hidden">
+                                <span className="block truncate">{i.importance ?? "—"}</span>
+                              </td>
                             )}
                             {isVisible("updated") && (
-                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground">{i.updatedAt ?? "—"}</td>
+                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground overflow-hidden">
+                                <span className="block truncate">{i.updatedAt ?? "—"}</span>
+                              </td>
                             )}
                             {isVisible("manage") && (
                               <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>

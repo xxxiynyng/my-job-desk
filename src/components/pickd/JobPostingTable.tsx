@@ -20,7 +20,6 @@ import {
   Clock,
   ChevronRight,
   ChevronUp,
-  FileText,
   LayoutGrid,
   Folder,
 } from "lucide-react";
@@ -310,18 +309,36 @@ function FinalResultPicker({
   );
 }
 
+// ── 폴더 SVG 아이콘 ────────────────────────────────────────────────
+function FolderSvgIcon() {
+  const c = { body: "#f1f5f9", tab: "#e2e8f0", stroke: "#94a3b8" };
+
+  return (
+    <svg width="52" height="44" viewBox="0 0 52 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* folder body */}
+      <path
+        d="M3 16 L3 39 Q3 41 5 41 L47 41 Q49 41 49 39 L49 18 Q49 16 47 16 L26 16 Q24 16 23 14 L21 10 Q20 8 18 8 L5 8 Q3 8 3 10 Z"
+        fill={c.body} stroke={c.stroke} strokeWidth="1.4" strokeLinejoin="round"
+      />
+      {/* folder tab shading */}
+      <path
+        d="M3 10 Q3 8 5 8 L18 8 Q20 8 21 10 L23 14 Q24 16 26 16 L3 16 Z"
+        fill={c.tab}
+      />
+    </svg>
+  );
+}
+
 // ── 완료된 공고 섹션 ───────────────────────────────────────────────
 function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
-  const [open, setOpen] = useState(false); // 기본 접힘
+  const [open, setOpen] = useState(false);
   const [view, setView] = useState<"file" | "card">("file");
 
   if (jobs.length === 0) return null;
 
   return (
     <section className="bg-card border border-border rounded-xl overflow-hidden">
-      {/* 헤더 — 닫혀 있을 때만 하단 구분선을 보여줌(열렸을 때 선+여백이 이중으로 강조되는 것을 방지) */}
       <div className={cn("px-4 pt-2 pb-1.5 flex items-center justify-between", !open && "border-b border-border")}>
-
         <button onClick={() => setOpen((p) => !p)} className="flex items-center gap-2 flex-1 text-left">
           <ChevronRight
             className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform shrink-0", open && "rotate-90")}
@@ -334,16 +351,16 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setView("file")}
-                aria-label="파일함형"
+                aria-label="폴더형"
                 className={cn(
-                  "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                  "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                   view === "file" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Folder className="w-3.5 h-3.5" />
+                <Folder className="w-3 h-3" />
               </button>
             </TooltipTrigger>
-            <TooltipContent className="text-xs">파일함형</TooltipContent>
+            <TooltipContent className="text-xs">폴더형</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -351,11 +368,11 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                 onClick={() => setView("card")}
                 aria-label="카드형"
                 className={cn(
-                  "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                  "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                   view === "card" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-3 h-3" />
               </button>
             </TooltipTrigger>
             <TooltipContent className="text-xs">카드형</TooltipContent>
@@ -364,34 +381,38 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
       </div>
 
       {open && (
-        <div className="px-3 pb-3 pt-2">
+        <div className="px-4 pb-4 pt-3">
           {view === "file" ? (
-            /* 파일함형 — 왼쪽 정렬, 아이콘만 (뱃지 없음) */
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-1">
               {jobs.map((job) => {
                 const year = job.completedAt ? new Date(job.completedAt).getFullYear() : new Date().getFullYear();
-                const filename = `${year}_${job.company}_${job.role}_${job.employType}`;
+                const label = `${job.company} ${job.role}`;
                 return (
-                  <div key={job.id} className="flex flex-col items-start gap-1.5 w-[100px] p-2 rounded-lg select-none">
-                    <FileText className="w-10 h-10 text-muted-foreground/40" />
-                    <span className="text-[10px] text-muted-foreground leading-tight break-all line-clamp-3 w-full">
-                      {filename}
-                    </span>
+                  <div
+                    key={job.id}
+                    className="flex flex-col items-center gap-1.5 w-[80px] py-3 px-1 rounded-lg select-none hover:bg-muted/50 transition-colors cursor-pointer"
+                  >
+                    <div className="relative">
+                      <FolderSvgIcon />
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 w-full">
+                      <span className="text-[9px] text-muted-foreground/60 leading-none tabular-nums">{year}</span>
+                      <span className="text-[10px] text-muted-foreground leading-tight text-center line-clamp-2 w-full px-0.5">
+                        {job.company}
+                      </span>
+                    </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            /* 카드형 — 결과 텍스트만, 색상 없음 */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {jobs.map((job) => (
                 <div key={job.id} className="bg-background border border-border rounded-lg p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-[13px] font-semibold text-foreground truncate">{job.company}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {job.role} {job.employType}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{job.role} {job.employType}</p>
                     </div>
                     {job.finalResult && (
                       <span className="text-[11px] text-muted-foreground shrink-0 font-medium">{job.finalResult}</span>
@@ -807,15 +828,15 @@ export function JobPostingTable() {
         {/* ── 공고 테이블 카드 ─────────────────────────────────── */}
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           {/* Toolbar */}
-          <div className="px-3 py-2.5 border-b border-border flex items-center gap-2">
+          <div className="px-3 py-1.5 border-b border-border flex items-center gap-2">
             {/* 정렬 — 칸반 보기에서는 적용되지 않으므로 표 보기에서만 노출 */}
             {view === "table" && (
               <DropdownMenu>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <DropdownMenuTrigger asChild>
-                      <button className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border">
-                        <sortOption.icon className="w-3.5 h-3.5" />
+                      <button className="inline-flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border">
+                        <sortOption.icon className="w-3 h-3" />
                       </button>
                     </DropdownMenuTrigger>
                   </TooltipTrigger>
@@ -850,13 +871,13 @@ export function JobPostingTable() {
                     onClick={() => setView("table")}
                     aria-label="표 보기"
                     className={cn(
-                      "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                      "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                       view === "table"
                         ? "bg-card text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <TableIcon className="w-3.5 h-3.5" />
+                    <TableIcon className="w-3 h-3" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-xs">
@@ -869,13 +890,13 @@ export function JobPostingTable() {
                     onClick={() => setView("kanban")}
                     aria-label="칸반 보기"
                     className={cn(
-                      "inline-flex items-center justify-center w-6 h-6 rounded transition-colors",
+                      "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
                       view === "kanban"
                         ? "bg-card text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    <Columns3 className="w-3.5 h-3.5" />
+                    <Columns3 className="w-3 h-3" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-xs">
@@ -887,12 +908,12 @@ export function JobPostingTable() {
             <div className="ml-auto flex items-center gap-2">
               {/* 검색 */}
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="기업명 / 공고명"
-                  className="h-8 w-44 pl-7 text-xs border-border"
+                  className="h-7 w-44 pl-6 text-[12px] border-border"
                 />
               </div>
               {/* 컬럼 선택 — 표 보기에서만 의미가 있어 칸반 보기에서는 숨김 */}
@@ -903,9 +924,9 @@ export function JobPostingTable() {
                       <DropdownMenuTrigger asChild>
                         <button
                           aria-label="표시할 컬럼"
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
                         >
-                          <Columns3 className="w-3.5 h-3.5" />
+                          <Columns3 className="w-3 h-3" />
                         </button>
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
@@ -938,30 +959,30 @@ export function JobPostingTable() {
           </div>
 
           {/* 필터 칩 — 탭형, 칩별 카운트 표시 */}
-          <div className="px-3 py-2.5 border-b border-border flex items-center gap-2 flex-wrap">
+          <div className="px-3 py-1 border-b border-border flex items-center gap-1.5 flex-wrap">
             {FILTER_CHIPS.map((f, i) =>
               f === "|" ? (
-                <span key={`sep-${i}`} className="w-px h-4 bg-border mx-0.5" />
+                <span key={`sep-${i}`} className="w-px h-3.5 bg-border mx-0.5" />
               ) : (
                 <button
                   key={f}
                   onClick={() => setActiveFilter(f)}
                   className={cn(
-                    "h-8 px-3 rounded-lg text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5",
+                    "h-6 px-2 rounded-md text-[11px] font-medium transition-colors inline-flex items-center gap-1",
                     activeFilter === f
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
                   {f === "★" ? (
-                    <Star className={cn("w-3.5 h-3.5", activeFilter === f ? "fill-current text-pickd-orange" : "text-muted-foreground")} />
+                    <Star className={cn("w-3 h-3", activeFilter === f ? "fill-current text-pickd-orange" : "text-muted-foreground")} />
                   ) : (
                     f
                   )}
                   <span
                     className={cn(
-                      "text-[11px] font-bold tabular-nums px-1.5 py-0.5 rounded-full",
-                      activeFilter === f ? "bg-card/70 text-accent-foreground" : "bg-muted text-muted-foreground/80",
+                      "text-[10px] font-bold tabular-nums px-1 py-px rounded-full leading-none",
+                      activeFilter === f ? "bg-card/70 text-accent-foreground" : "bg-muted text-muted-foreground/70",
                     )}
                   >
                     {chipCount(f)}

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, BookOpen, Sparkles, Settings, HelpCircle } from "lucide-react";
+import { LayoutDashboard, BookOpen, Sparkles, Settings, HelpCircle, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -43,6 +43,26 @@ export function PickdSidebar() {
             </Tooltip>
           );
         })}
+
+        {/* 캘린더 — 보조 기능, 구분선 위 하단 */}
+        <div className="mt-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <NavLink
+                to="/calendar"
+                className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-lg transition-colors",
+                  isActive("/calendar")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <CalendarDays className="w-[18px] h-[18px] shrink-0" />
+              </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">캘린더</TooltipContent>
+          </Tooltip>
+        </div>
       </nav>
 
       <div className="flex flex-col gap-1 pt-2 border-t border-border">
