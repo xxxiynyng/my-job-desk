@@ -2855,9 +2855,9 @@ function ResizableHead({
   filter?: React.ReactNode;
 }) {
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-3 py-2.5 font-medium overflow-hidden">
-      <span className="inline-flex items-center gap-1">
-        <span>{label}</span>
+    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 font-medium overflow-hidden whitespace-nowrap">
+      <span className="inline-flex items-center gap-1 overflow-hidden">
+        <span className="truncate">{label}</span>
         {filter}
       </span>
       {onResize && <ResizeHandle onMouseDown={onResize} />}
