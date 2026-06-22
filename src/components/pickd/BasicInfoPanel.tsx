@@ -175,7 +175,7 @@ export function BasicInfoPanel() {
       <div className="relative">
         {/* ── 뷰 모드 ──────────────────────────────── */}
         {!editMode && (
-          <div className="pt-8 flex gap-10 items-start">
+          <div className="pt-6 flex gap-10 items-start">
             <div className="absolute top-0 right-0">
               <button
                 onClick={enterEdit}

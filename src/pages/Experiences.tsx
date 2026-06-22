@@ -821,7 +821,7 @@ export default function Experiences() {
         <PickdSidebar />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-10 pt-5 pb-8 max-w-[1400px] mx-auto space-y-3">
+          <div className="px-10 pt-8 pb-10 max-w-[1400px] mx-auto space-y-3">
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -850,7 +850,7 @@ export default function Experiences() {
                 <TabsTrigger value="files" className="text-[13px]">파일함</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="db" className="space-y-5 mt-6 focus-visible:outline-none">
+              <TabsContent value="db" className="space-y-5 mt-4 focus-visible:outline-none">
 
             {/* ── 경험·스펙 목록 ─────────────────────────────────────── */}
             <section>
@@ -1387,11 +1387,11 @@ export default function Experiences() {
             </section>
               </TabsContent>
 
-              <TabsContent value="basic-info" className="mt-6 focus-visible:outline-none">
+              <TabsContent value="basic-info" className="mt-4 focus-visible:outline-none">
                 <BasicInfoPanel />
               </TabsContent>
 
-              <TabsContent value="files" className="mt-6 focus-visible:outline-none">
+              <TabsContent value="files" className="mt-4 focus-visible:outline-none">
                 <FilesPanel />
               </TabsContent>
             </Tabs>

@@ -191,7 +191,7 @@ function FileGrid({
       </div>
 
       {/* ── 콘텐츠 ───────────────────────────────── */}
-      <div className="pt-8">
+      <div className="pt-6">
         {/* 드래그 존 */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
