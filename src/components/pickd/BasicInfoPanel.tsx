@@ -172,31 +172,18 @@ export function BasicInfoPanel() {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div>
-        {/* ── 헤더 ─────────────────────────────────── */}
-        <div className="flex items-center justify-end pb-4 border-b border-border">
-          {editMode ? (
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="ghost" className="h-7 text-xs px-2.5 gap-1" onClick={cancel}>
-                <X className="w-3 h-3" />취소
-              </Button>
-              <Button size="sm" className="h-7 text-xs px-3 gap-1" onClick={save}>
-                <Check className="w-3 h-3" />저장
-              </Button>
-            </div>
-          ) : (
-            <button
-              onClick={enterEdit}
-              className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
-            >
-              <Pencil className="w-3 h-3" /> 편집
-            </button>
-          )}
-        </div>
-
+      <div className="relative">
         {/* ── 뷰 모드 ──────────────────────────────── */}
         {!editMode && (
-          <div className="pt-6 flex gap-10 items-start">
+          <div className="pt-2 flex gap-10 items-start">
+            <div className="absolute top-0 right-0">
+              <button
+                onClick={enterEdit}
+                className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
+              >
+                <Pencil className="w-3 h-3" /> 편집
+              </button>
+            </div>
             {/* 증명사진 */}
             {photoShown && basicPhoto?.url && (
               <div className="shrink-0">

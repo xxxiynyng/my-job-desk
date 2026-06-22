@@ -179,10 +179,9 @@ function FileGrid({
   };
 
   return (
-    <div>
-      {/* ── 헤더 ─────────────────────────────────── */}
-      <div className="flex items-center justify-end pb-4 border-b border-border">
-        <input ref={inputRef} type="file" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+    <div className="relative">
+      <input ref={inputRef} type="file" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      <div className="absolute top-0 right-0">
         <button
           onClick={() => inputRef.current?.click()}
           className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
@@ -192,7 +191,7 @@ function FileGrid({
       </div>
 
       {/* ── 콘텐츠 ───────────────────────────────── */}
-      <div className="pt-6">
+      <div className="pt-2">
         {/* 드래그 존 */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
