@@ -11,7 +11,7 @@ import {
   formatKoreanDate, getDday, getDdayStyle,
   CalTask, CalApplication, CalSchedule, PostingFilterValue, ApplicationStatus,
 } from "@/data/calendarData";
-import { Maximize2, Clock, Sparkles, Star, ChevronDown, CalendarPlus, ListPlus } from "lucide-react";
+import { Clock, Sparkles, Star, ChevronDown, CalendarPlus, ListPlus, ChevronLeft } from "lucide-react";
 import { CreateScheduleModal, CreateTaskModal } from "./CreateModal";
 import { PostingDetailModal, ScheduleDetailModal, TaskDetailModal } from "./DetailModal";
 
@@ -26,7 +26,6 @@ interface ContextPanelProps {
   onAddSchedule: (data: { title: string; date: string; time: string; linkedPostingId?: string; notes: string }) => void;
   progress: number;
   postingFilter: PostingFilterValue;
-  onExpandClick: () => void;
   onToggleStar: (id: string) => void;
   onUpdateStatus: (id: string, status: ApplicationStatus) => void;
 }
@@ -49,7 +48,7 @@ const stageStyles: Record<string, string> = {
 export function ContextPanel({
   selectedDate, tasks, carriedOverTasks, applications, schedules,
   onToggleTask, onAddTask, onAddSchedule, progress,
-  postingFilter, onExpandClick, onToggleStar, onUpdateStatus,
+  postingFilter, onToggleStar, onUpdateStatus,
 }: ContextPanelProps) {
   const todayStr = new Date().toISOString().split("T")[0];
   const dateStr = selectedDate.toISOString().split("T")[0];
@@ -67,6 +66,7 @@ export function ContextPanel({
   const [schedulePeriod, setSchedulePeriod] = useState("1개월");
   const [taskPeriod, setTaskPeriod] = useState("1개월");
   const [postingsOpen, setPostingsOpen] = useState(true);
+  const [panelMode, setPanelMode] = useState<"date" | "all">("date");
 
   const defaultPostingId = postingFilter !== "all" && postingFilter !== "personal" ? postingFilter : undefined;
 
@@ -77,8 +77,11 @@ export function ContextPanel({
     return dd >= 0 && dd <= 14;
   }).sort((a, b) => getDday(a.deadline) - getDday(b.deadline));
 
+  const effectiveScheduleMode = panelMode === "all" ? "all" : scheduleMode;
+  const effectiveTaskMode = panelMode === "all" ? "all" : taskMode;
+
   const filteredSchedules = schedules.filter((s) => {
-    if (scheduleMode === "today" && s.date !== dateStr) return false;
+    if (effectiveScheduleMode === "today" && s.date !== dateStr) return false;
     if (postingFilter === "personal") return s.scheduleType === "personal";
     if (postingFilter !== "all") return s.linkedPostingId === postingFilter;
     return true;
@@ -91,6 +94,7 @@ export function ContextPanel({
       return true;
     })
     .sort((a, b) => Number(a.completed) - Number(b.completed));
+  void effectiveTaskMode; // used in TaskMode toggle label only
 
   const MAX_POSTINGS = 3;
   const [showAllPostings, setShowAllPostings] = useState(false);
@@ -107,13 +111,23 @@ export function ContextPanel({
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between pb-3 border-b border-border mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-foreground">{formatKoreanDate(selectedDate)}</h3>
-          {isToday && <span className="text-xs text-muted-foreground">오늘의 진행률</span>}
+          {panelMode === "date" ? (
+            <>
+              <h3 className="text-base font-semibold text-foreground">{formatKoreanDate(selectedDate)}</h3>
+              {isToday && <span className="text-xs text-muted-foreground">오늘의 진행률</span>}
+            </>
+          ) : (
+            <h3 className="text-base font-semibold text-foreground">전체 일정 · 할일 · 공고</h3>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <ProgressRing progress={progress} size={44} strokeWidth={3.5} />
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={onExpandClick}>
-            <Maximize2 size={16} />
+          <Button
+            variant="ghost" size="sm"
+            className="h-7 text-xs text-muted-foreground hover:text-foreground px-2 gap-1"
+            onClick={() => setPanelMode(m => m === "date" ? "all" : "date")}
+          >
+            {panelMode === "date" ? "전체보기" : <><ChevronLeft size={12} />날짜별</>}
           </Button>
         </div>
       </div>
@@ -170,7 +184,7 @@ export function ContextPanel({
           <div>
             <ListHeader
               label="일정" count={filteredSchedules.length}
-              mode={scheduleMode} onToggleMode={() => setScheduleMode(m => m === "today" ? "all" : "today")}
+              mode={effectiveScheduleMode} onToggleMode={() => panelMode === "date" && setScheduleMode(m => m === "today" ? "all" : "today")}
               selectedDate={selectedDate} onShiftDate={shiftListDate} onResetToday={() => setListDate(new Date())}
               currentMonth={listMonth} onShiftMonth={(d) => setListMonth(new Date(listMonth.getFullYear(), listMonth.getMonth() + d, 1))}
               period={schedulePeriod} onPeriodChange={setSchedulePeriod}
@@ -201,7 +215,7 @@ export function ContextPanel({
           <div>
             <ListHeader
               label="할 일" count={allTodayTasks.length}
-              mode={taskMode} onToggleMode={() => setTaskMode(m => m === "today" ? "all" : "today")}
+              mode={effectiveTaskMode} onToggleMode={() => panelMode === "date" && setTaskMode(m => m === "today" ? "all" : "today")}
               selectedDate={selectedDate} onShiftDate={shiftListDate} onResetToday={() => setListDate(new Date())}
               currentMonth={listMonth} onShiftMonth={(d) => setListMonth(new Date(listMonth.getFullYear(), listMonth.getMonth() + d, 1))}
               period={taskPeriod} onPeriodChange={setTaskPeriod}

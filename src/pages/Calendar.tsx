@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { MonthlyCalendar } from "@/components/pickd/calendar/MonthlyCalendar";
 import { ContextPanel } from "@/components/pickd/calendar/ContextPanel";
-import { ExpandedView } from "@/components/pickd/calendar/ExpandedView";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import {
   mockCalTasks, mockCalCarriedOverTasks, mockCalEvents,
@@ -16,7 +15,6 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"month" | "week">("month");
   const [postingFilter, setPostingFilter] = useState<PostingFilterValue>("all");
-  const [showExpanded, setShowExpanded] = useState(false);
   const [selectedPostingId, setSelectedPostingId] = useState<string | null>(null);
 
   const [tasks, setTasks] = useState<CalTask[]>(() => {
@@ -111,22 +109,12 @@ export default function Calendar() {
               applications={applications} schedules={scheduleList}
               onToggleTask={handleToggleTask} onAddTask={handleAddTask} onAddSchedule={handleAddSchedule}
               progress={progress} postingFilter={postingFilter}
-              onExpandClick={() => setShowExpanded(true)}
               onToggleStar={handleToggleStar} onUpdateStatus={handleUpdateStatus}
             />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {showExpanded && (
-        <ExpandedView
-          applications={applications} schedules={scheduleList}
-          tasks={tasks} carriedOverTasks={carriedOver}
-          onClose={() => setShowExpanded(false)}
-          onToggleTask={handleToggleTask} onAddTask={handleAddTask} onAddSchedule={handleAddSchedule}
-          onToggleStar={handleToggleStar} onUpdateStatus={handleUpdateStatus}
-        />
-      )}
     </div>
   );
 }
