@@ -1325,10 +1325,7 @@ export default function Experiences() {
                             <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
                               <button
                                 onClick={() => togglePin(i.id)}
-                                className={cn(
-                                  "text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity",
-                                  i.pinned ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-                                )}
+                                className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
                                 title={i.pinned ? "고정 해제" : "고정"}
                               >
                                 <Pin className={cn("w-3 h-3", i.pinned && "fill-current text-foreground")} />

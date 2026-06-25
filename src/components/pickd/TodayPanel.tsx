@@ -52,7 +52,7 @@ export function TodayPanel() {
     setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
 
   const dateStr = new Date().toLocaleDateString("ko-KR", {
-    month: "long", day: "numeric", weekday: "short",
+    year: "numeric", month: "long", day: "numeric",
   });
 
   // 일정·할일 추가: 추후 캘린더 공유 등록폼으로 연결 (현재는 캘린더 탭으로 이동)
@@ -67,7 +67,7 @@ export function TodayPanel() {
         className="text-left group w-full"
         title="캘린더 탭으로 이동"
       >
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium group-hover:text-primary transition-colors">오늘</p>
+        <p className="text-sm uppercase tracking-wide text-muted-foreground font-medium group-hover:text-primary transition-colors">오늘</p>
         <p className="text-sm font-semibold text-foreground mt-0.5 group-hover:text-primary transition-colors">{dateStr}</p>
       </button>
 
