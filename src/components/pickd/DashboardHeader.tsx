@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
 import { MoodRefresh } from "./MoodRefresh";
 
 export function DashboardHeader() {
+  const navigate = useNavigate();
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -11,7 +14,16 @@ export function DashboardHeader() {
           오늘도 한 걸음 더 가까이.
         </p>
       </div>
-      <MoodRefresh />
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => navigate("/calendar")}
+          className="w-8 h-8 rounded-full bg-accent flex items-center justify-center hover:ring-2 hover:ring-primary/20 transition-all"
+          title="캘린더 바로가기"
+        >
+          <CalendarDays className="w-4 h-4 text-muted-foreground" />
+        </button>
+        <MoodRefresh />
+      </div>
     </div>
   );
 }

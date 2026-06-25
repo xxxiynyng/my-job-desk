@@ -46,9 +46,11 @@ function buildDemoEvents(year: number, month: number): CalEvent[] {
 export function CalendarMini({
   events,
   onSelectEvent,
+  onMonthTitleClick,
 }: {
   events?: CalEvent[];
   onSelectEvent?: (e: CalEvent) => void;
+  onMonthTitleClick?: () => void;
 }) {
   const [cursor, setCursor] = useState(() => {
     const d = new Date(); d.setDate(1); return d;
@@ -93,9 +95,19 @@ export function CalendarMini({
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
-          <span className="text-xs font-semibold text-foreground tabular-nums px-1.5">
-            {year}.{String(month + 1).padStart(2, "0")}
-          </span>
+          {onMonthTitleClick ? (
+            <button
+              onClick={onMonthTitleClick}
+              className="text-xs font-semibold text-foreground tabular-nums px-1.5 hover:text-primary transition-colors"
+              aria-label="캘린더 탭으로 이동"
+            >
+              {year}.{String(month + 1).padStart(2, "0")}
+            </button>
+          ) : (
+            <span className="text-xs font-semibold text-foreground tabular-nums px-1.5">
+              {year}.{String(month + 1).padStart(2, "0")}
+            </span>
+          )}
           <button
             onClick={() => setCursor(new Date(year, month + 1, 1))}
             className="w-6 h-6 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
