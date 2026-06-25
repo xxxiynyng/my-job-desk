@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { MonthlyCalendar } from "@/components/pickd/calendar/MonthlyCalendar";
 import { ContextPanel } from "@/components/pickd/calendar/ContextPanel";
@@ -19,8 +19,18 @@ export default function Calendar() {
   const [showExpanded, setShowExpanded] = useState(false);
   const [selectedPostingId, setSelectedPostingId] = useState<string | null>(null);
 
-  const [tasks, setTasks] = useState<CalTask[]>(mockCalTasks);
-  const [carriedOver, setCarriedOver] = useState<CalTask[]>(mockCalCarriedOverTasks);
+  const [tasks, setTasks] = useState<CalTask[]>(() => {
+    try {
+      const saved = localStorage.getItem("cal.tasks.v1");
+      return saved ? JSON.parse(saved) : mockCalTasks;
+    } catch { return mockCalTasks; }
+  });
+  const [carriedOver, setCarriedOver] = useState<CalTask[]>(() => {
+    try {
+      const saved = localStorage.getItem("cal.carriedOver.v1");
+      return saved ? JSON.parse(saved) : mockCalCarriedOverTasks;
+    } catch { return mockCalCarriedOverTasks; }
+  });
   const [applications, setApplications] = useState<CalApplication[]>(mockCalApplications);
   const [scheduleList, setScheduleList] = useState<CalSchedule[]>(mockCalSchedules);
 
@@ -28,6 +38,13 @@ export default function Calendar() {
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter((t) => t.completed).length;
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  useEffect(() => {
+    localStorage.setItem("cal.tasks.v1", JSON.stringify(tasks));
+  }, [tasks]);
+  useEffect(() => {
+    localStorage.setItem("cal.carriedOver.v1", JSON.stringify(carriedOver));
+  }, [carriedOver]);
 
   const handleToggleTask = useCallback((id: string) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));

@@ -84,11 +84,13 @@ export function ContextPanel({
     return true;
   });
 
-  const allTodayTasks = [...carriedOverTasks, ...tasks].filter((t) => {
-    if (postingFilter === "personal") return !t.linkedPostingId;
-    if (postingFilter !== "all") return t.linkedPostingId === postingFilter;
-    return true;
-  });
+  const allTodayTasks = [...carriedOverTasks, ...tasks]
+    .filter((t) => {
+      if (postingFilter === "personal") return !t.linkedPostingId;
+      if (postingFilter !== "all") return t.linkedPostingId === postingFilter;
+      return true;
+    })
+    .sort((a, b) => Number(a.completed) - Number(b.completed));
 
   const MAX_POSTINGS = 3;
   const [showAllPostings, setShowAllPostings] = useState(false);

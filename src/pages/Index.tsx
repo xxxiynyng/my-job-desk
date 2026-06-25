@@ -16,8 +16,8 @@ const Index = () => {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Main workspace — flex-1 so it smoothly reflows as panel slides */}
-        <div className="flex-1 overflow-y-auto px-10 py-8 min-w-0 transition-all duration-300 ease-in-out">
-          <div className="max-w-[1320px] w-full mx-auto flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto px-10 pt-[25vh] pb-10 min-w-0 transition-all duration-300 ease-in-out">
+          <div className="max-w-[1320px] w-full mx-auto flex flex-col gap-6">
             <DashboardHeader />
             <QuickJobRegistration />
             <JobPostingTable />

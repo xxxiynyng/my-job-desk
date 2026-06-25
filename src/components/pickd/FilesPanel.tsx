@@ -208,7 +208,7 @@ function FileGrid({
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {activeKinds.map((kind) => {
                 const kindItems = byKind[kind] || [];
                 const isPhotoKind = kind === "증명사진";
@@ -216,52 +216,62 @@ function FileGrid({
                 const remaining = kindItems.length - previewItems.length;
                 return (
                   <div key={kind}>
-                    <h3 className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2.5">
-                      <Folder className="w-3 h-3" />
-                      <span className="truncate">{kind}</span>
-                      <span className="text-muted-foreground/60">{kindItems.length}</span>
-                    </h3>
+                    {/* 섹션 헤더 */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{kind}</span>
+                      <span className="text-[11px] text-muted-foreground/60 ml-0.5">{kindItems.length}</span>
+                      <div className="flex-1 h-px bg-border ml-1" />
+                    </div>
                     {isPhotoKind ? (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3 pl-1">
                         {previewItems.map((f) => (
                           <button
                             key={f.id}
                             onClick={() => onPreview(f)}
-                            className="relative w-[64px] h-[86px] rounded-md border border-border overflow-hidden bg-muted/30 hover:border-primary/40 transition-colors"
+                            className="group relative w-[90px] h-[120px] rounded-lg overflow-hidden bg-muted hover:shadow-md transition-all"
                             title={f.name}
                           >
                             {f.url ? (
-                              <img src={f.url} alt={f.name} className="w-full h-full object-cover" />
+                              <img src={f.url} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground">사진</div>
+                              <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-muted-foreground">
+                                <ImageIcon className="w-6 h-6" />
+                                <span className="text-[10px]">사진</span>
+                              </div>
                             )}
+                            <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-primary/40 rounded-lg transition-all" />
                           </button>
                         ))}
                         {remaining > 0 && (
-                          <div className="w-[64px] h-[86px] rounded-md border border-dashed border-border flex items-center justify-center text-[10px] text-muted-foreground">
-                            +{remaining}
+                          <div className="w-[90px] h-[120px] rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground">
+                            <span className="text-sm font-semibold">+{remaining}</span>
+                            <span className="text-[10px]">더보기</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
-                        {previewItems.map((f) => (
-                          <li key={f.id}>
+                      <ul className="pl-1">
+                        {previewItems.map((f, idx) => (
+                          <li key={f.id} className={cn(idx < previewItems.length - 1 && "border-b border-border/50")}>
                             <button
                               onClick={() => onPreview(f)}
-                              className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted/60 text-left transition-colors"
+                              className="w-full flex items-center gap-3 py-3 px-2 hover:bg-muted/50 rounded-md text-left transition-colors group"
                             >
                               {f.fileKind === "image" ? (
-                                <ImageIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                <ImageIcon className="w-5 h-5 text-blue-500 shrink-0" />
                               ) : (
-                                <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                <FileText className="w-5 h-5 text-red-500 shrink-0" />
                               )}
-                              <span className="text-[12.5px] text-foreground truncate">{f.name}</span>
+                              <span className="text-[14px] font-medium text-foreground truncate flex-1">{f.name}</span>
+                              <span className="text-[11px] text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {f.fileKind === "image" ? "이미지" : "PDF"}
+                              </span>
                             </button>
                           </li>
                         ))}
                         {remaining > 0 && (
-                          <li className="text-[11px] text-muted-foreground px-2 pt-1">+{remaining}개 더보기</li>
+                          <li className="py-2 px-2 text-[12px] text-muted-foreground">+{remaining}개 더보기</li>
                         )}
                       </ul>
                     )}
