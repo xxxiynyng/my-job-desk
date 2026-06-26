@@ -74,7 +74,7 @@ type ItemType =
   | "봉사활동"
   | "교환학생"
   | "알바"
-  | "학력/학점"
+  | "학부연구생"
   | "어학"
   | "자격증"
   | "수상"
@@ -112,8 +112,8 @@ export type Item = {
 
 export const SHARED_EXP_KEY = "pickd.experiences.items";
 
-const NARRATIVE_TYPES: ItemType[] = ["프로젝트", "대외활동", "인턴", "공모전", "봉사활동", "교환학생", "알바"];
-const SPEC_TYPES: ItemType[] = ["학력/학점", "어학", "자격증", "수상", "수강과목", "교육 이수"];
+const NARRATIVE_TYPES: ItemType[] = ["프로젝트", "대외활동", "인턴", "공모전", "봉사활동", "교환학생", "알바", "학부연구생"];
+const SPEC_TYPES: ItemType[] = ["어학", "자격증", "수상", "수강과목", "교육 이수"];
 const ALL_TYPES: ItemType[] = [...NARRATIVE_TYPES, ...SPEC_TYPES];
 
 const KEYWORD_OPTIONS = [
@@ -361,22 +361,32 @@ const PRESETS: Record<ItemType, Preset> = {
       "이 경험이 지원 직무와 어떻게 연결되나요?",
     ],
   },
-  "학력/학점": {
-    editorOpenByDefault: false,
+  학부연구생: {
+    editorOpenByDefault: true,
     fields: withTail([
-      { key: "school", label: "학교명", type: "text" },
-      { key: "major", label: "전공", type: "text" },
-      { key: "doubleMajor", label: "복수전공 / 부전공", type: "text" },
-      { key: "admitDate", label: "입학일", type: "date" },
-      { key: "gradDate", label: "졸업일 / 졸업예정일", type: "date" },
-      { key: "gradStatus", label: "재학 / 휴학 / 졸업 상태", type: "text" },
-      { key: "gpaTotal", label: "전체 학점", type: "text" },
-      { key: "gpaMajor", label: "전공 학점", type: "text" },
-      { key: "gpaBase", label: "기준 만점", type: "text" },
-      { key: "transcript", label: "성적증명서 파일", type: "file" },
+      { key: "lab", label: "연구실명", type: "text" },
+      { key: "org", label: "소속 기관", type: "text" },
+      { key: "period", label: "참여 기간", type: "text" },
+      { key: "topic", label: "연구 주제", type: "text" },
+      { key: "role", label: "담당 역할", type: "text" },
+      { key: "output", label: "주요 결과물", type: "text" },
     ]),
-    writingGuide: [],
-    aiQuestions: [],
+    writingGuide: [
+      "연구 배경 및 목표",
+      "나의 역할",
+      "연구 방법",
+      "주요 과정",
+      "결과물 / 성과",
+      "어려움과 극복",
+      "배운 점",
+      "직무 관련성",
+    ],
+    aiQuestions: [
+      "이 연구에서 본인의 구체적인 역할은 무엇이었나요?",
+      "가장 어려웠던 부분과 어떻게 극복했나요?",
+      "연구 결과물이나 성과를 수치로 표현할 수 있나요?",
+      "이 경험이 지원 직무와 어떻게 연결되나요?",
+    ],
   },
   어학: {
     editorOpenByDefault: false,
@@ -400,6 +410,7 @@ const PRESETS: Record<ItemType, Preset> = {
       { key: "issuedAt", label: "취득일", type: "date" },
       { key: "expireAt", label: "유효기간", type: "date" },
       { key: "certNo", label: "자격번호", type: "text" },
+      { key: "certFile", label: "증빙서류", type: "file" },
     ]),
     writingGuide: ["취득 이유", "학습 과정", "어려움", "직무 관련성", "지원에 활용하는 방법"],
     aiQuestions: [],
@@ -525,20 +536,6 @@ export const INITIAL_EXPERIENCES: Item[] = [
     }),
   },
   {
-    ...makeFromPreset("학력/학점", "고려대학교 경영학과", {
-      pinned: true,
-      status: "완료",
-      values: {
-        school: "고려대학교",
-        major: "경영학과",
-        gradStatus: "4학년 재학",
-        gpaTotal: "4.2 / 4.5",
-        gpaMajor: "4.3 / 4.5",
-        gpaBase: "4.5",
-      },
-    }),
-  },
-  {
     ...makeFromPreset("수강과목", "Digital Marketing", {
       keywords: ["기획력", "데이터 분석"],
       competencies: ["기획력"],
@@ -616,6 +613,12 @@ const FILTER_CHIPS: ItemType[] = [...NARRATIVE_TYPES, ...SPEC_TYPES];
 // ────────────────────────────────────────────────────────────────
 // Main Page
 // ────────────────────────────────────────────────────────────────
+
+const EXTRACT_MOCK_CANDIDATES: { id: string; type: ItemType; name: string; summary: string }[] = [
+  { id: "ec1", type: "프로젝트", name: "캡스톤 디자인 프로젝트", summary: "2024.09 ~ 2025.01 · PM / 기획" },
+  { id: "ec2", type: "인턴", name: "여름 마케팅 인턴십", summary: "2024.07 ~ 2024.08 · 마케팅팀" },
+  { id: "ec3", type: "대외활동", name: "청년 창업 서포터즈", summary: "2024.03 ~ 2024.06 · 기획 파트" },
+];
 
 export default function Experiences() {
   // ── 탭 허브 상태 (경험·스펙 DB / 기본정보 / 파일함) — ?tab= 쿼리로 딥링크 ──
@@ -702,6 +705,9 @@ export default function Experiences() {
   const [importOpen, setImportOpen] = useState(false);
   const [extractLoading, setExtractLoading] = useState(false);
   const [extractDoneOpen, setExtractDoneOpen] = useState(false);
+  const [checkedCandidates, setCheckedCandidates] = useState<Set<string>>(
+    new Set(["ec1", "ec2", "ec3"]),
+  );
   const [mergeOpen, setMergeOpen] = useState(false);
   const [excelOpen, setExcelOpen] = useState(false);
   const [infoExpanded, setInfoExpanded] = useState(false);
@@ -1545,18 +1551,70 @@ export default function Experiences() {
         </Dialog>
 
         <Dialog open={extractDoneOpen} onOpenChange={setExtractDoneOpen}>
-          <DialogContent className="max-w-[420px]">
+          <DialogContent className="max-w-[480px]">
             <DialogHeader>
-              <DialogTitle className="text-base">경험 정리 완료</DialogTitle>
-              <DialogDescription className="text-sm">3개의 경험을 찾았어요.</DialogDescription>
+              <DialogTitle className="text-base">추출된 경험 후보</DialogTitle>
+              <DialogDescription className="text-sm">
+                자소서에서 {EXTRACT_MOCK_CANDIDATES.length}개의 경험을 찾았어요. 저장할 항목을 선택하세요.
+              </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setExtractDoneOpen(false)}>
-                나중에
-              </Button>
-              <Button size="sm" className="h-8 text-xs" onClick={() => setExtractDoneOpen(false)}>
-                확인
-              </Button>
+            <div className="space-y-2 my-2">
+              {EXTRACT_MOCK_CANDIDATES.map((c) => (
+                <label
+                  key={c.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/30 cursor-pointer transition-colors"
+                >
+                  <Checkbox
+                    checked={checkedCandidates.has(c.id)}
+                    onCheckedChange={(v) =>
+                      setCheckedCandidates((prev) => {
+                        const next = new Set(prev);
+                        if (v) next.add(c.id); else next.delete(c.id);
+                        return next;
+                      })
+                    }
+                    aria-label={c.name}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                        {c.type}
+                      </span>
+                      <span className="text-sm font-medium truncate">{c.name}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{c.summary}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-[11px] text-muted-foreground">{checkedCandidates.size}개 선택됨</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setExtractDoneOpen(false)}
+                >
+                  나중에
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs"
+                  disabled={checkedCandidates.size === 0}
+                  onClick={() => {
+                    const newItems = EXTRACT_MOCK_CANDIDATES.filter((c) =>
+                      checkedCandidates.has(c.id),
+                    ).map((c) => makeFromPreset(c.type, c.name));
+                    setItems((p) => [...newItems, ...p]);
+                    setExtractDoneOpen(false);
+                    setCheckedCandidates(new Set(EXTRACT_MOCK_CANDIDATES.map((c) => c.id)));
+                    toast.success(`${newItems.length}개의 경험이 추가되었어요.`);
+                  }}
+                >
+                  선택 저장하기
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
