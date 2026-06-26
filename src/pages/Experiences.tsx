@@ -1718,7 +1718,7 @@ function RepExperienceCard({
         {filledFields.length > 0 && (
           <RepSection label="세부 필드">
             {filledFields.map((f) => (
-              <div key={f.key} className="flex items-center gap-2 group/row py-1">
+              <div key={f.key} className="flex items-center gap-2 group/row">
                 <span className="text-[11px] text-muted-foreground w-[80px] shrink-0">{f.label}</span>
                 <button
                   onClick={() => onCopy(f.value)}
