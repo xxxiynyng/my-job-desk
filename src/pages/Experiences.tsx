@@ -710,6 +710,8 @@ export default function Experiences() {
   );
   const [mergeOpen, setMergeOpen] = useState(false);
   const [excelOpen, setExcelOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
   const [infoExpanded, setInfoExpanded] = useState(false);
 
   const detail = detailId ? (items.find((i) => i.id === detailId) ?? null) : null;
@@ -815,10 +817,15 @@ export default function Experiences() {
     setSelected(new Set());
     toast.success(`${ids.length}개 항목이 삭제되었어요.`);
   };
+  const confirmDelete = (ids: string[]) => {
+    setPendingDeleteIds(ids);
+    setDeleteConfirmOpen(true);
+  };
+
   const copy = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
-    toast("복사되었습니다", { duration: 1200 });
+    toast("복사했어요", { duration: 1200 });
   };
 
   return (
@@ -1352,6 +1359,11 @@ export default function Experiences() {
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-3">
+                  {filtered.length === 0 && (
+                    <div className="col-span-3 py-10 text-center text-xs text-muted-foreground">
+                      해당하는 항목이 없습니다.
+                    </div>
+                  )}
                   {filtered.map((i) => {
                     const { org, period } = readMeta(i);
                     return (
@@ -1410,7 +1422,7 @@ export default function Experiences() {
               병합하기
             </button>
             <button className="text-[11px] hover:text-background/80">키워드 추가</button>
-            <button onClick={() => deleteItems([...selected])} className="text-[11px] text-red-400 hover:text-red-300">
+            <button onClick={() => confirmDelete([...selected])} className="text-[11px] text-red-400 hover:text-red-300">
               삭제
             </button>
             <button onClick={() => setSelected(new Set())} className="ml-1 text-background/60 hover:text-background">
@@ -1473,10 +1485,7 @@ export default function Experiences() {
             }}
             onChange={(patch) => updateItem(detail.id, patch)}
             onTogglePin={() => togglePin(detail.id)}
-            onDelete={() => {
-              deleteItems([detail.id]);
-              setDetailId(null);
-            }}
+            onDelete={() => confirmDelete([detail.id])}
             mergeOpen={mergeOpen}
             setMergeOpen={setMergeOpen}
           />
@@ -1640,6 +1649,37 @@ export default function Experiences() {
                 }}
               >
                 내보내기
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          <DialogContent className="max-w-[380px]">
+            <DialogHeader>
+              <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
+              <DialogDescription className="text-sm">
+                {pendingDeleteIds.length === 1
+                  ? "이 경험을 삭제하면 되돌릴 수 없어요."
+                  : `${pendingDeleteIds.length}개의 경험을 삭제하면 되돌릴 수 없어요.`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirmOpen(false)}>
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  deleteItems(pendingDeleteIds);
+                  if (detailId && pendingDeleteIds.includes(detailId)) setDetailId(null);
+                  setSelected(new Set());
+                  setDeleteConfirmOpen(false);
+                }}
+              >
+                삭제
               </Button>
             </div>
           </DialogContent>

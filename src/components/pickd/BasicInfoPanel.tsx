@@ -154,7 +154,7 @@ export function BasicInfoPanel() {
   const commitInline = () => {
     if (inlineKey) {
       setInfoValues((p) => ({ ...p, [inlineKey]: inlineDraft }));
-      toast("저장되었습니다", { duration: 900 });
+      toast("저장됐어요", { duration: 900 });
     }
     setInlineKey(null);
   };
@@ -167,7 +167,7 @@ export function BasicInfoPanel() {
   const copy = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
-    toast("복사되었습니다", { duration: 1200 });
+    toast("복사했어요", { duration: 1200 });
   };
 
   const toggleMask = (k: InfoKey) =>
@@ -189,7 +189,7 @@ export function BasicInfoPanel() {
     setInfoVisible(draftVisible);
     setPhotoShown(draftPhotoShown);
     setEditMode(false);
-    toast("저장되었습니다", { duration: 1500 });
+    toast("저장됐어요", { duration: 1200 });
   };
 
   const cancel = () => setEditMode(false);

@@ -106,19 +106,19 @@ export function FilesPanel() {
 
   const renameFile = (id: string, name: string) => {
     setFiles((p) => p.map((f) => (f.id === id ? { ...f, name } : f)));
-    toast("저장됨", { duration: 1200 });
+    toast("저장됐어요", { duration: 1200 });
   };
 
   const deleteFile = (id: string) => {
     setFiles((p) => p.filter((f) => f.id !== id));
     setPreview(null);
-    toast("삭제되었습니다", { duration: 1200 });
+    toast("삭제했어요", { duration: 1200 });
   };
 
   const copy = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
-    toast("복사되었습니다", { duration: 1200 });
+    toast("복사했어요", { duration: 1200 });
   };
 
   return (

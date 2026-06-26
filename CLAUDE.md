@@ -34,7 +34,7 @@ src/
 ├── App.tsx                              라우터 루트
 ├── pages/
 │   ├── Index.tsx                        대시보드 (지원 현황, 오늘 할 일)
-│   ├── Experiences.tsx                  경험·스펙 DB — 가장 큰 파일(~1800줄)
+│   ├── Experiences.tsx                  경험·스펙 DB — 가장 큰 파일(~3100줄)
 │   │   └── tabs: db | basic-info | files
 │   ├── JobDetail.tsx                    공고 상세 + 자소서 작성
 │   ├── AICover.tsx                      AI 자소서 생성
@@ -53,7 +53,7 @@ src/
 ## 데이터 지속성 (localStorage 키)
 
 ```
-specs.info.visibleKeys.v3    표시할 기본정보 필드 목록 (InfoKey[])
+specs.info.visibleKeys.v4    표시할 기본정보 필드 목록 (InfoKey[])
 specs.info.values.v2         기본정보 필드 값 (Record<string, string>)
 specs.info.hiddenValueKeys.v1 값 마스킹된 필드 목록
 specs.basicPhoto.shown       증명사진 표시 여부
@@ -67,8 +67,8 @@ specs.rep.view.v1            대표 스펙 뷰 모드 (card | list)
 ## BasicInfoPanel 구조 (경험·스펙 DB > 기본정보 탭)
 
 - **렌더 경로**: `/experiences?tab=basic-info` → Experiences.tsx → `<BasicInfoPanel />`
-- **InfoKey 타입**: name, engName, birth, email, phone, address, school, major, grade, military, veteran, disability, national, driverLicense, portfolioUrl, github, linkedin, blog, enrollYear, gradYear, gpa, minor, transfer, gender, marital, nationality, bloodType, height, weight (총 30개)
-- **FIELD_GROUPS (뷰 모드)**: 인적사항 / 연락처 / 학력 / 온라인 프로필 / 신체 / 병역·면허
+- **InfoKey 타입**: name, hanjaName, engName, birth, email, phone, address, school, major, grade, military, veteran, disability, national, driverLicense, portfolioUrl, github, linkedin, blog, enrollYear, gradYear, gpa, minor, transfer, gender, nationality, hsSchool, hsLocation, hsEnroll, hsGrad, hsGradStatus, langExam1Name, langExam1Score, langExam1Date, langConversation, langWriting, langReading, itProgram, itLevel, itDuration (총 39개)
+- **FIELD_GROUPS (뷰 모드)**: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 공인외국어시험 / 외국어활용능력 / IT활용능력 / 병역·면허
 - **편집**: 뷰 모드에서 필드별 인라인 편집(hover 연필) + 전체 편집 모달(편집 버튼)
 
 ## 코딩 컨벤션
@@ -79,8 +79,18 @@ specs.rep.view.v1            대표 스펙 뷰 모드 (card | list)
 - shadcn/ui 컴포넌트는 `@/components/ui/`에서 import
 - 커밋 메시지: `type(scope): 한국어 설명` (예: `feat(BasicInfoPanel): ...`)
 
+## 반응형 범위
+
+**데스크톱 전용 (min-width: 1280px).** 모바일·태블릿 대응은 현재 스코프 외.
+Tailwind `sm:`/`md:`/`lg:` prefix가 거의 없는 것은 의도적 결정. 모바일 대응이 필요하다면 별도 작업으로 처리.
+
+## 토스트 톤 컨벤션
+
+**`어요` 체 통일** — `"저장됐어요"`, `"복사했어요"`, `"삭제했어요"` 형식 사용.
+예외: `JobDetail.tsx`는 `@/hooks/use-toast`를 사용 (sonner와 다른 라이브러리). 추후 sonner로 통합 검토 필요.
+
 ## 주의사항
 
 - 백엔드 없음 — API 호출, fetch, 서버 사이드 로직 없음
 - `Specs.tsx`는 삭제됨 (미연결 dead code였음, 2025-06 제거)
-- localStorage 키 버전 suffix(`.v2`, `.v3`)는 breaking change 시 올릴 것
+- localStorage 키 버전 suffix(`.v2`, `.v4`)는 breaking change 시 올릴 것
