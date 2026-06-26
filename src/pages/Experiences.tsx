@@ -832,10 +832,10 @@ export default function Experiences() {
               </div>
               {activeTab === "db" && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3" onClick={() => setImportOpen(true)}>
+                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3 rounded-md" onClick={() => setImportOpen(true)}>
                     <Sparkles className="w-3 h-3" /> 자소서에서 추출
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3" onClick={() => setExcelOpen(true)}>
+                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3 rounded-md" onClick={() => setExcelOpen(true)}>
                     <Download className="w-3 h-3" /> Excel 내보내기
                   </Button>
                 </div>
@@ -856,7 +856,7 @@ export default function Experiences() {
             <section>
               {/* Toolbar */}
               <div className="flex items-center gap-2 flex-wrap mb-3">
-                <Button size="sm" className="h-7 text-[12px] px-3" onClick={() => setEntryOpen(true)}>
+                <Button size="sm" className="h-7 text-[12px] px-3 rounded-md" onClick={() => setEntryOpen(true)}>
                   <Plus className="w-3 h-3" /> 경험 추가
                 </Button>
 
@@ -1048,7 +1048,7 @@ export default function Experiences() {
                 <button
                   onClick={() => setActiveFilter("전체")}
                   className={cn(
-                    "h-6 px-2 inline-flex items-center rounded text-[11px] border transition-colors",
+                    "h-6 px-2 inline-flex items-center rounded-full text-[11px] border transition-colors",
                     activeFilter === "전체" && view !== "paste"
                       ? "bg-accent text-accent-foreground border-accent"
                       : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1085,7 +1085,7 @@ export default function Experiences() {
                     key={f}
                     onClick={() => setActiveFilter(f)}
                     className={cn(
-                      "h-6 px-2 inline-flex items-center rounded text-[11px] border transition-colors",
+                      "h-6 px-2 inline-flex items-center rounded-full text-[11px] border transition-colors",
                       activeFilter === f
                         ? "bg-accent text-accent-foreground border-accent"
                         : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1109,7 +1109,7 @@ export default function Experiences() {
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
                   <table className="w-full text-sm table-fixed">
                     <thead>
-                      <tr className="bg-muted/20 border-b border-border text-xs text-muted-foreground">
+                      <tr className="border-b border-border bg-[#F8FAFC] text-[10px] text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
                         <th className="w-9 px-3 py-2.5">
                           <Checkbox
                             checked={allFilteredSelected}
@@ -1249,7 +1249,7 @@ export default function Experiences() {
                           <tr
                             key={i.id}
                             className={cn(
-                              "border-b border-border/50 hover:bg-muted/30 group cursor-pointer",
+                              "border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer",
                               selected.has(i.id) && "bg-accent/30",
                             )}
                             onClick={() => setDetailId(i.id)}
@@ -1289,7 +1289,7 @@ export default function Experiences() {
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
                                       key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground/70 shrink-0"
+                                      className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground/70 shrink-0"
                                     >
                                       {k}
                                     </span>
@@ -1371,7 +1371,7 @@ export default function Experiences() {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground/70">
+                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground/70">
                               {k}
                             </span>
                           ))}
@@ -1665,12 +1665,12 @@ function RepExperienceCard({
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden group/card hover:border-border/80 transition-colors">
       {/* 헤더 */}
-      <div className="px-3 pt-3 pb-2 flex items-start justify-between gap-2">
+      <div className="px-3 pt-3 pb-2.5 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="text-[10px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">{item.type}</span>
-          <p className="text-[13px] font-semibold text-foreground mt-1 leading-snug">{item.name}</p>
+          <p className="text-[13px] font-semibold text-foreground mt-1.5 leading-snug">{item.name}</p>
           {(org || period) && (
-            <p className="text-[11px] text-muted-foreground mt-0.5">{[org, period].filter(Boolean).join(" · ")}</p>
+            <p className="text-[11px] text-muted-foreground mt-1">{[org, period].filter(Boolean).join(" · ")}</p>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0 mt-0.5">
@@ -1707,7 +1707,7 @@ function RepExperienceCard({
           <RepSection label="자소서용 요약" onCopyAll={() => onCopy(docText)}>
             <button
               onClick={() => onCopy(docText)}
-              className="text-[12px] leading-relaxed text-foreground whitespace-pre-line text-left hover:text-primary transition-colors w-full"
+              className="text-[12px] leading-loose text-foreground whitespace-pre-line text-left hover:text-primary transition-colors w-full"
             >
               {docText}
             </button>
@@ -1718,7 +1718,7 @@ function RepExperienceCard({
         {filledFields.length > 0 && (
           <RepSection label="세부 필드">
             {filledFields.map((f) => (
-              <div key={f.key} className="flex items-center gap-2 group/row py-0.5">
+              <div key={f.key} className="flex items-center gap-2 group/row py-1">
                 <span className="text-[11px] text-muted-foreground w-[80px] shrink-0">{f.label}</span>
                 <button
                   onClick={() => onCopy(f.value)}
@@ -1746,8 +1746,8 @@ function RepSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-3 py-2.5.5">
-      <div className="flex items-center justify-between mb-1.5">
+    <div className="px-3 pt-4 pb-2.5">
+      <div className="flex items-center justify-between mb-2">
         <span className="text-[10.5px] font-medium text-muted-foreground">{label}</span>
         {onCopyAll && (
           <button
@@ -1758,7 +1758,7 @@ function RepSection({
           </button>
         )}
       </div>
-      <div className="space-y-1">{children}</div>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
@@ -2223,7 +2223,7 @@ function DetailEditor({
                 </button>
               </div>
               <div className="px-4 py-3 space-y-3">
-                <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5.5">
+                <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5">
                   <p className="text-[10px] text-muted-foreground mb-1">AI의 질문</p>
                   <p className="text-[13px] text-foreground leading-snug">{currentQ}</p>
                   <button
@@ -2713,7 +2713,7 @@ function SentenceCardView({
         e.dataTransfer.setData("text/plain", card.sentence);
         e.dataTransfer.effectAllowed = "copy";
       }}
-      className="border border-border rounded-md bg-muted/20 px-3 py-2.5.5 cursor-grab active:cursor-grabbing"
+      className="border border-border rounded-md bg-muted/20 px-3 py-2.5 cursor-grab active:cursor-grabbing"
     >
       <p className="text-[10px] text-muted-foreground mb-1">{card.question}</p>
       <p className="text-[12.5px] text-foreground leading-snug">{card.sentence}</p>
