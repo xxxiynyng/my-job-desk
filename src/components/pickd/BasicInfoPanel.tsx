@@ -16,49 +16,66 @@ type InfoKey =
   | "military" | "veteran" | "disability" | "national" | "driverLicense"
   | "portfolioUrl" | "github" | "linkedin" | "blog"
   | "enrollYear" | "gradYear" | "gpa" | "minor" | "transfer"
-  | "gender" | "marital" | "nationality" | "bloodType" | "height" | "weight";
+  | "gender" | "nationality"
+  | "hsSchool" | "hsLocation" | "hsEnroll" | "hsGrad" | "hsGradStatus"
+  | "langExam1Name" | "langExam1Score" | "langExam1Date"
+  | "langConversation" | "langWriting" | "langReading"
+  | "itProgram" | "itLevel" | "itDuration";
 
 const INFO_FIELDS: { key: InfoKey; label: string }[] = [
-  { key: "name",          label: "이름"            },
-  { key: "hanjaName",     label: "한자 이름"        },
-  { key: "engName",       label: "영문 이름"        },
-  { key: "birth",         label: "생년월일"         },
-  { key: "email",         label: "이메일"           },
-  { key: "phone",         label: "전화번호"         },
-  { key: "address",       label: "주소"             },
-  { key: "school",        label: "학교"             },
-  { key: "major",         label: "전공"             },
-  { key: "grade",         label: "학년 / 졸업 여부"  },
-  { key: "military",      label: "병역 사항"        },
-  { key: "veteran",       label: "보훈 사항"        },
-  { key: "disability",    label: "장애 사항"        },
-  { key: "national",      label: "국가유공자 관련"   },
-  { key: "driverLicense", label: "운전면허"         },
-  { key: "portfolioUrl",  label: "포트폴리오 URL"   },
-  { key: "github",        label: "GitHub"           },
-  { key: "linkedin",      label: "LinkedIn"         },
-  { key: "blog",          label: "블로그/노션"       },
-  { key: "enrollYear",    label: "입학 연도"        },
-  { key: "gradYear",      label: "졸업(예정) 연도"  },
-  { key: "gpa",           label: "학점 (GPA)"       },
-  { key: "minor",         label: "부전공"           },
-  { key: "transfer",      label: "편입 여부"        },
-  { key: "gender",        label: "성별"             },
-  { key: "marital",       label: "결혼 여부"        },
-  { key: "nationality",   label: "국적"             },
-  { key: "bloodType",     label: "혈액형"           },
-  { key: "height",        label: "신장 (cm)"        },
-  { key: "weight",        label: "체중 (kg)"        },
+  { key: "name",             label: "이름"                },
+  { key: "hanjaName",        label: "한자 이름"            },
+  { key: "engName",          label: "영문 이름"            },
+  { key: "birth",            label: "생년월일"             },
+  { key: "email",            label: "이메일"               },
+  { key: "phone",            label: "전화번호"             },
+  { key: "address",          label: "주소"                 },
+  { key: "school",           label: "학교"                 },
+  { key: "major",            label: "전공"                 },
+  { key: "grade",            label: "학년 / 졸업 여부"      },
+  { key: "military",         label: "병역 사항"            },
+  { key: "veteran",          label: "보훈 사항"            },
+  { key: "disability",       label: "장애 사항"            },
+  { key: "national",         label: "국가유공자 관련"       },
+  { key: "driverLicense",    label: "운전면허"             },
+  { key: "portfolioUrl",     label: "포트폴리오 URL"       },
+  { key: "github",           label: "GitHub"               },
+  { key: "linkedin",         label: "LinkedIn"             },
+  { key: "blog",             label: "블로그/노션"           },
+  { key: "enrollYear",       label: "입학 연도"            },
+  { key: "gradYear",         label: "졸업(예정) 연도"      },
+  { key: "gpa",              label: "학점 (GPA)"           },
+  { key: "minor",            label: "부전공"               },
+  { key: "transfer",         label: "편입 여부"            },
+  { key: "gender",           label: "성별"                 },
+  { key: "nationality",      label: "국적"                 },
+  { key: "hsSchool",         label: "고등학교"             },
+  { key: "hsLocation",       label: "고등학교 소재지"       },
+  { key: "hsEnroll",         label: "고등학교 입학년월"     },
+  { key: "hsGrad",           label: "고등학교 졸업년월"     },
+  { key: "hsGradStatus",     label: "고등학교 졸업여부"     },
+  { key: "langExam1Name",    label: "공인외국어시험명"      },
+  { key: "langExam1Score",   label: "점수 / 등급"          },
+  { key: "langExam1Date",    label: "응시일"               },
+  { key: "langConversation", label: "회화 수준"            },
+  { key: "langWriting",      label: "작문 수준"            },
+  { key: "langReading",      label: "독해 수준"            },
+  { key: "itProgram",        label: "IT 프로그램명"        },
+  { key: "itLevel",          label: "활용 수준"            },
+  { key: "itDuration",       label: "사용 기간"            },
 ];
 
-// 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 온라인 프로필 / 신체·가족 / 병역·면허
+// 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 어학 / IT활용능력 / 병역·면허
 const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
-  { title: "인적사항",    keys: ["name", "hanjaName", "engName", "birth", "gender", "nationality", "marital"] },
-  { title: "연락처",      keys: ["email", "phone", "address"] },
-  { title: "학력",        keys: ["school", "major", "grade", "enrollYear", "gradYear", "gpa", "minor", "transfer"] },
+  { title: "인적사항",      keys: ["name", "hanjaName", "engName", "birth", "gender", "nationality"] },
+  { title: "연락처",        keys: ["email", "phone", "address"] },
+  { title: "학력",          keys: ["school", "major", "grade", "enrollYear", "gradYear", "gpa", "minor", "transfer"] },
+  { title: "고등학교",      keys: ["hsSchool", "hsLocation", "hsEnroll", "hsGrad", "hsGradStatus"] },
   { title: "온라인 프로필", keys: ["portfolioUrl", "github", "linkedin", "blog"] },
-  { title: "신체",        keys: ["bloodType", "height", "weight"] },
-  { title: "병역·면허",   keys: ["military", "veteran", "disability", "national", "driverLicense"] },
+  { title: "공인외국어시험", keys: ["langExam1Name", "langExam1Score", "langExam1Date"] },
+  { title: "외국어활용능력", keys: ["langConversation", "langWriting", "langReading"] },
+  { title: "IT활용능력",    keys: ["itProgram", "itLevel", "itDuration"] },
+  { title: "병역·면허",     keys: ["military", "veteran", "disability", "national", "driverLicense"] },
 ];
 
 const INFO_DEFAULTS: Record<InfoKey, string> = {
@@ -69,8 +86,11 @@ const INFO_DEFAULTS: Record<InfoKey, string> = {
   disability: "해당 없음", national: "해당 없음", driverLicense: "2종 보통",
   portfolioUrl: "", github: "", linkedin: "", blog: "",
   enrollYear: "", gradYear: "", gpa: "", minor: "", transfer: "해당 없음",
-  gender: "선택 안 함", marital: "미혼", nationality: "대한민국",
-  bloodType: "모름", height: "", weight: "",
+  gender: "선택 안 함", nationality: "대한민국",
+  hsSchool: "", hsLocation: "", hsEnroll: "", hsGrad: "", hsGradStatus: "해당 없음",
+  langExam1Name: "", langExam1Score: "", langExam1Date: "",
+  langConversation: "", langWriting: "", langReading: "",
+  itProgram: "", itLevel: "", itDuration: "",
 };
 
 const DEFAULT_VISIBLE: InfoKey[] = [
@@ -80,7 +100,7 @@ const DEFAULT_VISIBLE: InfoKey[] = [
 
 type FileItem = { id: string; kind: string; name: string; fileKind: "pdf" | "image"; url?: string };
 
-const LS_INFO_VISIBLE = "specs.info.visibleKeys.v3";
+const LS_INFO_VISIBLE = "specs.info.visibleKeys.v4";
 const LS_INFO_VALUES  = "specs.info.values.v2";
 const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
 const LS_PHOTO_ID     = "specs.basicPhoto.id";
@@ -94,13 +114,13 @@ function lsSet(k: string, v: unknown) {
   try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
 }
 
-const MIL_OPTS    = ["해당 없음", "군필", "미필", "면제", "복무 중"];
-const YES_NO      = ["해당 없음", "대상", "비대상"];
-const LIC_OPTS    = ["없음", "1종 보통", "1종 대형", "2종 보통", "2종 소형", "기타"];
-const TRANS_OPTS  = ["해당 없음", "편입"];
-const GENDER_OPTS = ["선택 안 함", "남성", "여성"];
-const MARITAL_OPTS = ["미혼", "기혼", "기타"];
-const BLOOD_OPTS  = ["A", "B", "O", "AB", "모름"];
+const MIL_OPTS       = ["해당 없음", "군필", "미필", "면제", "복무 중"];
+const YES_NO         = ["해당 없음", "대상", "비대상"];
+const LIC_OPTS       = ["없음", "1종 보통", "1종 대형", "2종 보통", "2종 소형", "기타"];
+const TRANS_OPTS     = ["해당 없음", "편입"];
+const GENDER_OPTS    = ["선택 안 함", "남성", "여성"];
+const HS_GRAD_OPTS   = ["졸업", "졸업예정", "재학 중", "해당 없음"];
+const LANG_LEVEL_OPTS = ["상", "중상", "중", "중하", "하"];
 
 // ── Panel ─────────────────────────────────────────────────────
 // 기본정보 탭 콘텐츠. 사이드바/페이지 셸은 호출하는 쪽(통합 허브)에서 처리합니다.
@@ -388,9 +408,12 @@ export function BasicInfoPanel() {
           {/* 기본 인적사항 */}
           <EditSection title="기본 인적사항">
             <EditGrid>
-              {(["name","hanjaName","engName","birth","email","phone","address","school","major","grade"] as InfoKey[]).map((k) => (
+              {(["name","hanjaName","engName","birth","email","phone","address","school","major","grade","gender","nationality"] as InfoKey[]).map((k) => (
                 <FieldRow key={k} label={INFO_FIELDS.find((x) => x.key === k)!.label} visible={isVis(k)} onToggle={() => toggleVis(k)}>
-                  <Input value={dv(k)} onChange={(e) => setDv(k, e.target.value)} className="h-8 text-[12px]" />
+                  {k === "gender"
+                    ? <InlineSelect value={dv(k) || "선택 안 함"} options={GENDER_OPTS} onChange={(v) => setDv(k, v)} />
+                    : <Input value={dv(k)} onChange={(e) => setDv(k, e.target.value)} className="h-8 text-[12px]" />
+                  }
                 </FieldRow>
               ))}
             </EditGrid>
@@ -421,26 +444,68 @@ export function BasicInfoPanel() {
             </EditGrid>
           </EditSection>
 
-          {/* 신체·가족 */}
-          <EditSection title="신체·가족">
+          {/* 고등학교 */}
+          <EditSection title="고등학교">
             <EditGrid>
-              <FieldRow label="성별" visible={isVis("gender")} onToggle={() => toggleVis("gender")}>
-                <InlineSelect value={dv("gender") || "선택 안 함"} options={GENDER_OPTS} onChange={(v) => setDv("gender", v)} />
+              <FieldRow label="학교명" visible={isVis("hsSchool")} onToggle={() => toggleVis("hsSchool")}>
+                <Input value={dv("hsSchool")} onChange={(e) => setDv("hsSchool", e.target.value)} className="h-8 text-[12px]" />
               </FieldRow>
-              <FieldRow label="결혼 여부" visible={isVis("marital")} onToggle={() => toggleVis("marital")}>
-                <InlineSelect value={dv("marital") || "미혼"} options={MARITAL_OPTS} onChange={(v) => setDv("marital", v)} />
+              <FieldRow label="소재지" visible={isVis("hsLocation")} onToggle={() => toggleVis("hsLocation")}>
+                <Input value={dv("hsLocation")} onChange={(e) => setDv("hsLocation", e.target.value)} className="h-8 text-[12px]" />
               </FieldRow>
-              <FieldRow label="국적" visible={isVis("nationality")} onToggle={() => toggleVis("nationality")}>
-                <Input value={dv("nationality")} onChange={(e) => setDv("nationality", e.target.value)} className="h-8 text-[12px]" />
+              <FieldRow label="입학년월" visible={isVis("hsEnroll")} onToggle={() => toggleVis("hsEnroll")}>
+                <Input value={dv("hsEnroll")} onChange={(e) => setDv("hsEnroll", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
               </FieldRow>
-              <FieldRow label="혈액형" visible={isVis("bloodType")} onToggle={() => toggleVis("bloodType")}>
-                <InlineSelect value={dv("bloodType") || "모름"} options={BLOOD_OPTS} onChange={(v) => setDv("bloodType", v)} />
+              <FieldRow label="졸업년월" visible={isVis("hsGrad")} onToggle={() => toggleVis("hsGrad")}>
+                <Input value={dv("hsGrad")} onChange={(e) => setDv("hsGrad", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
               </FieldRow>
-              <FieldRow label="신장 (cm)" visible={isVis("height")} onToggle={() => toggleVis("height")}>
-                <Input value={dv("height")} onChange={(e) => setDv("height", e.target.value)} className="h-8 text-[12px]" />
+              <FieldRow label="졸업여부" visible={isVis("hsGradStatus")} onToggle={() => toggleVis("hsGradStatus")}>
+                <InlineSelect value={dv("hsGradStatus") || "해당 없음"} options={HS_GRAD_OPTS} onChange={(v) => setDv("hsGradStatus", v)} />
               </FieldRow>
-              <FieldRow label="체중 (kg)" visible={isVis("weight")} onToggle={() => toggleVis("weight")}>
-                <Input value={dv("weight")} onChange={(e) => setDv("weight", e.target.value)} className="h-8 text-[12px]" />
+            </EditGrid>
+          </EditSection>
+
+          {/* 어학 — 공인외국어시험 */}
+          <EditSection title="공인외국어시험">
+            <EditGrid>
+              <FieldRow label="시험명" visible={isVis("langExam1Name")} onToggle={() => toggleVis("langExam1Name")}>
+                <Input value={dv("langExam1Name")} onChange={(e) => setDv("langExam1Name", e.target.value)} className="h-8 text-[12px]" placeholder="TOEIC, TOEFL..." />
+              </FieldRow>
+              <FieldRow label="점수 / 등급" visible={isVis("langExam1Score")} onToggle={() => toggleVis("langExam1Score")}>
+                <Input value={dv("langExam1Score")} onChange={(e) => setDv("langExam1Score", e.target.value)} className="h-8 text-[12px]" />
+              </FieldRow>
+              <FieldRow label="응시일" visible={isVis("langExam1Date")} onToggle={() => toggleVis("langExam1Date")}>
+                <Input value={dv("langExam1Date")} onChange={(e) => setDv("langExam1Date", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
+              </FieldRow>
+            </EditGrid>
+          </EditSection>
+
+          {/* 어학 — 외국어활용능력 */}
+          <EditSection title="외국어활용능력">
+            <EditGrid>
+              <FieldRow label="회화" visible={isVis("langConversation")} onToggle={() => toggleVis("langConversation")}>
+                <InlineSelect value={dv("langConversation") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langConversation", v)} />
+              </FieldRow>
+              <FieldRow label="작문" visible={isVis("langWriting")} onToggle={() => toggleVis("langWriting")}>
+                <InlineSelect value={dv("langWriting") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langWriting", v)} />
+              </FieldRow>
+              <FieldRow label="독해" visible={isVis("langReading")} onToggle={() => toggleVis("langReading")}>
+                <InlineSelect value={dv("langReading") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langReading", v)} />
+              </FieldRow>
+            </EditGrid>
+          </EditSection>
+
+          {/* IT활용능력 */}
+          <EditSection title="IT활용능력">
+            <EditGrid>
+              <FieldRow label="프로그램명" visible={isVis("itProgram")} onToggle={() => toggleVis("itProgram")}>
+                <Input value={dv("itProgram")} onChange={(e) => setDv("itProgram", e.target.value)} className="h-8 text-[12px]" placeholder="Excel, Python..." />
+              </FieldRow>
+              <FieldRow label="활용 수준" visible={isVis("itLevel")} onToggle={() => toggleVis("itLevel")}>
+                <InlineSelect value={dv("itLevel") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("itLevel", v)} />
+              </FieldRow>
+              <FieldRow label="사용 기간" visible={isVis("itDuration")} onToggle={() => toggleVis("itDuration")}>
+                <Input value={dv("itDuration")} onChange={(e) => setDv("itDuration", e.target.value)} className="h-8 text-[12px]" placeholder="2년, 6개월..." />
               </FieldRow>
             </EditGrid>
           </EditSection>
