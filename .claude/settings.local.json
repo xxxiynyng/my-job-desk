@@ -27,7 +27,28 @@
       "Bash(/Users/xxxiynyng/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node -e ' *)",
       "Bash(~/.bun/bin/bun install *)",
       "Bash(claude plugin *)",
-      "Bash(claude --version)"
+      "Bash(claude --version)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(cat vercel.json)",
+      "Bash(ls .vercel)",
+      "Bash(git commit -m 'design: increase dashboard header font size to 4xl *)",
+      "Bash(claude mcp *)",
+      "mcp__Figma__get_design_context",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(xargs cat)",
+      "Bash(rm \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/.git/HEAD.lock\")",
+      "Skill(run)",
+      "Bash(grep -vE \"^\\\\s*$\")",
+      "Bash(~/.bun/bin/bun run *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(curl *)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --screenshot=/tmp/experiences-page.png --window-size=1440,900 --virtual-time-budget=3000 http://localhost:8080/experiences)",
+      "Bash(echo \"exit: $?\")",
+      "Read(//tmp/**)"
     ]
   }
 }
