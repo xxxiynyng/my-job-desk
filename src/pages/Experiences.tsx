@@ -1748,7 +1748,7 @@ function RepSection({
   return (
     <div className="px-3 pt-4 pb-2.5">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10.5px] font-medium text-muted-foreground">{label}</span>
+        <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
         {onCopyAll && (
           <button
             onClick={onCopyAll}
