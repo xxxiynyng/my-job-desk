@@ -357,7 +357,7 @@ export default function JobDetail() {
                 <Button
                   variant={rawOpen ? "default" : "outline"}
                   size="sm"
-                  className="h-7 text-xs gap-1.5"
+                  className="h-7 text-xs gap-1.5 rounded-md"
                   onClick={() => setRawOpen((v) => !v)}
                 >
                   <ScrollText className="w-3.5 h-3.5" />
@@ -367,7 +367,7 @@ export default function JobDetail() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs gap-1.5"
+                  className="h-7 text-xs gap-1.5 rounded-md"
                   onClick={() => navigate("/")}
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -408,7 +408,7 @@ export default function JobDetail() {
                 <span className="text-border">·</span>
                 <span>{job.role}</span>
               </div>
-              <h1 className="text-[22px] font-semibold text-foreground tracking-tight leading-snug">
+              <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">
                 {job.title}
               </h1>
 
@@ -431,7 +431,7 @@ export default function JobDetail() {
                   }
                 />
                 <SummaryItem label="지원 상태" value={
-                  <span className="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
+                  <span className="px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
                     {job.status}
                   </span>
                 } />
@@ -707,7 +707,7 @@ export default function JobDetail() {
                             size="sm"
                             variant={e.status === "미작성" ? "outline" : "default"}
                             className={cn(
-                              "shrink-0 h-7 text-xs gap-1 whitespace-nowrap",
+                              "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
                               e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
                             )}
                             onClick={() => goToTab3(e.no)}

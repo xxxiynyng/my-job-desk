@@ -1746,8 +1746,8 @@ function RepSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-3 pt-4 pb-2.5">
-      <div className="flex items-center justify-between mb-1">
+    <div className="px-3 pt-3 pb-3">
+      <div className="flex items-center justify-between mb-1.5">
         <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
         {onCopyAll && (
           <button
