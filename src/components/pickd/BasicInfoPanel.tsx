@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Copy, Pencil, Check, X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,14 +51,14 @@ const INFO_FIELDS: { key: InfoKey; label: string }[] = [
   { key: "weight",        label: "체중 (kg)"        },
 ];
 
-// 뷰 모드에서 항목을 의미 단위로 그룹화 — 편집 모드의 섹션 구분과 동일한 분류를 사용
+// 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 온라인 프로필 / 신체·가족 / 병역·면허
 const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
-  { title: "기본 인적사항", keys: ["name", "hanjaName", "engName", "birth", "email", "phone", "address", "school", "major", "grade"] },
+  { title: "인적사항",    keys: ["name", "hanjaName", "engName", "birth", "gender", "nationality", "marital"] },
+  { title: "연락처",      keys: ["email", "phone", "address"] },
+  { title: "학력",        keys: ["school", "major", "grade", "enrollYear", "gradYear", "gpa", "minor", "transfer"] },
   { title: "온라인 프로필", keys: ["portfolioUrl", "github", "linkedin", "blog"] },
-  { title: "학력 상세", keys: ["enrollYear", "gradYear", "gpa", "minor", "transfer"] },
-  { title: "신체·가족", keys: ["gender", "marital", "nationality", "bloodType", "height", "weight"] },
-  { title: "병역·보훈 등", keys: ["military", "veteran", "disability", "national"] },
-  { title: "운전면허", keys: ["driverLicense"] },
+  { title: "신체",        keys: ["bloodType", "height", "weight"] },
+  { title: "병역·면허",   keys: ["military", "veteran", "disability", "national", "driverLicense"] },
 ];
 
 const INFO_DEFAULTS: Record<InfoKey, string> = {
@@ -120,6 +120,26 @@ export function BasicInfoPanel() {
   const [draftVisible, setDraftVisible]       = useState<InfoKey[]>(infoVisible);
   const [draftPhotoShown, setDraftPhotoShown] = useState(photoShown);
 
+  // 필드별 인라인 편집
+  const [inlineKey,   setInlineKey]   = useState<InfoKey | null>(null);
+  const [inlineDraft, setInlineDraft] = useState("");
+  const inlineRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (inlineKey) inlineRef.current?.select(); }, [inlineKey]);
+
+  const startInline = (k: InfoKey) => {
+    setInlineKey(k);
+    setInlineDraft(infoValues[k] ?? "");
+  };
+  const commitInline = () => {
+    if (inlineKey) {
+      setInfoValues((p) => ({ ...p, [inlineKey]: inlineDraft }));
+      toast("저장되었습니다", { duration: 900 });
+    }
+    setInlineKey(null);
+  };
+  const cancelInline = () => setInlineKey(null);
+
   useEffect(() => lsSet(LS_INFO_VISIBLE, infoVisible), [infoVisible]);
   useEffect(() => lsSet(LS_INFO_VALUES,  infoValues),  [infoValues]);
   useEffect(() => lsSet(LS_PHOTO_SHOWN,  photoShown),  [photoShown]);
@@ -165,6 +185,10 @@ export function BasicInfoPanel() {
     [files, basicPhotoId],
   );
 
+  const filledCount = INFO_FIELDS.filter((f) => (infoValues[f.key] || "").trim()).length;
+  const totalCount  = INFO_FIELDS.length;
+  const pct         = Math.round((filledCount / totalCount) * 100);
+
   const visibleGroups = FIELD_GROUPS.map((g) => ({
     title: g.title,
     fields: INFO_FIELDS.filter((f) => g.keys.includes(f.key) && infoVisible.includes(f.key) && infoValues[f.key]),
@@ -176,14 +200,33 @@ export function BasicInfoPanel() {
         {/* ── 뷰 모드 ──────────────────────────────── */}
         {!editMode && (
           <div className="pt-6 flex gap-10 items-start">
-            <div className="absolute top-0 right-0">
+
+            {/* 상단 우측: 완성도 + 편집 버튼 */}
+            <div className="absolute top-0 right-0 flex items-center gap-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-default select-none">
+                    <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full transition-all", pct === 100 ? "bg-emerald-500" : "bg-primary/70")}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground tabular-nums">{filledCount}/{totalCount}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-[11px]">
+                  {pct === 100 ? "모든 항목이 입력되었어요" : `${totalCount - filledCount}개 항목이 비어 있어요`}
+                </TooltipContent>
+              </Tooltip>
               <button
                 onClick={enterEdit}
                 className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
               >
-                <Pencil className="w-3 h-3" /> 편집
+                <Pencil className="w-3 h-3" /> 전체 편집
               </button>
             </div>
+
             {/* 증명사진 */}
             {photoShown && basicPhoto?.url && (
               <div className="shrink-0">
@@ -194,7 +237,7 @@ export function BasicInfoPanel() {
             )}
 
             {/* 그룹별 필드 */}
-            <div className="flex-1 min-w-0 space-y-7">
+            <div className="flex-1 min-w-0 space-y-6">
               {visibleGroups.length === 0 ? (
                 <div className="py-16 text-center text-muted-foreground">
                   <p className="text-sm">표시할 정보가 없어요.</p>
@@ -203,67 +246,111 @@ export function BasicInfoPanel() {
               ) : (
                 visibleGroups.map((group) => (
                   <div key={group.title}>
-                    <h3 className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <span className="w-3 h-px bg-border inline-block" />
-                      {group.title}
-                    </h3>
-                    <div className={cn(
-                      "grid gap-x-10",
-                      group.fields.length > 4 ? "grid-cols-3" : "grid-cols-2",
-                    )}>
+                    {/* 섹션 헤더 — 배경 + 좌측 강조 선 */}
+                    <div className="flex items-center gap-2.5 mb-3 px-2 py-1 bg-muted/40 rounded-md border-l-[3px] border-primary/60">
+                      <h3 className="text-[11px] font-semibold text-foreground/75 tracking-wide leading-none">
+                        {group.title}
+                      </h3>
+                      <span className="text-[10px] text-muted-foreground/50 tabular-nums">
+                        {group.fields.length}개
+                      </span>
+                    </div>
+
+                    {/* 반응형 그리드: 필드 수에 관계없이 190px 단위로 자동 배치 */}
+                    <div
+                      className="grid gap-x-8"
+                      style={{ gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))" }}
+                    >
                       {group.fields.map((f) => {
-                        const isMasked = masked.has(f.key);
+                        const isMasked  = masked.has(f.key);
+                        const isEditing = inlineKey === f.key;
+                        const val       = infoValues[f.key] ?? "";
+
                         return (
-                          <div key={f.key} className="group flex items-center gap-3 py-2.5 border-b border-border/40 last:border-0">
+                          <div key={f.key} className="group/row flex items-center gap-2 py-2.5 border-b border-border/40 last:border-0 min-w-0">
                             {/* 레이블 */}
-                            <span className="text-xs text-muted-foreground w-24 shrink-0 leading-none">
+                            <span className="text-[11px] text-muted-foreground w-[88px] shrink-0 leading-none truncate" title={f.label}>
                               {f.label}
                             </span>
 
                             {/* 값 영역 */}
-                            <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                              {isMasked ? (
-                                <span className="text-sm text-muted-foreground/30 tracking-widest select-none">
-                                  ••••••
-                                </span>
+                            <div className="flex-1 min-w-0 flex items-center gap-1">
+                              {isEditing ? (
+                                /* 인라인 편집 입력 */
+                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                                  <input
+                                    ref={inlineRef}
+                                    value={inlineDraft}
+                                    onChange={(e) => setInlineDraft(e.target.value)}
+                                    onBlur={commitInline}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter")  { e.preventDefault(); commitInline(); }
+                                      if (e.key === "Escape") { e.preventDefault(); cancelInline(); }
+                                    }}
+                                    className="flex-1 min-w-0 text-sm text-foreground bg-transparent border-b border-primary/60 outline-none py-0.5"
+                                  />
+                                  <button onClick={commitInline} className="shrink-0 p-0.5 rounded text-emerald-500 hover:bg-emerald-50">
+                                    <Check className="w-3 h-3" />
+                                  </button>
+                                  <button onClick={cancelInline} className="shrink-0 p-0.5 rounded text-muted-foreground hover:bg-muted">
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ) : isMasked ? (
+                                <span className="text-sm text-muted-foreground/30 tracking-widest select-none">••••••</span>
                               ) : (
+                                /* 복사 버튼 + full-value 툴팁 */
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <button
-                                      onClick={() => copy(infoValues[f.key])}
-                                      className="inline-flex items-center gap-1.5 text-[13.5px] text-foreground hover:text-primary transition-colors min-w-0 max-w-full text-left font-medium"
+                                      onClick={() => copy(val)}
+                                      className="inline-flex items-center gap-1 text-[13px] text-foreground hover:text-primary transition-colors min-w-0 max-w-full text-left font-medium"
                                     >
-                                      <span className="truncate">{infoValues[f.key]}</span>
-                                      <Copy className="w-3 h-3 opacity-0 group-hover:opacity-40 shrink-0 transition-opacity" />
+                                      <span className="truncate">{val}</span>
+                                      <Copy className="w-3 h-3 opacity-0 group-hover/row:opacity-35 shrink-0 transition-opacity" />
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent className="text-xs">클릭하여 복사</TooltipContent>
+                                  <TooltipContent className="text-xs max-w-72">
+                                    <p className="break-all">{val}</p>
+                                    <p className="text-muted-foreground/60 mt-0.5 text-[10px]">클릭하여 복사</p>
+                                  </TooltipContent>
                                 </Tooltip>
+                              )}
+
+                              {/* hover 시 노출: 인라인 편집 연필 */}
+                              {!isEditing && !isMasked && (
+                                <button
+                                  onClick={() => startInline(f.key)}
+                                  title="편집"
+                                  className="shrink-0 p-0.5 rounded text-muted-foreground/50 hover:text-foreground hover:bg-muted opacity-0 group-hover/row:opacity-100 transition-opacity"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </button>
                               )}
                             </div>
 
                             {/* 눈 감기/뜨기 */}
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => toggleMask(f.key)}
-                                  className={cn(
-                                    "w-5 h-5 flex items-center justify-center shrink-0 transition-all",
-                                    isMasked
-                                      ? "text-muted-foreground/50 opacity-100"
-                                      : "text-muted-foreground/30 opacity-0 group-hover:opacity-100 hover:text-muted-foreground",
-                                  )}
-                                  aria-label={isMasked ? "값 보기" : "값 숨기기"}
-                                >
-                                  {isMasked
-                                    ? <EyeOff className="w-3 h-3" />
-                                    : <Eye className="w-3 h-3" />}
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent className="text-xs">
-                                {isMasked ? "값 보기" : "값 숨기기"}
-                              </TooltipContent>
-                            </Tooltip>
+                            {!isEditing && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() => toggleMask(f.key)}
+                                    className={cn(
+                                      "w-5 h-5 flex items-center justify-center shrink-0 transition-all",
+                                      isMasked
+                                        ? "text-muted-foreground/50 opacity-100"
+                                        : "text-muted-foreground/30 opacity-0 group-hover/row:opacity-100 hover:text-muted-foreground",
+                                    )}
+                                    aria-label={isMasked ? "값 보기" : "값 숨기기"}
+                                  >
+                                    {isMasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs">
+                                  {isMasked ? "값 보기" : "값 숨기기"}
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </div>
                         );
                       })}
