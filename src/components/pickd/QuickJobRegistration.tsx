@@ -20,7 +20,7 @@ export function QuickJobRegistration() {
         />
         <Button
           size="sm"
-          className="h-7 px-3.5 text-xs gap-1.5 shrink-0"
+          className="h-7 px-3.5 text-xs gap-1.5 shrink-0 rounded-md"
           onClick={() => setModalOpen(true)}
         >
           <Plus className="w-3.5 h-3.5" />

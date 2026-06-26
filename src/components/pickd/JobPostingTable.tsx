@@ -258,7 +258,7 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 const FILTER_CHIPS = ["전체", "★", "마감임박", "|", "작성 중", "결과 대기", "필기 전형", "면접 전형"];
-const ROW_CAP = 8;
+const ROW_CAP = 7;
 
 function lsGet<T>(k: string, fb: T): T {
   try {
@@ -1005,10 +1005,10 @@ export function JobPostingTable() {
             />
           ) : (
             <>
-            <div className="overflow-x-auto" style={{ minHeight: 404 }}>
+            <div className="overflow-x-auto">
               <table className="w-full text-sm table-fixed">
                 <thead>
-                  <tr className="border-b border-border bg-muted/30 text-[12px] text-foreground/70 select-none">
+                  <tr className="border-b border-border bg-[#F8FAFC] text-[10px] text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
                     <th className="w-9 px-3 py-1.5">
                       <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                     </th>
@@ -1066,7 +1066,7 @@ export function JobPostingTable() {
                     <tr
                       key={job.id}
                       className={cn(
-                        "border-b border-border/50 hover:bg-muted/30 transition-colors",
+                        "border-b border-border/50 hover:bg-accent/40 transition-colors",
                         selected.has(job.id) && "bg-accent/20",
                       )}
                     >
@@ -1243,6 +1243,11 @@ export function JobPostingTable() {
                       </td>
                     </tr>
                   )}
+                  {!tableExpanded && Array.from({ length: Math.max(0, ROW_CAP - visibleJobs.length) }).map((_, i) => (
+                    <tr key={`empty-${i}`}>
+                      <td colSpan={20} className="py-[20px]" />
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
 
 @tailwind base;
@@ -7,16 +8,16 @@
 @layer base {
   :root {
     /* ── Pickd raw palette ─────────────────────────────────────── */
-    --blue-50: #EFF4FE;
-    --blue-100: #DCE8FD;
-    --blue-200: #BFD3FB;
-    --blue-300: #92B2F6;
-    --blue-400: #618CEF;
-    --blue-500: #3A67E6;
-    --blue-600: #2A52CC;
-    --blue-700: #2342A3;
-    --blue-800: #1F3782;
-    --blue-900: #1B3068;
+    --blue-50: #EFF6FF;
+    --blue-100: #DBEAFE;
+    --blue-200: #BFDBFE;
+    --blue-300: #93C5FD;
+    --blue-400: #3B82F6;
+    --blue-500: #2563EB;
+    --blue-600: #1D4ED8;
+    --blue-700: #1E3A8A;
+    --blue-800: #1E3A8A;
+    --blue-900: #1e2e5e;
 
     --slate-0: #FFFFFF;
     --slate-25: #FBFCFE;
@@ -92,7 +93,7 @@
     --text-link: var(--blue-600);
 
     /* ── Pickd typography scale ────────────────────────────────── */
-    --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+    --font-sans: "Inter", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
     --text-display: 34px;
@@ -152,7 +153,7 @@
 
     /* ── shadcn/Tailwind bridge ────────────────────────────────── */
     /* shadcn HSL tokens — mapped to Pickd palette */
-    --background: 214 71% 99%;    /* slate-25 approx */
+    --background: 210 40% 98%;    /* #F8FAFC — pickd bg-base */
     --foreground: 220 24% 14%;    /* slate-900 approx */
 
     --card: 0 0% 100%;
@@ -161,7 +162,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 24% 14%;
 
-    --primary: 224 74% 56%;       /* blue-500 approx */
+    --primary: 221 83% 53%;       /* #2563EB — pickd primary */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 216 28% 95%;     /* slate-100 approx */
@@ -254,10 +255,19 @@
 
 @layer utilities {
   .pickd-shadow {
-    box-shadow: 0 1px 3px 0 hsl(220 13% 91% / 0.5), 0 1px 2px -1px hsl(220 13% 91% / 0.5);
+    box-shadow:
+      rgba(0,0,0,0.01) 0 0.175px 1.041px,
+      rgba(0,0,0,0.02) 0 0.8px 2.925px,
+      rgba(0,0,0,0.027) 0 2.025px 7.847px,
+      rgba(0,0,0,0.04) 0 4px 18px;
   }
   .pickd-shadow-md {
-    box-shadow: 0 4px 6px -1px hsl(220 13% 91% / 0.4), 0 2px 4px -2px hsl(220 13% 91% / 0.3);
+    box-shadow:
+      rgba(0,0,0,0.01) 0 0.175px 1.041px,
+      rgba(0,0,0,0.02) 0 0.8px 2.925px,
+      rgba(0,0,0,0.027) 0 2.025px 7.847px,
+      rgba(0,0,0,0.04) 0 4px 18px,
+      rgba(0,0,0,0.05) 0 23px 52px;
   }
 }
 

@@ -59,7 +59,7 @@ export default function Settings() {
           <div className="px-10 py-8 max-w-[720px] mx-auto">
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-7">
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">설정</h1>
+              <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">설정</h1>
               {editMode ? (
                 <div className="flex items-center gap-1.5">
                   <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={cancel}>

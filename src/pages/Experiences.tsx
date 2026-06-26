@@ -825,8 +825,8 @@ export default function Experiences() {
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-foreground tracking-tight">경험·스펙 DB</h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">경험·스펙 DB</h1>
+                <p className="text-sm text-muted-foreground mt-1.5">
                   경험과 스펙을 한 곳에서 정리하고, 자소서·면접에 바로 꺼내 쓰세요.
                 </p>
               </div>

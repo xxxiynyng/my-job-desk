@@ -32,7 +32,7 @@ export function DdayChip({ days = 0, size = "md", style, ...rest }: DdayChipProp
         fontSize: sm ? "var(--text-micro)" : "var(--text-caption)",
         fontWeight: "var(--weight-bold)" as React.CSSProperties["fontWeight"],
         fontVariantNumeric: "tabular-nums",
-        letterSpacing: "0.01em", borderRadius: "var(--radius-sm)", whiteSpace: "nowrap",
+        letterSpacing: "0.01em", borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",
         ...style,
       }}
       {...rest}

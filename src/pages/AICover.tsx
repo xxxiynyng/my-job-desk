@@ -8,8 +8,8 @@ export default function AICover() {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-10 py-8">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">AI 자소서</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
+            <p className="text-sm text-muted-foreground mt-1.5">
               정리한 경험을 활용해 자기소개서 초안을 작성해보세요.
             </p>
           </div>

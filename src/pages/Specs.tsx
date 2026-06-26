@@ -359,8 +359,8 @@ export default function Specs() {
           <div className="px-8 py-6 max-w-[1180px] mx-auto space-y-6">
             {/* Page header — no top action buttons */}
             <header>
-              <h1 className="text-xl font-semibold text-foreground tracking-tight">기본 스펙</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">기본 스펙</h1>
+              <p className="text-sm text-muted-foreground mt-1.5">
                 지원서에 자주 쓰는 기본정보, 대표 스펙, 제출 파일을 한곳에서 빠르게 꺼내 쓰세요.
               </p>
             </header>
