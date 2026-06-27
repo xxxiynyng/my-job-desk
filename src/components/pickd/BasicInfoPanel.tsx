@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Pencil, Check, X, Eye, EyeOff } from "lucide-react";
+import { Copy, Pencil, Check, X, Eye, EyeOff, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,10 +17,7 @@ type InfoKey =
   | "portfolioUrl" | "github" | "linkedin" | "blog"
   | "enrollYear" | "gradYear" | "gpa" | "minor" | "transfer"
   | "gender" | "nationality"
-  | "hsSchool" | "hsLocation" | "hsEnroll" | "hsGrad" | "hsGradStatus"
-  | "langExam1Name" | "langExam1Score" | "langExam1Date"
-  | "langConversation" | "langWriting" | "langReading"
-  | "itProgram" | "itLevel" | "itDuration";
+  | "hsSchool" | "hsLocation" | "hsEnroll" | "hsGrad" | "hsGradStatus";
 
 const INFO_FIELDS: { key: InfoKey; label: string }[] = [
   { key: "name",             label: "이름"                },
@@ -54,15 +51,6 @@ const INFO_FIELDS: { key: InfoKey; label: string }[] = [
   { key: "hsEnroll",         label: "고등학교 입학년월"     },
   { key: "hsGrad",           label: "고등학교 졸업년월"     },
   { key: "hsGradStatus",     label: "고등학교 졸업여부"     },
-  { key: "langExam1Name",    label: "공인외국어시험명"      },
-  { key: "langExam1Score",   label: "점수 / 등급"          },
-  { key: "langExam1Date",    label: "응시일"               },
-  { key: "langConversation", label: "회화 수준"            },
-  { key: "langWriting",      label: "작문 수준"            },
-  { key: "langReading",      label: "독해 수준"            },
-  { key: "itProgram",        label: "IT 프로그램명"        },
-  { key: "itLevel",          label: "활용 수준"            },
-  { key: "itDuration",       label: "사용 기간"            },
 ];
 
 // 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 어학 / IT활용능력 / 병역·면허
@@ -72,9 +60,6 @@ const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
   { title: "학력",          keys: ["school", "major", "grade", "enrollYear", "gradYear", "gpa", "minor", "transfer"] },
   { title: "고등학교",      keys: ["hsSchool", "hsLocation", "hsEnroll", "hsGrad", "hsGradStatus"] },
   { title: "온라인 프로필", keys: ["portfolioUrl", "github", "linkedin", "blog"] },
-  { title: "공인외국어시험", keys: ["langExam1Name", "langExam1Score", "langExam1Date"] },
-  { title: "외국어활용능력", keys: ["langConversation", "langWriting", "langReading"] },
-  { title: "IT활용능력",    keys: ["itProgram", "itLevel", "itDuration"] },
   { title: "병역·면허",     keys: ["military", "veteran", "disability", "national", "driverLicense"] },
 ];
 
@@ -88,9 +73,6 @@ const INFO_DEFAULTS: Record<InfoKey, string> = {
   enrollYear: "", gradYear: "", gpa: "", minor: "", transfer: "해당 없음",
   gender: "선택 안 함", nationality: "대한민국",
   hsSchool: "", hsLocation: "", hsEnroll: "", hsGrad: "", hsGradStatus: "해당 없음",
-  langExam1Name: "", langExam1Score: "", langExam1Date: "",
-  langConversation: "", langWriting: "", langReading: "",
-  itProgram: "", itLevel: "", itDuration: "",
 };
 
 const DEFAULT_VISIBLE: InfoKey[] = [
@@ -105,6 +87,7 @@ const LS_INFO_VALUES  = "specs.info.values.v2";
 const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
 const LS_PHOTO_ID     = "specs.basicPhoto.id";
 const LS_FILES        = "specs.files.v1";
+const LS_LANG_EXAMS   = "specs.info.langExams.v1";
 
 function lsGet<T>(k: string, fallback: T): T {
   try { const v = localStorage.getItem(k); return v ? (JSON.parse(v) as T) : fallback; }
@@ -120,7 +103,8 @@ const LIC_OPTS       = ["없음", "1종 보통", "1종 대형", "2종 보통", "
 const TRANS_OPTS     = ["해당 없음", "편입"];
 const GENDER_OPTS    = ["선택 안 함", "남성", "여성"];
 const HS_GRAD_OPTS   = ["졸업", "졸업예정", "재학 중", "해당 없음"];
-const LANG_LEVEL_OPTS = ["상", "중상", "중", "중하", "하"];
+
+type LangExam = { id: string; lang: string; examName: string; score: string; date: string; expiry: string };
 
 // ── Panel ─────────────────────────────────────────────────────
 // 기본정보 탭 콘텐츠. 사이드바/페이지 셸은 호출하는 쪽(통합 허브)에서 처리합니다.
@@ -131,6 +115,8 @@ export function BasicInfoPanel() {
   const [photoShown,  setPhotoShown]  = useState<boolean>(() => lsGet<boolean>(LS_PHOTO_SHOWN, true));
   const [basicPhotoId]                = useState<string>(() => lsGet<string>(LS_PHOTO_ID, "f0"));
   const [files]                       = useState<FileItem[]>(() => lsGet<FileItem[]>(LS_FILES, []));
+  const [langExams, setLangExams]     = useState<LangExam[]>(() => lsGet<LangExam[]>(LS_LANG_EXAMS, []));
+  const [draftLangExams, setDraftLangExams] = useState<LangExam[]>([]);
 
   // 값만 마스킹하는 로컬 토글 (저장 불필요)
   const [masked, setMasked] = useState<Set<InfoKey>>(new Set());
@@ -163,6 +149,7 @@ export function BasicInfoPanel() {
   useEffect(() => lsSet(LS_INFO_VISIBLE, infoVisible), [infoVisible]);
   useEffect(() => lsSet(LS_INFO_VALUES,  infoValues),  [infoValues]);
   useEffect(() => lsSet(LS_PHOTO_SHOWN,  photoShown),  [photoShown]);
+  useEffect(() => lsSet(LS_LANG_EXAMS,  langExams),   [langExams]);
 
   const copy = (text: string) => {
     if (!text) return;
@@ -181,6 +168,7 @@ export function BasicInfoPanel() {
     setDraft({ ...infoValues });
     setDraftVisible([...infoVisible]);
     setDraftPhotoShown(photoShown);
+    setDraftLangExams([...langExams]);
     setEditMode(true);
   };
 
@@ -188,11 +176,19 @@ export function BasicInfoPanel() {
     setInfoValues(draft);
     setInfoVisible(draftVisible);
     setPhotoShown(draftPhotoShown);
+    setLangExams(draftLangExams);
     setEditMode(false);
     toast("저장됐어요", { duration: 1200 });
   };
 
   const cancel = () => setEditMode(false);
+
+  const addLangExam = () =>
+    setDraftLangExams((p) => [...p, { id: String(Date.now()), lang: "", examName: "", score: "", date: "", expiry: "" }]);
+  const removeLangExam = (idx: number) =>
+    setDraftLangExams((p) => p.filter((_, i) => i !== idx));
+  const updateLangExam = (idx: number, field: keyof LangExam, val: string) =>
+    setDraftLangExams((p) => p.map((e, i) => (i === idx ? { ...e, [field]: val } : e)));
 
   const dv       = (k: string) => draft[k] ?? "";
   const setDv    = (k: string, v: string) => setDraft((p) => ({ ...p, [k]: v }));
@@ -378,6 +374,28 @@ export function BasicInfoPanel() {
                   </div>
                 ))
               )}
+              {langExams.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2.5 mb-3 px-2 py-1 bg-muted/40 rounded-md border-l-[3px] border-primary/60">
+                    <h3 className="text-[11px] font-semibold text-foreground/75 tracking-wide leading-none">공인외국어시험</h3>
+                    <span className="text-[10px] text-muted-foreground/50 tabular-nums">{langExams.length}개</span>
+                  </div>
+                  <div className="grid gap-x-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
+                    {langExams.map((e) => (
+                      <div key={e.id} className="group/row flex items-start gap-2 py-2.5 border-b border-border/40 last:border-0 min-w-0">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium text-foreground truncate">
+                            {[e.lang, e.examName].filter(Boolean).join(" · ") || "—"}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {[e.score, e.date, e.expiry && `~${e.expiry}`].filter(Boolean).join(" · ")}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -465,49 +483,52 @@ export function BasicInfoPanel() {
             </EditGrid>
           </EditSection>
 
-          {/* 어학 — 공인외국어시험 */}
+          {/* 공인외국어시험 — 다중 입력 */}
           <EditSection title="공인외국어시험">
-            <EditGrid>
-              <FieldRow label="시험명" visible={isVis("langExam1Name")} onToggle={() => toggleVis("langExam1Name")}>
-                <Input value={dv("langExam1Name")} onChange={(e) => setDv("langExam1Name", e.target.value)} className="h-8 text-[12px]" placeholder="TOEIC, TOEFL..." />
-              </FieldRow>
-              <FieldRow label="점수 / 등급" visible={isVis("langExam1Score")} onToggle={() => toggleVis("langExam1Score")}>
-                <Input value={dv("langExam1Score")} onChange={(e) => setDv("langExam1Score", e.target.value)} className="h-8 text-[12px]" />
-              </FieldRow>
-              <FieldRow label="응시일" visible={isVis("langExam1Date")} onToggle={() => toggleVis("langExam1Date")}>
-                <Input value={dv("langExam1Date")} onChange={(e) => setDv("langExam1Date", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
-              </FieldRow>
-            </EditGrid>
-          </EditSection>
-
-          {/* 어학 — 외국어활용능력 */}
-          <EditSection title="외국어활용능력">
-            <EditGrid>
-              <FieldRow label="회화" visible={isVis("langConversation")} onToggle={() => toggleVis("langConversation")}>
-                <InlineSelect value={dv("langConversation") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langConversation", v)} />
-              </FieldRow>
-              <FieldRow label="작문" visible={isVis("langWriting")} onToggle={() => toggleVis("langWriting")}>
-                <InlineSelect value={dv("langWriting") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langWriting", v)} />
-              </FieldRow>
-              <FieldRow label="독해" visible={isVis("langReading")} onToggle={() => toggleVis("langReading")}>
-                <InlineSelect value={dv("langReading") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("langReading", v)} />
-              </FieldRow>
-            </EditGrid>
-          </EditSection>
-
-          {/* IT활용능력 */}
-          <EditSection title="IT활용능력">
-            <EditGrid>
-              <FieldRow label="프로그램명" visible={isVis("itProgram")} onToggle={() => toggleVis("itProgram")}>
-                <Input value={dv("itProgram")} onChange={(e) => setDv("itProgram", e.target.value)} className="h-8 text-[12px]" placeholder="Excel, Python..." />
-              </FieldRow>
-              <FieldRow label="활용 수준" visible={isVis("itLevel")} onToggle={() => toggleVis("itLevel")}>
-                <InlineSelect value={dv("itLevel") || ""} options={["", ...LANG_LEVEL_OPTS]} onChange={(v) => setDv("itLevel", v)} />
-              </FieldRow>
-              <FieldRow label="사용 기간" visible={isVis("itDuration")} onToggle={() => toggleVis("itDuration")}>
-                <Input value={dv("itDuration")} onChange={(e) => setDv("itDuration", e.target.value)} className="h-8 text-[12px]" placeholder="2년, 6개월..." />
-              </FieldRow>
-            </EditGrid>
+            <div className="space-y-3">
+              {draftLangExams.map((exam, idx) => (
+                <div key={exam.id} className="border border-border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] text-muted-foreground">시험 {idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeLangExam(idx)}
+                      className="p-0.5 rounded text-muted-foreground hover:text-destructive"
+                      aria-label="삭제"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <EditGrid>
+                    <FieldRow label="언어">
+                      <Input value={exam.lang} onChange={(e) => updateLangExam(idx, "lang", e.target.value)} className="h-8 text-[12px]" placeholder="영어, 일본어..." />
+                    </FieldRow>
+                    <FieldRow label="시험명">
+                      <Input value={exam.examName} onChange={(e) => updateLangExam(idx, "examName", e.target.value)} className="h-8 text-[12px]" placeholder="TOEIC, JLPT N1..." />
+                    </FieldRow>
+                    <FieldRow label="점수 / 등급">
+                      <Input value={exam.score} onChange={(e) => updateLangExam(idx, "score", e.target.value)} className="h-8 text-[12px]" />
+                    </FieldRow>
+                    <FieldRow label="응시일">
+                      <Input value={exam.date} onChange={(e) => updateLangExam(idx, "date", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
+                    </FieldRow>
+                    <FieldRow label="유효기간 (선택)">
+                      <Input value={exam.expiry} onChange={(e) => updateLangExam(idx, "expiry", e.target.value)} className="h-8 text-[12px]" placeholder="YYYY.MM" />
+                    </FieldRow>
+                  </EditGrid>
+                </div>
+              ))}
+              {draftLangExams.length === 0 && (
+                <p className="text-[11px] text-muted-foreground/50 py-1">등록된 시험이 없어요.</p>
+              )}
+              <button
+                type="button"
+                onClick={addLangExam}
+                className="flex items-center gap-1 text-[12px] text-primary hover:underline mt-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> 시험 추가
+              </button>
+            </div>
           </EditSection>
 
           {/* 병역 */}
