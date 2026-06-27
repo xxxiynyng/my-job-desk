@@ -9,6 +9,8 @@ import {
   FileText,
   X,
   RotateCcw,
+  MoreHorizontal,
+  Trash2,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader } from "@/components/ui/dialog";

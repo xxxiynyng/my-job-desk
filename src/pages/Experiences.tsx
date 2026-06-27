@@ -61,6 +61,15 @@ import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
 import { FilesPanel } from "@/components/pickd/FilesPanel";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  type ItemType,
+  type Item,
+  NARRATIVE_TYPES,
+  SPEC_TYPES,
+  SHARED_EXP_KEY,
+  makeFromPreset,
+} from "./experiences/presets";
+import { INITIAL_EXPERIENCES } from "./experiences/mockData";
 
 export {
   type ItemType,
