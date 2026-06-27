@@ -20,7 +20,7 @@ import {
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // ---------- Mock data registry (keyed by company slug) ----------
 const jobDetails: Record<string, any> = {
@@ -205,7 +205,7 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
         try {
           await navigator.clipboard.writeText(text);
           setCopied(true);
-          toast({ description: "클립보드에 복사되었습니다." });
+          toast("복사했어요");
           setTimeout(() => setCopied(false), 1500);
         } catch {}
       }}
