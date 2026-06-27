@@ -860,18 +860,26 @@ export default function Experiences() {
                                     setDetailId(i.id);
                                     setMergeOpen(true);
                                   }}
-                                  onOpen={() => setDetailId(i.id)}
                                 />
                               </td>
                             )}
                             <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                onClick={() => togglePin(i.id)}
-                                className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
-                                title={i.pinned ? "고정 해제" : "고정"}
-                              >
-                                <Pin className={cn("w-3 h-3", i.pinned && "fill-current text-foreground")} />
-                              </button>
+                              <div className="flex items-center gap-0.5">
+                                <button
+                                  onClick={() => setDetailId(i.id)}
+                                  className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
+                                  title="편집"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => togglePin(i.id)}
+                                  className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
+                                  title={i.pinned ? "고정 해제" : "고정"}
+                                >
+                                  <Pin className={cn("w-3 h-3", i.pinned && "fill-current text-foreground")} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -909,7 +917,6 @@ export default function Experiences() {
                               setDetailId(i.id);
                               setMergeOpen(true);
                             }}
-                            onOpen={() => setDetailId(i.id)}
                           />
                         </div>
                         <p className="text-sm font-semibold text-foreground mt-1.5">{i.name}</p>

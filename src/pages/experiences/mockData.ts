@@ -28,6 +28,7 @@ export const INITIAL_EXPERIENCES: Item[] = [
       competencies: ["기획력", "소통"],
       updatedAt: "3일 전",
       status: "작성중",
+      hasUnansweredAiQuestion: true,
       values: { org: "업비트", period: "2024.08 ~ 2024.11", role: "콘텐츠 기획" },
     }),
   },
@@ -79,6 +80,7 @@ export const INITIAL_EXPERIENCES: Item[] = [
     ...makeFromPreset("프로젝트", "고령층 인터뷰 경험", {
       keywords: ["사용자조사"],
       status: "병합 필요",
+      hasMergeCandidate: true,
       updatedAt: "방금",
       values: { period: "2025.04 ~ 2025.05", role: "리서처" },
     }),

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, Layers, Pencil } from "lucide-react";
+import { ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -157,8 +157,9 @@ export function HeaderFilter({
   );
 }
 
-export function ManageIndicator({ item, onMerge, onOpen }: { item: Item; onMerge: () => void; onOpen: () => void }) {
-  if (item.status === "병합 필요")
+export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => void }) {
+  // 병합 필요: hasMergeCandidate 플래그 또는 기존 status 값 모두 처리
+  if (item.hasMergeCandidate || item.status === "병합 필요")
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -167,23 +168,30 @@ export function ManageIndicator({ item, onMerge, onOpen }: { item: Item; onMerge
             className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-muted text-muted-foreground"
             aria-label="비슷한 항목 있음"
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="w-4 h-4" />
           </button>
         </TooltipTrigger>
         <TooltipContent className="text-xs">비슷한 항목이 있어요</TooltipContent>
+      </Tooltip>
+    );
+  if (item.hasUnansweredAiQuestion)
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center justify-center w-6 h-6 text-muted-foreground">
+            <Sparkles className="w-4 h-4" />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="text-xs">미답변 AI 질문이 있어요</TooltipContent>
       </Tooltip>
     );
   if (item.status === "작성중")
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={onOpen}
-            className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-muted text-muted-foreground"
-            aria-label="작성중"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
+          <span className="inline-flex items-center justify-center w-6 h-6 text-muted-foreground">
+            <Pencil className="w-4 h-4" />
+          </span>
         </TooltipTrigger>
         <TooltipContent className="text-xs">아직 정리 중</TooltipContent>
       </Tooltip>

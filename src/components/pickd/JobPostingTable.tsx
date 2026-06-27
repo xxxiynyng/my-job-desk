@@ -105,14 +105,14 @@ const initialJobData: Job[] = [
     role: "프론트엔드",
     employType: "신입",
     industry: "IT/테크",
-    deadline: "2026-04-18",
-    dday: 6,
+    deadline: "2026-07-01",
+    dday: calcDday("2026-07-01"),
     status: "작성 중",
     finalResult: null,
     linked: { schedules: 1, todos: 2 },
     starred: false,
     updatedAt: "2시간 전",
-    registeredAt: "2026-04-01",
+    registeredAt: "2026-06-15",
     stage: "작성 중",
   },
   {
@@ -123,14 +123,14 @@ const initialJobData: Job[] = [
     role: "백엔드",
     employType: "신입",
     industry: "IT/테크",
-    deadline: "2026-04-15",
-    dday: 3,
+    deadline: "2026-07-05",
+    dday: calcDday("2026-07-05"),
     status: "작성 중",
     finalResult: null,
     linked: { schedules: 2, todos: 1 },
     starred: true,
     updatedAt: "3시간 전",
-    registeredAt: "2026-04-02",
+    registeredAt: "2026-06-16",
     stage: "작성 중",
   },
   {
@@ -141,14 +141,14 @@ const initialJobData: Job[] = [
     role: "디자인",
     employType: "인턴",
     industry: "핀테크",
-    deadline: "2026-04-14",
-    dday: 2,
+    deadline: "2026-06-30",
+    dday: calcDday("2026-06-30"),
     status: "작성 중",
     finalResult: null,
     linked: { schedules: 1, todos: 3 },
     starred: true,
     updatedAt: "1시간 전",
-    registeredAt: "2026-04-03",
+    registeredAt: "2026-06-18",
     stage: "작성 중",
   },
   {
@@ -159,14 +159,14 @@ const initialJobData: Job[] = [
     role: "풀스택",
     employType: "신입",
     industry: "제조/전자",
-    deadline: "2026-04-20",
-    dday: 8,
+    deadline: "2026-07-10",
+    dday: calcDday("2026-07-10"),
     status: "결과 대기",
     finalResult: null,
     linked: { schedules: 0, todos: 1 },
     starred: false,
     updatedAt: "어제",
-    registeredAt: "2026-03-28",
+    registeredAt: "2026-06-10",
     stage: "결과 대기",
   },
   {
@@ -177,16 +177,16 @@ const initialJobData: Job[] = [
     role: "데이터",
     employType: "경력",
     industry: "이커머스",
-    deadline: "2026-04-10",
-    dday: -2,
+    deadline: "2026-06-15",
+    dday: calcDday("2026-06-15"),
     status: "최종 결과",
     finalResult: "불합격",
     linked: { schedules: 0, todos: 0 },
     starred: false,
     updatedAt: "3일 전",
-    registeredAt: "2026-03-20",
+    registeredAt: "2026-05-20",
     stage: "최종 결과",
-    completedAt: "2026-04-10",
+    completedAt: "2026-06-15",
   },
   {
     id: "j6",
@@ -196,14 +196,14 @@ const initialJobData: Job[] = [
     role: "모바일",
     employType: "신입",
     industry: "IT/테크",
-    deadline: "2026-04-22",
-    dday: 10,
+    deadline: "2026-07-07",
+    dday: calcDday("2026-07-07"),
     status: "면접 전형",
     finalResult: null,
     linked: { schedules: 1, todos: 0 },
     starred: false,
     updatedAt: "5일 전",
-    registeredAt: "2026-03-25",
+    registeredAt: "2026-06-05",
     stage: "면접 전형",
   },
 ];
@@ -267,6 +267,15 @@ function lsGet<T>(k: string, fb: T): T {
   } catch {
     return fb;
   }
+}
+
+// 마감일(YYYY-MM-DD) → 오늘 기준 남은 일수 (음수면 지남)
+function calcDday(deadline: string): number {
+  if (!deadline) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dl = new Date(deadline + "T00:00:00");
+  return Math.round((dl.getTime() - today.getTime()) / 86400000);
 }
 
 // ── 칸반: 최종결과 드롭 팝업 ──────────────────────────────────────
@@ -570,7 +579,7 @@ function KanbanView({
                       {/* 하단: 고용형태 + D-day / 결과 */}
                       <div className="flex items-center justify-between mt-2.5 gap-1">
                         <span className="text-[10px] text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-sm tabular-nums shrink-0">{job.employType}</span>
-                        {col !== "최종 결과" && <DdayChip days={job.dday} size="sm" />}
+                        {col !== "최종 결과" && <DdayChip days={calcDday(job.deadline)} size="sm" />}
                         {col === "최종 결과" && job.finalResult && (
                           <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
                         )}
@@ -748,7 +757,7 @@ export function JobPostingTable() {
   const chipCount = (f: string) => {
     if (f === "전체") return searchedActive.length;
     if (f === "★") return searchedActive.filter((j) => j.starred).length;
-    if (f === "마감임박") return searchedActive.filter((j) => j.dday > 0 && j.dday <= 3).length;
+    if (f === "마감임박") return searchedActive.filter((j) => { const d = calcDday(j.deadline); return d > 0 && d <= 3; }).length;
     return searchedActive.filter((j) => j.status === f).length;
   };
 
@@ -756,7 +765,7 @@ export function JobPostingTable() {
   const filtered = useMemo(() => {
     return searchedActive.filter((j) => {
       if (activeFilter === "★") return j.starred;
-      if (activeFilter === "마감임박") return j.dday > 0 && j.dday <= 3;
+      if (activeFilter === "마감임박") { const d = calcDday(j.deadline); return d > 0 && d <= 3; }
       if (activeFilter !== "전체") return j.status === activeFilter;
       return true;
     });
@@ -780,7 +789,7 @@ export function JobPostingTable() {
   const toggleStarred = (id: string) => setJobs((p) => p.map((j) => (j.id === id ? { ...j, starred: !j.starred } : j)));
 
   const updateDeadline = (id: string, v: string) =>
-    setJobs((p) => p.map((j) => (j.id === id ? { ...j, deadline: v } : j)));
+    setJobs((p) => p.map((j) => (j.id === id ? { ...j, deadline: v, dday: calcDday(v) } : j)));
 
   // 상태 변경 (칸반 드래그 포함)
   const moveJob = (jobId: string, toStatus: StatusType, finalResult?: NonNullable<FinalResult>) => {
@@ -1192,7 +1201,7 @@ export function JobPostingTable() {
                                   className="px-3 py-2.5 text-center"
                                   style={{ minWidth: COL_MIN_WIDTHS.dday }}
                                 >
-                                  <DdayChip days={job.dday} size="sm" />
+                                  <DdayChip days={calcDday(job.deadline)} size="sm" />
                                 </td>
                               );
                             case "linked":

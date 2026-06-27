@@ -1,41 +1,40 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
-interface DdayChipProps extends React.HTMLAttributes<HTMLSpanElement> {
+interface DdayChipProps {
   days: number;
   size?: "sm" | "md";
+  className?: string;
 }
 
-export function DdayChip({ days = 0, size = "md", style, ...rest }: DdayChipProps) {
-  let label: string, bg: string, fg: string;
+export function DdayChip({ days = 0, size = "md", className }: DdayChipProps) {
+  let label: string;
+  let colorClass: string;
 
   if (days < 0) {
-    label = `D+${Math.abs(days)}`; bg = "var(--bg-muted)"; fg = "var(--text-muted-color)";
+    label = `D+${Math.abs(days)}`;
+    colorClass = "bg-gray-100 text-gray-400";
   } else if (days === 0) {
-    label = "D-DAY"; bg = "var(--red-500)"; fg = "#fff";
-  } else if (days <= 1) {
-    label = `D-${days}`; bg = "var(--danger-subtle)"; fg = "var(--red-700)";
+    label = "D-DAY";
+    colorClass = "bg-red-500 text-white font-bold animate-pulse";
   } else if (days <= 3) {
-    label = `D-${days}`; bg = "var(--warning-subtle)"; fg = "var(--amber-700)";
+    label = `D-${days}`;
+    colorClass = "bg-red-100 text-red-600";
   } else if (days <= 7) {
-    label = `D-${days}`; bg = "var(--brand-subtle)"; fg = "var(--brand-hover)";
+    label = `D-${days}`;
+    colorClass = "bg-orange-100 text-orange-600";
   } else {
-    label = `D-${days}`; bg = "var(--bg-muted)"; fg = "var(--text-body-color)";
+    label = `D-${days}`;
+    colorClass = "bg-gray-100 text-gray-500";
   }
 
-  const sm = size === "sm";
   return (
     <span
-      style={{
-        display: "inline-flex", alignItems: "center", justifyContent: "center",
-        height: sm ? 20 : 24, padding: sm ? "0 7px" : "0 9px",
-        background: bg, color: fg,
-        fontSize: sm ? "var(--text-micro)" : "var(--text-caption)",
-        fontWeight: "var(--weight-bold)" as React.CSSProperties["fontWeight"],
-        fontVariantNumeric: "tabular-nums",
-        letterSpacing: "0.01em", borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",
-        ...style,
-      }}
-      {...rest}
+      className={cn(
+        "inline-flex items-center justify-center rounded-full whitespace-nowrap tabular-nums font-bold tracking-wide",
+        size === "sm" ? "h-5 px-1.5 text-[10px]" : "h-6 px-2 text-[11px]",
+        colorClass,
+        className,
+      )}
     >
       {label}
     </span>
