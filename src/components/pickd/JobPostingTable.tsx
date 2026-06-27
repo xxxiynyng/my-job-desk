@@ -12,12 +12,9 @@ import {
   RotateCcw,
   Star,
   GripVertical,
-  ArrowUpNarrowWide,
-  ArrowDownWideNarrow,
-  ArrowDownAZ,
-  CalendarPlus,
-  CalendarMinus,
-  Clock,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   ChevronRight,
   ChevronUp,
   LayoutGrid,
@@ -246,16 +243,6 @@ const DEFAULT_WIDTHS: Record<string, number> = {
   registeredAt: 95,
 };
 
-// ── 정렬 옵션 ──────────────────────────────────────────────────────
-type SortOption = { label: string; key: keyof Job | "dday"; dir: "asc" | "desc"; icon: React.ElementType };
-const SORT_OPTIONS: SortOption[] = [
-  { label: "마감일 가까운 순", key: "dday", dir: "asc", icon: ArrowUpNarrowWide },
-  { label: "마감일 먼 순", key: "dday", dir: "desc", icon: ArrowDownWideNarrow },
-  { label: "최근 등록 순", key: "registeredAt", dir: "desc", icon: CalendarPlus },
-  { label: "오래된 등록 순", key: "registeredAt", dir: "asc", icon: CalendarMinus },
-  { label: "최근 수정 순", key: "updatedAt", dir: "desc", icon: Clock },
-  { label: "기업명 가나다 순", key: "company", dir: "asc", icon: ArrowDownAZ },
-];
 
 const FILTER_CHIPS = ["전체", "★", "마감임박", "|", "작성 중", "결과 대기", "필기 전형", "면접 전형"];
 const ROW_CAP = 7;
@@ -661,10 +648,16 @@ export function JobPostingTable() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"table" | "kanban">("table");
   const [modalJobId, setModalJobId] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>(SORT_OPTIONS[0]);
   const [tableExpanded, setTableExpanded] = useState(false);
   const [colFilters] = useState<Record<string, ColFilter>>({});
-  const [sortBy] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const toggleColSort = (key: string) => {
+    setColSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null;
+    });
+  };
 
   // 컬럼 표시
   const [visibleCols, setVisibleCols] = useState<Set<ColumnKey>>(() => {
@@ -736,14 +729,14 @@ export function JobPostingTable() {
 
   // 정렬
   const sortedActive = useMemo(() => {
+    if (!colSort) return [...activeJobs];
     return [...activeJobs].sort((a, b) => {
-      const { key, dir } = sortOption;
-      const av = a[key as keyof Job] ?? "";
-      const bv = b[key as keyof Job] ?? "";
+      const av = a[colSort.key as keyof Job] ?? "";
+      const bv = b[colSort.key as keyof Job] ?? "";
       const cmp = String(av).localeCompare(String(bv), "ko", { numeric: true });
-      return dir === "asc" ? cmp : -cmp;
+      return colSort.dir === "asc" ? cmp : -cmp;
     });
-  }, [activeJobs, sortOption]);
+  }, [activeJobs, colSort]);
 
   // 검색 (칩 필터 적용 전) — 칩별 카운트 산출용
   const searchedActive = useMemo(() => {
@@ -847,83 +840,44 @@ export function JobPostingTable() {
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           {/* Toolbar */}
           <div className="px-3 py-1.5 border-b border-border flex items-center gap-2">
-            {/* 정렬 — 칸반 보기에서는 적용되지 않으므로 표 보기에서만 노출 */}
-            {view === "table" && (
-              <DropdownMenu>
+            <div className="ml-auto flex items-center gap-2">
+              {/* 보기 전환 */}
+              <div className="inline-flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-md border border-border">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <button className="inline-flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border">
-                        <sortOption.icon className="w-3 h-3" />
-                      </button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    {sortOption.label}
-                  </TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="start" className="w-[152px]">
-                  <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
-                    정렬 기준
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {SORT_OPTIONS.map((opt) => (
-                    <DropdownMenuItem
-                      key={opt.label}
-                      className="text-xs flex items-center justify-between"
-                      onClick={() => setSortOption(opt)}
+                    <button
+                      onClick={() => setView("table")}
+                      aria-label="표 보기"
+                      className={cn(
+                        "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
+                        view === "table"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
                     >
-                      {opt.label}
-                      {sortOption.label === opt.label && <Check className="w-3.5 h-3.5 text-primary" />}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* 보기 전환 */}
-            <div className="inline-flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-md border border-border">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setView("table")}
-                    aria-label="표 보기"
-                    className={cn(
-                      "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
-                      view === "table"
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <TableIcon className="w-3 h-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">
-                  표 보기
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setView("kanban")}
-                    aria-label="칸반 보기"
-                    className={cn(
-                      "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
-                      view === "kanban"
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <Columns3 className="w-3 h-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">
-                  칸반 보기
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            <div className="ml-auto flex items-center gap-2">
+                      <TableIcon className="w-3 h-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">표 보기</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setView("kanban")}
+                      aria-label="칸반 보기"
+                      className={cn(
+                        "inline-flex items-center justify-center w-5 h-5 rounded transition-colors",
+                        view === "kanban"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <Columns3 className="w-3 h-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">칸반 보기</TooltipContent>
+                </Tooltip>
+              </div>
               {/* 검색 */}
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -948,9 +902,7 @@ export function JobPostingTable() {
                         </button>
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      표시할 컬럼
-                    </TooltipContent>
+                    <TooltipContent side="bottom" className="text-xs">표시할 컬럼</TooltipContent>
                   </Tooltip>
                   <DropdownMenuContent align="end" className="min-w-[160px]">
                     <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
@@ -1056,17 +1008,37 @@ export function JobPostingTable() {
                     <th className="w-9 px-2 py-1.5 text-center">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold"
+                      className="relative text-left px-3 py-1.5 font-semibold group"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
-                      기업명 <ResizeHandle onMouseDown={onMouseDown("company")} />
+                      <span className="inline-flex items-center gap-1">
+                        기업명
+                        <button
+                          onClick={() => toggleColSort("company")}
+                          aria-label="정렬"
+                          className={cn("shrink-0 transition-opacity", colSort?.key === "company" ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
+                        >
+                          {colSort?.key === "company" && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === "company" && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
+                        </button>
+                      </span>
+                      <ResizeHandle onMouseDown={onMouseDown("company")} />
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold"
+                      className="relative text-left px-3 py-1.5 font-semibold group"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
-                      공고명 <ResizeHandle onMouseDown={onMouseDown("title")} />
+                      <span className="inline-flex items-center gap-1">
+                        공고명
+                        <button
+                          onClick={() => toggleColSort("title")}
+                          aria-label="정렬"
+                          className={cn("shrink-0 transition-opacity", colSort?.key === "title" ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
+                        >
+                          {colSort?.key === "title" && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === "title" && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
+                        </button>
+                      </span>
+                      <ResizeHandle onMouseDown={onMouseDown("title")} />
                     </th>
                     {/* 드래그 가능 컬럼 */}
                     {orderedCols
@@ -1087,7 +1059,7 @@ export function JobPostingTable() {
                             }}
                             style={{ width: w, minWidth: COL_MIN_WIDTHS[col.key] ?? 60 }}
                             className={cn(
-                              "relative text-left px-3 py-1.5 font-semibold cursor-grab",
+                              "relative text-left px-3 py-1.5 font-semibold cursor-grab group",
                               isOver && "bg-primary/10",
                               ["dday", "linked"].includes(col.key) && "text-center",
                             )}
@@ -1095,6 +1067,13 @@ export function JobPostingTable() {
                             <span className="inline-flex items-center gap-1">
                               <GripVertical className="w-2.5 h-2.5 opacity-25 shrink-0" />
                               {col.label}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }}
+                                aria-label="정렬"
+                                className={cn("shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
+                              >
+                                {colSort?.key === col.key && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === col.key && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
+                              </button>
                             </span>
                             <ResizeHandle onMouseDown={onMouseDown(col.key)} />
                           </th>
@@ -1107,7 +1086,7 @@ export function JobPostingTable() {
                     <tr
                       key={job.id}
                       className={cn(
-                        "border-b border-border/50 hover:bg-accent/40 transition-colors",
+                        "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors",
                         selected.has(job.id) && "bg-accent/20",
                       )}
                     >
