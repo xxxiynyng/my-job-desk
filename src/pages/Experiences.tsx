@@ -831,7 +831,7 @@ export default function Experiences() {
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
                                       key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground/70 shrink-0"
+                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/70 shrink-0"
                                     >
                                       {k}
                                     </span>
@@ -925,7 +925,7 @@ export default function Experiences() {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground/70">
+                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/70">
                               {k}
                             </span>
                           ))}

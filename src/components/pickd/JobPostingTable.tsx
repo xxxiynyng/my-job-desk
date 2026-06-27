@@ -1142,7 +1142,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="role"
-                                  className="px-3 py-2.5 text-muted-foreground text-xs"
+                                  className="px-3 py-2.5 text-gray-700 text-xs"
                                   style={{ minWidth: COL_MIN_WIDTHS.role }}
                                 >
                                   <span className="block truncate">{job.role}</span>
