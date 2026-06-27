@@ -638,6 +638,33 @@ export default function Experiences() {
                 ))}
               </div>
 
+              {/* 배치 액션 바 */}
+              {selected.size > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-1.5 mb-3">
+                  <span className="text-[12px] font-medium text-blue-700 shrink-0">{selected.size}개 선택됨</span>
+                  <span className="w-px h-3.5 bg-blue-200 mx-1 shrink-0" />
+                  <button
+                    onClick={() => confirmDelete([...selected])}
+                    className="text-[12px] text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-md transition-colors font-medium"
+                  >
+                    삭제
+                  </button>
+                  <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
+                    유형 변경
+                  </button>
+                  <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
+                    내보내기
+                  </button>
+                  <button
+                    onClick={() => setSelected(new Set())}
+                    className="ml-auto text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 transition-colors"
+                    aria-label="선택 해제"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               {/* 복붙 / List / Card view */}
               {view === "paste" ? (
                 <RepExperienceGrid
@@ -949,23 +976,6 @@ export default function Experiences() {
           </div>
         </main>
 
-        {/* 선택 플로팅 바 */}
-        {selected.size > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-foreground text-background rounded-lg px-3 py-2.5 flex items-center gap-3 shadow-lg">
-            <span className="text-[12px]">{selected.size}개 선택됨</span>
-            <span className="w-px h-4 bg-background/20" />
-            <button onClick={() => setMergeOpen(true)} className="text-[11px] hover:text-background/80">
-              병합하기
-            </button>
-            <button className="text-[11px] hover:text-background/80">키워드 추가</button>
-            <button onClick={() => confirmDelete([...selected])} className="text-[11px] text-red-400 hover:text-red-300">
-              삭제
-            </button>
-            <button onClick={() => setSelected(new Set())} className="ml-1 text-background/60 hover:text-background">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
 
         {/* ── Dialogs ─────────────────────────────────────────── */}
         <Dialog open={entryOpen} onOpenChange={setEntryOpen}>
