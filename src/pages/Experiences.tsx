@@ -136,8 +136,8 @@ const MIN_EXP_WIDTHS: Record<string, number> = {
   manage: 60,
 };
 
-// "전체"와 복붙 아이콘은 렌더에서 별도 처리
-const FILTER_CHIPS: ItemType[] = [...NARRATIVE_TYPES, ...SPEC_TYPES];
+const PINNED_FILTER_CHIPS = ["전체", "프로젝트", "대외활동", "인턴", "공모전", "자격증"];
+const MORE_FILTER_CHIPS = ["봉사활동", "교환학생", "알바", "학부연구생", "어학", "수상", "수강과목", "교육 이수"];
 
 // ────────────────────────────────────────────────────────────────
 // Main Page
@@ -356,6 +356,32 @@ export default function Experiences() {
     navigator.clipboard.writeText(text);
     toast("복사했어요", { duration: 1200 });
   };
+
+  const expChipCount = (f: string) => {
+    if (f === "전체") return items.length;
+    return items.filter((i) => i.type === f).length;
+  };
+
+  const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const toggleColSort = (key: string) => {
+    setColSort((prev) => {
+      if (!prev || prev.key !== key) return { key, dir: "asc" };
+      if (prev.dir === "asc") return { key, dir: "desc" };
+      return null;
+    });
+  };
+
+  const sortedFiltered = useMemo(() => {
+    if (!colSort) return filtered;
+    return [...filtered].sort((a, b) => {
+      const av = getColValue(a, colSort.key);
+      const bv = getColValue(b, colSort.key);
+      const astr = Array.isArray(av) ? av.join(",") : String(av);
+      const bstr = Array.isArray(bv) ? bv.join(",") : String(bv);
+      const cmp = astr.localeCompare(bstr, "ko", { numeric: true });
+      return colSort.dir === "asc" ? cmp : -cmp;
+    });
+  }, [filtered, colSort]);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -584,58 +610,72 @@ export default function Experiences() {
                 </div>
               </div>
 
-              {/* Filter chips */}
-              <div className="flex items-center gap-1 flex-wrap mb-3">
-                {/* 전체 */}
-                <button
-                  onClick={() => setActiveFilter("전체")}
-                  className={cn(
-                    "h-6 px-2 inline-flex items-center rounded-full text-[11px] border transition-colors",
-                    activeFilter === "전체" && view !== "paste"
-                      ? "bg-accent text-accent-foreground border-accent"
-                      : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  전체
-                </button>
-
-                {/* 복붙 뷰 버튼 */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
+              {/* Filter tab-bar */}
+              <div className="flex items-center border-b border-border mb-3">
+                <div className="flex items-end -mb-px overflow-x-auto">
+                  {PINNED_FILTER_CHIPS.map((f) => (
                     <button
-                      onClick={() => setView((v) => v === "paste" ? "list" : "paste")}
+                      key={f}
+                      onClick={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
                       className={cn(
-                        "inline-flex items-center justify-center w-6 h-6 rounded border transition-colors",
-                        view === "paste"
-                          ? "bg-accent text-accent-foreground border-accent"
-                          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+                        "px-3 py-2 text-[12px] flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
+                        activeFilter === f && view !== "paste"
+                          ? "text-blue-600 font-semibold border-blue-500"
+                          : "border-transparent text-muted-foreground hover:text-foreground",
                       )}
-                      aria-label="복붙 보기"
                     >
-                      <Clipboard className="w-3 h-3" />
+                      {f}
+                      <span className={cn("tabular-nums text-[10px]", activeFilter === f && view !== "paste" ? "text-blue-400" : "text-muted-foreground/40")}>
+                        {expChipCount(f)}
+                      </span>
                     </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">복붙 보기 (핀 고정 항목)</TooltipContent>
-                </Tooltip>
-
-                {/* 구분선 */}
-                <span className="w-px h-3.5 bg-border/60 mx-0.5" />
-
-                {/* 유형 필터 */}
-                {FILTER_CHIPS.map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => setActiveFilter(f)}
-                    className={cn(
-                      "h-6 px-2 inline-flex items-center rounded-full text-[11px] border transition-colors",
-                      activeFilter === f
-                        ? "bg-accent text-accent-foreground border-accent"
-                        : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {f}
-                  </button>
-                ))}
+                  ))}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className={cn(
+                          "px-3 py-2 text-[12px] flex items-center gap-0.5 border-b-2 whitespace-nowrap transition-colors shrink-0",
+                          MORE_FILTER_CHIPS.includes(activeFilter) && view !== "paste"
+                            ? "text-blue-600 font-semibold border-blue-500"
+                            : "border-transparent text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        더보기 <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="min-w-[160px]">
+                      {MORE_FILTER_CHIPS.map((f) => (
+                        <DropdownMenuItem
+                          key={f}
+                          onSelect={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
+                          className="flex items-center justify-between text-xs"
+                        >
+                          <span>{f}</span>
+                          <span className="text-muted-foreground text-[10px] ml-2 tabular-nums">{expChipCount(f)}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="ml-auto pl-3 pb-1 shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setView((v) => v === "paste" ? "list" : "paste")}
+                        className={cn(
+                          "inline-flex items-center justify-center w-6 h-6 rounded border transition-colors",
+                          view === "paste"
+                            ? "bg-accent text-accent-foreground border-accent"
+                            : "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
+                        )}
+                        aria-label="복붙 보기"
+                      >
+                        <Clipboard className="w-3 h-3" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">복붙 보기 (핀 고정 항목)</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
 
               {/* 배치 액션 바 */}
@@ -691,6 +731,8 @@ export default function Experiences() {
                             label="유형"
                             width={colW.type}
                             onResize={onResize("type")}
+                            sortDir={colSort?.key === "type" ? colSort.dir : null}
+                            onSort={() => toggleColSort("type")}
                             filter={
                               <HeaderFilter
                                 colKey="type"
@@ -708,6 +750,8 @@ export default function Experiences() {
                             label="항목명"
                             width={colW.name}
                             onResize={onResize("name")}
+                            sortDir={colSort?.key === "name" ? colSort.dir : null}
+                            onSort={() => toggleColSort("name")}
                             filter={
                               <HeaderFilter
                                 colKey="name"
@@ -725,6 +769,8 @@ export default function Experiences() {
                             label="기관/소속"
                             width={colW.org}
                             onResize={onResize("org")}
+                            sortDir={colSort?.key === "org" ? colSort.dir : null}
+                            onSort={() => toggleColSort("org")}
                             filter={
                               <HeaderFilter
                                 colKey="org"
@@ -742,6 +788,8 @@ export default function Experiences() {
                             label="기간"
                             width={colW.period}
                             onResize={onResize("period")}
+                            sortDir={colSort?.key === "period" ? colSort.dir : null}
+                            onSort={() => toggleColSort("period")}
                             filter={
                               <HeaderFilter
                                 colKey="period"
@@ -759,6 +807,8 @@ export default function Experiences() {
                             label="주요 키워드"
                             width={colW.keywords}
                             onResize={onResize("keywords")}
+                            sortDir={colSort?.key === "keywords" ? colSort.dir : null}
+                            onSort={() => toggleColSort("keywords")}
                             filter={
                               <HeaderFilter
                                 colKey="keywords"
@@ -772,13 +822,21 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("importance") && (
-                          <ResizableHead label="중요도" width={colW.importance} onResize={onResize("importance")} />
+                          <ResizableHead
+                            label="중요도"
+                            width={colW.importance}
+                            onResize={onResize("importance")}
+                            sortDir={colSort?.key === "importance" ? colSort.dir : null}
+                            onSort={() => toggleColSort("importance")}
+                          />
                         )}
                         {isVisible("updated") && (
                           <ResizableHead
                             label="최근 수정"
                             width={colW.updated}
                             onResize={onResize("updated")}
+                            sortDir={colSort?.key === "updated" ? colSort.dir : null}
+                            onSort={() => toggleColSort("updated")}
                             filter={
                               <HeaderFilter
                                 colKey="updated"
@@ -796,6 +854,8 @@ export default function Experiences() {
                             label="관리 상태"
                             width={colW.manage}
                             onResize={onResize("manage")}
+                            sortDir={colSort?.key === "manage" ? colSort.dir : null}
+                            onSort={() => toggleColSort("manage")}
                             filter={
                               <HeaderFilter
                                 colKey="manage"
@@ -812,13 +872,13 @@ export default function Experiences() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((i) => {
+                      {sortedFiltered.map((i) => {
                         const { org, period } = readMeta(i);
                         return (
                           <tr
                             key={i.id}
                             className={cn(
-                              "border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer",
+                              "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer",
                               selected.has(i.id) && "bg-accent/30",
                             )}
                             onClick={() => setDetailId(i.id)}
@@ -911,7 +971,7 @@ export default function Experiences() {
                           </tr>
                         );
                       })}
-                      {filtered.length === 0 && (
+                      {sortedFiltered.length === 0 && (
                         <tr>
                           <td colSpan={20} className="px-4 py-10 text-center text-xs text-muted-foreground">
                             해당하는 항목이 없습니다.

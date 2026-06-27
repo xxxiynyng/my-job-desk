@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
+import { ChevronDown, Layers, Pencil, Sparkles, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,17 +22,35 @@ export function ResizableHead({
   width,
   onResize,
   filter,
+  sortDir,
+  onSort,
 }: {
   label: string;
   width?: number;
   onResize?: (e: React.MouseEvent) => void;
   filter?: React.ReactNode;
+  sortDir?: "asc" | "desc" | null;
+  onSort?: () => void;
 }) {
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 font-medium overflow-hidden whitespace-nowrap">
+    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 font-medium overflow-hidden whitespace-nowrap group">
       <span className="inline-flex items-center gap-1 overflow-hidden">
         <span className="truncate">{label}</span>
         {filter}
+        {onSort && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSort(); }}
+            aria-label="정렬"
+            className={cn(
+              "shrink-0 transition-opacity",
+              sortDir != null ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50",
+            )}
+          >
+            {sortDir === "asc" ? <ArrowUp className="w-3 h-3" /> :
+             sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> :
+             <ArrowUpDown className="w-3 h-3" />}
+          </button>
+        )}
       </span>
       {onResize && <ResizeHandle onMouseDown={onResize} />}
     </th>
