@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import type React from "react";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import {
   ChevronDown,
@@ -38,6 +39,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
+import { JobRowContextMenu, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
@@ -91,6 +93,7 @@ type Job = {
   registeredAt: string;
   stage: AppStage;
   completedAt?: string;
+  url?: string;
 };
 
 const initialJobData: Job[] = [
@@ -789,6 +792,19 @@ export function JobPostingTable() {
     setSelected(new Set());
   };
 
+  const duplicateJob = (id: string) => {
+    const src = jobs.find((j) => j.id === id);
+    if (!src) return;
+    const newJob: Job = { ...src, id: `${id}-${Date.now()}`, slug: `${src.slug}-copy` };
+    setJobs((p) => [...p, newJob]);
+    toast("공고를 복제했어요", { duration: 1500 });
+  };
+
+  const deleteJob = (id: string) => {
+    setJobs((p) => p.filter((j) => j.id !== id));
+    toast("공고를 삭제했어요", { duration: 1500 });
+  };
+
   // 상태 변경 (칸반 드래그 포함)
   const moveJob = (jobId: string, toStatus: StatusType, finalResult?: NonNullable<FinalResult>) => {
     setJobs((p) =>
@@ -1002,8 +1018,10 @@ export function JobPostingTable() {
               <table className="w-full text-sm table-fixed">
                 <thead>
                   <tr className="border-b border-border bg-[#F8FAFC] text-[10px] text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
-                    <th className="w-9 px-3 py-1.5">
-                      <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
+                    <th className="w-12 pl-1 pr-3 py-1.5">
+                      <div className="ml-5">
+                        <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
+                      </div>
                     </th>
                     <th className="w-9 px-2 py-1.5 text-center">★</th>
                     {/* 기업명 — 고정 */}
@@ -1086,23 +1104,38 @@ export function JobPostingTable() {
                     <tr
                       key={job.id}
                       className={cn(
-                        "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors",
+                        "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group relative",
                         selected.has(job.id) && "bg-accent/20",
                       )}
                     >
-                      {/* 체크박스 */}
-                      <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selected.has(job.id)}
-                          onCheckedChange={() => {
-                            setSelected((p) => {
-                              const n = new Set(p);
-                              n.has(job.id) ? n.delete(job.id) : n.add(job.id);
-                              return n;
-                            });
+                      {/* 그립 버튼 + 체크박스 */}
+                      <td className="relative w-12 pl-1 pr-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                        <JobRowContextMenu
+                          job={{
+                            starred: job.starred,
+                            updatedAt: job.updatedAt,
+                            url: job.url,
+                            status: job.status as JobMenuStatus,
                           }}
-                          className="h-3.5 w-3.5"
+                          onStar={() => toggleStarred(job.id)}
+                          onEdit={() => setModalJobId(job.id)}
+                          onDuplicate={() => duplicateJob(job.id)}
+                          onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
+                          onDelete={() => deleteJob(job.id)}
                         />
+                        <div className="ml-5">
+                          <Checkbox
+                            checked={selected.has(job.id)}
+                            onCheckedChange={() => {
+                              setSelected((p) => {
+                                const n = new Set(p);
+                                n.has(job.id) ? n.delete(job.id) : n.add(job.id);
+                                return n;
+                              });
+                            }}
+                            className="h-3.5 w-3.5"
+                          />
+                        </div>
                       </td>
                       {/* 별표 */}
                       <td className="px-2 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>

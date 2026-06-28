@@ -351,6 +351,13 @@ export default function Experiences() {
     setDeleteConfirmOpen(true);
   };
 
+  const duplicateItem = (id: string) => {
+    const src = items.find((i) => i.id === id);
+    if (!src) return;
+    setItems((p) => [...p, { ...src, id: `${id}-${Date.now()}` }]);
+    toast("경험을 복제했어요", { duration: 1500 });
+  };
+
   const copy = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
@@ -719,12 +726,14 @@ export default function Experiences() {
                   <table className="w-full text-sm table-fixed">
                     <thead>
                       <tr className="border-b border-border bg-[#F8FAFC] text-[10px] text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
-                        <th className="w-9 px-3 py-2.5">
-                          <Checkbox
-                            checked={allFilteredSelected}
-                            onCheckedChange={toggleSelectAll}
-                            className="h-3.5 w-3.5"
-                          />
+                        <th className="w-12 pl-1 pr-3 py-2.5">
+                          <div className="ml-5">
+                            <Checkbox
+                              checked={allFilteredSelected}
+                              onCheckedChange={toggleSelectAll}
+                              className="h-3.5 w-3.5"
+                            />
+                          </div>
                         </th>
                         {isVisible("type") && (
                           <ResizableHead
@@ -878,17 +887,28 @@ export default function Experiences() {
                           <tr
                             key={i.id}
                             className={cn(
-                              "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer",
+                              "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
                               selected.has(i.id) && "bg-accent/30",
                             )}
                             onClick={() => setDetailId(i.id)}
                           >
-                            <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={selected.has(i.id)}
-                                onCheckedChange={() => toggleSelect(i.id)}
-                                className="h-3.5 w-3.5"
+                            {/* 그립 버튼 + 체크박스 */}
+                            <td className="relative w-12 pl-1 pr-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                              <ExpRowContextMenu
+                                item={{ updatedAt: i.updatedAt }}
+                                jobs={[]}
+                                onEdit={() => setDetailId(i.id)}
+                                onDuplicate={() => duplicateItem(i.id)}
+                                onLinkJob={() => {}}
+                                onDelete={() => confirmDelete([i.id])}
                               />
+                              <div className="ml-5">
+                                <Checkbox
+                                  checked={selected.has(i.id)}
+                                  onCheckedChange={() => toggleSelect(i.id)}
+                                  className="h-3.5 w-3.5"
+                                />
+                              </div>
                             </td>
                             {isVisible("type") && (
                               <td className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
@@ -1301,3 +1321,4 @@ import { RepExperienceGrid, InfoRow } from './experiences/RepExperienceViews';
 import { DetailEditor } from './experiences/DetailEditor';
 
 import { ResizableHead, HeaderFilter, ManageIndicator, type ColFilterShape } from './experiences/tableWidgets';
+import { ExpRowContextMenu } from "@/components/pickd/RowContextMenu";
