@@ -1019,7 +1019,7 @@ export function JobPostingTable() {
             <div className="overflow-x-auto">
               <table className="w-full text-[13px] table-fixed">
                 <thead>
-                  <tr className="border-b border-border bg-[#F8FAFC] text-[12px] text-muted-foreground font-normal select-none">
+                  <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
                     <th className="w-12 pl-1 pr-3 py-1.5">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
@@ -1085,7 +1085,7 @@ export function JobPostingTable() {
                             )}
                           >
                             <span className="inline-flex items-center gap-1">
-                              <GripVertical className="w-2.5 h-2.5 opacity-25 shrink-0" />
+                              <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                               {col.label}
                               <button
                                 onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }}

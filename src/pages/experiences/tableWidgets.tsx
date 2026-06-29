@@ -45,7 +45,7 @@ export function ResizableHead({
   }, [open]);
 
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 text-[12px] font-normal text-gray-500 overflow-hidden whitespace-nowrap group">
+    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 text-[13px] font-normal text-gray-500 overflow-hidden whitespace-nowrap group">
       {onSort && (
         <div ref={menuRef} className="absolute left-1 top-1/2 -translate-y-1/2">
           <button
@@ -132,7 +132,7 @@ export function HeaderFilter({
             "inline-flex items-center justify-center w-4 h-4 rounded transition-colors",
             active
               ? "text-foreground bg-accent"
-              : "text-muted-foreground/50 hover:text-foreground opacity-60 hover:opacity-100",
+              : "text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100",
           )}
         >
           <ChevronDown className="w-3 h-3" />
