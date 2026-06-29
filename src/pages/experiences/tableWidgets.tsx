@@ -45,7 +45,7 @@ export function ResizableHead({
   }, [open]);
 
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 text-sm font-normal text-gray-500 overflow-hidden whitespace-nowrap group">
+    <th style={width ? { width } : undefined} className="relative text-left px-3 py-1.5 text-[12px] font-normal text-gray-500 overflow-hidden whitespace-nowrap group">
       {onSort && (
         <div ref={menuRef} className="absolute left-1 top-1/2 -translate-y-1/2">
           <button

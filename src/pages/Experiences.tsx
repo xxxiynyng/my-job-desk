@@ -697,9 +697,9 @@ export default function Experiences() {
                 />
               ) : view === "list" ? (
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
-                  <table className="w-full text-sm table-fixed">
+                  <table className="w-full text-[13px] table-fixed">
                     <thead>
-                      <tr className="border-b border-border bg-[#F8FAFC] text-xs text-muted-foreground font-medium select-none">
+                      <tr className="border-b border-border bg-[#F8FAFC] text-[12px] text-muted-foreground font-normal select-none">
                         <th className="w-12 pl-1 pr-3 py-2.5">
                           <div className="ml-5">
                             <Checkbox
@@ -885,7 +885,7 @@ export default function Experiences() {
                               </div>
                             </td>
                             {isVisible("type") && (
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
+                              <td className="px-3 py-2.5 text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.type}</span>
                               </td>
                             )}
@@ -897,12 +897,12 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("org") && (
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
+                              <td className="px-3 py-2.5 text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{org || "—"}</span>
                               </td>
                             )}
                             {isVisible("period") && (
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground tabular-nums overflow-hidden">
+                              <td className="px-3 py-2.5 text-muted-foreground tabular-nums overflow-hidden">
                                 <span className="block truncate">{period || "—"}</span>
                               </td>
                             )}
@@ -924,12 +924,12 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("importance") && (
-                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground overflow-hidden">
+                              <td className="px-3 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.importance ?? "—"}</span>
                               </td>
                             )}
                             {isVisible("updated") && (
-                              <td className="px-3 py-2.5 text-[11px] text-muted-foreground overflow-hidden">
+                              <td className="px-3 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.updatedAt ?? "—"}</span>
                               </td>
                             )}

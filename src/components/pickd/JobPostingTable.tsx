@@ -1017,9 +1017,9 @@ export function JobPostingTable() {
           ) : (
             <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm table-fixed">
+              <table className="w-full text-[13px] table-fixed">
                 <thead>
-                  <tr className="border-b border-border bg-[#F8FAFC] text-xs text-muted-foreground font-medium select-none">
+                  <tr className="border-b border-border bg-[#F8FAFC] text-[12px] text-muted-foreground font-normal select-none">
                     <th className="w-12 pl-1 pr-3 py-1.5">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
@@ -1188,7 +1188,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="role"
-                                  className="px-3 py-2.5 text-gray-700 text-xs whitespace-nowrap"
+                                  className="px-3 py-2.5 text-gray-700 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.role }}
                                 >
                                   <span className="block truncate">{job.role}</span>
@@ -1198,7 +1198,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="employType"
-                                  className="px-3 py-2.5 text-muted-foreground text-xs whitespace-nowrap"
+                                  className="px-3 py-2.5 text-muted-foreground whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.employType }}
                                 >
                                   {job.employType}
@@ -1208,7 +1208,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="industry"
-                                  className="px-3 py-2.5 text-muted-foreground text-xs whitespace-nowrap overflow-hidden text-ellipsis"
+                                  className="px-3 py-2.5 text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis"
                                   style={{ minWidth: COL_MIN_WIDTHS.industry }}
                                 >
                                   {job.industry}
@@ -1254,7 +1254,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="linked"
-                                  className="px-3 py-2.5 text-center text-[11px] text-muted-foreground tabular-nums cursor-pointer hover:text-foreground transition-colors whitespace-nowrap"
+                                  className="px-3 py-2.5 text-center text-[13px] text-muted-foreground tabular-nums cursor-pointer hover:text-foreground transition-colors whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.linked }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1269,7 +1269,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="updated"
-                                  className="px-3 py-2.5 text-[11px] text-muted-foreground whitespace-nowrap"
+                                  className="px-3 py-2.5 text-[13px] text-muted-foreground whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.updated }}
                                 >
                                   {job.updatedAt}
@@ -1279,7 +1279,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="registeredAt"
-                                  className="px-3 py-2.5 text-[11px] text-muted-foreground tabular-nums whitespace-nowrap"
+                                  className="px-3 py-2.5 text-[13px] text-muted-foreground tabular-nums whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.registeredAt }}
                                 >
                                   {job.registeredAt}
