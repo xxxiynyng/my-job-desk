@@ -44,16 +44,16 @@ import { JobRowContextMenu, type JobMenuStatus } from "@/components/pickd/RowCon
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
   company: 80,
-  title: 120,
-  role: 80,
-  employType: 80,
+  title: 130,
+  role: 70,
+  employType: 70,
+  dday: 60,
+  deadline: 90,
+  status: 90,
+  linked: 85,
   industry: 80,
-  status: 100,
-  deadline: 100,
-  dday: 70,
-  linked: 90,
-  updated: 90,
-  registeredAt: 90,
+  registeredAt: 95,   // 등록일 — "2026-06-15" 한 줄 보장
+  updated: 95,        // 최근 수정일
 };
 
 // ── 타입 ──────────────────────────────────────────────────────────
@@ -234,16 +234,16 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
 
 const DEFAULT_WIDTHS: Record<string, number> = {
   company: 90,
-  title: 155,
+  title: 160,
   role: 80,
-  employType: 80,
-  industry: 80,
-  status: 100,
+  employType: 75,
+  dday: 65,
   deadline: 100,
-  dday: 70,
+  status: 100,
   linked: 90,
-  updated: 100,
+  industry: 90,
   registeredAt: 95,
+  updated: 100,
 };
 
 
@@ -1109,7 +1109,7 @@ export function JobPostingTable() {
                       )}
                     >
                       {/* 그립 버튼 + 체크박스 */}
-                      <td className="relative w-12 pl-1 pr-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                      <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <JobRowContextMenu
                           job={{
                             starred: job.starred,
@@ -1138,7 +1138,7 @@ export function JobPostingTable() {
                         </div>
                       </td>
                       {/* 별표 */}
-                      <td className="px-2 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-2 py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => toggleStarred(job.id)} aria-label="관심 공고">
                           <Star
                             className={cn(
@@ -1152,7 +1152,7 @@ export function JobPostingTable() {
                       </td>
                       {/* 기업명 — 반응 없음, tooltip */}
                       <td
-                        className="px-3 py-2.5 font-medium text-foreground"
+                        className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap"
                         style={{ minWidth: COL_MIN_WIDTHS.company }}
                       >
                         <Tooltip>
@@ -1163,7 +1163,7 @@ export function JobPostingTable() {
                         </Tooltip>
                       </td>
                       {/* 공고명 — 클릭 시 공고 상세 페이지로 이동 */}
-                      <td className="px-3 py-2.5 text-foreground" style={{ minWidth: COL_MIN_WIDTHS.title }}>
+                      <td className="px-3 py-2.5 text-foreground whitespace-nowrap overflow-hidden text-ellipsis" style={{ minWidth: COL_MIN_WIDTHS.title }}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -1186,7 +1186,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="role"
-                                  className="px-3 py-2.5 text-gray-700 text-xs"
+                                  className="px-3 py-2.5 text-gray-700 text-xs whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.role }}
                                 >
                                   <span className="block truncate">{job.role}</span>
@@ -1196,7 +1196,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="employType"
-                                  className="px-3 py-2.5 text-muted-foreground text-xs"
+                                  className="px-3 py-2.5 text-muted-foreground text-xs whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.employType }}
                                 >
                                   {job.employType}
@@ -1206,7 +1206,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="industry"
-                                  className="px-3 py-2.5 text-muted-foreground text-xs"
+                                  className="px-3 py-2.5 text-muted-foreground text-xs whitespace-nowrap overflow-hidden text-ellipsis"
                                   style={{ minWidth: COL_MIN_WIDTHS.industry }}
                                 >
                                   {job.industry}
@@ -1214,7 +1214,7 @@ export function JobPostingTable() {
                               );
                             case "status":
                               return (
-                                <td key="status" className="px-3 py-2.5" style={{ minWidth: COL_MIN_WIDTHS.status }}>
+                                <td key="status" className="px-3 py-2.5 whitespace-nowrap" style={{ minWidth: COL_MIN_WIDTHS.status }}>
                                   {/* 배지 클릭 → 모달 */}
                                   <button
                                     onClick={() => setModalJobId(job.id)}
@@ -1228,7 +1228,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="deadline"
-                                  className="px-3 py-2.5"
+                                  className="px-3 py-2.5 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.deadline }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
@@ -1242,7 +1242,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="dday"
-                                  className="px-3 py-2.5 text-center"
+                                  className="px-3 py-2.5 text-center whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.dday }}
                                 >
                                   <DdayChip days={calcDday(job.deadline)} size="sm" />
@@ -1252,7 +1252,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="linked"
-                                  className="px-3 py-2.5 text-center text-[11px] text-muted-foreground tabular-nums cursor-pointer hover:text-foreground transition-colors"
+                                  className="px-3 py-2.5 text-center text-[11px] text-muted-foreground tabular-nums cursor-pointer hover:text-foreground transition-colors whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.linked }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1267,7 +1267,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="updated"
-                                  className="px-3 py-2.5 text-[11px] text-muted-foreground"
+                                  className="px-3 py-2.5 text-[11px] text-muted-foreground whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.updated }}
                                 >
                                   {job.updatedAt}
@@ -1277,7 +1277,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="registeredAt"
-                                  className="px-3 py-2.5 text-[11px] text-muted-foreground tabular-nums"
+                                  className="px-3 py-2.5 text-[11px] text-muted-foreground tabular-nums whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.registeredAt }}
                                 >
                                   {job.registeredAt}
