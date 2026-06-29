@@ -32,7 +32,7 @@ const jobDetails: Record<string, any> = {
     period: "2026-04-01 ~ 2026-04-20",
     deadline: "2026-04-20 23:59",
     deadlineDate: new Date("2026-04-20T23:59:00"),
-    dday: 8,
+    dday: 8, // TODO: MOCK_DATA - 실제 API 연결 시 getDday(job.deadline) 로 교체
     expired: false,
     status: "서류 작성중",
     docsInProgress: [
