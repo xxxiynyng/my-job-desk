@@ -1019,7 +1019,7 @@ export function JobPostingTable() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm table-fixed">
                 <thead>
-                  <tr className="border-b border-border bg-[#F8FAFC] text-sm text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
+                  <tr className="border-b border-border bg-[#F8FAFC] text-sm text-muted-foreground font-normal tracking-[0.5px] uppercase select-none">
                     <th className="w-12 pl-1 pr-3 py-1.5">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
@@ -1028,7 +1028,7 @@ export function JobPostingTable() {
                     <th className="w-9 px-2 py-1.5 text-center">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold group whitespace-nowrap"
+                      className="relative text-left px-3 py-1.5 font-normal group whitespace-nowrap"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1045,7 +1045,7 @@ export function JobPostingTable() {
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold group whitespace-nowrap"
+                      className="relative text-left px-3 py-1.5 font-normal group whitespace-nowrap"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1079,7 +1079,7 @@ export function JobPostingTable() {
                             }}
                             style={{ width: w, minWidth: COL_MIN_WIDTHS[col.key] ?? 60 }}
                             className={cn(
-                              "relative text-left px-3 py-1.5 font-semibold cursor-grab group whitespace-nowrap",
+                              "relative text-left px-3 py-1.5 font-normal cursor-grab group whitespace-nowrap",
                               isOver && "bg-primary/10",
                               ["dday", "linked"].includes(col.key) && "text-center",
                             )}
