@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// ---------- Mock data registry (keyed by company slug) ----------
+// TODO: MOCK_DATA - 실제 API 연결 시 제거. API: GET /job-postings/:id
 const jobDetails: Record<string, any> = {
   samsung: {
     company: "삼성전자",
