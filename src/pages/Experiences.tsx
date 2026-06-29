@@ -699,7 +699,7 @@ export default function Experiences() {
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
                   <table className="w-full text-sm table-fixed">
                     <thead>
-                      <tr className="border-b border-border bg-[#F8FAFC] text-[10px] text-muted-foreground font-bold tracking-[0.5px] uppercase select-none">
+                      <tr className="border-b border-border bg-[#F8FAFC] text-xs text-muted-foreground font-medium select-none">
                         <th className="w-12 pl-1 pr-3 py-2.5">
                           <div className="ml-5">
                             <Checkbox
