@@ -475,7 +475,7 @@ export default function JobDetail() {
 
             {/* Section 1. 기본 정보 */}
             <section>
-              <SectionHeader icon={Info} title="1. 기본 정보" subtitle="Properties" />
+              <SectionHeader icon={Info} title="1. 기본 정보" subtitle="기본 정보" />
               <div className="border border-border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <tbody>
@@ -515,7 +515,7 @@ export default function JobDetail() {
               <SectionHeader
                 icon={ClipboardList}
                 title="2. 지원 핵심 정보"
-                subtitle="Eligibility & Requirements"
+                subtitle="지원 요건"
                 rightSlot={
                   highlights.size > 0 && (
                     <button
@@ -572,7 +572,7 @@ export default function JobDetail() {
 
             {/* Section 3. 전형 정보 */}
             <section>
-              <SectionHeader icon={ListChecks} title="3. 전형 정보" subtitle="Hiring Process" />
+              <SectionHeader icon={ListChecks} title="3. 전형 정보" subtitle="전형 절차" />
               <div className="relative pl-6">
                 {/* 수직 타임라인 선 */}
                 <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border" />
@@ -603,7 +603,7 @@ export default function JobDetail() {
 
             {/* Section 4. 직무 설명 · 요구 역량 — 중요 표시 포함 */}
             <section>
-              <SectionHeader icon={BookOpen} title="4. 직무 설명 · 요구 역량" subtitle="Job Description" />
+              <SectionHeader icon={BookOpen} title="4. 직무 설명 · 요구 역량" subtitle="직무 설명" />
               <div className="grid grid-cols-2 gap-3">
                 {/* 직무 설명 */}
                 <div className="border border-border rounded-lg p-4">
