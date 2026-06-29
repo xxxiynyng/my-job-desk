@@ -48,7 +48,16 @@
       "Bash(curl *)",
       "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --screenshot=/tmp/experiences-page.png --window-size=1440,900 --virtual-time-budget=3000 http://localhost:8080/experiences)",
       "Bash(echo \"exit: $?\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(vercel --prod)",
+      "Bash(npm i *)",
+      "Bash(vercel projects *)",
+      "Bash(vercel link *)",
+      "Bash(git checkout *)",
+      "Bash(rm -rf dist)",
+      "Bash(npm cache *)",
+      "Bash(rm pickd_code_vs_taskflow_diff.md REPORT_20260627.md REPORT_EXPERIENCES_SPLIT.md)",
+      "Bash(git commit *)"
     ]
   }
 }
