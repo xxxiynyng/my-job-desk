@@ -44,7 +44,7 @@ import { JobRowContextMenu, type JobMenuStatus } from "@/components/pickd/RowCon
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
   company: 80,
-  title: 140,
+  title: 120,
   role: 80,
   employType: 80,
   industry: 80,
@@ -52,7 +52,7 @@ const COL_MIN_WIDTHS: Record<string, number> = {
   deadline: 100,
   dday: 70,
   linked: 90,
-  updated: 104,
+  updated: 90,
   registeredAt: 90,
 };
 
@@ -233,15 +233,15 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
 ];
 
 const DEFAULT_WIDTHS: Record<string, number> = {
-  company: 110,
-  title: 200,
-  role: 90,
+  company: 90,
+  title: 155,
+  role: 80,
   employType: 80,
-  industry: 90,
-  status: 110,
-  deadline: 110,
-  dday: 75,
-  linked: 100,
+  industry: 80,
+  status: 100,
+  deadline: 100,
+  dday: 70,
+  linked: 90,
   updated: 100,
   registeredAt: 95,
 };
@@ -1026,7 +1026,7 @@ export function JobPostingTable() {
                     <th className="w-9 px-2 py-1.5 text-center">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold group"
+                      className="relative text-left px-3 py-1.5 font-semibold group whitespace-nowrap"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1043,7 +1043,7 @@ export function JobPostingTable() {
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-semibold group"
+                      className="relative text-left px-3 py-1.5 font-semibold group whitespace-nowrap"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1077,10 +1077,9 @@ export function JobPostingTable() {
                             }}
                             style={{ width: w, minWidth: COL_MIN_WIDTHS[col.key] ?? 60 }}
                             className={cn(
-                              "relative text-left px-3 py-1.5 font-semibold cursor-grab group",
+                              "relative text-left px-3 py-1.5 font-semibold cursor-grab group whitespace-nowrap",
                               isOver && "bg-primary/10",
                               ["dday", "linked"].includes(col.key) && "text-center",
-                              col.key === "updated" && "whitespace-nowrap",
                             )}
                           >
                             <span className="inline-flex items-center gap-1">
