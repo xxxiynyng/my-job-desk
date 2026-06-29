@@ -977,6 +977,9 @@ export function JobPostingTable() {
               ),
             )}
           </div>
+          {view === "kanban" && (
+            <div className="px-3 py-1.5 text-sm text-gray-500">칸반 보기</div>
+          )}
 
           {/* 배치 액션 바 */}
           {selected.size > 0 && (
