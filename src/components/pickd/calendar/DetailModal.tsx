@@ -24,7 +24,6 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
   if (!app) return null;
 
   const dd = getDday(app.deadline);
-  const ddStyle = getDdayStyle(dd);
   const linkedSchedules = schedules.filter((s) => s.linkedPostingId === app.id);
   const linkedTasks = tasks.filter((t) => t.linkedPostingId === app.id);
   const pendingTasks = linkedTasks.filter((t) => !t.completed);
@@ -40,8 +39,8 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
               <p className="text-[11px] text-muted-foreground mb-0.5">{app.company}</p>
               <h2 className="text-[15px] font-bold text-foreground leading-tight">{app.position}</h2>
             </div>
-            <Badge className={cn("text-[11px] h-6 px-2 border-0 shrink-0 mt-0.5 font-semibold", ddStyle.bg, ddStyle.text)}>
-              {ddStyle.label}
+            <Badge className={cn("text-[11px] h-6 px-2 border-0 shrink-0 mt-0.5", getDdayStyle(dd))}>
+              {dd < 0 ? "마감" : `D-${dd}`}
             </Badge>
           </div>
           {/* 상태 + 마감일 한 줄 */}

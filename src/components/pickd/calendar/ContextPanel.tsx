@@ -147,7 +147,6 @@ export function ContextPanel({
                 <div className="flex flex-col gap-1.5">
                   {visibleApps.map((app) => {
                     const dd = getDday(app.deadline);
-                    const ddStyle = getDdayStyle(dd);
                     return (
                       <div key={app.id}
                         className="flex items-center justify-between py-2 px-3 rounded-md text-sm cursor-pointer hover:bg-accent/40 transition-colors border border-transparent hover:border-border"
@@ -165,7 +164,7 @@ export function ContextPanel({
                             </div>
                           </div>
                         </div>
-                        <Badge className={cn("text-[10px] h-5 border-0 shrink-0", ddStyle.bg, ddStyle.text)}>{ddStyle.label}</Badge>
+                        <Badge className={cn("text-[10px] h-5 border-0 shrink-0", getDdayStyle(dd))}>{dd < 0 ? "마감" : `D-${dd}`}</Badge>
                       </div>
                     );
                   })}

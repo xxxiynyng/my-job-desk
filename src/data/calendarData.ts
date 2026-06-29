@@ -153,11 +153,12 @@ export function getDday(deadlineStr: string): number {
   return Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function getDdayStyle(dd: number): { bg: string; text: string; label: string } {
-  if (dd <= 1) return { bg: "bg-red-100", text: "text-red-600", label: dd === 0 ? "D-Day" : dd < 0 ? `D+${Math.abs(dd)}` : `D-${dd}` };
-  if (dd <= 3) return { bg: "bg-amber-100", text: "text-amber-600", label: `D-${dd}` };
-  if (dd <= 7) return { bg: "bg-emerald-100", text: "text-emerald-600", label: `D-${dd}` };
-  return { bg: "", text: "text-muted-foreground", label: `D-${dd}` };
+export function getDdayStyle(dday: number): string {
+  if (dday === 0) return "bg-red-500 text-white font-bold animate-pulse";
+  if (dday >= 1 && dday <= 3) return "text-red-500 font-semibold";
+  if (dday >= 4 && dday <= 7) return "text-orange-500 font-semibold";
+  if (dday > 7) return "text-gray-500";
+  return "text-gray-400";
 }
 
 export function getDateRange(start: string, end: string): string[] {
