@@ -904,43 +904,6 @@ export function JobPostingTable() {
                   className="h-7 w-44 pl-6 text-[12px] border-border"
                 />
               </div>
-              {/* 컬럼 선택 — 표 보기에서만 의미가 있어 칸반 보기에서는 숨김 */}
-              {view === "table" && (
-                <DropdownMenu>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          aria-label="표시할 컬럼"
-                          className="inline-flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
-                        >
-                          <Columns3 className="w-3 h-3" />
-                        </button>
-                      </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">표시할 컬럼</TooltipContent>
-                  </Tooltip>
-                  <DropdownMenuContent align="end" className="min-w-[160px]">
-                    <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
-                      표시할 컬럼 선택
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {ALL_COLUMNS.map((c) => (
-                      <DropdownMenuItem
-                        key={c.key}
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          toggleCol(c.key);
-                        }}
-                        className="text-xs flex items-center justify-between"
-                      >
-                        <span>{c.label}</span>
-                        {isVisible(c.key) && <Check className="w-3.5 h-3.5 text-primary" />}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
 
@@ -975,6 +938,42 @@ export function JobPostingTable() {
                   </span>
                 </button>
               ),
+            )}
+            {view !== "kanban" && (
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        aria-label="표시할 컬럼"
+                        className="ml-auto shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-border"
+                      >
+                        <Columns3 className="w-3 h-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">표시할 컬럼</TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end" className="min-w-[160px]">
+                  <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
+                    표시할 컬럼 선택
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {ALL_COLUMNS.map((c) => (
+                    <DropdownMenuItem
+                      key={c.key}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        toggleCol(c.key);
+                      }}
+                      className="text-xs flex items-center justify-between"
+                    >
+                      <span>{c.label}</span>
+                      {isVisible(c.key) && <Check className="w-3.5 h-3.5 text-primary" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
           {view === "kanban" && (
