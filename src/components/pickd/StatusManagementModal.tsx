@@ -258,10 +258,10 @@ export function StatusManagementModal({
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="text-[10px] text-muted-foreground bg-muted/30 border-b border-border">
-                    <th className="text-left px-3 py-1.5 font-medium w-16">유형</th>
-                    <th className="text-left px-3 py-1.5 font-medium">제목</th>
-                    <th className="text-left px-3 py-1.5 font-medium w-24">날짜</th>
-                    <th className="text-left px-3 py-1.5 font-medium w-20">상태</th>
+                    <th className="text-left px-3 py-1.5 font-normal w-16">유형</th>
+                    <th className="text-left px-3 py-1.5 font-normal">제목</th>
+                    <th className="text-left px-3 py-1.5 font-normal w-24">날짜</th>
+                    <th className="text-left px-3 py-1.5 font-normal w-20">상태</th>
                     <th className="w-8"></th>
                   </tr>
                 </thead>

@@ -95,9 +95,9 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-muted/40 border-b border-border">
-                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground text-[10px] w-24">날짜</th>
-                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground text-[10px] w-16">시간</th>
-                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground text-[10px]">일정</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-24">날짜</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-16">시간</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px]">일정</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -130,9 +130,9 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-muted/40 border-b border-border">
-                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground text-[10px] w-6" />
-                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground text-[10px]">할 일</th>
-                      <th className="text-right px-3 py-1.5 font-medium text-muted-foreground text-[10px] w-12">상태</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-6" />
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px]">할 일</th>
+                      <th className="text-right px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-12">상태</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
