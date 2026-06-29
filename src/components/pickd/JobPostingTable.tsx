@@ -52,7 +52,7 @@ const COL_MIN_WIDTHS: Record<string, number> = {
   deadline: 100,
   dday: 70,
   linked: 90,
-  updated: 80,
+  updated: 104,
   registeredAt: 90,
 };
 
@@ -1080,6 +1080,7 @@ export function JobPostingTable() {
                               "relative text-left px-3 py-1.5 font-semibold cursor-grab group",
                               isOver && "bg-primary/10",
                               ["dday", "linked"].includes(col.key) && "text-center",
+                              col.key === "updated" && "whitespace-nowrap",
                             )}
                           >
                             <span className="inline-flex items-center gap-1">
@@ -1104,7 +1105,7 @@ export function JobPostingTable() {
                     <tr
                       key={job.id}
                       className={cn(
-                        "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group relative",
+                        "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group relative",
                         selected.has(job.id) && "bg-accent/20",
                       )}
                     >

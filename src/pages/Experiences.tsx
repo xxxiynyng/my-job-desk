@@ -887,7 +887,7 @@ export default function Experiences() {
                           <tr
                             key={i.id}
                             className={cn(
-                              "h-[52px] border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
+                              "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
                               selected.has(i.id) && "bg-accent/30",
                             )}
                             onClick={() => setDetailId(i.id)}
