@@ -620,7 +620,7 @@ export default function Experiences() {
               {/* Filter tab-bar */}
               <div className="flex items-center border-b border-border mb-3">
                 <div className="flex items-end -mb-px overflow-x-auto">
-                  {PINNED_FILTER_CHIPS.map((f) => (
+                  {PINNED_FILTER_CHIPS.filter(f => f === '전체' || expChipCount(f) > 0).map((f) => (
                     <button
                       key={f}
                       onClick={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
@@ -637,32 +637,6 @@ export default function Experiences() {
                       </span>
                     </button>
                   ))}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className={cn(
-                          "px-3 py-2 text-[12px] flex items-center gap-0.5 border-b-2 whitespace-nowrap transition-colors shrink-0",
-                          MORE_FILTER_CHIPS.includes(activeFilter) && view !== "paste"
-                            ? "text-blue-600 font-semibold border-blue-500"
-                            : "border-transparent text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        더보기 <ChevronDown className="w-3 h-3" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[160px]">
-                      {MORE_FILTER_CHIPS.map((f) => (
-                        <DropdownMenuItem
-                          key={f}
-                          onSelect={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
-                          className="flex items-center justify-between text-xs"
-                        >
-                          <span>{f}</span>
-                          <span className="text-muted-foreground text-[10px] ml-2 tabular-nums">{expChipCount(f)}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
                 <div className="ml-auto pl-3 pb-1 shrink-0">
                   <Tooltip>
