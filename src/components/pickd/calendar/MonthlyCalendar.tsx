@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
-  CalendarEvent, DAYS_KO, MONTHS_KO, getDday, getDdayStyle,
+  CalendarEvent, DAYS_KO, MONTHS_KO, getDday,
   CalApplication, PostingFilterValue, CalSchedule, CalTask, getDateRange,
 } from "@/data/calendarData";
 import { useMemo, useState } from "react";
