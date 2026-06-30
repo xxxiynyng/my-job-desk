@@ -875,7 +875,7 @@ export default function Experiences() {
                             onClick={() => setDetailId(i.id)}
                           >
                             {/* 그립 버튼 + 체크박스 */}
-                            <td className="relative w-12 pl-1 pr-3 py-2.5 align-middle" onClick={(e) => e.stopPropagation()}>
+                            <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                               <ExpRowContextMenu
                                 item={{ updatedAt: i.updatedAt }}
                                 jobs={[]}
