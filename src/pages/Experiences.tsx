@@ -705,7 +705,7 @@ export default function Experiences() {
                 />
               ) : view === "list" ? (
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
-                  <table className="w-full text-[13px] table-fixed">
+                  <table className="w-full min-w-full text-[13px] table-fixed">
                     <thead>
                       <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
                         <th className="w-12 pl-1 pr-3 py-3">

@@ -1005,7 +1005,7 @@ export function JobPostingTable() {
           ) : (
             <>
             <div className="overflow-x-auto">
-              <table className="w-full text-[13px] table-fixed">
+              <table className="w-full min-w-full text-[13px] table-fixed">
                 <thead>
                   <tr className="border-b border-border bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
                     <th className="w-12 pl-1 pr-3 py-3">
