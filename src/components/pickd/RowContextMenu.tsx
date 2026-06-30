@@ -322,7 +322,7 @@ function RowActionGutter({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function JobRowActionCell({ onEdit }: { onEdit: () => void }) {
+export function RowEditCell({ onEdit }: { onEdit: () => void }) {
   return (
     <RowActionGutter>
       <button
@@ -336,16 +336,6 @@ export function JobRowActionCell({ onEdit }: { onEdit: () => void }) {
   );
 }
 
-export function ExpRowActionCell({ onEdit }: { onEdit: () => void }) {
-  return (
-    <RowActionGutter>
-      <button
-        className="relative p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="편집"
-        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-      >
-        <Pencil className="w-3.5 h-3.5" />
-      </button>
-    </RowActionGutter>
-  );
-}
+// 탭별 alias — callers 변경 없이 공용 컴포넌트 공유
+export const JobRowActionCell = RowEditCell;
+export const ExpRowActionCell = RowEditCell;
