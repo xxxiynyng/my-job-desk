@@ -30,7 +30,7 @@ export function DdayChip({ days = 0, size = "md", className }: DdayChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-full whitespace-nowrap tabular-nums font-bold tracking-wide",
+        "inline-flex items-center justify-center rounded-md whitespace-nowrap tabular-nums font-bold tracking-wide",
         size === "sm" ? "h-5 px-1.5 text-[10px]" : "h-6 px-2 text-[11px]",
         colorClass,
         className,
