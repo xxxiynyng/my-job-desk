@@ -940,7 +940,9 @@ export function JobPostingTable() {
                     >
                       <button onClick={() => toggleColSort("company")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         기업명
-                        {colSort?.key === "company" && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === "company" ? "opacity-100" : "opacity-0")}>
+                          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+                        </span>
                       </button>
                       <ResizeHandle onMouseDown={onMouseDown("company")} />
                     </th>
@@ -951,7 +953,9 @@ export function JobPostingTable() {
                     >
                       <button onClick={() => toggleColSort("title")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         공고명
-                        {colSort?.key === "title" && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === "title" ? "opacity-100" : "opacity-0")}>
+                          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+                        </span>
                       </button>
                       <ResizeHandle onMouseDown={onMouseDown("title")} />
                     </th>
@@ -981,7 +985,9 @@ export function JobPostingTable() {
                             <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
                               <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                               {col.label}
-                              {colSort?.key === col.key && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                              <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
+                                {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+                              </span>
                             </button>
                             <ResizeHandle onMouseDown={onMouseDown(col.key)} />
                           </th>

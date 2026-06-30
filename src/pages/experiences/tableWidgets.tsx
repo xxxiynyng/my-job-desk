@@ -42,7 +42,13 @@ export function ResizableHead({
           >
             <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             {label}
-            {sortDir != null && (sortDir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+            {/* 항상 같은 폭(w-3)을 점유 — 조건부 mount 대신 opacity로 제어해 레이아웃 고정 */}
+            <span className={cn(
+              "inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity",
+              sortDir != null ? "opacity-100" : "opacity-0",
+            )}>
+              {sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+            </span>
           </button>
         ) : (
           <span>{label}</span>
