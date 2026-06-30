@@ -1017,16 +1017,10 @@ export function JobPostingTable() {
                       className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
-                      <span className="inline-flex items-center gap-1">
+                      <button onClick={() => toggleColSort("company")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         기업명
-                        <button
-                          onClick={() => toggleColSort("company")}
-                          aria-label="정렬"
-                          className={cn("shrink-0 transition-opacity", colSort?.key === "company" ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
-                        >
-                          {colSort?.key === "company" && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === "company" && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
-                        </button>
-                      </span>
+                        {colSort?.key === "company" && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                      </button>
                       <ResizeHandle onMouseDown={onMouseDown("company")} />
                     </th>
                     {/* 공고명 — 고정 */}
@@ -1034,16 +1028,10 @@ export function JobPostingTable() {
                       className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
-                      <span className="inline-flex items-center gap-1">
+                      <button onClick={() => toggleColSort("title")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         공고명
-                        <button
-                          onClick={() => toggleColSort("title")}
-                          aria-label="정렬"
-                          className={cn("shrink-0 transition-opacity", colSort?.key === "title" ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
-                        >
-                          {colSort?.key === "title" && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === "title" && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
-                        </button>
-                      </span>
+                        {colSort?.key === "title" && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                      </button>
                       <ResizeHandle onMouseDown={onMouseDown("title")} />
                     </th>
                     {/* 드래그 가능 컬럼 */}
@@ -1069,17 +1057,11 @@ export function JobPostingTable() {
                               isOver && "bg-primary/10",
                             )}
                           >
-                            <span className="inline-flex items-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
                               <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                               {col.label}
-                              <button
-                                onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }}
-                                aria-label="정렬"
-                                className={cn("shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100 text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground/50")}
-                              >
-                                {colSort?.key === col.key && colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : colSort?.key === col.key && colSort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUpDown className="w-3 h-3" />}
-                              </button>
-                            </span>
+                              {colSort?.key === col.key && (colSort.dir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}
+                            </button>
                             <ResizeHandle onMouseDown={onMouseDown(col.key)} />
                           </th>
                         );
@@ -1125,7 +1107,7 @@ export function JobPostingTable() {
                         </div>
                       </td>
                       {/* 별표 */}
-                      <td className="px-2 py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-2 py-2.5 text-left whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => toggleStarred(job.id)} aria-label="관심 공고">
                           <Star
                             className={cn(
