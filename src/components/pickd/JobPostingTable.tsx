@@ -925,6 +925,20 @@ export function JobPostingTable() {
             <>
             <div className="overflow-x-auto">
               <table className="w-full min-w-full text-[13px] table-fixed">
+                {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
+                <colgroup>
+                  <col style={{ width: 48 }} />
+                  <col style={{ width: 36 }} />
+                  <col style={{ width: widths.company }} />
+                  <col style={{ width: widths.title }} />
+                  {orderedCols
+                    .filter((c) => isVisible(c.key))
+                    .map((col) => {
+                      const w = Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
+                      return <col key={col.key} style={{ width: w }} />;
+                    })}
+                  <col style={{ width: 56 }} />
+                </colgroup>
                 <thead>
                   <tr className="border-b border-border bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
                     <th className="w-12 pl-1 pr-3 py-3">

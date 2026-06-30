@@ -706,6 +706,19 @@ export default function Experiences() {
               ) : view === "list" ? (
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
                   <table className="w-full min-w-full text-[13px] table-fixed">
+                    {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
+                    <colgroup>
+                      <col style={{ width: 48 }} />
+                      {isVisible("type") && <col style={{ width: colW.type }} />}
+                      {isVisible("name") && <col style={{ width: colW.name }} />}
+                      {isVisible("org") && <col style={{ width: colW.org }} />}
+                      {isVisible("period") && <col style={{ width: colW.period }} />}
+                      {isVisible("keywords") && <col style={{ width: colW.keywords }} />}
+                      {isVisible("importance") && <col style={{ width: colW.importance }} />}
+                      {isVisible("updated") && <col style={{ width: colW.updated }} />}
+                      {isVisible("manage") && <col style={{ width: colW.manage }} />}
+                      <col style={{ width: 56 }} />
+                    </colgroup>
                     <thead>
                       <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
                         <th className="w-12 pl-1 pr-3 py-3">
