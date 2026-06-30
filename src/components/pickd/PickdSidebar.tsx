@@ -29,6 +29,7 @@ export function PickdSidebar() {
               <TooltipTrigger asChild>
                 <NavLink
                   to={item.to}
+                  aria-label={item.label}
                   className={cn(
                     "flex items-center justify-center w-10 h-10 rounded-lg transition-colors",
                     active
@@ -50,6 +51,7 @@ export function PickdSidebar() {
             <TooltipTrigger asChild>
               <NavLink
                 to="/calendar"
+                aria-label="캘린더"
                 className={cn(
                   "flex items-center justify-center w-10 h-10 rounded-lg transition-colors",
                   isActive("/calendar")
@@ -70,6 +72,7 @@ export function PickdSidebar() {
           <TooltipTrigger asChild>
             <NavLink
               to="/settings"
+              aria-label="설정"
               className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-lg transition-colors",
                 isActive("/settings")
@@ -87,6 +90,7 @@ export function PickdSidebar() {
           <Tooltip key={item.label}>
             <TooltipTrigger asChild>
               <button
+                aria-label={item.label}
                 className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 <item.icon className="w-[18px] h-[18px] shrink-0" />
