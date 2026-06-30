@@ -18,7 +18,7 @@ export function DashboardHeader() {
         <button
           onClick={() => navigate("/calendar")}
           className="w-8 h-8 rounded-full bg-accent flex items-center justify-center hover:ring-2 hover:ring-primary/20 transition-all"
-          title="캘린더 바로가기"
+          aria-label="캘린더 바로가기"
         >
           <CalendarDays className="w-4 h-4 text-muted-foreground" />
         </button>
