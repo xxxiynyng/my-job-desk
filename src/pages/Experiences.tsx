@@ -877,7 +877,7 @@ export default function Experiences() {
                             }
                           />
                         )}
-                        <th className="w-10"></th>
+                        <th className="w-16"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -970,18 +970,19 @@ export default function Experiences() {
                                 />
                               </td>
                             )}
-                            <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center gap-0.5">
+                            <td className="relative w-16 px-1 py-2" onClick={(e) => e.stopPropagation()}>
+                              <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 bg-gradient-to-l from-gray-50 via-gray-50/95 to-transparent" />
                                 <button
                                   onClick={() => setDetailId(i.id)}
-                                  className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
+                                  className="relative text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted"
                                   title="편집"
                                 >
                                   <Pencil className="w-3 h-3" />
                                 </button>
                                 <button
                                   onClick={() => togglePin(i.id)}
-                                  className="text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-opacity opacity-0 group-hover:opacity-100"
+                                  className="relative text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted"
                                   title={i.pinned ? "고정 해제" : "고정"}
                                 >
                                   <Pin className={cn("w-3 h-3", i.pinned && "fill-current text-foreground")} />
