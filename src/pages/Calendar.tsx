@@ -57,7 +57,7 @@ export default function Calendar() {
       linkedPosting: linkedApp?.company || undefined,
     };
     setTasks((prev) => [...prev, newTask]);
-    toast.success("할 일이 추가되었습니다");
+    toast.success("할 일이 추가됐어요");
   }, [applications]);
 
   const handleAddSchedule = useCallback((data: { title: string; date: string; time: string; linkedPostingId?: string; notes: string }) => {
@@ -69,7 +69,7 @@ export default function Calendar() {
       linkedPosting: linkedApp?.company || undefined,
     };
     setScheduleList((prev) => [...prev, newSchedule]);
-    toast.success("일정이 추가되었습니다");
+    toast.success("일정이 추가됐어요");
   }, [applications]);
 
   const handleToggleStar = useCallback((id: string) => {
