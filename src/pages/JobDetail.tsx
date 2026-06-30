@@ -224,7 +224,7 @@ function SectionHeader({
   subtitle,
   rightSlot,
 }: {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   subtitle?: string;
   rightSlot?: React.ReactNode;
