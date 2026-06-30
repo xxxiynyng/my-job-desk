@@ -999,7 +999,7 @@ export default function Experiences() {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/70">
+                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-700 border border-gray-200">
                               {k}
                             </span>
                           ))}
