@@ -890,19 +890,19 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("name") && (
-                              <td className="px-4 py-2.5 font-medium text-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-sm font-medium text-gray-900 overflow-hidden">
                                 <span className="flex items-center gap-1.5 min-w-0">
                                   <span className="truncate">{i.name}</span>
                                 </span>
                               </td>
                             )}
                             {isVisible("org") && (
-                              <td className="px-4 py-2.5 text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
                                 <span className="block truncate">{org || "—"}</span>
                               </td>
                             )}
                             {isVisible("period") && (
-                              <td className="px-4 py-2.5 text-muted-foreground tabular-nums overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
                                 <span className="block truncate">{period || "—"}</span>
                               </td>
                             )}
@@ -924,12 +924,12 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("importance") && (
-                              <td className="px-4 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
                                 <span className="block truncate">{i.importance ?? "—"}</span>
                               </td>
                             )}
                             {isVisible("updated") && (
-                              <td className="px-4 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
                                 <span className="block truncate">{i.updatedAt ?? "—"}</span>
                               </td>
                             )}

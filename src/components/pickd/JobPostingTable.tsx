@@ -1137,9 +1137,9 @@ export function JobPostingTable() {
                           />
                         </button>
                       </td>
-                      {/* 기업명 — 반응 없음, tooltip */}
+                      {/* 기업명 — 3차 메타 (보조 정보) */}
                       <td
-                        className="px-4 py-2.5 font-medium text-foreground whitespace-nowrap"
+                        className="px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap"
                         style={{ minWidth: COL_MIN_WIDTHS.company }}
                       >
                         <Tooltip>
@@ -1149,8 +1149,8 @@ export function JobPostingTable() {
                           <TooltipContent className="text-xs">{job.company}</TooltipContent>
                         </Tooltip>
                       </td>
-                      {/* 공고명 — 클릭 시 공고 상세 페이지로 이동 */}
-                      <td className="px-4 py-2.5 text-foreground whitespace-nowrap overflow-hidden text-ellipsis" style={{ minWidth: COL_MIN_WIDTHS.title }}>
+                      {/* 공고명 — 1차 정보 (가장 중요) */}
+                      <td className="px-4 py-2.5 text-sm font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis" style={{ minWidth: COL_MIN_WIDTHS.title }}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -1173,7 +1173,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="role"
-                                  className="px-4 py-2.5 text-gray-700 whitespace-nowrap"
+                                  className="px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.role }}
                                 >
                                   <span className="block truncate">{job.role}</span>
@@ -1183,7 +1183,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="employType"
-                                  className="px-4 py-2.5 text-muted-foreground whitespace-nowrap"
+                                  className="px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.employType }}
                                 >
                                   {job.employType}
@@ -1193,7 +1193,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="industry"
-                                  className="px-4 py-2.5 text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis"
+                                  className="px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis"
                                   style={{ minWidth: COL_MIN_WIDTHS.industry }}
                                 >
                                   {job.industry}
