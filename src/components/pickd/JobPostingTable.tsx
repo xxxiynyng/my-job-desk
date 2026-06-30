@@ -1005,16 +1005,16 @@ export function JobPostingTable() {
             <div className="overflow-x-auto">
               <table className="w-full text-[13px] table-fixed">
                 <thead>
-                  <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
-                    <th className="w-12 pl-1 pr-3 py-1.5">
+                  <tr className="border-b border-border bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
+                    <th className="w-12 pl-1 pr-3 py-3">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                       </div>
                     </th>
-                    <th className="w-9 px-2 py-1.5 text-center">★</th>
+                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-normal group whitespace-nowrap"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                       style={{ width: widths.company, minWidth: COL_MIN_WIDTHS.company }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1031,7 +1031,7 @@ export function JobPostingTable() {
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-3 py-1.5 font-normal group whitespace-nowrap"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                       style={{ width: widths.title, minWidth: COL_MIN_WIDTHS.title }}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -1065,9 +1065,8 @@ export function JobPostingTable() {
                             }}
                             style={{ width: w, minWidth: COL_MIN_WIDTHS[col.key] ?? 60 }}
                             className={cn(
-                              "relative text-left px-3 py-1.5 font-normal cursor-grab group whitespace-nowrap",
+                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap",
                               isOver && "bg-primary/10",
-                              ["dday", "linked"].includes(col.key) && "text-center",
                             )}
                           >
                             <span className="inline-flex items-center gap-1">
@@ -1140,7 +1139,7 @@ export function JobPostingTable() {
                       </td>
                       {/* 기업명 — 반응 없음, tooltip */}
                       <td
-                        className="px-3 py-2.5 font-medium text-foreground whitespace-nowrap"
+                        className="px-4 py-2.5 font-medium text-foreground whitespace-nowrap"
                         style={{ minWidth: COL_MIN_WIDTHS.company }}
                       >
                         <Tooltip>
@@ -1151,7 +1150,7 @@ export function JobPostingTable() {
                         </Tooltip>
                       </td>
                       {/* 공고명 — 클릭 시 공고 상세 페이지로 이동 */}
-                      <td className="px-3 py-2.5 text-foreground whitespace-nowrap overflow-hidden text-ellipsis" style={{ minWidth: COL_MIN_WIDTHS.title }}>
+                      <td className="px-4 py-2.5 text-foreground whitespace-nowrap overflow-hidden text-ellipsis" style={{ minWidth: COL_MIN_WIDTHS.title }}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -1174,7 +1173,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="role"
-                                  className="px-3 py-2.5 text-gray-700 whitespace-nowrap"
+                                  className="px-4 py-2.5 text-gray-700 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.role }}
                                 >
                                   <span className="block truncate">{job.role}</span>
@@ -1184,7 +1183,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="employType"
-                                  className="px-3 py-2.5 text-muted-foreground whitespace-nowrap"
+                                  className="px-4 py-2.5 text-muted-foreground whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.employType }}
                                 >
                                   {job.employType}
@@ -1194,7 +1193,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="industry"
-                                  className="px-3 py-2.5 text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis"
+                                  className="px-4 py-2.5 text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis"
                                   style={{ minWidth: COL_MIN_WIDTHS.industry }}
                                 >
                                   {job.industry}
@@ -1202,7 +1201,7 @@ export function JobPostingTable() {
                               );
                             case "status":
                               return (
-                                <td key="status" className="px-3 py-2.5 whitespace-nowrap" style={{ minWidth: COL_MIN_WIDTHS.status }}>
+                                <td key="status" className="px-4 py-2.5 whitespace-nowrap" style={{ minWidth: COL_MIN_WIDTHS.status }}>
                                   {/* 배지 클릭 → 모달 */}
                                   <button
                                     onClick={() => setModalJobId(job.id)}
@@ -1216,7 +1215,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="deadline"
-                                  className="px-3 py-2.5 whitespace-nowrap"
+                                  className="px-4 py-2.5 whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.deadline }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
@@ -1230,7 +1229,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="dday"
-                                  className="px-3 py-2.5 text-center whitespace-nowrap"
+                                  className="px-4 py-2.5 text-left whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.dday }}
                                 >
                                   <DdayChip days={calcDday(job.deadline)} size="sm" />
@@ -1240,7 +1239,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="linked"
-                                  className="px-3 py-2.5 text-center text-[13px] text-muted-foreground tabular-nums cursor-pointer hover:text-foreground transition-colors whitespace-nowrap"
+                                  className="px-4 py-2.5 text-left whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.linked }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1255,7 +1254,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="updated"
-                                  className="px-3 py-2.5 text-[13px] text-muted-foreground whitespace-nowrap"
+                                  className="px-4 py-2.5 text-[13px] text-muted-foreground whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.updated }}
                                 >
                                   {job.updatedAt}
@@ -1265,7 +1264,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="registeredAt"
-                                  className="px-3 py-2.5 text-[13px] text-muted-foreground tabular-nums whitespace-nowrap"
+                                  className="px-4 py-2.5 text-[13px] text-muted-foreground tabular-nums whitespace-nowrap"
                                   style={{ minWidth: COL_MIN_WIDTHS.registeredAt }}
                                 >
                                   {job.registeredAt}
@@ -1286,7 +1285,7 @@ export function JobPostingTable() {
                   )}
                   {!tableExpanded && Array.from({ length: Math.max(0, ROW_CAP - visibleJobs.length) }).map((_, i) => (
                     <tr key={`empty-${i}`}>
-                      <td colSpan={20} className="py-[20px]" />
+                      <td colSpan={20} className="h-11" />
                     </tr>
                   ))}
                 </tbody>

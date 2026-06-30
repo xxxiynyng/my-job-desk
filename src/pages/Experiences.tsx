@@ -700,7 +700,7 @@ export default function Experiences() {
                   <table className="w-full text-[13px] table-fixed">
                     <thead>
                       <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
-                        <th className="w-12 pl-1 pr-3 py-2.5">
+                        <th className="w-12 pl-1 pr-3 py-3">
                           <div className="ml-5">
                             <Checkbox
                               checked={allFilteredSelected}
@@ -867,7 +867,7 @@ export default function Experiences() {
                             onClick={() => setDetailId(i.id)}
                           >
                             {/* 그립 버튼 + 체크박스 */}
-                            <td className="relative w-12 pl-1 pr-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                            <td className="relative w-12 pl-1 pr-3 py-2.5 align-middle" onClick={(e) => e.stopPropagation()}>
                               <ExpRowContextMenu
                                 item={{ updatedAt: i.updatedAt }}
                                 jobs={[]}
@@ -885,29 +885,29 @@ export default function Experiences() {
                               </div>
                             </td>
                             {isVisible("type") && (
-                              <td className="px-3 py-2.5 text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.type}</span>
                               </td>
                             )}
                             {isVisible("name") && (
-                              <td className="px-3 py-2.5 font-medium text-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 font-medium text-foreground overflow-hidden">
                                 <span className="flex items-center gap-1.5 min-w-0">
                                   <span className="truncate">{i.name}</span>
                                 </span>
                               </td>
                             )}
                             {isVisible("org") && (
-                              <td className="px-3 py-2.5 text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{org || "—"}</span>
                               </td>
                             )}
                             {isVisible("period") && (
-                              <td className="px-3 py-2.5 text-muted-foreground tabular-nums overflow-hidden">
+                              <td className="px-4 py-2.5 text-muted-foreground tabular-nums overflow-hidden">
                                 <span className="block truncate">{period || "—"}</span>
                               </td>
                             )}
                             {isVisible("keywords") && (
-                              <td className="px-3 py-2.5 overflow-hidden">
+                              <td className="px-4 py-2.5 overflow-hidden">
                                 <div className="flex flex-nowrap gap-1 overflow-hidden">
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
@@ -924,17 +924,17 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("importance") && (
-                              <td className="px-3 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.importance ?? "—"}</span>
                               </td>
                             )}
                             {isVisible("updated") && (
-                              <td className="px-3 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
+                              <td className="px-4 py-2.5 text-[13px] text-muted-foreground overflow-hidden">
                                 <span className="block truncate">{i.updatedAt ?? "—"}</span>
                               </td>
                             )}
                             {isVisible("manage") && (
-                              <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
+                              <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
                                 <ManageIndicator
                                   item={i}
                                   onMerge={() => {
