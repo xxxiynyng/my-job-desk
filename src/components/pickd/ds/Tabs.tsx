@@ -2,7 +2,7 @@ import React from "react";
 
 type TabItem = string | { value: string; label: string; count?: number };
 
-interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   tabs: TabItem[];
   value: string;
   onChange?: (value: string) => void;
