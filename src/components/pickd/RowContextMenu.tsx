@@ -21,6 +21,7 @@ const GripTrigger = React.forwardRef<
 >((props, ref) => (
   <button
     ref={ref}
+    aria-label="행 메뉴 열기"
     {...props}
     onClick={(e) => {
       e.stopPropagation();
