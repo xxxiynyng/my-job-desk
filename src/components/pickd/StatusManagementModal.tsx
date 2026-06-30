@@ -277,6 +277,7 @@ export function StatusManagementModal({
                       <td className="px-2 py-1.5">
                         <button
                           onClick={() => deleteItem(it.id)}
+                          aria-label="항목 삭제"
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-pickd-red"
                         >
                           <Trash2 className="w-3 h-3" />
