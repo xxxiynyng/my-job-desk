@@ -214,17 +214,17 @@ export function HeaderFilter({
 }
 
 export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => void }) {
-  // 병합 필요: hasMergeCandidate 플래그 또는 기존 status 값 모두 처리
+  // 우선순위: 병합 > AI질문 > 작성중 > 완료(—)
   if (item.hasMergeCandidate || item.status === "병합 필요")
     return (
       <Tooltip>
         <TooltipTrigger asChild>
           <button
             onClick={onMerge}
-            className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-muted text-muted-foreground"
+            className="inline-flex items-center justify-center w-5 h-5 rounded hover:bg-muted text-amber-500 align-middle"
             aria-label="비슷한 항목 있음"
           >
-            <Layers className="w-4 h-4" />
+            <Layers className="w-3.5 h-3.5" />
           </button>
         </TooltipTrigger>
         <TooltipContent className="text-xs">비슷한 항목이 있어요</TooltipContent>
@@ -234,8 +234,8 @@ export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => 
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex items-center justify-center w-6 h-6 text-muted-foreground">
-            <Sparkles className="w-4 h-4" />
+          <span className="inline-flex items-center justify-center w-5 h-5 text-blue-500 align-middle">
+            <Sparkles className="w-3.5 h-3.5" />
           </span>
         </TooltipTrigger>
         <TooltipContent className="text-xs">미답변 AI 질문이 있어요</TooltipContent>
@@ -245,12 +245,12 @@ export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => 
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex items-center justify-center w-6 h-6 text-muted-foreground">
-            <Pencil className="w-4 h-4" />
+          <span className="inline-flex items-center justify-center w-5 h-5 text-gray-400 align-middle">
+            <Pencil className="w-3.5 h-3.5" />
           </span>
         </TooltipTrigger>
         <TooltipContent className="text-xs">아직 정리 중</TooltipContent>
       </Tooltip>
     );
-  return <span className="text-muted-foreground/30 text-[11px]">—</span>;
+  return <span className="text-gray-300 text-[11px]">—</span>;
 }
