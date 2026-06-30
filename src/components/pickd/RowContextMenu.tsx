@@ -140,7 +140,7 @@ export function JobRowContextMenu({
         )}
         {show("공고 URL 열기") && (
           <DropdownMenuItem
-            onSelect={() => { if (job.url) window.open(job.url, "_blank"); }}
+            onSelect={() => { if (job.url) window.open(job.url, "_blank", "noopener,noreferrer"); }}
             className={cn("gap-2.5 text-[13px]", !job.url && "opacity-40 pointer-events-none")}
           >
             <span className="w-4 text-center shrink-0">🔗</span>
