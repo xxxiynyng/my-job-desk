@@ -20,6 +20,8 @@ import {
   ChevronUp,
   LayoutGrid,
   Folder,
+  CalendarDays,
+  CheckSquare2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -1221,7 +1223,7 @@ export function JobPostingTable() {
                               return (
                                 <td
                                   key="linked"
-                                  className="px-4 py-2.5 text-left whitespace-nowrap"
+                                  className="px-4 py-2.5 text-left whitespace-nowrap cursor-pointer"
                                   style={{ minWidth: COL_MIN_WIDTHS.linked }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1229,7 +1231,24 @@ export function JobPostingTable() {
                                   }}
                                   title="클릭하여 일정·할 일 편집"
                                 >
-                                  일정 {job.linked.schedules} · 할일 {job.linked.todos}
+                                  {job.linked.schedules === 0 && job.linked.todos === 0 ? (
+                                    <span className="text-[13px] text-gray-400">—</span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-2 text-[13px] text-gray-600">
+                                      {job.linked.schedules > 0 && (
+                                        <span className="inline-flex items-center gap-0.5">
+                                          <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
+                                          {job.linked.schedules}
+                                        </span>
+                                      )}
+                                      {job.linked.todos > 0 && (
+                                        <span className="inline-flex items-center gap-0.5">
+                                          <CheckSquare2 className="w-3.5 h-3.5 text-gray-400" />
+                                          {job.linked.todos}
+                                        </span>
+                                      )}
+                                    </span>
+                                  )}
                                 </td>
                               );
                             case "updated":
