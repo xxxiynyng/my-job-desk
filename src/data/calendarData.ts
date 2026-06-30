@@ -1,7 +1,9 @@
 export type TaskPriority = "high" | "medium" | "low";
 export type TaskType = "서류" | "면접" | "자소서" | "기타";
 export type EventType = "interview" | "deadline" | "personal" | "task";
-export type ApplicationStatus = "지원서 작성" | "서류 전형" | "필기 전형" | "면접 전형" | "최종합격";
+export type ApplicationStatus =
+  | "서류작성중" | "지원완료" | "서류합격"
+  | "필기진행" | "면접진행" | "최종합격" | "불합격";
 export type ScheduleType = "posting" | "personal";
 
 export interface CalTask {
@@ -101,32 +103,32 @@ export const mockCalEvents: CalendarEvent[] = [
 
 export const mockCalApplications: CalApplication[] = [
   {
-    id: "a1", company: "삼성전자", position: "DX부문 마케팅", status: "서류 전형", deadline: fmt(new Date(y, m, d)), stage: "서류 전형", starred: true, brandColor: "#0066CC",
+    id: "a1", company: "삼성전자", position: "DX부문 마케팅", status: "서류합격", deadline: fmt(new Date(y, m, d)), stage: "서류합격", starred: true, brandColor: "#0066CC",
     recruitmentStart: fmt(new Date(y, m, d - 7)), recruitmentEnd: fmt(new Date(y, m, d + 8)),
     keyDates: [{ date: fmt(new Date(y, m, d)), label: "서류 마감" }, { date: fmt(new Date(y, m, d + 8)), label: "결과 발표" }],
   },
   {
-    id: "a2", company: "SK하이닉스", position: "HR", status: "면접 전형", deadline: fmt(new Date(y, m, d + 1)), stage: "면접 전형", starred: true, brandColor: "#FF0000",
+    id: "a2", company: "SK하이닉스", position: "HR", status: "면접진행", deadline: fmt(new Date(y, m, d + 1)), stage: "면접진행", starred: true, brandColor: "#FF0000",
     recruitmentStart: fmt(new Date(y, m, d - 5)), recruitmentEnd: fmt(new Date(y, m, d + 10)),
     keyDates: [{ date: fmt(new Date(y, m, d + 1)), label: "1차 면접" }, { date: fmt(new Date(y, m, d + 10)), label: "최종 면접" }],
   },
   {
-    id: "a3", company: "네이버", position: "프론트엔드 개발", status: "서류 전형", deadline: fmt(new Date(y, m, d + 2)), stage: "서류 전형", starred: false, brandColor: "#03C75A",
+    id: "a3", company: "네이버", position: "프론트엔드 개발", status: "서류합격", deadline: fmt(new Date(y, m, d + 2)), stage: "서류합격", starred: false, brandColor: "#03C75A",
     recruitmentStart: fmt(new Date(y, m, d - 3)), recruitmentEnd: fmt(new Date(y, m, d + 5)),
     keyDates: [{ date: fmt(new Date(y, m, d + 2)), label: "서류 마감" }],
   },
   {
-    id: "a4", company: "카카오", position: "백엔드 개발", status: "필기 전형", deadline: fmt(new Date(y, m, d + 5)), stage: "필기 전형", starred: false, brandColor: "#FEE500",
+    id: "a4", company: "카카오", position: "백엔드 개발", status: "필기진행", deadline: fmt(new Date(y, m, d + 5)), stage: "필기진행", starred: false, brandColor: "#FEE500",
     recruitmentStart: fmt(new Date(y, m, d - 2)), recruitmentEnd: fmt(new Date(y, m, d + 12)),
     keyDates: [{ date: fmt(new Date(y, m, d + 5)), label: "필기 시험" }, { date: fmt(new Date(y, m, d + 12)), label: "결과 발표" }],
   },
   {
-    id: "a5", company: "LG전자", position: "AI 연구", status: "지원서 작성", deadline: fmt(new Date(y, m, d + 7)), stage: "지원서 작성", starred: false, brandColor: "#A50034",
+    id: "a5", company: "LG전자", position: "AI 연구", status: "서류작성중", deadline: fmt(new Date(y, m, d + 7)), stage: "서류작성중", starred: false, brandColor: "#A50034",
     recruitmentStart: fmt(new Date(y, m, d)), recruitmentEnd: fmt(new Date(y, m, d + 14)),
     keyDates: [{ date: fmt(new Date(y, m, d + 7)), label: "서류 마감" }],
   },
   {
-    id: "a6", company: "한국전력공사", position: "사무직", status: "서류 전형", deadline: fmt(new Date(y, m, d + 4)), stage: "서류 전형", starred: false, brandColor: "#005BAC",
+    id: "a6", company: "한국전력공사", position: "사무직", status: "서류합격", deadline: fmt(new Date(y, m, d + 4)), stage: "서류합격", starred: false, brandColor: "#005BAC",
     recruitmentStart: fmt(new Date(y, m, d - 4)), recruitmentEnd: fmt(new Date(y, m, d + 15)),
     keyDates: [{ date: fmt(new Date(y, m, d + 4)), label: "서류 마감" }, { date: fmt(new Date(y, m, d + 15)), label: "필기 시험" }],
   },
@@ -177,5 +179,6 @@ export function getDateRange(start: string, end: string): string[] {
 export type PostingFilterValue = "all" | "personal" | string;
 
 export const APPLICATION_STATUSES: ApplicationStatus[] = [
-  "지원서 작성", "서류 전형", "필기 전형", "면접 전형", "최종합격",
+  "서류작성중", "지원완료", "서류합격",
+  "필기진행", "면접진행", "최종합격", "불합격",
 ];

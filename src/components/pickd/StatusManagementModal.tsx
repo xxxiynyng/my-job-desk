@@ -9,10 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type AppStage = "작성 중" | "결과 대기" | "필기 전형" | "면접 전형" | "최종 결과";
+export type AppStage = "서류작성중" | "지원완료" | "서류합격" | "필기진행" | "면접진행" | "최종합격" | "불합격";
 export type FinalResult = "합격" | "불합격" | "포기" | null;
 
-const STAGE_FLOW: AppStage[] = ["작성 중", "결과 대기", "필기 전형", "면접 전형", "최종 결과"];
+const STAGE_FLOW: AppStage[] = ["서류작성중", "지원완료", "서류합격", "필기진행", "면접진행", "최종합격", "불합격"];
 
 const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "포기"];
 
@@ -81,7 +81,7 @@ export function StatusManagementModal({
   open,
   onOpenChange,
   job,
-  currentStage = "작성 중",
+  currentStage = "서류작성중",
   currentFinalResult = null,
   onStageChange,
   onFinalResultChange,
@@ -95,11 +95,6 @@ export function StatusManagementModal({
   const setStage = (s: AppStage) => {
     setStageLocal(s);
     onStageChange?.(s);
-    // 최종 결과에서 다른 상태로 돌아가면 finalResult 초기화
-    if (s !== "최종 결과") {
-      setFinalResultLocal(null);
-      onFinalResultChange?.(null);
-    }
   };
 
   const setFinalResult = (r: FinalResult) => {
@@ -203,33 +198,6 @@ export function StatusManagementModal({
                 ))}
               </div>
 
-              {/* 최종 결과 선택 — 합격/불합격/포기 */}
-              {activeStage === "최종 결과" && (
-                <div className="pt-2 border-t border-border/40">
-                  <p className="text-[11px] text-muted-foreground mb-2">결과를 선택하세요</p>
-                  <div className="flex gap-2">
-                    {FINAL_RESULT_OPTIONS.map((r) => (
-                      <button
-                        key={r}
-                        onClick={() => setFinalResult(activeFinalResult === r ? null : r)}
-                        className={cn(
-                          "flex-1 py-1.5 rounded-md text-[12px] font-medium border transition-colors",
-                          activeFinalResult === r
-                            ? finalResultStyles[r]
-                            : "border-border text-muted-foreground hover:bg-muted",
-                        )}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                  {activeFinalResult && (
-                    <p className="mt-2 text-[11px] text-muted-foreground">
-                      저장하면 이 공고는 <span className="text-foreground font-medium">완료된 공고</span>로 이동합니다.
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
           </Section>
 

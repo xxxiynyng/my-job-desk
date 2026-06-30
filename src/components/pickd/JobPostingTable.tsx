@@ -57,16 +57,19 @@ const COL_MIN_WIDTHS: Record<string, number> = {
 };
 
 // ── 타입 ──────────────────────────────────────────────────────────
-type StatusType = "작성 중" | "결과 대기" | "필기 전형" | "면접 전형" | "최종 결과";
-const ACTIVE_STATUSES: StatusType[] = ["작성 중", "결과 대기", "필기 전형", "면접 전형"];
-const STATUS_OPTIONS: StatusType[] = [...ACTIVE_STATUSES, "최종 결과"];
+type StatusType = "서류작성중" | "지원완료" | "서류합격" | "필기진행" | "면접진행" | "최종합격" | "불합격";
+const ACTIVE_STATUSES: StatusType[] = ["서류작성중", "지원완료", "서류합격", "필기진행", "면접진행"];
+const COMPLETED_STATUSES: StatusType[] = ["최종합격", "불합격"];
+const STATUS_OPTIONS: StatusType[] = [...ACTIVE_STATUSES, ...COMPLETED_STATUSES];
 
-const STATUS_DS_KEY: Record<StatusType, "draft" | "applied" | "test" | "interview" | "hold"> = {
-  "작성 중": "draft",
-  "결과 대기": "applied",
-  "필기 전형": "test",
-  "면접 전형": "interview",
-  "최종 결과": "hold",
+const STATUS_DS_KEY: Record<StatusType, "draft" | "applied" | "document" | "test" | "interview" | "passed" | "rejected"> = {
+  "서류작성중": "draft",
+  "지원완료":   "applied",
+  "서류합격":   "document",
+  "필기진행":   "test",
+  "면접진행":   "interview",
+  "최종합격":   "passed",
+  "불합격":     "rejected",
 };
 
 const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
@@ -107,13 +110,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-01",
     dday: calcDday("2026-07-01"),
-    status: "작성 중",
+    status: "서류작성중",
     finalResult: null,
     linked: { schedules: 1, todos: 2 },
     starred: false,
     updatedAt: "2시간 전",
     registeredAt: "2026-06-15",
-    stage: "작성 중",
+    stage: "서류작성중",
   },
   {
     id: "j2",
@@ -125,13 +128,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-05",
     dday: calcDday("2026-07-05"),
-    status: "작성 중",
+    status: "서류작성중",
     finalResult: null,
     linked: { schedules: 2, todos: 1 },
     starred: true,
     updatedAt: "3시간 전",
     registeredAt: "2026-06-16",
-    stage: "작성 중",
+    stage: "서류작성중",
   },
   {
     id: "j3",
@@ -143,13 +146,13 @@ const initialJobData: Job[] = [
     industry: "핀테크",
     deadline: "2026-06-30",
     dday: calcDday("2026-06-30"),
-    status: "작성 중",
+    status: "서류작성중",
     finalResult: null,
     linked: { schedules: 1, todos: 3 },
     starred: true,
     updatedAt: "1시간 전",
     registeredAt: "2026-06-18",
-    stage: "작성 중",
+    stage: "서류작성중",
   },
   {
     id: "j4",
@@ -161,13 +164,13 @@ const initialJobData: Job[] = [
     industry: "제조/전자",
     deadline: "2026-07-10",
     dday: calcDday("2026-07-10"),
-    status: "결과 대기",
+    status: "지원완료",
     finalResult: null,
     linked: { schedules: 0, todos: 1 },
     starred: false,
     updatedAt: "어제",
     registeredAt: "2026-06-10",
-    stage: "결과 대기",
+    stage: "지원완료",
   },
   {
     id: "j5",
@@ -179,13 +182,13 @@ const initialJobData: Job[] = [
     industry: "이커머스",
     deadline: "2026-06-15",
     dday: calcDday("2026-06-15"),
-    status: "최종 결과",
+    status: "불합격",
     finalResult: "불합격",
     linked: { schedules: 0, todos: 0 },
     starred: false,
     updatedAt: "3일 전",
     registeredAt: "2026-05-20",
-    stage: "최종 결과",
+    stage: "불합격",
     completedAt: "2026-06-15",
   },
   {
@@ -198,13 +201,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-07",
     dday: calcDday("2026-07-07"),
-    status: "면접 전형",
+    status: "면접진행",
     finalResult: null,
     linked: { schedules: 1, todos: 0 },
     starred: false,
     updatedAt: "5일 전",
     registeredAt: "2026-06-05",
-    stage: "면접 전형",
+    stage: "면접진행",
   },
 ];
 
@@ -247,7 +250,7 @@ const DEFAULT_WIDTHS: Record<string, number> = {
 };
 
 
-const FILTER_CHIPS = ["전체", "★", "마감임박", "|", "작성 중", "결과 대기", "필기 전형", "면접 전형"];
+const FILTER_CHIPS = ["전체", "★", "마감임박", "|", "서류작성중", "지원완료", "서류합격", "필기진행", "면접진행"];
 const ROW_CAP = 7;
 
 function lsGet<T>(k: string, fb: T): T {
@@ -435,11 +438,13 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
 
 // ── 칸반 뷰 (드래그앤드롭) ─────────────────────────────────────────
 const COL_THEME: Record<StatusType, { bg: string; text: string; dot: string; border: string }> = {
-  "작성 중":   { bg: "bg-muted/60",          text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
-  "결과 대기": { bg: "bg-pickd-blue-light",   text: "text-pickd-blue",    dot: "bg-pickd-blue",          border: "border-l-pickd-blue" },
-  "필기 전형": { bg: "bg-pickd-purple-light", text: "text-pickd-purple",  dot: "bg-pickd-purple",        border: "border-l-pickd-purple" },
-  "면접 전형": { bg: "bg-pickd-orange-light", text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
-  "최종 결과": { bg: "bg-pickd-green-light",  text: "text-pickd-green",   dot: "bg-pickd-green",         border: "border-l-pickd-green" },
+  "서류작성중": { bg: "bg-blue-50",             text: "text-blue-700",      dot: "bg-blue-500",            border: "border-l-blue-400" },
+  "지원완료":   { bg: "bg-emerald-50",          text: "text-emerald-700",   dot: "bg-emerald-500",         border: "border-l-emerald-400" },
+  "서류합격":   { bg: "bg-pickd-green-light",   text: "text-pickd-green",   dot: "bg-pickd-green",         border: "border-l-pickd-green" },
+  "필기진행":   { bg: "bg-amber-50",            text: "text-amber-700",     dot: "bg-amber-500",           border: "border-l-amber-400" },
+  "면접진행":   { bg: "bg-pickd-orange-light",  text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
+  "최종합격":   { bg: "bg-green-100",           text: "text-green-700",     dot: "bg-green-600",           border: "border-l-green-600" },
+  "불합격":     { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
 };
 
 const KANBAN_COL_CAP = 8;
@@ -450,13 +455,12 @@ function KanbanView({
   onSelect,
 }: {
   jobs: Job[];
-  onMove: (jobId: string, toStatus: StatusType, finalResult?: NonNullable<FinalResult>) => void;
+  onMove: (jobId: string, toStatus: StatusType) => void;
   onSelect: (job: Job) => void;
 }) {
   const dragId = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [overCol, setOverCol] = useState<StatusType | null>(null);
-  const [finalPickTarget, setFinalPickTarget] = useState<string | null>(null);
   const [expandedCols, setExpandedCols] = useState<Set<StatusType>>(new Set());
 
   // 드래그 중 컨테이너 가장자리에 가까워지면 자동으로 가로 스크롤 — 화면 밖으로 밀려난
@@ -475,11 +479,13 @@ function KanbanView({
 
   const byStatus = useMemo(() => {
     const m: Record<StatusType, Job[]> = {
-      "작성 중": [],
-      "결과 대기": [],
-      "필기 전형": [],
-      "면접 전형": [],
-      "최종 결과": [],
+      "서류작성중": [],
+      "지원완료":   [],
+      "서류합격":   [],
+      "필기진행":   [],
+      "면접진행":   [],
+      "최종합격":   [],
+      "불합격":     [],
     };
     jobs.forEach((j) => {
       m[j.status]?.push(j);
@@ -507,8 +513,7 @@ function KanbanView({
               key={col}
               className={cn(
                 "flex-1 min-w-[180px] max-w-[240px] rounded-xl border-2 border-transparent bg-muted/15 p-2 transition-colors",
-                overCol === col && col === "최종 결과" && "border-pickd-orange/40 bg-pickd-orange/5",
-                overCol === col && col !== "최종 결과" && "border-primary/30 bg-primary/5",
+                overCol === col && "border-primary/30 bg-primary/5",
               )}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -521,11 +526,7 @@ function KanbanView({
                 const id = dragId.current;
                 dragId.current = null;
                 if (!id) return;
-                if (col === "최종 결과") {
-                  setFinalPickTarget(id);
-                } else {
-                  onMove(id, col);
-                }
+                onMove(id, col);
               }}
             >
               <div className={cn("flex items-center gap-2 px-2.5 py-2 mb-2 rounded-lg", theme.bg)}>
@@ -535,9 +536,6 @@ function KanbanView({
                   {colJobs.length}
                 </span>
               </div>
-              {overCol === col && col === "최종 결과" && (
-                <p className="px-2 -mt-1 mb-1.5 text-[10px] text-pickd-orange">놓으면 결과를 선택하게 돼요</p>
-              )}
               <div className="space-y-2">
                 {visibleColJobs.map((job) => (
                   <div
@@ -569,8 +567,8 @@ function KanbanView({
                       {/* 하단: 고용형태 + D-day / 결과 */}
                       <div className="flex items-center justify-between mt-2.5 gap-1">
                         <span className="text-[10px] text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-sm tabular-nums shrink-0">{job.employType}</span>
-                        {col !== "최종 결과" && <DdayChip days={calcDday(job.deadline)} size="sm" />}
-                        {col === "최종 결과" && job.finalResult && (
+                        {!COMPLETED_STATUSES.includes(col) && <DdayChip days={calcDday(job.deadline)} size="sm" />}
+                        {COMPLETED_STATUSES.includes(col) && job.finalResult && (
                           <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
                         )}
                       </div>
@@ -596,14 +594,6 @@ function KanbanView({
         })}
       </div>
 
-      <FinalResultPicker
-        open={!!finalPickTarget}
-        onClose={() => setFinalPickTarget(null)}
-        onSelect={(r) => {
-          if (finalPickTarget) onMove(finalPickTarget, "최종 결과", r);
-          setFinalPickTarget(null);
-        }}
-      />
     </>
   );
 }
@@ -728,7 +718,7 @@ export function JobPostingTable() {
 
   // 지원중 vs 완료 분리
   const activeJobs = useMemo(() => jobs.filter((j) => ACTIVE_STATUSES.includes(j.status)), [jobs]);
-  const completedJobs = useMemo(() => jobs.filter((j) => j.status === "최종 결과"), [jobs]);
+  const completedJobs = useMemo(() => jobs.filter((j) => COMPLETED_STATUSES.includes(j.status)), [jobs]);
 
   // 정렬
   const sortedActive = useMemo(() => {
@@ -806,16 +796,16 @@ export function JobPostingTable() {
   };
 
   // 상태 변경 (칸반 드래그 포함)
-  const moveJob = (jobId: string, toStatus: StatusType, finalResult?: NonNullable<FinalResult>) => {
+  const moveJob = (jobId: string, toStatus: StatusType) => {
     setJobs((p) =>
       p.map((j) => {
         if (j.id !== jobId) return j;
-        if (toStatus === "최종 결과" && finalResult) {
+        if (COMPLETED_STATUSES.includes(toStatus)) {
           return {
             ...j,
             status: toStatus,
             stage: toStatus,
-            finalResult,
+            finalResult: toStatus === "최종합격" ? "합격" : "불합격",
             completedAt: new Date().toISOString().split("T")[0],
           };
         }
@@ -836,14 +826,10 @@ export function JobPostingTable() {
     setJobs((p) =>
       p.map((j) => {
         if (j.id !== modalJobId) return j;
-        if (result)
-          return {
-            ...j,
-            finalResult: result,
-            status: "최종 결과",
-            stage: "최종 결과",
-            completedAt: new Date().toISOString().split("T")[0],
-          };
+        if (result === "합격")
+          return { ...j, finalResult: result, status: "최종합격", stage: "최종합격", completedAt: new Date().toISOString().split("T")[0] };
+        if (result === "불합격" || result === "포기")
+          return { ...j, finalResult: result, status: "불합격", stage: "불합격", completedAt: new Date().toISOString().split("T")[0] };
         return { ...j, finalResult: null };
       }),
     );
@@ -1011,7 +997,7 @@ export function JobPostingTable() {
           {view === "kanban" ? (
             <KanbanView
               jobs={[...activeJobs, ...completedJobs]}
-              onMove={(id, status, fr) => moveJob(id, status, fr)}
+              onMove={(id, status) => moveJob(id, status)}
               onSelect={(j) => setModalJobId(j.id)}
             />
           ) : (
