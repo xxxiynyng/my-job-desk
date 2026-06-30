@@ -2,7 +2,7 @@ import React from "react";
 
 type StatusKey =
   | "draft" | "planned" | "applied" | "document" | "test"
-  | "interview" | "offer" | "passed" | "rejected" | "hold";
+  | "interview" | "passed" | "rejected" | "hold";
 
 type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
 
@@ -20,7 +20,6 @@ export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
   document:  { label: "서류전형",   tone: "info" },
   test:      { label: "코딩테스트", tone: "info" },
   interview: { label: "면접전형",   tone: "warning" },
-  offer:     { label: "처우협의",   tone: "warning" },
   passed:    { label: "최종합격",   tone: "success" },
   rejected:  { label: "불합격",     tone: "danger" },
   hold:      { label: "보류",       tone: "caution" },
