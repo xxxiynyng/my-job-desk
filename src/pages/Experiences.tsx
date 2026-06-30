@@ -69,6 +69,32 @@ import {
   SHARED_EXP_KEY,
   makeFromPreset,
 } from "./experiences/presets";
+
+// 유형별 칩 색상 매핑 (rounded-md 고정, rounded-full 금지)
+const TYPE_CHIP_CLASS: Record<ItemType, string> = {
+  "프로젝트":   "bg-blue-50 text-blue-600 border-blue-100",
+  "대외활동":   "bg-green-50 text-green-600 border-green-100",
+  "인턴":       "bg-violet-50 text-violet-600 border-violet-100",
+  "공모전":     "bg-amber-50 text-amber-600 border-amber-100",
+  "봉사활동":   "bg-teal-50 text-teal-600 border-teal-100",
+  "교환학생":   "bg-slate-100 text-slate-600 border-slate-200",
+  "알바":       "bg-violet-50 text-violet-600 border-violet-100",
+  "학부연구생": "bg-blue-50 text-blue-600 border-blue-100",
+  "어학":       "bg-gray-100 text-gray-600 border-gray-200",
+  "자격증":     "bg-gray-100 text-gray-600 border-gray-200",
+  "수상":       "bg-amber-50 text-amber-600 border-amber-100",
+  "수강과목":   "bg-gray-100 text-gray-500 border-gray-200",
+  "교육 이수":  "bg-gray-100 text-gray-500 border-gray-200",
+};
+
+function TypeChip({ type }: { type: ItemType }) {
+  const cls = TYPE_CHIP_CLASS[type] ?? "bg-gray-100 text-gray-500 border-gray-200";
+  return (
+    <span className={cn("inline-flex items-center rounded-md text-xs font-medium px-2 py-0.5 border whitespace-nowrap", cls)}>
+      {type}
+    </span>
+  );
+}
 import { INITIAL_EXPERIENCES } from "./experiences/mockData";
 
 export {
@@ -885,8 +911,8 @@ export default function Experiences() {
                               </div>
                             </td>
                             {isVisible("type") && (
-                              <td className="px-4 py-2.5 text-muted-foreground overflow-hidden">
-                                <span className="block truncate">{i.type}</span>
+                              <td className="px-4 py-2.5 overflow-hidden">
+                                <TypeChip type={i.type} />
                               </td>
                             )}
                             {isVisible("name") && (
