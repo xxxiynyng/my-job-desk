@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowDown, ArrowUp, ChevronDown, Layers, Pencil, Sparkles, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ResizeHandle } from "@/hooks/useResizableCols";
@@ -30,64 +32,45 @@ export function ResizableHead({
   onResize?: (e: React.MouseEvent) => void;
   filter?: React.ReactNode;
   sortDir?: "asc" | "desc" | null;
-  onSort?: () => void;
+  onSort?: (dir: "asc" | "desc" | null) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 overflow-hidden whitespace-nowrap group">
-      {onSort && (
-        <div ref={menuRef} className="absolute left-1 top-1/2 -translate-y-1/2">
-          <button
-            onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-            aria-label="정렬 메뉴"
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          >
-            ⋮⋮
-          </button>
-          {open && (
-            <div className="absolute top-full left-0 z-50 mt-1 w-36 bg-white border border-gray-100 rounded-lg shadow-md py-1 text-sm text-gray-600">
-              <div className="px-3 pt-2 pb-1 text-xs text-gray-400 font-normal">정렬</div>
+    <th style={width ? { width } : undefined} className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
+      <span className="inline-flex items-center gap-1">
+        {onSort && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 font-normal hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                onClick={(e) => { e.stopPropagation(); onSort(); setOpen(false); }}
+                aria-label="정렬 메뉴"
+                className="opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 transition-opacity p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100"
               >
-                <span className="text-gray-400">↑</span> 오름차순
+                ⋮⋮
               </button>
-              <button
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 font-normal hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                onClick={(e) => { e.stopPropagation(); onSort(); setOpen(false); }}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" sideOffset={4} className="w-40">
+              <DropdownMenuLabel className="px-3 py-1 text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+                정렬
+              </DropdownMenuLabel>
+              <DropdownMenuItem onSelect={() => onSort("asc")} className="gap-2 text-[13px]">
+                <ArrowUp className="w-3.5 h-3.5 text-gray-400" /> 오름차순
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onSort("desc")} className="gap-2 text-[13px]">
+                <ArrowDown className="w-3.5 h-3.5 text-gray-400" /> 내림차순
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => onSort(null)}
+                disabled={sortDir == null}
+                className="gap-2 text-[13px]"
               >
-                <span className="text-gray-400">↓</span> 내림차순
-              </button>
-              <button
-                className={cn(
-                  "w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 font-normal hover:bg-gray-50 hover:text-gray-900 transition-colors",
-                  sortDir === null && "opacity-40 cursor-not-allowed pointer-events-none",
-                )}
-                onClick={(e) => { e.stopPropagation(); onSort(); setOpen(false); }}
-              >
-                <span className="text-gray-400">✕</span> 정렬 해제
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      <span className="inline-flex items-center gap-1 overflow-hidden">
+                <X className="w-3.5 h-3.5 text-gray-400" /> 정렬 해제
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         <span className="truncate">{label}</span>
         {filter}
         {sortDir != null && (
-          <span className="text-blue-500 text-xs ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>
+          <span className="text-blue-500 text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>
         )}
       </span>
       {onResize && <ResizeHandle onMouseDown={onResize} />}
