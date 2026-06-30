@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 type Variant = "primary" | "secondary" | "ghost" | "outlined" | "danger";
 type Size = "sm" | "md" | "lg";
@@ -58,6 +59,7 @@ export function Button({
   const s = SIZES[size];
   const v = VARIANTS[variant];
   const isDisabled = disabled || loading;
+  const { className: callerClass, ...restWithoutClass } = rest as { className?: string } & typeof rest;
 
   const base: React.CSSProperties = {
     display: "inline-flex",
@@ -87,11 +89,12 @@ export function Button({
       type={type}
       disabled={isDisabled}
       style={base}
+      className={cn("focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500", callerClass)}
       onMouseEnter={(e) => { if (!isDisabled) e.currentTarget.style.backgroundColor = HOVER_BG[variant]; }}
       onMouseLeave={(e) => { if (!isDisabled) e.currentTarget.style.backgroundColor = (v.background as string) ?? ""; }}
       onMouseDown={(e) => { if (!isDisabled) e.currentTarget.style.backgroundColor = ACTIVE_BG[variant]; }}
       onMouseUp={(e) => { if (!isDisabled) e.currentTarget.style.backgroundColor = HOVER_BG[variant]; }}
-      {...rest}
+      {...restWithoutClass}
     >
       {loading && <Spinner />}
       {!loading && leftIcon}

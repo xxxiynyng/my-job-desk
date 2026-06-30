@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 type IBVariant = "ghost" | "secondary" | "primary";
 type IBSize = "sm" | "md" | "lg";
@@ -20,7 +21,7 @@ const VARIANTS: Record<IBVariant, { background: string; color: string; border: s
   primary:   { background: "var(--brand)", color: "#fff", border: "1px solid transparent", hover: "var(--brand-hover)" },
 };
 
-export function IconButton({ variant = "ghost", size = "md", disabled = false, children, style, ...rest }: IconButtonProps) {
+export function IconButton({ variant = "ghost", size = "md", disabled = false, children, style, className, ...rest }: IconButtonProps & { className?: string }) {
   const s = SIZES[size];
   const v = VARIANTS[variant];
 
@@ -28,6 +29,7 @@ export function IconButton({ variant = "ghost", size = "md", disabled = false, c
     <button
       type="button"
       disabled={disabled}
+      className={cn("focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500", className)}
       onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.backgroundColor = v.hover; }}
       onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.backgroundColor = v.background; }}
       style={{
