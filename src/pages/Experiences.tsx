@@ -72,7 +72,7 @@ import {
 
 function TypeChip({ type }: { type: ItemType }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded-md whitespace-nowrap">
+    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 rounded-md whitespace-nowrap">
       {type}
     </span>
   );
@@ -920,7 +920,7 @@ export default function Experiences() {
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
                                       key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-foreground/70 shrink-0"
+                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-600 border border-gray-200 shrink-0"
                                     >
                                       {k}
                                     </span>
