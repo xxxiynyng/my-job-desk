@@ -41,7 +41,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
-import { JobRowContextMenu, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
+import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
@@ -1068,6 +1068,8 @@ export function JobPostingTable() {
                           </th>
                         );
                       })}
+                    {/* 액션 거터 헤더 — JobRowActionCell td(w-14)에 대응 */}
+                    <th className="w-14 bg-[#F8FAFC]" />
                   </tr>
                 </thead>
                 <tbody>
@@ -1275,6 +1277,19 @@ export function JobPostingTable() {
                               return null;
                           }
                         })}
+                      <JobRowActionCell
+                        job={{
+                          starred: job.starred,
+                          updatedAt: job.updatedAt,
+                          url: job.url,
+                          status: job.status as JobMenuStatus,
+                        }}
+                        onStar={() => toggleStarred(job.id)}
+                        onEdit={() => setModalJobId(job.id)}
+                        onDuplicate={() => duplicateJob(job.id)}
+                        onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
+                        onDelete={() => deleteJob(job.id)}
+                      />
                     </tr>
                   ))}
                   {filtered.length === 0 && (
