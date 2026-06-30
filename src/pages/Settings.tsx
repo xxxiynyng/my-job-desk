@@ -46,7 +46,7 @@ export default function Settings() {
   useEffect(() => lsSet(LS_JOB_PREFS, prefs), [prefs]);
 
   const enterEdit = () => { setDraft({ ...prefs }); setEditMode(true); };
-  const save      = () => { setPrefs(draft); setEditMode(false); toast("저장되었습니다", { duration: 1500 }); };
+  const save      = () => { setPrefs(draft); setEditMode(false); toast("저장됐어요", { duration: 1500 }); };
   const cancel    = () => setEditMode(false);
 
   const anyFilled = Object.values(prefs).some(Boolean);
