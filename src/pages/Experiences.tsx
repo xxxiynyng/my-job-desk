@@ -72,7 +72,7 @@ import {
 
 function TypeChip({ type }: { type: ItemType }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200 rounded-md whitespace-nowrap">
+    <span className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-100 rounded-md whitespace-nowrap">
       {type}
     </span>
   );
@@ -898,7 +898,7 @@ export default function Experiences() {
                               </td>
                             )}
                             {isVisible("name") && (
-                              <td className="px-4 py-2.5 text-sm font-medium text-gray-900 overflow-hidden">
+                              <td className="px-4 py-2.5 text-sm font-semibold text-gray-900 overflow-hidden">
                                 <span className="flex items-center gap-1.5 min-w-0">
                                   <span className="truncate">{i.name}</span>
                                 </span>
@@ -920,7 +920,7 @@ export default function Experiences() {
                                   {i.keywords.slice(0, 3).map((k) => (
                                     <span
                                       key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-700 border border-gray-200 shrink-0"
+                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0"
                                     >
                                       {k}
                                     </span>
@@ -999,7 +999,7 @@ export default function Experiences() {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-700 border border-gray-200">
+                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
                               {k}
                             </span>
                           ))}
