@@ -4,7 +4,7 @@ type StatusKey =
   | "draft" | "planned" | "applied" | "document" | "test"
   | "interview" | "offer" | "passed" | "rejected" | "hold";
 
-type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger";
+type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status?: StatusKey;
@@ -23,7 +23,7 @@ export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
   offer:     { label: "처우협의",   tone: "warning" },
   passed:    { label: "최종합격",   tone: "success" },
   rejected:  { label: "불합격",     tone: "danger" },
-  hold:      { label: "보류",       tone: "neutral" },
+  hold:      { label: "보류",       tone: "caution" },
 };
 
 const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
@@ -33,6 +33,7 @@ const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
   success: { bg: "var(--success-subtle)", fg: "var(--green-700)", dot: "var(--green-500)" },
   warning: { bg: "var(--warning-subtle)", fg: "var(--amber-700)", dot: "var(--amber-500)" },
   danger:  { bg: "var(--danger-subtle)", fg: "var(--red-700)", dot: "var(--red-500)" },
+  caution: { bg: "var(--violet-50)", fg: "var(--violet-600)", dot: "var(--violet-500)" },
 };
 
 export function StatusBadge({ status = "applied", label, tone, size = "md", style, ...rest }: StatusBadgeProps) {
