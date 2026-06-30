@@ -8,12 +8,9 @@ import {
   Check,
   X,
   Search,
-  EyeOff,
   Table as TableIcon,
-  RotateCcw,
   Star,
   GripVertical,
-  ArrowUpDown,
   ArrowUp,
   ArrowDown,
   ChevronRight,
@@ -271,48 +268,6 @@ function calcDday(deadline: string): number {
   today.setHours(0, 0, 0, 0);
   const dl = new Date(deadline + "T00:00:00");
   return Math.round((dl.getTime() - today.getTime()) / 86400000);
-}
-
-// ── 칸반: 최종결과 드롭 팝업 ──────────────────────────────────────
-function FinalResultPicker({
-  open,
-  onClose,
-  onSelect,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSelect: (r: NonNullable<FinalResult>) => void;
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20">
-      <div className="bg-card border border-border rounded-xl p-5 shadow-lg w-72">
-        <p className="text-sm font-semibold text-foreground mb-1">최종 결과 선택</p>
-        <p className="text-[11px] text-muted-foreground mb-4">결과를 선택하면 완료된 공고로 이동합니다.</p>
-        <div className="flex gap-2">
-          {(["합격", "불합격", "포기"] as NonNullable<FinalResult>[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => onSelect(r)}
-              className={cn(
-                "flex-1 py-2 rounded-md text-[12px] font-medium border transition-colors hover:opacity-80",
-                r === "합격"
-                  ? "border-pickd-green/40 bg-pickd-green-light text-pickd-green"
-                  : r === "불합격"
-                    ? "border-pickd-red/40 bg-pickd-red-light text-pickd-red"
-                    : "border-border bg-muted text-muted-foreground",
-              )}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-        <button onClick={onClose} className="mt-3 w-full text-[11px] text-muted-foreground hover:text-foreground">
-          취소
-        </button>
-      </div>
-    </div>
-  );
 }
 
 // ── 폴더 SVG 아이콘 ────────────────────────────────────────────────
@@ -600,41 +555,6 @@ function KanbanView({
   );
 }
 
-// ── ColHeaderFilter ────────────────────────────────────────────────
-type ColFilter = { kind: "select"; values: string[] } | { kind: "text"; q: string };
-
-function ColHeaderFilter({
-  colKey,
-  colFilters,
-  setColFilter,
-  sortBy,
-  setSortBy,
-}: {
-  colKey: string;
-  colFilters: Record<string, ColFilter>;
-  setColFilter: (k: string, f: ColFilter | null) => void;
-  sortBy: { key: string; dir: "asc" | "desc" } | null;
-  setSortBy: (v: { key: string; dir: "asc" | "desc" } | null) => void;
-}) {
-  const active = !!colFilters[colKey];
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-      aria-label="필터"
-      className={cn(
-        "inline-flex items-center justify-center w-3 h-3 rounded transition-colors",
-        active
-          ? "text-foreground"
-          : "text-muted-foreground/40 hover:text-muted-foreground opacity-60 hover:opacity-100",
-      )}
-    >
-      <ChevronDown className="w-2.5 h-2.5" />
-    </button>
-  );
-}
-
 // ── Main Component ─────────────────────────────────────────────────
 export function JobPostingTable() {
   const [jobs, setJobs] = useState<Job[]>(initialJobData);
@@ -644,7 +564,6 @@ export function JobPostingTable() {
   const [view, setView] = useState<"table" | "kanban">("table");
   const [modalJobId, setModalJobId] = useState<string | null>(null);
   const [tableExpanded, setTableExpanded] = useState(false);
-  const [colFilters] = useState<Record<string, ColFilter>>({});
   const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
   const toggleColSort = (key: string) => {
     setColSort((prev) => {
