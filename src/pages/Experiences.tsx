@@ -723,7 +723,7 @@ export default function Experiences() {
                             width={colW.type}
                             onResize={onResize("type")}
                             sortDir={colSort?.key === "type" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "type", dir })}
+                            onSort={() => toggleColSort("type")}
                             filter={
                               <HeaderFilter
                                 colKey="type"
@@ -742,7 +742,7 @@ export default function Experiences() {
                             width={colW.name}
                             onResize={onResize("name")}
                             sortDir={colSort?.key === "name" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "name", dir })}
+                            onSort={() => toggleColSort("name")}
                             filter={
                               <HeaderFilter
                                 colKey="name"
@@ -761,7 +761,7 @@ export default function Experiences() {
                             width={colW.org}
                             onResize={onResize("org")}
                             sortDir={colSort?.key === "org" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "org", dir })}
+                            onSort={() => toggleColSort("org")}
                             filter={
                               <HeaderFilter
                                 colKey="org"
@@ -780,7 +780,7 @@ export default function Experiences() {
                             width={colW.period}
                             onResize={onResize("period")}
                             sortDir={colSort?.key === "period" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "period", dir })}
+                            onSort={() => toggleColSort("period")}
                             filter={
                               <HeaderFilter
                                 colKey="period"
@@ -799,7 +799,7 @@ export default function Experiences() {
                             width={colW.keywords}
                             onResize={onResize("keywords")}
                             sortDir={colSort?.key === "keywords" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "keywords", dir })}
+                            onSort={() => toggleColSort("keywords")}
                             filter={
                               <HeaderFilter
                                 colKey="keywords"
@@ -818,7 +818,7 @@ export default function Experiences() {
                             width={colW.importance}
                             onResize={onResize("importance")}
                             sortDir={colSort?.key === "importance" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "importance", dir })}
+                            onSort={() => toggleColSort("importance")}
                           />
                         )}
                         {isVisible("updated") && (
@@ -827,7 +827,7 @@ export default function Experiences() {
                             width={colW.updated}
                             onResize={onResize("updated")}
                             sortDir={colSort?.key === "updated" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "updated", dir })}
+                            onSort={() => toggleColSort("updated")}
                             filter={
                               <HeaderFilter
                                 colKey="updated"
@@ -846,7 +846,7 @@ export default function Experiences() {
                             width={colW.manage}
                             onResize={onResize("manage")}
                             sortDir={colSort?.key === "manage" ? colSort.dir : null}
-                            onSort={(dir) => dir === null ? setColSort(null) : setColSort({ key: "manage", dir })}
+                            onSort={() => toggleColSort("manage")}
                             filter={
                               <HeaderFilter
                                 colKey="manage"
