@@ -32,11 +32,11 @@ export function Tag({ tone = "neutral", onRemove, children, style, ...rest }: Ta
       {onRemove && (
         <button
           type="button"
-          aria-label="remove"
+          aria-label="삭제"
           onClick={onRemove}
           style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
-            width: 14, height: 14, padding: 0, border: "none", background: "transparent",
+            width: 20, height: 20, padding: 0, border: "none", background: "transparent",
             color: "var(--text-subtle-color)", cursor: "pointer", borderRadius: 3,
           }}
         >
