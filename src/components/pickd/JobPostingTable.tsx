@@ -1278,17 +1278,7 @@ export function JobPostingTable() {
                           }
                         })}
                       <JobRowActionCell
-                        job={{
-                          starred: job.starred,
-                          updatedAt: job.updatedAt,
-                          url: job.url,
-                          status: job.status as JobMenuStatus,
-                        }}
-                        onStar={() => toggleStarred(job.id)}
                         onEdit={() => setModalJobId(job.id)}
-                        onDuplicate={() => duplicateJob(job.id)}
-                        onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
-                        onDelete={() => deleteJob(job.id)}
                       />
                     </tr>
                   ))}

@@ -953,12 +953,7 @@ export default function Experiences() {
                               </td>
                             )}
                             <ExpRowActionCell
-                              item={{ updatedAt: i.updatedAt }}
-                              jobs={[]}
                               onEdit={() => setDetailId(i.id)}
-                              onDuplicate={() => duplicateItem(i.id)}
-                              onLinkJob={() => {}}
-                              onDelete={() => confirmDelete([i.id])}
                             />
                           </tr>
                         );
