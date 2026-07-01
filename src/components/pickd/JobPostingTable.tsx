@@ -947,7 +947,7 @@ export function JobPostingTable() {
               {resizingKey && (
                 <div
                   ref={guideLineRef}
-                  className="absolute top-0 bottom-0 w-px bg-primary/40 z-20 pointer-events-none"
+                  className="absolute top-0 bottom-0 w-px bg-gray-400 z-20 pointer-events-none"
                   style={{ left: 0 }}
                 />
               )}
