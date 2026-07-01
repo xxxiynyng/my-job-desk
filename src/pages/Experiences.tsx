@@ -160,6 +160,19 @@ const MIN_EXP_WIDTHS: Record<string, number> = {
   manage: 60,
 };
 
+// 컬럼 최대 너비 — 내용보다 훨씬 넓게 드래그해서 헤더·본문 사이에 큰 빈 공백이
+// 남는 것을 방지. 저장된 값이 이보다 크면 useResizableCols가 자동으로 clamp한다.
+const MAX_EXP_WIDTHS: Record<string, number> = {
+  type: 160,
+  name: 420,
+  org: 280,
+  period: 220,
+  keywords: 340,
+  importance: 160,
+  updated: 170,
+  manage: 140,
+};
+
 const PINNED_FILTER_CHIPS = ["전체", "프로젝트", "대외활동", "인턴", "공모전", "자격증"];
 const MORE_FILTER_CHIPS = ["봉사활동", "교환학생", "알바", "학부연구생", "어학", "수상", "수강과목", "교육 이수"];
 
@@ -389,6 +402,7 @@ export default function Experiences() {
     "pickd.experiences.colWidths.v2",
     DEFAULT_EXP_WIDTHS,
     MIN_EXP_WIDTHS,
+    MAX_EXP_WIDTHS,
   );
   // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
   const dividers = useMemo(() => {

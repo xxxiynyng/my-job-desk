@@ -71,6 +71,22 @@ const COL_MIN_WIDTHS: Record<string, number> = {
   updated: 95,        // 최근 수정일
 };
 
+// 컬럼 최대 너비 — 내용보다 훨씬 넓게 드래그해서 헤더·본문 사이에 큰 빈 공백이
+// 남는 것을 방지. 저장된 값이 이보다 크면 useResizableCols가 자동으로 clamp한다.
+const COL_MAX_WIDTHS: Record<string, number> = {
+  company: 200,
+  title: 320,
+  role: 160,
+  employType: 140,
+  dday: 120,
+  deadline: 160,
+  status: 160,
+  linked: 160,
+  industry: 160,
+  registeredAt: 160,
+  updated: 160,
+};
+
 // ── 타입 ──────────────────────────────────────────────────────────
 type StatusType = "서류작성중" | "지원완료" | "서류합격" | "필기진행" | "면접진행" | "최종합격" | "불합격";
 const ACTIVE_STATUSES: StatusType[] = ["서류작성중", "지원완료", "서류합격", "필기진행", "면접진행"];
@@ -661,7 +677,12 @@ export function JobPostingTable() {
     });
 
   // 컬럼 너비 (최소 너비 적용)
-  const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols("pickd.jobs.colWidths", DEFAULT_WIDTHS);
+  const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols(
+    "pickd.jobs.colWidths",
+    DEFAULT_WIDTHS,
+    COL_MIN_WIDTHS,
+    COL_MAX_WIDTHS,
+  );
   const widths = useMemo(() => {
     const result: Record<string, number> = {};
     for (const key of Object.keys(rawWidths)) {

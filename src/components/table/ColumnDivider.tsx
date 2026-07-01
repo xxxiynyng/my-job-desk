@@ -14,9 +14,12 @@ type ColumnDividerProps = {
  * 한 번만 그린다(셀마다 따로 그리지 않으므로 레이어가 어긋날 수 없음).
  * top-0 bottom-0으로 테이블 전체 높이(헤더+바디)를 관통.
  *
- * 색상은 행 구분선과 동일한 --border 토큰 재사용: 평상시 50% 알파, hover/리사이즈 중엔 100%.
+ * 평상시엔 완전히 숨겨져 있다가(투명), 리사이즈 히트박스에 마우스를 올리거나 실제
+ * 드래그 중일 때만 --border 토큰 색으로 나타난다 — "세로선은 전부 hover로"라는 결정에 따름.
+ * 리사이즈할 수 없는 고정 경계(체크박스·즐겨찾기 열 등)는 hover로 나타낼 대상이 없으므로
+ * 아예 그리지 않는다(onResizeMouseDown 없으면 null).
  * 두께는 항상 1px, 위치는 정수로 반올림해서 서브픽셀 렌더링으로 선이 두껍게/흐릿하게
- * 보이는 것을 방지한다(호출부에서 left 값을 Math.round 해서 넘긴다는 전제).
+ * 보이는 것을 방지한다.
  *
  * 리사이즈 가능한 경계는 8px 히트박스를 경계에서 "왼쪽으로만" 확장해서 두되, 실제로는
  * 경계 바로 앞 2px는 비워 둔다(hitbox: [left-8, left-2]). 오른쪽 옆 컬럼의 그립(DragHandle,
@@ -27,16 +30,16 @@ type ColumnDividerProps = {
 export function ColumnDivider({ left, onResizeMouseDown, active }: ColumnDividerProps) {
   const x = Math.round(left);
   if (!onResizeMouseDown) {
-    return <div className="absolute top-0 bottom-0 w-px bg-border/50 pointer-events-none" style={{ left: x }} />;
+    return null;
   }
   return (
     // 폭 0인 위치 기준점 — 자식은 모두 absolute라 이 컨테이너의 실제 렌더 크기는 없지만,
     // 자식을 hover해도 group/resize의 :hover는 이 조상까지 정상적으로 전파된다.
     <div className="group/resize absolute top-0 bottom-0 z-20" style={{ left: x }}>
-      {/* 항상 보이는 1px 선 — 실제 컬럼 경계(x)에 정확히 고정. 히트박스 크기와 무관하게 위치 불변 */}
+      {/* 평상시 투명, hover/리사이즈 중에만 보이는 1px 선 — 실제 컬럼 경계(x)에 정확히 고정 */}
       <div
         className={cn(
-          "absolute inset-y-0 left-0 w-px bg-border/50 transition-colors duration-150 pointer-events-none group-hover/resize:bg-border",
+          "absolute inset-y-0 left-0 w-px bg-transparent transition-colors duration-150 pointer-events-none group-hover/resize:bg-border",
           active && "bg-border",
         )}
       />
