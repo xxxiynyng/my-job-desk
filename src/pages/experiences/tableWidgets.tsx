@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, GripVertical, Layers, Pencil, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ResizeHandle } from "@/components/table/ResizeHandle";
 import { cn } from "@/lib/utils";
 import { type Item } from "./presets";
 
@@ -19,24 +18,17 @@ import { type Item } from "./presets";
 
 export function ResizableHead({
   label,
-  width,
-  onResize,
   filter,
   sortDir,
   onSort,
 }: {
   label: string;
-  width?: number;
-  onResize?: (e: React.MouseEvent) => void;
   filter?: React.ReactNode;
   sortDir?: "asc" | "desc" | null;
   onSort?: () => void;
 }) {
   return (
     <th className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
-      {onSort && (
-        <GripVertical className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-      )}
       <span className="inline-flex items-center gap-1">
         {onSort ? (
           <button
@@ -56,7 +48,6 @@ export function ResizableHead({
         )}
         {filter}
       </span>
-      {onResize && <ResizeHandle onMouseDown={onResize} />}
     </th>
   );
 }

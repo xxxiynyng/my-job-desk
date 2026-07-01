@@ -70,7 +70,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useResizableCols } from "@/hooks/useResizableCols";
-import { ResizeHandle } from "@/components/table/ResizeHandle";
+import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
@@ -385,11 +385,24 @@ export default function Experiences() {
     } catch {}
     return new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key));
   });
-  const { widths: colW, onMouseDown: onResize } = useResizableCols(
+  const { widths: colW, onMouseDown: onResize, resizingKey } = useResizableCols(
     "pickd.experiences.colWidths.v2",
     DEFAULT_EXP_WIDTHS,
     MIN_EXP_WIDTHS,
   );
+  // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
+  const dividers = useMemo(() => {
+    type Divider = { key: string; left: number; onResizeMouseDown?: (e: React.MouseEvent) => void; active?: boolean };
+    const items: Divider[] = [];
+    let x = 48; // 체크박스
+    items.push({ key: "after-checkbox", left: x });
+    for (const col of ALL_COLUMNS) {
+      if (!visibleCols.has(col.key)) continue;
+      x += colW[col.key] ?? DEFAULT_EXP_WIDTHS[col.key] ?? 100;
+      items.push({ key: col.key, left: x, onResizeMouseDown: onResize(col.key), active: resizingKey === col.key });
+    }
+    return items;
+  }, [colW, visibleCols, onResize, resizingKey]);
 
   const resetCols = () => {
     setVisibleCols(new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key)));
@@ -902,7 +915,10 @@ export default function Experiences() {
                   readMeta={readMeta}
                 />
               ) : view === "list" ? (
-                <div className="bg-card border border-border rounded-xl overflow-hidden">
+                <div className="bg-card border border-border rounded-xl overflow-hidden relative">
+                  {dividers.map((d) => (
+                    <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
+                  ))}
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <table className="w-full min-w-full text-[13px] table-fixed">
                     {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
@@ -932,8 +948,6 @@ export default function Experiences() {
                         {isVisible("type") && (
                           <ResizableHead
                             label="유형"
-                            width={colW.type}
-                            onResize={onResize("type")}
                             sortDir={colSort?.key === "type" ? colSort.dir : null}
                             onSort={() => toggleColSort("type")}
                             filter={
@@ -951,8 +965,6 @@ export default function Experiences() {
                         {isVisible("name") && (
                           <ResizableHead
                             label="항목명"
-                            width={colW.name}
-                            onResize={onResize("name")}
                             sortDir={colSort?.key === "name" ? colSort.dir : null}
                             onSort={() => toggleColSort("name")}
                             filter={
@@ -970,8 +982,6 @@ export default function Experiences() {
                         {isVisible("org") && (
                           <ResizableHead
                             label="기관/소속"
-                            width={colW.org}
-                            onResize={onResize("org")}
                             sortDir={colSort?.key === "org" ? colSort.dir : null}
                             onSort={() => toggleColSort("org")}
                             filter={
@@ -989,8 +999,6 @@ export default function Experiences() {
                         {isVisible("period") && (
                           <ResizableHead
                             label="기간"
-                            width={colW.period}
-                            onResize={onResize("period")}
                             sortDir={colSort?.key === "period" ? colSort.dir : null}
                             onSort={() => toggleColSort("period")}
                             filter={
@@ -1008,8 +1016,6 @@ export default function Experiences() {
                         {isVisible("keywords") && (
                           <ResizableHead
                             label="주요 키워드"
-                            width={colW.keywords}
-                            onResize={onResize("keywords")}
                             sortDir={colSort?.key === "keywords" ? colSort.dir : null}
                             onSort={() => toggleColSort("keywords")}
                             filter={
@@ -1027,8 +1033,6 @@ export default function Experiences() {
                         {isVisible("importance") && (
                           <ResizableHead
                             label="중요도"
-                            width={colW.importance}
-                            onResize={onResize("importance")}
                             sortDir={colSort?.key === "importance" ? colSort.dir : null}
                             onSort={() => toggleColSort("importance")}
                           />
@@ -1036,8 +1040,6 @@ export default function Experiences() {
                         {isVisible("updated") && (
                           <ResizableHead
                             label="최근 수정"
-                            width={colW.updated}
-                            onResize={onResize("updated")}
                             sortDir={colSort?.key === "updated" ? colSort.dir : null}
                             onSort={() => toggleColSort("updated")}
                             filter={
@@ -1055,8 +1057,6 @@ export default function Experiences() {
                         {isVisible("manage") && (
                           <ResizableHead
                             label="관리 상태"
-                            width={colW.manage}
-                            onResize={onResize("manage")}
                             sortDir={colSort?.key === "manage" ? colSort.dir : null}
                             onSort={() => toggleColSort("manage")}
                             filter={

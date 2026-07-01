@@ -47,8 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useResizableCols } from "@/hooks/useResizableCols";
-import { ResizeHandle } from "@/components/table/ResizeHandle";
-import { ResizeGuideLine } from "@/components/table/ResizeGuideLine";
+import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -577,12 +576,10 @@ function SortableColumnHeader({
   col,
   colSort,
   toggleColSort,
-  onResizeMouseDown,
 }: {
   col: { key: ColumnKey; label: string };
   colSort: { key: string; dir: "asc" | "desc" } | null;
   toggleColSort: (key: string) => void;
-  onResizeMouseDown: (e: React.MouseEvent) => void;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: col.key });
@@ -609,7 +606,6 @@ function SortableColumnHeader({
           {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
         </span>
       </button>
-      <ResizeHandle onMouseDown={onResizeMouseDown} />
     </th>
   );
 }
@@ -652,7 +648,7 @@ export function JobPostingTable() {
     });
 
   // 컬럼 너비 (최소 너비 적용)
-  const { widths: rawWidths, onMouseDown, resizingKey, resizingStartX } = useResizableCols("pickd.jobs.colWidths", DEFAULT_WIDTHS);
+  const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols("pickd.jobs.colWidths", DEFAULT_WIDTHS);
   const widths = useMemo(() => {
     const result: Record<string, number> = {};
     for (const key of Object.keys(rawWidths)) {
@@ -673,11 +669,29 @@ export function JobPostingTable() {
     } catch {}
   }, [colOrder]);
   const tableWrapRef = useRef<HTMLDivElement>(null);
-  const guideLineRef = useRef<HTMLDivElement>(null);
   const orderedCols = useMemo(
     () => colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean),
     [colOrder],
   );
+  // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
+  const dividers = useMemo(() => {
+    type Divider = { key: string; left: number; onResizeMouseDown?: (e: React.MouseEvent) => void; active?: boolean };
+    const items: Divider[] = [];
+    let x = 48; // 체크박스
+    items.push({ key: "after-checkbox", left: x });
+    x += 36; // ★
+    items.push({ key: "after-star", left: x });
+    x += widths.company;
+    items.push({ key: "company", left: x, onResizeMouseDown: onMouseDown("company"), active: resizingKey === "company" });
+    x += widths.title;
+    items.push({ key: "title", left: x, onResizeMouseDown: onMouseDown("title"), active: resizingKey === "title" });
+    for (const col of orderedCols) {
+      if (!visibleCols.has(col.key)) continue;
+      x += Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
+      items.push({ key: col.key, left: x, onResizeMouseDown: onMouseDown(col.key), active: resizingKey === col.key });
+    }
+    return items;
+  }, [widths, orderedCols, visibleCols, onMouseDown, resizingKey]);
   const colSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const handleColumnDragEnd = useCallback(({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -733,23 +747,6 @@ export function JobPostingTable() {
   // 필터/검색이 바뀌면 펼침 상태 초기화 — 목록 길이가 들쭉날쭉해지는 것을 방지
   useEffect(() => setTableExpanded(false), [activeFilter, search]);
 
-  useEffect(() => {
-    if (!resizingKey) return;
-    const wrap = tableWrapRef.current;
-    if (!wrap) return;
-    const line = guideLineRef.current;
-    if (line) {
-      const rect = wrap.getBoundingClientRect();
-      line.style.left = `${resizingStartX.current - rect.left + wrap.scrollLeft}px`;
-    }
-    const onMove = (e: MouseEvent) => {
-      if (!guideLineRef.current) return;
-      const rect = wrap.getBoundingClientRect();
-      guideLineRef.current.style.left = `${e.clientX - rect.left + wrap.scrollLeft}px`;
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [resizingKey, resizingStartX]);
 
   // 8개까지만 기본 노출, 나머지는 "더보기"로 — 결과 수가 줄어도 영역 높이는 유지됨
   const visibleJobs = useMemo(
@@ -994,7 +991,9 @@ export function JobPostingTable() {
           ) : (
             <>
             <div ref={tableWrapRef} className="overflow-x-auto relative">
-              {resizingKey && <ResizeGuideLine ref={guideLineRef} left={0} />}
+              {dividers.map((d) => (
+                <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
+              ))}
               <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
               <table className="w-full min-w-full text-[13px] table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
@@ -1029,7 +1028,6 @@ export function JobPostingTable() {
                           {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
                         </span>
                       </button>
-                      <ResizeHandle onMouseDown={onMouseDown("company")} />
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
@@ -1041,7 +1039,6 @@ export function JobPostingTable() {
                           {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
                         </span>
                       </button>
-                      <ResizeHandle onMouseDown={onMouseDown("title")} />
                     </th>
                     {/* 드래그 가능 컬럼 */}
                     <SortableContext
@@ -1056,7 +1053,6 @@ export function JobPostingTable() {
                             col={col}
                             colSort={colSort}
                             toggleColSort={toggleColSort}
-                            onResizeMouseDown={onMouseDown(col.key)}
                           />
                         ))}
                     </SortableContext>
