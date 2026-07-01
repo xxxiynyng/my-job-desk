@@ -25,12 +25,16 @@ export function useResizableCols(
     } catch {}
   }, [storageKey, widths]);
 
+  const [resizingKey, setResizingKey] = useState<string | null>(null);
+  const resizingStartX = useRef<number>(0);
   const dragRef = useRef<{ key: string; startX: number; startW: number } | null>(null);
 
   const onMouseDown = useCallback(
     (key: string) => (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      setResizingKey(key);
+      resizingStartX.current = e.clientX;
       dragRef.current = {
         key,
         startX: e.clientX,
@@ -38,6 +42,7 @@ export function useResizableCols(
       };
       const onMove = (ev: MouseEvent) => {
         if (!dragRef.current) return;
+        resizingStartX.current = ev.clientX;
         const dx = ev.clientX - dragRef.current.startX;
         const min = minWidths?.[dragRef.current.key] ?? 60;
         const next = Math.max(min, dragRef.current.startW + dx);
@@ -45,6 +50,7 @@ export function useResizableCols(
       };
       const onUp = () => {
         dragRef.current = null;
+        setResizingKey(null);
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("mouseup", onUp);
         document.body.style.cursor = "";
@@ -56,7 +62,7 @@ export function useResizableCols(
     [widths, defaults],
   );
 
-  return { widths, onMouseDown };
+  return { widths, onMouseDown, resizingKey, resizingStartX };
 }
 
 /** 컬럼 헤더 오른쪽 끝의 드래그 핸들 */

@@ -593,7 +593,7 @@ export function JobPostingTable() {
     });
 
   // 컬럼 너비 (최소 너비 적용)
-  const { widths: rawWidths, onMouseDown } = useResizableCols("pickd.jobs.colWidths", DEFAULT_WIDTHS);
+  const { widths: rawWidths, onMouseDown, resizingKey, resizingStartX } = useResizableCols("pickd.jobs.colWidths", DEFAULT_WIDTHS);
   const widths = useMemo(() => {
     const result: Record<string, number> = {};
     for (const key of Object.keys(rawWidths)) {
@@ -615,6 +615,8 @@ export function JobPostingTable() {
   }, [colOrder]);
   const dragColRef = useRef<number | null>(null);
   const [overColIdx, setOverColIdx] = useState<number | null>(null);
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+  const guideLineRef = useRef<HTMLDivElement>(null);
   const orderedCols = useMemo(
     () => colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean),
     [colOrder],
@@ -680,6 +682,24 @@ export function JobPostingTable() {
 
   // 필터/검색이 바뀌면 펼침 상태 초기화 — 목록 길이가 들쭉날쭉해지는 것을 방지
   useEffect(() => setTableExpanded(false), [activeFilter, search]);
+
+  useEffect(() => {
+    if (!resizingKey) return;
+    const wrap = tableWrapRef.current;
+    if (!wrap) return;
+    const line = guideLineRef.current;
+    if (line) {
+      const rect = wrap.getBoundingClientRect();
+      line.style.left = `${resizingStartX.current - rect.left + wrap.scrollLeft}px`;
+    }
+    const onMove = (e: MouseEvent) => {
+      if (!guideLineRef.current) return;
+      const rect = wrap.getBoundingClientRect();
+      guideLineRef.current.style.left = `${e.clientX - rect.left + wrap.scrollLeft}px`;
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [resizingKey, resizingStartX]);
 
   // 8개까지만 기본 노출, 나머지는 "더보기"로 — 결과 수가 줄어도 영역 높이는 유지됨
   const visibleJobs = useMemo(
@@ -923,7 +943,14 @@ export function JobPostingTable() {
             />
           ) : (
             <>
-            <div className="overflow-x-auto">
+            <div ref={tableWrapRef} className="overflow-x-auto relative">
+              {resizingKey && (
+                <div
+                  ref={guideLineRef}
+                  className="absolute top-0 bottom-0 w-px bg-primary/40 z-20 pointer-events-none"
+                  style={{ left: 0 }}
+                />
+              )}
               <table className="w-full min-w-full text-[13px] table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                 <colgroup>
@@ -940,16 +967,16 @@ export function JobPostingTable() {
                   <col style={{ width: 56 }} />
                 </colgroup>
                 <thead>
-                  <tr className="border-b border-border bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
-                    <th className="w-12 pl-1 pr-3 py-3">
+                  <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
+                    <th className="w-12 pl-1 pr-3 py-3 border-b border-border">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                       </div>
                     </th>
-                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
+                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap border-b border-border">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap border-b border-border"
                     >
                       <button onClick={() => toggleColSort("company")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         기업명
@@ -961,7 +988,7 @@ export function JobPostingTable() {
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap border-b border-border"
                     >
                       <button onClick={() => toggleColSort("title")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         공고명
@@ -988,7 +1015,7 @@ export function JobPostingTable() {
                               setOverColIdx(null);
                             }}
                             className={cn(
-                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap",
+                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap border-b border-border",
                               isOver && "bg-primary/10",
                             )}
                           >
@@ -1004,7 +1031,7 @@ export function JobPostingTable() {
                         );
                       })}
                     {/* 액션 거터 헤더 — JobRowActionCell td(w-14)에 대응 */}
-                    <th className="w-14 bg-[#F8FAFC]" />
+                    <th className="w-14 bg-[#F8FAFC] border-b border-border" />
                   </tr>
                 </thead>
                 <tbody>
