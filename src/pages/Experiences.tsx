@@ -34,7 +34,6 @@ import {
   Pencil,
   MoreHorizontal,
   EyeOff,
-  GripVertical,
   Wand2,
   Trash2,
   ChevronDown,
@@ -901,6 +900,7 @@ export default function Experiences() {
                 />
               ) : view === "list" ? (
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <table className="w-full min-w-full text-[13px] table-fixed">
                     {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                     <colgroup>
@@ -1071,34 +1071,33 @@ export default function Experiences() {
                         <th className="w-14 bg-[#F8FAFC]" />
                       </tr>
                     </thead>
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                      <SortableContext items={sortedFiltered.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-                        <tbody>
-                          {sortedFiltered.map((i) => (
-                            <SortableExpRow
-                              key={i.id}
-                              item={i}
-                              selected={selected}
-                              isVisible={isVisible}
-                              setDetailId={setDetailId}
-                              toggleSelect={toggleSelect}
-                              duplicateItem={duplicateItem}
-                              confirmDelete={confirmDelete}
-                              setMergeOpen={setMergeOpen}
-                              readMeta={readMeta}
-                            />
-                          ))}
-                          {sortedFiltered.length === 0 && (
-                            <tr>
-                              <td colSpan={20} className="px-4 py-10 text-center text-xs text-muted-foreground">
-                                해당하는 항목이 없습니다.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </SortableContext>
-                    </DndContext>
+                    <SortableContext items={sortedFiltered.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                      <tbody>
+                        {sortedFiltered.map((i) => (
+                          <SortableExpRow
+                            key={i.id}
+                            item={i}
+                            selected={selected}
+                            isVisible={isVisible}
+                            setDetailId={setDetailId}
+                            toggleSelect={toggleSelect}
+                            duplicateItem={duplicateItem}
+                            confirmDelete={confirmDelete}
+                            setMergeOpen={setMergeOpen}
+                            readMeta={readMeta}
+                          />
+                        ))}
+                        {sortedFiltered.length === 0 && (
+                          <tr>
+                            <td colSpan={20} className="px-4 py-10 text-center text-xs text-muted-foreground">
+                              해당하는 항목이 없습니다.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </SortableContext>
                   </table>
+                  </DndContext>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-3">
