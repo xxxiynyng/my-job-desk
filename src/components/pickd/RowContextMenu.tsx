@@ -210,6 +210,8 @@ export function ExpRowContextMenu({
   onDuplicate,
   onLinkJob,
   onDelete,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: {
   item: {
     updatedAt?: string;
@@ -219,14 +221,24 @@ export function ExpRowContextMenu({
   onDuplicate: () => void;
   onLinkJob: (jobId: string) => void;
   onDelete: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
 
   const q = search.toLowerCase();
   const show = (label: string) => !q || label.toLowerCase().includes(q);
 
+  const handleOpenChange = (o: boolean) => {
+    if (!o) setSearch("");
+    controlledOnOpenChange?.(o);
+  };
+
   return (
-    <DropdownMenu onOpenChange={(open) => { if (!open) setSearch(""); }}>
+    <DropdownMenu
+      open={controlledOpen}
+      onOpenChange={controlledOpen !== undefined ? handleOpenChange : (o) => { if (!o) setSearch(""); }}
+    >
       <DropdownMenuTrigger asChild>
         <GripTrigger />
       </DropdownMenuTrigger>

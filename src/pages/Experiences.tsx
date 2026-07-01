@@ -1,4 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   Plus,
   Download,
@@ -157,6 +172,147 @@ const EXTRACT_MOCK_CANDIDATES: { id: string; type: ItemType; name: string; summa
   { id: "ec3", type: "대외활동", name: "청년 창업 서포터즈", summary: "2024.03 ~ 2024.06 · 기획 파트" },
 ];
 
+function SortableExpRow({
+  item,
+  selected,
+  isVisible,
+  setDetailId,
+  toggleSelect,
+  duplicateItem,
+  confirmDelete,
+  setMergeOpen,
+  readMeta,
+}: {
+  item: Item;
+  selected: Set<string>;
+  isVisible: (k: ColumnKey) => boolean;
+  setDetailId: (id: string) => void;
+  toggleSelect: (id: string) => void;
+  duplicateItem: (id: string) => void;
+  confirmDelete: (ids: string[]) => void;
+  setMergeOpen: (open: boolean) => void;
+  readMeta: (i: Item) => { org: string; period: string };
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  const { org, period } = readMeta(item);
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className={cn(
+        "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
+        selected.has(item.id) && "bg-accent/30",
+      )}
+      onClick={() => setDetailId(item.id)}
+    >
+      <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+        <div
+          ref={setActivatorNodeRef}
+          {...listeners}
+          onClick={() => setMenuOpen(true)}
+          className="absolute left-0.5 top-1/2 -translate-y-1/2 w-6 h-6 z-20 cursor-grab active:cursor-grabbing rounded"
+        />
+        <ExpRowContextMenu
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          item={{ updatedAt: item.updatedAt }}
+          jobs={[]}
+          onEdit={() => setDetailId(item.id)}
+          onDuplicate={() => duplicateItem(item.id)}
+          onLinkJob={() => {}}
+          onDelete={() => confirmDelete([item.id])}
+        />
+        <div className="ml-5">
+          <Checkbox
+            checked={selected.has(item.id)}
+            onCheckedChange={() => toggleSelect(item.id)}
+            className="h-3.5 w-3.5"
+          />
+        </div>
+      </td>
+      {isVisible("type") && (
+        <td className="px-4 py-2.5 overflow-hidden">
+          <TypeChip type={item.type} />
+        </td>
+      )}
+      {isVisible("name") && (
+        <td className="px-4 py-2.5 text-sm font-semibold text-gray-900 overflow-hidden">
+          <span className="flex items-center gap-1.5 min-w-0">
+            <span className="truncate">{item.name}</span>
+          </span>
+        </td>
+      )}
+      {isVisible("org") && (
+        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+          <span className="block truncate">{org || "—"}</span>
+        </td>
+      )}
+      {isVisible("period") && (
+        <td className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
+          <span className="block truncate">{period || "—"}</span>
+        </td>
+      )}
+      {isVisible("keywords") && (
+        <td className="px-4 py-2.5 overflow-hidden">
+          <div className="flex flex-nowrap gap-1 overflow-hidden">
+            {item.keywords.slice(0, 3).map((k) => (
+              <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
+                {k}
+              </span>
+            ))}
+            {item.keywords.length > 3 && (
+              <span className="text-[10px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
+            )}
+          </div>
+        </td>
+      )}
+      {isVisible("importance") && (
+        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+          <span className="block truncate">{item.importance ?? "—"}</span>
+        </td>
+      )}
+      {isVisible("updated") && (
+        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+          <span className="block truncate">{item.updatedAt ?? "—"}</span>
+        </td>
+      )}
+      {isVisible("manage") && (
+        <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+          <ManageIndicator
+            item={item}
+            onMerge={() => {
+              setDetailId(item.id);
+              setMergeOpen(true);
+            }}
+          />
+        </td>
+      )}
+      <ExpRowActionCell onEdit={() => setDetailId(item.id)} />
+    </tr>
+  );
+}
+
+const LS_SORT_MODE = "pickd.experiences.sortMode";
+
 export default function Experiences() {
   // ── 탭 허브 상태 (경험·스펙 DB / 기본정보 / 파일함) — ?tab= 쿼리로 딥링크 ──
   const [searchParams, setSearchParams] = useSearchParams();
@@ -168,15 +324,20 @@ export default function Experiences() {
 
   // ── 경험 DB state ──
   const [items, setItems] = useState<Item[]>(() => {
-    if (typeof window === "undefined") return INITIAL_EXPERIENCES;
+    if (typeof window === "undefined") return INITIAL_EXPERIENCES.map((i, idx) => ({ ...i, sortOrder: idx }));
     try {
       const raw = localStorage.getItem(SHARED_EXP_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Item[];
-        if (Array.isArray(parsed) && parsed.length) return parsed;
+        if (Array.isArray(parsed) && parsed.length) {
+          if (parsed.some((i) => i.sortOrder === undefined)) {
+            return parsed.map((i, idx) => ({ ...i, sortOrder: i.sortOrder ?? idx }));
+          }
+          return parsed;
+        }
       }
     } catch {}
-    return INITIAL_EXPERIENCES;
+    return INITIAL_EXPERIENCES.map((i, idx) => ({ ...i, sortOrder: idx }));
   });
   useEffect(() => {
     try {
@@ -378,7 +539,22 @@ export default function Experiences() {
   };
 
   const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const [sortMode, setSortMode] = useState<"custom" | null>(() => {
+    try {
+      return localStorage.getItem(LS_SORT_MODE) === "custom" ? "custom" : null;
+    } catch {
+      return null;
+    }
+  });
+  useEffect(() => {
+    try {
+      if (sortMode === "custom") localStorage.setItem(LS_SORT_MODE, "custom");
+      else localStorage.removeItem(LS_SORT_MODE);
+    } catch {}
+  }, [sortMode]);
+
   const toggleColSort = (key: string) => {
+    setSortMode(null);
     setColSort((prev) => {
       if (!prev || prev.key !== key) return { key, dir: "asc" };
       if (prev.dir === "asc") return { key, dir: "desc" };
@@ -386,7 +562,27 @@ export default function Experiences() {
     });
   };
 
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent) => {
+      if (!over || active.id === over.id) return;
+      setItems((prev) => {
+        const oldIdx = prev.findIndex((i) => i.id === String(active.id));
+        const newIdx = prev.findIndex((i) => i.id === String(over.id));
+        if (oldIdx === -1 || newIdx === -1) return prev;
+        return arrayMove(prev, oldIdx, newIdx).map((item, idx) => ({ ...item, sortOrder: idx }));
+      });
+      setSortMode("custom");
+      setColSort(null);
+    },
+    [],
+  );
+
   const sortedFiltered = useMemo(() => {
+    if (sortMode === "custom") {
+      return [...filtered].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    }
     if (!colSort) return filtered;
     return [...filtered].sort((a, b) => {
       const av = getColValue(a, colSort.key);
@@ -396,7 +592,7 @@ export default function Experiences() {
       const cmp = astr.localeCompare(bstr, "ko", { numeric: true });
       return colSort.dir === "asc" ? cmp : -cmp;
     });
-  }, [filtered, colSort]);
+  }, [filtered, colSort, sortMode]);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -875,110 +1071,33 @@ export default function Experiences() {
                         <th className="w-14 bg-[#F8FAFC]" />
                       </tr>
                     </thead>
-                    <tbody>
-                      {sortedFiltered.map((i) => {
-                        const { org, period } = readMeta(i);
-                        return (
-                          <tr
-                            key={i.id}
-                            className={cn(
-                              "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
-                              selected.has(i.id) && "bg-accent/30",
-                            )}
-                            onClick={() => setDetailId(i.id)}
-                          >
-                            {/* 그립 버튼 + 체크박스 */}
-                            <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                              <ExpRowContextMenu
-                                item={{ updatedAt: i.updatedAt }}
-                                jobs={[]}
-                                onEdit={() => setDetailId(i.id)}
-                                onDuplicate={() => duplicateItem(i.id)}
-                                onLinkJob={() => {}}
-                                onDelete={() => confirmDelete([i.id])}
-                              />
-                              <div className="ml-5">
-                                <Checkbox
-                                  checked={selected.has(i.id)}
-                                  onCheckedChange={() => toggleSelect(i.id)}
-                                  className="h-3.5 w-3.5"
-                                />
-                              </div>
-                            </td>
-                            {isVisible("type") && (
-                              <td className="px-4 py-2.5 overflow-hidden">
-                                <TypeChip type={i.type} />
-                              </td>
-                            )}
-                            {isVisible("name") && (
-                              <td className="px-4 py-2.5 text-sm font-semibold text-gray-900 overflow-hidden">
-                                <span className="flex items-center gap-1.5 min-w-0">
-                                  <span className="truncate">{i.name}</span>
-                                </span>
-                              </td>
-                            )}
-                            {isVisible("org") && (
-                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-                                <span className="block truncate">{org || "—"}</span>
-                              </td>
-                            )}
-                            {isVisible("period") && (
-                              <td className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
-                                <span className="block truncate">{period || "—"}</span>
-                              </td>
-                            )}
-                            {isVisible("keywords") && (
-                              <td className="px-4 py-2.5 overflow-hidden">
-                                <div className="flex flex-nowrap gap-1 overflow-hidden">
-                                  {i.keywords.slice(0, 3).map((k) => (
-                                    <span
-                                      key={k}
-                                      className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0"
-                                    >
-                                      {k}
-                                    </span>
-                                  ))}
-                                  {i.keywords.length > 3 && (
-                                    <span className="text-[10px] text-muted-foreground shrink-0">+{i.keywords.length - 3}</span>
-                                  )}
-                                </div>
-                              </td>
-                            )}
-                            {isVisible("importance") && (
-                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-                                <span className="block truncate">{i.importance ?? "—"}</span>
-                              </td>
-                            )}
-                            {isVisible("updated") && (
-                              <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-                                <span className="block truncate">{i.updatedAt ?? "—"}</span>
-                              </td>
-                            )}
-                            {isVisible("manage") && (
-                              <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
-                                <ManageIndicator
-                                  item={i}
-                                  onMerge={() => {
-                                    setDetailId(i.id);
-                                    setMergeOpen(true);
-                                  }}
-                                />
-                              </td>
-                            )}
-                            <ExpRowActionCell
-                              onEdit={() => setDetailId(i.id)}
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                      <SortableContext items={sortedFiltered.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+                        <tbody>
+                          {sortedFiltered.map((i) => (
+                            <SortableExpRow
+                              key={i.id}
+                              item={i}
+                              selected={selected}
+                              isVisible={isVisible}
+                              setDetailId={setDetailId}
+                              toggleSelect={toggleSelect}
+                              duplicateItem={duplicateItem}
+                              confirmDelete={confirmDelete}
+                              setMergeOpen={setMergeOpen}
+                              readMeta={readMeta}
                             />
-                          </tr>
-                        );
-                      })}
-                      {sortedFiltered.length === 0 && (
-                        <tr>
-                          <td colSpan={20} className="px-4 py-10 text-center text-xs text-muted-foreground">
-                            해당하는 항목이 없습니다.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
+                          ))}
+                          {sortedFiltered.length === 0 && (
+                            <tr>
+                              <td colSpan={20} className="px-4 py-10 text-center text-xs text-muted-foreground">
+                                해당하는 항목이 없습니다.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </SortableContext>
+                    </DndContext>
                   </table>
                 </div>
               ) : (

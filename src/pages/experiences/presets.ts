@@ -46,6 +46,7 @@ export type Item = {
   updatedAt?: string;
   hasMergeCandidate?: boolean;
   hasUnansweredAiQuestion?: boolean;
+  sortOrder?: number;
 };
 
 export const SHARED_EXP_KEY = "pickd.experiences.items";
