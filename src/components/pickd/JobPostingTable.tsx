@@ -598,7 +598,7 @@ function SortableColumnHeader({
         {...attributes}
         {...listeners}
         iconClassName="w-2.5 h-2.5"
-        className="absolute left-1 top-1/2 -translate-y-1/2"
+        className="absolute left-0 inset-y-1 w-[15px]"
       />
       <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
         {col.label}
