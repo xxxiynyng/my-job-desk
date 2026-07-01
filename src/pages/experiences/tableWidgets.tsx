@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ResizeHandle } from "@/hooks/useResizableCols";
+import { ResizeHandle } from "@/components/table/ResizeHandle";
 import { cn } from "@/lib/utils";
 import { type Item } from "./presets";
 

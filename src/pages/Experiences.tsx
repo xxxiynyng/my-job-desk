@@ -69,7 +69,9 @@ import {
   DropdownMenuPortal,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { useResizableCols, ResizeHandle } from "@/hooks/useResizableCols";
+import { useResizableCols } from "@/hooks/useResizableCols";
+import { ResizeHandle } from "@/components/table/ResizeHandle";
+import { DragHandle } from "@/components/table/DragHandle";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
 import { FilesPanel } from "@/components/pickd/FilesPanel";
@@ -224,11 +226,12 @@ function SortableExpRow({
       onClick={() => setDetailId(item.id)}
     >
       <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-        <div
+        <DragHandle
           ref={setActivatorNodeRef}
           {...listeners}
+          icon={null}
           onClick={() => setMenuOpen(true)}
-          className="absolute left-0.5 top-1/2 -translate-y-1/2 w-6 h-6 z-20 cursor-grab active:cursor-grabbing rounded"
+          className="absolute left-0.5 top-1/2 -translate-y-1/2 w-6 h-6 z-20 rounded"
         />
         <ExpRowContextMenu
           open={menuOpen}

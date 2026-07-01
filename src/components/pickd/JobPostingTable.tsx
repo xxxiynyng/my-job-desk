@@ -25,7 +25,6 @@ import {
   Search,
   Table as TableIcon,
   Star,
-  GripVertical,
   ArrowUp,
   ArrowDown,
   ChevronRight,
@@ -47,7 +46,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useResizableCols, ResizeHandle } from "@/hooks/useResizableCols";
+import { useResizableCols } from "@/hooks/useResizableCols";
+import { ResizeHandle } from "@/components/table/ResizeHandle";
+import { ResizeGuideLine } from "@/components/table/ResizeGuideLine";
+import { DragHandle } from "@/components/table/DragHandle";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
@@ -594,14 +596,13 @@ function SortableColumnHeader({
 
   return (
     <th ref={setNodeRef} style={style} className="relative text-left px-4 py-3 font-medium group whitespace-nowrap">
-      <div
+      <DragHandle
         ref={setActivatorNodeRef}
         {...attributes}
         {...listeners}
-        className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-      >
-        <GripVertical className="w-2.5 h-2.5 pointer-events-none" />
-      </div>
+        iconClassName="w-2.5 h-2.5"
+        className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+      />
       <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
         {col.label}
         <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
@@ -993,13 +994,7 @@ export function JobPostingTable() {
           ) : (
             <>
             <div ref={tableWrapRef} className="overflow-x-auto relative">
-              {resizingKey && (
-                <div
-                  ref={guideLineRef}
-                  className="absolute top-0 bottom-0 w-px bg-gray-400 z-20 pointer-events-none"
-                  style={{ left: 0 }}
-                />
-              )}
+              {resizingKey && <ResizeGuideLine ref={guideLineRef} left={0} />}
               <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
               <table className="w-full min-w-full text-[13px] table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
