@@ -33,7 +33,7 @@ export function ResizableHead({
   onSort?: () => void;
 }) {
   return (
-    <th style={width ? { width } : undefined} className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
+    <th className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
       {onSort && (
         <GripVertical className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       )}
