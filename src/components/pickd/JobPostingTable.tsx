@@ -1,7 +1,22 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import type React from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   ChevronDown,
   Columns3,
@@ -555,6 +570,49 @@ function KanbanView({
   );
 }
 
+// ── 드래그로 순서를 바꿀 수 있는 컬럼 헤더 ─────────────────────────────
+function SortableColumnHeader({
+  col,
+  colSort,
+  toggleColSort,
+  onResizeMouseDown,
+}: {
+  col: { key: ColumnKey; label: string };
+  colSort: { key: string; dir: "asc" | "desc" } | null;
+  toggleColSort: (key: string) => void;
+  onResizeMouseDown: (e: React.MouseEvent) => void;
+}) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+    useSortable({ id: col.key });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  return (
+    <th ref={setNodeRef} style={style} className="relative text-left px-4 py-3 font-medium group whitespace-nowrap">
+      <div
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-2.5 h-2.5 pointer-events-none" />
+      </div>
+      <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
+        {col.label}
+        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
+          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+        </span>
+      </button>
+      <ResizeHandle onMouseDown={onResizeMouseDown} />
+    </th>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────
 export function JobPostingTable() {
   const [jobs, setJobs] = useState<Job[]>(initialJobData);
@@ -613,31 +671,22 @@ export function JobPostingTable() {
       localStorage.setItem("pickd.jobs.colOrder", JSON.stringify(colOrder));
     } catch {}
   }, [colOrder]);
-  const dragColRef = useRef<number | null>(null);
-  const [overColIdx, setOverColIdx] = useState<number | null>(null);
   const tableWrapRef = useRef<HTMLDivElement>(null);
   const guideLineRef = useRef<HTMLDivElement>(null);
   const orderedCols = useMemo(
     () => colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean),
     [colOrder],
   );
-  const handleColDragStart = (i: number) => {
-    dragColRef.current = i;
-  };
-  const handleColDragOver = (e: React.DragEvent, i: number) => {
-    e.preventDefault();
-    setOverColIdx(i);
-  };
-  const handleColDrop = (i: number) => {
-    const from = dragColRef.current;
-    dragColRef.current = null;
-    setOverColIdx(null);
-    if (from === null || from === i) return;
-    const next = [...colOrder];
-    const [moved] = next.splice(from, 1);
-    next.splice(i, 0, moved);
-    setColOrder(next);
-  };
+  const colSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const handleColumnDragEnd = useCallback(({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    setColOrder((prev) => {
+      const oldIdx = prev.findIndex((k) => k === active.id);
+      const newIdx = prev.findIndex((k) => k === over.id);
+      if (oldIdx === -1 || newIdx === -1) return prev;
+      return arrayMove(prev, oldIdx, newIdx);
+    });
+  }, []);
 
   // 지원중 vs 완료 분리
   const activeJobs = useMemo(() => jobs.filter((j) => ACTIVE_STATUSES.includes(j.status)), [jobs]);
@@ -951,6 +1000,7 @@ export function JobPostingTable() {
                   style={{ left: 0 }}
                 />
               )}
+              <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
               <table className="w-full min-w-full text-[13px] table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                 <colgroup>
@@ -999,37 +1049,22 @@ export function JobPostingTable() {
                       <ResizeHandle onMouseDown={onMouseDown("title")} />
                     </th>
                     {/* 드래그 가능 컬럼 */}
-                    {orderedCols
-                      .filter((c) => isVisible(c.key))
-                      .map((col, i) => {
-                        const isOver = overColIdx === i;
-                        return (
-                          <th
+                    <SortableContext
+                      items={orderedCols.filter((c) => isVisible(c.key)).map((c) => c.key)}
+                      strategy={horizontalListSortingStrategy}
+                    >
+                      {orderedCols
+                        .filter((c) => isVisible(c.key))
+                        .map((col) => (
+                          <SortableColumnHeader
                             key={col.key}
-                            draggable
-                            onDragStart={() => handleColDragStart(i)}
-                            onDragOver={(e) => handleColDragOver(e, i)}
-                            onDrop={() => handleColDrop(i)}
-                            onDragEnd={() => {
-                              dragColRef.current = null;
-                              setOverColIdx(null);
-                            }}
-                            className={cn(
-                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap",
-                              isOver && "bg-primary/10",
-                            )}
-                          >
-                            <GripVertical className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                          <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
-                              {col.label}
-                              <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
-                                {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
-                              </span>
-                            </button>
-                            <ResizeHandle onMouseDown={onMouseDown(col.key)} />
-                          </th>
-                        );
-                      })}
+                            col={col}
+                            colSort={colSort}
+                            toggleColSort={toggleColSort}
+                            onResizeMouseDown={onMouseDown(col.key)}
+                          />
+                        ))}
+                    </SortableContext>
                     {/* 액션 거터 헤더 — JobRowActionCell td(w-14)에 대응 */}
                     <th className="w-14 bg-[#F8FAFC]" />
                   </tr>
@@ -1249,6 +1284,7 @@ export function JobPostingTable() {
                   ))}
                 </tbody>
               </table>
+              </DndContext>
             </div>
             {filtered.length > ROW_CAP && (
               <div className="px-3 py-2.5 border-t border-border flex justify-center">
