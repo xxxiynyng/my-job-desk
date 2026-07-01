@@ -967,16 +967,16 @@ export function JobPostingTable() {
                   <col style={{ width: 56 }} />
                 </colgroup>
                 <thead>
-                  <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none">
-                    <th className="w-12 pl-1 pr-3 py-3 border-b border-border">
+                  <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none border-b border-border">
+                    <th className="w-12 pl-1 pr-3 py-3">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                       </div>
                     </th>
-                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap border-b border-border">★</th>
+                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
                     {/* 기업명 — 고정 */}
                     <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap border-b border-border"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                     >
                       <button onClick={() => toggleColSort("company")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         기업명
@@ -988,7 +988,7 @@ export function JobPostingTable() {
                     </th>
                     {/* 공고명 — 고정 */}
                     <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap border-b border-border"
+                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
                     >
                       <button onClick={() => toggleColSort("title")} className="inline-flex items-center gap-1 hover:text-gray-900">
                         공고명
@@ -1015,7 +1015,7 @@ export function JobPostingTable() {
                               setOverColIdx(null);
                             }}
                             className={cn(
-                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap border-b border-border",
+                              "relative text-left px-4 py-3 font-medium cursor-grab group whitespace-nowrap",
                               isOver && "bg-primary/10",
                             )}
                           >
@@ -1031,7 +1031,7 @@ export function JobPostingTable() {
                         );
                       })}
                     {/* 액션 거터 헤더 — JobRowActionCell td(w-14)에 대응 */}
-                    <th className="w-14 bg-[#F8FAFC] border-b border-border" />
+                    <th className="w-14 bg-[#F8FAFC]" />
                   </tr>
                 </thead>
                 <tbody>
