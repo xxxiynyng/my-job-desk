@@ -592,13 +592,26 @@ function SortableColumnHeader({
   };
 
   return (
-    <th ref={setNodeRef} style={style} className="relative text-left px-4 py-3 font-medium group whitespace-nowrap">
+    // attributes(role/tabIndex/aria-*)는 정렬 가능한 노드(th) 자체에 둔다 — 탭2 행 드래그(Experiences.tsx)와
+    // 동일한 패턴. listeners(포인터 핸들러)만 DragHandle에 위임한다.
+    <th
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
+    >
+      {/*
+        left-[2px]로 경계에서 2px 띄워서 시작 — 왼쪽 옆 ColumnDivider의 리사이즈 히트박스([x-10, x-2])와
+        절대 겹치지 않는 여백을 확보한다(겹치면 mousedown이 리사이즈 쪽으로 새서 드래그가 아예 시작되지
+        않거나, 그립 아이콘과 구분선이 같은 자리에 겹쳐 "선이 두 겹으로 보이는" 문제가 생김).
+        z-30으로 ColumnDivider(z-20)보다 위에 둬서 픽셀 경계에서도 그립이 항상 클릭 우선순위를 갖게 함.
+        색상은 행 그립(RowContextMenu의 GripTrigger)과 동일한 gray-400 → gray-600로 통일.
+      */}
       <DragHandle
         ref={setActivatorNodeRef}
-        {...attributes}
         {...listeners}
-        iconClassName="w-2.5 h-2.5"
-        className="absolute left-0 inset-y-1 w-[15px]"
+        iconClassName="w-3 h-3"
+        className="absolute left-[2px] inset-y-1 w-[15px] z-30 text-gray-400 hover:text-gray-600"
       />
       <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
         {col.label}
