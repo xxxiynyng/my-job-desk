@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
  * 행 클릭·정렬 버튼 등 주변 인터랙션과 겹치지 않게 한다.
  * 탭1 컬럼 헤더 그립처럼 아이콘을 직접 보여줄 수도 있고(기본값),
  * 탭2 행 그립처럼 다른 곳에 이미 그려진 아이콘 위에 투명 히트 영역만 올릴 수도 있다(icon={null}).
+ *
+ * touchAction: "none"은 항상 고정 — 없으면 브라우저가 pointerdown을 스크롤/패닝 제스처로
+ * 가로채서 dnd-kit PointerSensor가 드래그를 시작하지 못하는 경우가 생긴다.
+ * opacity-0 → group-hover:opacity-100 전환, cursor-grab/active:cursor-grabbing도 여기 한 곳에서만 정의.
  */
 type DragHandleProps = ComponentPropsWithoutRef<"div"> & {
   iconClassName?: string;
@@ -14,8 +18,16 @@ type DragHandleProps = ComponentPropsWithoutRef<"div"> & {
 };
 
 export const DragHandle = forwardRef<HTMLDivElement, DragHandleProps>(
-  ({ className, iconClassName, icon, ...props }, ref) => (
-    <div ref={ref} {...props} className={cn("cursor-grab active:cursor-grabbing", className)}>
+  ({ className, iconClassName, icon, style, ...props }, ref) => (
+    <div
+      ref={ref}
+      {...props}
+      style={{ touchAction: "none", ...style }}
+      className={cn(
+        "flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-grab active:cursor-grabbing",
+        className,
+      )}
+    >
       {icon === null ? null : icon ?? <GripVertical className={cn("pointer-events-none", iconClassName)} />}
     </div>
   ),
