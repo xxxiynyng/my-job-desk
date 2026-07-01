@@ -996,8 +996,8 @@ export function JobPostingTable() {
                               isOver && "bg-primary/10",
                             )}
                           >
-                            <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
-                              <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                            <GripVertical className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                          <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
                               {col.label}
                               <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
                                 {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}

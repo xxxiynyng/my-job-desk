@@ -34,15 +34,16 @@ export function ResizableHead({
 }) {
   return (
     <th style={width ? { width } : undefined} className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
+      {onSort && (
+        <GripVertical className="absolute left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      )}
       <span className="inline-flex items-center gap-1">
         {onSort ? (
           <button
             onClick={(e) => { e.stopPropagation(); onSort(); }}
             className="inline-flex items-center gap-1 hover:text-gray-900"
           >
-            <GripVertical className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             {label}
-            {/* 항상 같은 폭(w-3)을 점유 — 조건부 mount 대신 opacity로 제어해 레이아웃 고정 */}
             <span className={cn(
               "inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity",
               sortDir != null ? "opacity-100" : "opacity-0",
