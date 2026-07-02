@@ -29,7 +29,7 @@ export function MoodRefresh() {
         className="w-8 h-8 rounded-full bg-accent flex items-center justify-center hover:ring-2 hover:ring-primary/20 transition-all ml-1"
         title="기분 전환"
       >
-        <span className="text-sm">😊</span>
+        <img src="/logo-mark.svg" alt="" className="w-4 h-auto" />
       </button>
 
       <AnimatePresence>
