@@ -1099,8 +1099,8 @@ export function JobPostingTable() {
                     <tr
                       key={job.id}
                       className={cn(
-                        "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group relative",
-                        selected.has(job.id) && "bg-accent/20",
+                        "h-11 border-b border-border/50 hover:bg-gray-50 transition-colors group relative",
+                        selected.has(job.id) && "bg-accent/30",
                       )}
                     >
                       {/* 그립 버튼 + 체크박스 */}
@@ -1157,7 +1157,7 @@ export function JobPostingTable() {
                         </Tooltip>
                       </td>
                       {/* 공고명 — 1차 정보 (가장 중요) */}
-                      <td className="px-4 py-2.5 text-sm font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                      <td className="px-4 py-2.5 text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link

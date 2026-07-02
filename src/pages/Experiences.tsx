@@ -233,7 +233,7 @@ function SortableExpRow({
       style={style}
       {...attributes}
       className={cn(
-        "h-11 border-b border-border/50 hover:bg-accent/40 transition-colors group cursor-pointer relative",
+        "h-11 border-b border-border/50 hover:bg-gray-50 transition-colors group cursor-pointer relative",
         selected.has(item.id) && "bg-accent/30",
       )}
       onClick={() => setDetailId(item.id)}
@@ -270,7 +270,7 @@ function SortableExpRow({
         </td>
       )}
       {isVisible("name") && (
-        <td className="px-4 py-2.5 text-sm font-semibold text-gray-900 overflow-hidden">
+        <td className="px-4 py-2.5 text-sm font-medium text-foreground overflow-hidden">
           <span className="flex items-center gap-1.5 min-w-0">
             <span className="truncate">{item.name}</span>
           </span>
@@ -290,12 +290,12 @@ function SortableExpRow({
         <td className="px-4 py-2.5 overflow-hidden">
           <div className="flex flex-nowrap gap-1 overflow-hidden">
             {item.keywords.slice(0, 3).map((k) => (
-              <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
+              <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
                 {k}
               </span>
             ))}
             {item.keywords.length > 3 && (
-              <span className="text-[10px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
+              <span className="text-[11px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
             )}
           </div>
         </td>
@@ -949,7 +949,7 @@ export default function Experiences() {
                       <col style={{ width: 56 }} />
                     </colgroup>
                     <thead>
-                      <tr className="border-b border-border bg-[#F8FAFC] text-[13px] text-muted-foreground font-normal select-none">
+                      <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none border-b border-border">
                         <th className="w-12 pl-1 pr-3 py-3">
                           <div className="ml-5">
                             <Checkbox
@@ -1147,7 +1147,7 @@ export default function Experiences() {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
+                            <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
                               {k}
                             </span>
                           ))}
