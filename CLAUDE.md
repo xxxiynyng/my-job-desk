@@ -56,10 +56,11 @@ src/
 ├── components/table/
 │   ├── ColumnDivider.tsx                컬럼 리사이즈 세로 구분선 (탭1·탭2 공용, hover 전용, 색=행 구분선과 동일)
 │   ├── DragHandle.tsx                   dnd-kit 드래그 핸들 뼈대 (탭1·탭2 공용)
-│   ├── HeaderCell.tsx                   헤더 셀·정렬 버튼·정렬 드롭다운 (탭1·탭2 공용)
-│   ├── SortableColumnHeader.tsx         드래그 가능한 컬럼 헤더 (탭1·탭2 공용, 그립=드래그+정렬 메뉴)
+│   ├── HeaderCell.tsx                   헤더 셀·정렬 버튼·컬럼 메뉴(정렬/필터/숨기기) (탭1·탭2 공용)
+│   ├── SortableColumnHeader.tsx         드래그 가능한 컬럼 헤더 (탭1·탭2 공용, 그립=드래그 / ∨=컬럼 메뉴)
 │   ├── BatchActionBar.tsx               배치 액션 바 셸 (탭1·탭2 공용, 액션 항목은 탭별 주입)
-│   └── HeaderFilter.tsx                 컬럼별 헤더 필터 (탭1·탭2 공용)
+│   ├── HeaderFilter.tsx                 컬럼 필터 본문 — 컬럼 메뉴의 필터 서브메뉴에 주입 (탭1·탭2 공용)
+│   └── useTableDividers.ts              컬럼 경계 실측 훅 — 세로선 위치는 th 실측값 사용 (탭1·탭2 공용)
 └── hooks/
     └── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
 ```
