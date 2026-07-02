@@ -177,9 +177,17 @@ const MAX_EXP_WIDTHS: Record<string, number> = {
 // 유형 탭 표기 순서 — 13개 프리셋 기준(상세 서술형 → 스펙·증빙형). 데이터에 있는(count>0) 유형만 노출,
 // 목록에 없는 커스텀 유형은 뒤에 이어 붙인다(SSOT 8-3: 더보기 없음, 가로 스크롤).
 const TYPE_TAB_ORDER = [
-  "프로젝트", "대외활동", "인턴", "공모전", "봉사활동", "교환학생", "알바", "학부연구생",
+  "프로젝트", "대외활동", "경력/인턴", "공모전", "봉사활동", "해외경험", "알바", "학부연구생",
   "어학", "자격증", "수상", "수강과목", "교육 이수",
 ];
+
+// 구 유형명 → 정본 (2026-07-02 프리셋 개편) — localStorage 저장분 로드 시 정규화
+const LEGACY_TYPE_MAP: Record<string, string> = {
+  "인턴": "경력/인턴",
+  "교환학생": "해외경험",
+};
+const normalizeItemTypes = (list: Item[]): Item[] =>
+  list.map((i) => (LEGACY_TYPE_MAP[i.type] ? { ...i, type: LEGACY_TYPE_MAP[i.type] as Item["type"] } : i));
 
 // ────────────────────────────────────────────────────────────────
 // Main Page
@@ -187,7 +195,7 @@ const TYPE_TAB_ORDER = [
 
 const EXTRACT_MOCK_CANDIDATES: { id: string; type: ItemType; name: string; summary: string }[] = [
   { id: "ec1", type: "프로젝트", name: "캡스톤 디자인 프로젝트", summary: "2024.09 ~ 2025.01 · PM / 기획" },
-  { id: "ec2", type: "인턴", name: "여름 마케팅 인턴십", summary: "2024.07 ~ 2024.08 · 마케팅팀" },
+  { id: "ec2", type: "경력/인턴", name: "여름 마케팅 인턴십", summary: "2024.07 ~ 2024.08 · 마케팅팀" },
   { id: "ec3", type: "대외활동", name: "청년 창업 서포터즈", summary: "2024.03 ~ 2024.06 · 기획 파트" },
 ];
 
@@ -348,7 +356,7 @@ export default function Experiences() {
     try {
       const raw = localStorage.getItem(SHARED_EXP_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as Item[];
+        const parsed = normalizeItemTypes(JSON.parse(raw) as Item[]);
         if (Array.isArray(parsed) && parsed.length) {
           if (parsed.some((i) => i.sortOrder === undefined)) {
             return parsed.map((i, idx) => ({ ...i, sortOrder: i.sortOrder ?? idx }));

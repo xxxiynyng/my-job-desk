@@ -33,7 +33,7 @@ export const INITIAL_EXPERIENCES: Item[] = [
     }),
   },
   {
-    ...makeFromPreset("교환학생", "파리정치대학 교환학생", {
+    ...makeFromPreset("해외경험", "파리정치대학 교환학생", {
       pinned: true,
       keywords: ["글로벌", "팀워크"],
       competencies: ["글로벌"],

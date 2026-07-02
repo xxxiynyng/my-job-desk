@@ -2,13 +2,15 @@
 // 경험 Types & Constants
 // ────────────────────────────────────────────────────────────────
 
+// 2026-07-02 기획 확정: 경력(재직여부)은 "경력/인턴"에 통합(연봉은 MVP 제외),
+// 비학업 해외경험(워킹홀리데이 등)은 "해외경험"으로 일반화 (구 인턴·교환학생에서 개명)
 export type ItemType =
   | "프로젝트"
   | "대외활동"
-  | "인턴"
+  | "경력/인턴"
   | "공모전"
   | "봉사활동"
-  | "교환학생"
+  | "해외경험"
   | "알바"
   | "학부연구생"
   | "어학"
@@ -51,7 +53,7 @@ export type Item = {
 
 export const SHARED_EXP_KEY = "pickd.experiences.items";
 
-export const NARRATIVE_TYPES: ItemType[] = ["프로젝트", "대외활동", "인턴", "공모전", "봉사활동", "교환학생", "알바", "학부연구생"];
+export const NARRATIVE_TYPES: ItemType[] = ["프로젝트", "대외활동", "경력/인턴", "공모전", "봉사활동", "해외경험", "알바", "학부연구생"];
 export const SPEC_TYPES: ItemType[] = ["어학", "자격증", "수상", "수강과목", "교육 이수"];
 export const ALL_TYPES: ItemType[] = [...NARRATIVE_TYPES, ...SPEC_TYPES];
 
@@ -156,14 +158,15 @@ export const PRESETS: Record<ItemType, Preset> = {
       "이 경험은 어떤 역량을 보여줄 수 있나요?",
     ],
   },
-  인턴: {
+  "경력/인턴": {
     editorOpenByDefault: true,
     fields: withTail([
       { key: "company", label: "회사명", type: "text" },
       { key: "dept", label: "부서", type: "text" },
       { key: "position", label: "직무 / 포지션", type: "text" },
       { key: "period", label: "근무 기간", type: "text" },
-      { key: "empType", label: "고용 형태", type: "text" },
+      { key: "empType", label: "고용 형태", type: "text", placeholder: "정규직 / 계약직 / 인턴" },
+      { key: "employed", label: "재직 여부", type: "text", placeholder: "재직 중 / 퇴사" },
       { key: "tasks", label: "담당 업무", type: "text" },
     ]),
     writingGuide: [
@@ -179,7 +182,7 @@ export const PRESETS: Record<ItemType, Preset> = {
       "직무 관련성",
     ],
     aiQuestions: [
-      "인턴 기간 동안 가장 주요했던 업무는 무엇이었나요?",
+      "근무 기간 동안 가장 주요했던 업무는 무엇이었나요?",
       "어떤 문제를 해결했거나 개선했나요?",
       "팀원들과 어떻게 협업했나요?",
       "결과를 수치로 표현할 수 있나요?",
@@ -245,15 +248,15 @@ export const PRESETS: Record<ItemType, Preset> = {
       "이 경험이 보여주는 가치관은 무엇인가요?",
     ],
   },
-  교환학생: {
+  해외경험: {
     editorOpenByDefault: true,
     fields: withTail([
       { key: "country", label: "국가", type: "text" },
-      { key: "univ", label: "학교명", type: "text" },
+      { key: "univ", label: "학교 / 기관명", type: "text" },
       { key: "period", label: "기간", type: "text" },
       { key: "major", label: "전공 / 수강 분야", type: "text" },
       { key: "courses", label: "수강 과목", type: "text" },
-      { key: "activity", label: "활동 유형", type: "text" },
+      { key: "activity", label: "활동 유형", type: "text", placeholder: "교환학생 / 어학연수 / 워킹홀리데이" },
     ]),
     writingGuide: [
       "참여 이유",
@@ -266,7 +269,7 @@ export const PRESETS: Record<ItemType, Preset> = {
       "직무 관련성",
     ],
     aiQuestions: [
-      "이 교환학생 경험에서 가장 성장한 부분은 무엇인가요?",
+      "이 해외 경험에서 가장 성장한 부분은 무엇인가요?",
       "문화/언어 차이는 어떻게 다뤘나요?",
       "지원 직무와 연결되는 수업/프로젝트가 있었나요?",
       "어떤 커뮤니케이션 경험을 강조할 수 있나요?",
