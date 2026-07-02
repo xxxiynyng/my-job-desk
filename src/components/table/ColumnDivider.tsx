@@ -36,11 +36,12 @@ export function ColumnDivider({ left, onResizeMouseDown, active }: ColumnDivider
     // 폭 0인 위치 기준점 — 자식은 모두 absolute라 이 컨테이너의 실제 렌더 크기는 없지만,
     // 자식을 hover해도 group/resize의 :hover는 이 조상까지 정상적으로 전파된다.
     <div className="group/resize absolute top-0 bottom-0 z-20" style={{ left: x }}>
-      {/* 평상시 투명, hover/리사이즈 중에만 보이는 1px 선 — 실제 컬럼 경계(x)에 정확히 고정 */}
+      {/* 평상시 투명, hover/리사이즈 중에만 보이는 1px 선 — 실제 컬럼 경계(x)에 정확히 고정.
+          색은 행 구분선(border-border/50)과 동일 — 세로선만 진하면 일체감이 깨진다(2026-07-02 확정). */}
       <div
         className={cn(
-          "absolute inset-y-0 left-0 w-px bg-transparent transition-colors duration-150 pointer-events-none group-hover/resize:bg-border",
-          active && "bg-border",
+          "absolute inset-y-0 left-0 w-px bg-transparent transition-colors duration-150 pointer-events-none group-hover/resize:bg-border/50",
+          active && "bg-border/50",
         )}
       />
       {/* 리사이즈 히트박스 — 경계에서 왼쪽으로만 확장([x-10, x-2]), 경계 바로 앞 2px는 비워서
