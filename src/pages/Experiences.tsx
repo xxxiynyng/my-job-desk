@@ -72,6 +72,7 @@ import {
 import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
+import { BatchActionBar } from "@/components/table/BatchActionBar";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
 import { FilesPanel } from "@/components/pickd/FilesPanel";
@@ -892,32 +893,17 @@ export default function Experiences() {
                 </div>
               </div>
 
-              {/* 배치 액션 바 */}
-              {selected.size > 0 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-1.5 mb-3">
-                  <span className="text-[12px] font-medium text-blue-700 shrink-0">{selected.size}개 선택됨</span>
-                  <span className="w-px h-3.5 bg-blue-200 mx-1 shrink-0" />
-                  <button
-                    onClick={() => confirmDelete([...selected])}
-                    className="text-[12px] text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-md transition-colors font-medium"
-                  >
-                    삭제
-                  </button>
-                  <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
-                    유형 변경
-                  </button>
-                  <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
-                    내보내기
-                  </button>
-                  <button
-                    onClick={() => setSelected(new Set())}
-                    className="ml-auto text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 transition-colors"
-                    aria-label="선택 해제"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
+              {/* 배치 액션 바 — 공용 컴포넌트, 액션 항목만 탭2 전용 */}
+              <BatchActionBar
+                count={selected.size}
+                className="border rounded-lg mb-3"
+                actions={[
+                  { label: "삭제", onClick: () => confirmDelete([...selected]), tone: "danger" },
+                  { label: "유형 변경" },
+                  { label: "내보내기" },
+                ]}
+                onClear={() => setSelected(new Set())}
+              />
 
               {/* 복붙 / List / Card view */}
               {view === "paste" ? (

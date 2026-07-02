@@ -48,6 +48,7 @@ import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { HeaderCell, SortHeaderButton, HEADER_CELL_CLASS } from "@/components/table/HeaderCell";
+import { BatchActionBar } from "@/components/table/BatchActionBar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
@@ -986,32 +987,17 @@ export function JobPostingTable() {
             <div className="px-3 py-1.5 text-sm text-gray-500">칸반 보기</div>
           )}
 
-          {/* 배치 액션 바 */}
-          {selected.size > 0 && (
-            <div className="px-3 py-2 bg-blue-50 border-b border-blue-200 flex items-center gap-1.5">
-              <span className="text-[12px] font-medium text-blue-700 shrink-0">{selected.size}개 선택됨</span>
-              <span className="w-px h-3.5 bg-blue-200 mx-1 shrink-0" />
-              <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
-                상태 변경
-              </button>
-              <button
-                onClick={deleteSelected}
-                className="text-[12px] text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-md transition-colors font-medium"
-              >
-                삭제
-              </button>
-              <button className="text-[12px] text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors font-medium">
-                내보내기
-              </button>
-              <button
-                onClick={() => setSelected(new Set())}
-                className="ml-auto text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 transition-colors"
-                aria-label="선택 해제"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
+          {/* 배치 액션 바 — 공용 컴포넌트, 액션 항목만 탭1 전용 */}
+          <BatchActionBar
+            count={selected.size}
+            className="border-b"
+            actions={[
+              { label: "상태 변경" },
+              { label: "삭제", onClick: deleteSelected, tone: "danger" },
+              { label: "내보내기" },
+            ]}
+            onClear={() => setSelected(new Set())}
+          />
 
           {/* 칸반 / 테이블 */}
           {view === "kanban" ? (
