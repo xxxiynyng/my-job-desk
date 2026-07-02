@@ -1421,6 +1421,7 @@ import { RepExperienceGrid, InfoRow } from './experiences/RepExperienceViews';
 
 import { DetailEditor } from './experiences/DetailEditor';
 
-import { HeaderFilter, ManageIndicator, type ColFilterShape } from './experiences/tableWidgets';
+import { ManageIndicator } from './experiences/tableWidgets';
 import { HeaderCell } from "@/components/table/HeaderCell";
+import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";

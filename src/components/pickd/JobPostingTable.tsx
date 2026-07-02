@@ -49,6 +49,7 @@ import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { HeaderCell, SortHeaderButton, HEADER_CELL_CLASS } from "@/components/table/HeaderCell";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
+import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
@@ -592,10 +593,12 @@ function SortableColumnHeader({
   col,
   colSort,
   toggleColSort,
+  filter,
 }: {
   col: { key: ColumnKey; label: string };
   colSort: { key: string; dir: "asc" | "desc" } | null;
   toggleColSort: (key: string) => void;
+  filter?: React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: col.key });
@@ -629,11 +632,14 @@ function SortableColumnHeader({
         iconClassName="w-3 h-3"
         className="absolute left-[2px] inset-y-1 w-[15px] z-30 text-gray-400 hover:text-gray-600"
       />
-      <SortHeaderButton
-        label={col.label}
-        dir={colSort?.key === col.key ? colSort.dir : null}
-        onSort={() => toggleColSort(col.key)}
-      />
+      <span className="inline-flex items-center gap-1">
+        <SortHeaderButton
+          label={col.label}
+          dir={colSort?.key === col.key ? colSort.dir : null}
+          onSort={() => toggleColSort(col.key)}
+        />
+        {filter}
+      </span>
     </th>
   );
 }
@@ -654,6 +660,51 @@ export function JobPostingTable() {
       if (prev.dir === "asc") return { key, dir: "desc" };
       return null;
     });
+  };
+
+  // ── 컬럼별 헤더 필터 (탭2와 동일한 HeaderFilter 공용 컴포넌트) ──
+  const [colFilter, setColFilter] = useState<Record<string, ColFilterShape>>({});
+  const setSelectFilter = (key: string, values: string[]) =>
+    setColFilter((p) => {
+      const n = { ...p };
+      if (!values.length) delete n[key];
+      else n[key] = { kind: "select", values };
+      return n;
+    });
+  const setTextFilter = (key: string, q: string) =>
+    setColFilter((p) => {
+      const n = { ...p };
+      if (!q.trim()) delete n[key];
+      else n[key] = { kind: "text", q };
+      return n;
+    });
+
+  const getColValue = (j: Job, key: string): string => {
+    switch (key) {
+      case "company": return j.company;
+      case "title": return j.title;
+      case "role": return j.role;
+      case "employType": return j.employType;
+      case "industry": return j.industry;
+      case "status": return j.status;
+      case "deadline": return j.deadline;
+      case "registeredAt": return j.registeredAt;
+      case "updated": return j.updatedAt;
+      default: return "";
+    }
+  };
+
+  // 컬럼별 필터 종류 — dday(계산값)·linked(복합값)는 필터 제외
+  const FILTER_KIND: Partial<Record<string, "select" | "text">> = {
+    company: "select",
+    title: "text",
+    role: "select",
+    employType: "select",
+    industry: "select",
+    status: "select",
+    deadline: "text",
+    registeredAt: "text",
+    updated: "text",
   };
 
   // 컬럼 표시
@@ -767,18 +818,57 @@ export function JobPostingTable() {
     return searchedActive.filter((j) => j.status === f).length;
   };
 
-  // 필터
+  // 필터 (상단 칩 필터 + 컬럼별 헤더 필터 — 탭2와 동일한 파이프라인)
   const filtered = useMemo(() => {
     return searchedActive.filter((j) => {
-      if (activeFilter === "★") return j.starred;
-      if (activeFilter === "마감임박") { const d = calcDday(j.deadline); return d > 0 && d <= 3; }
-      if (activeFilter !== "전체") return j.status === activeFilter;
+      if (activeFilter === "★") {
+        if (!j.starred) return false;
+      } else if (activeFilter === "마감임박") {
+        const d = calcDday(j.deadline);
+        if (!(d > 0 && d <= 3)) return false;
+      } else if (activeFilter !== "전체") {
+        if (j.status !== activeFilter) return false;
+      }
+      for (const [key, f] of Object.entries(colFilter)) {
+        const v = getColValue(j, key);
+        if (f.kind === "select") {
+          if (!f.values.includes(v)) return false;
+        } else {
+          if (!v.toLowerCase().includes(f.q.toLowerCase())) return false;
+        }
+      }
       return true;
     });
-  }, [searchedActive, activeFilter]);
+  }, [searchedActive, activeFilter, colFilter]);
+
+  // 헤더 필터 옵션 — 지원중 목록 기준 고유값
+  const distinctValues = (key: string): string[] => {
+    const set = new Set<string>();
+    for (const j of activeJobs) {
+      const v = getColValue(j, key);
+      if (v) set.add(v);
+    }
+    return Array.from(set).sort();
+  };
+
+  // 컬럼 키 → HeaderFilter 노드 (필터 없는 컬럼은 undefined)
+  const headerFilterFor = (key: string): React.ReactNode => {
+    const kind = FILTER_KIND[key];
+    if (!kind) return undefined;
+    return (
+      <HeaderFilter
+        colKey={key}
+        kind={kind}
+        options={kind === "select" ? distinctValues(key) : []}
+        colFilter={colFilter}
+        setSelectFilter={setSelectFilter}
+        setTextFilter={setTextFilter}
+      />
+    );
+  };
 
   // 필터/검색이 바뀌면 펼침 상태 초기화 — 목록 길이가 들쭉날쭉해지는 것을 방지
-  useEffect(() => setTableExpanded(false), [activeFilter, search]);
+  useEffect(() => setTableExpanded(false), [activeFilter, search, colFilter]);
 
 
   // 8개까지만 기본 노출, 나머지는 "더보기"로 — 결과 수가 줄어도 영역 높이는 유지됨
@@ -1041,12 +1131,14 @@ export function JobPostingTable() {
                       label="기업명"
                       sortDir={colSort?.key === "company" ? colSort.dir : null}
                       onSort={() => toggleColSort("company")}
+                      filter={headerFilterFor("company")}
                     />
                     {/* 공고명 — 고정 */}
                     <HeaderCell
                       label="공고명"
                       sortDir={colSort?.key === "title" ? colSort.dir : null}
                       onSort={() => toggleColSort("title")}
+                      filter={headerFilterFor("title")}
                     />
                     {/* 드래그 가능 컬럼 */}
                     <SortableContext
@@ -1061,6 +1153,7 @@ export function JobPostingTable() {
                             col={col}
                             colSort={colSort}
                             toggleColSort={toggleColSort}
+                            filter={headerFilterFor(col.key)}
                           />
                         ))}
                     </SortableContext>
