@@ -88,9 +88,36 @@ import {
   makeFromPreset,
 } from "./experiences/presets";
 
+// 유형별 파스텔 색 (2026-07-02) — 배경 50계열·글자 700계열, border는 배경 톤.
+// 서술형(narrative)은 따뜻·활동 계열, 스펙형(spec)은 차분·중립 계열로 묶어 시각적 그룹 힌트.
+// 칩은 여전히 항목명보다 약한 보조 요소(SSOT 5-2) — 파스텔로 채도를 낮춰 톤 유지.
+const TYPE_CHIP_COLOR: Record<string, string> = {
+  // narrative
+  "프로젝트":  "bg-blue-50 text-blue-700 border-blue-100",
+  "대외활동":  "bg-green-50 text-green-700 border-green-100",
+  "경력/인턴": "bg-violet-50 text-violet-700 border-violet-100",
+  "공모전":    "bg-amber-50 text-amber-700 border-amber-100",
+  "봉사활동":  "bg-teal-50 text-teal-700 border-teal-100",
+  "해외경험":  "bg-sky-50 text-sky-700 border-sky-100",
+  "알바":      "bg-orange-50 text-orange-700 border-orange-100",
+  "학부연구생": "bg-indigo-50 text-indigo-700 border-indigo-100",
+  // spec — 차분·중립 계열
+  "어학":      "bg-cyan-50 text-cyan-700 border-cyan-100",
+  "자격증":    "bg-slate-100 text-slate-600 border-slate-200",
+  "수상":      "bg-rose-50 text-rose-700 border-rose-100",
+  "수강과목":  "bg-stone-100 text-stone-600 border-stone-200",
+  "교육 이수": "bg-zinc-100 text-zinc-600 border-zinc-200",
+};
+const TYPE_CHIP_FALLBACK = "bg-gray-50 text-gray-500 border-gray-100";
+
 function TypeChip({ type }: { type: ItemType }) {
   return (
-    <span className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium bg-gray-50 text-gray-500 border border-gray-100 rounded-md whitespace-nowrap">
+    <span
+      className={cn(
+        "inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium border rounded-md whitespace-nowrap",
+        TYPE_CHIP_COLOR[type] ?? TYPE_CHIP_FALLBACK,
+      )}
+    >
       {type}
     </span>
   );
@@ -1127,7 +1154,7 @@ export default function Experiences() {
                         className="bg-card border border-border rounded-xl px-4 py-3 cursor-pointer hover:bg-muted/30"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-muted-foreground">{i.type}</span>
+                          <TypeChip type={i.type} />
                           <ManageIndicator
                             item={i}
                             onMerge={() => {
