@@ -960,7 +960,7 @@ export default function Experiences() {
                           </div>
                         </th>
                         {isVisible("type") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="유형"
                             sortDir={colSort?.key === "type" ? colSort.dir : null}
                             onSort={() => toggleColSort("type")}
@@ -977,7 +977,7 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("name") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="항목명"
                             sortDir={colSort?.key === "name" ? colSort.dir : null}
                             onSort={() => toggleColSort("name")}
@@ -994,7 +994,7 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("org") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="기관/소속"
                             sortDir={colSort?.key === "org" ? colSort.dir : null}
                             onSort={() => toggleColSort("org")}
@@ -1011,7 +1011,7 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("period") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="기간"
                             sortDir={colSort?.key === "period" ? colSort.dir : null}
                             onSort={() => toggleColSort("period")}
@@ -1028,7 +1028,7 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("keywords") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="주요 키워드"
                             sortDir={colSort?.key === "keywords" ? colSort.dir : null}
                             onSort={() => toggleColSort("keywords")}
@@ -1045,14 +1045,14 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("importance") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="중요도"
                             sortDir={colSort?.key === "importance" ? colSort.dir : null}
                             onSort={() => toggleColSort("importance")}
                           />
                         )}
                         {isVisible("updated") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="최근 수정"
                             sortDir={colSort?.key === "updated" ? colSort.dir : null}
                             onSort={() => toggleColSort("updated")}
@@ -1069,7 +1069,7 @@ export default function Experiences() {
                           />
                         )}
                         {isVisible("manage") && (
-                          <ResizableHead
+                          <HeaderCell
                             label="관리 상태"
                             sortDir={colSort?.key === "manage" ? colSort.dir : null}
                             onSort={() => toggleColSort("manage")}
@@ -1435,5 +1435,6 @@ import { RepExperienceGrid, InfoRow } from './experiences/RepExperienceViews';
 
 import { DetailEditor } from './experiences/DetailEditor';
 
-import { ResizableHead, HeaderFilter, ManageIndicator, type ColFilterShape } from './experiences/tableWidgets';
+import { HeaderFilter, ManageIndicator, type ColFilterShape } from './experiences/tableWidgets';
+import { HeaderCell } from "@/components/table/HeaderCell";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";

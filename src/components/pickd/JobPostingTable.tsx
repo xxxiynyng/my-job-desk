@@ -25,8 +25,6 @@ import {
   Search,
   Table as TableIcon,
   Star,
-  ArrowUp,
-  ArrowDown,
   ChevronRight,
   ChevronUp,
   LayoutGrid,
@@ -49,6 +47,7 @@ import {
 import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
+import { HeaderCell, SortHeaderButton, HEADER_CELL_CLASS } from "@/components/table/HeaderCell";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
@@ -614,7 +613,7 @@ function SortableColumnHeader({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
+      className={HEADER_CELL_CLASS}
     >
       {/*
         left-[2px]로 경계에서 2px 띄워서 시작 — 왼쪽 옆 ColumnDivider의 리사이즈 히트박스([x-10, x-2])와
@@ -629,12 +628,11 @@ function SortableColumnHeader({
         iconClassName="w-3 h-3"
         className="absolute left-[2px] inset-y-1 w-[15px] z-30 text-gray-400 hover:text-gray-600"
       />
-      <button onClick={(e) => { e.stopPropagation(); toggleColSort(col.key); }} className="inline-flex items-center gap-1 hover:text-gray-900">
-        {col.label}
-        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === col.key ? "opacity-100" : "opacity-0")}>
-          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
-        </span>
-      </button>
+      <SortHeaderButton
+        label={col.label}
+        dir={colSort?.key === col.key ? colSort.dir : null}
+        onSort={() => toggleColSort(col.key)}
+      />
     </th>
   );
 }
@@ -1053,27 +1051,17 @@ export function JobPostingTable() {
                     </th>
                     <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
                     {/* 기업명 — 고정 */}
-                    <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
-                    >
-                      <button onClick={() => toggleColSort("company")} className="inline-flex items-center gap-1 hover:text-gray-900">
-                        기업명
-                        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === "company" ? "opacity-100" : "opacity-0")}>
-                          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
-                        </span>
-                      </button>
-                    </th>
+                    <HeaderCell
+                      label="기업명"
+                      sortDir={colSort?.key === "company" ? colSort.dir : null}
+                      onSort={() => toggleColSort("company")}
+                    />
                     {/* 공고명 — 고정 */}
-                    <th
-                      className="relative text-left px-4 py-3 font-medium group whitespace-nowrap"
-                    >
-                      <button onClick={() => toggleColSort("title")} className="inline-flex items-center gap-1 hover:text-gray-900">
-                        공고명
-                        <span className={cn("inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity", colSort?.key === "title" ? "opacity-100" : "opacity-0")}>
-                          {colSort?.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
-                        </span>
-                      </button>
-                    </th>
+                    <HeaderCell
+                      label="공고명"
+                      sortDir={colSort?.key === "title" ? colSort.dir : null}
+                      onSort={() => toggleColSort("title")}
+                    />
                     {/* 드래그 가능 컬럼 */}
                     <SortableContext
                       items={orderedCols.filter((c) => isVisible(c.key)).map((c) => c.key)}

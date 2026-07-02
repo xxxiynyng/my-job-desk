@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
+import { ChevronDown, Layers, Pencil, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,44 +13,9 @@ import { cn } from "@/lib/utils";
 import { type Item } from "./presets";
 
 // ────────────────────────────────────────────────────────────────
-// ResizableHead, HeaderFilter, ManageIndicator
+// HeaderFilter, ManageIndicator
+// (구 ResizableHead는 공용 컴포넌트 @/components/table/HeaderCell로 이동·통합)
 // ────────────────────────────────────────────────────────────────
-
-export function ResizableHead({
-  label,
-  filter,
-  sortDir,
-  onSort,
-}: {
-  label: string;
-  filter?: React.ReactNode;
-  sortDir?: "asc" | "desc" | null;
-  onSort?: () => void;
-}) {
-  return (
-    <th className="relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group">
-      <span className="inline-flex items-center gap-1">
-        {onSort ? (
-          <button
-            onClick={(e) => { e.stopPropagation(); onSort(); }}
-            className="inline-flex items-center gap-1 hover:text-gray-900"
-          >
-            {label}
-            <span className={cn(
-              "inline-flex items-center justify-center w-3 h-3 shrink-0 transition-opacity",
-              sortDir != null ? "opacity-100" : "opacity-0",
-            )}>
-              {sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
-            </span>
-          </button>
-        ) : (
-          <span>{label}</span>
-        )}
-        {filter}
-      </span>
-    </th>
-  );
-}
 
 export type ColFilterShape = { kind: "select"; values: string[] } | { kind: "text"; q: string };
 
