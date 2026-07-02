@@ -89,19 +89,28 @@ const COL_MAX_WIDTHS: Record<string, number> = {
 };
 
 // ── 타입 ──────────────────────────────────────────────────────────
-type StatusType = "서류작성중" | "지원완료" | "서류합격" | "필기진행" | "면접진행" | "최종합격" | "불합격";
-const ACTIVE_STATUSES: StatusType[] = ["서류작성중", "지원완료", "서류합격", "필기진행", "면접진행"];
-const COMPLETED_STATUSES: StatusType[] = ["최종합격", "불합격"];
+// 정본 10개 상태 (2026-07-02 확정 — 구 "코딩테스트"는 직무 중립 명칭 "필기전형"으로)
+type StatusType =
+  | "작성중" | "지원예정" | "지원완료" | "서류전형" | "서류합격"
+  | "필기전형" | "면접전형" | "최종합격" | "불합격" | "보류";
+const ACTIVE_STATUSES: StatusType[] = ["작성중", "지원예정", "지원완료", "서류전형", "서류합격", "필기전형", "면접전형"];
+const COMPLETED_STATUSES: StatusType[] = ["최종합격", "불합격", "보류"];
 const STATUS_OPTIONS: StatusType[] = [...ACTIVE_STATUSES, ...COMPLETED_STATUSES];
 
-const STATUS_DS_KEY: Record<StatusType, "draft" | "applied" | "document" | "test" | "interview" | "passed" | "rejected"> = {
-  "서류작성중": "draft",
-  "지원완료":   "applied",
-  "서류합격":   "document",
-  "필기진행":   "test",
-  "면접진행":   "interview",
-  "최종합격":   "passed",
-  "불합격":     "rejected",
+const STATUS_DS_KEY: Record<
+  StatusType,
+  "draft" | "planned" | "applied" | "document" | "document_pass" | "test" | "interview" | "passed" | "rejected" | "hold"
+> = {
+  "작성중":   "draft",
+  "지원예정": "planned",
+  "지원완료": "applied",
+  "서류전형": "document",
+  "서류합격": "document_pass",
+  "필기전형": "test",
+  "면접전형": "interview",
+  "최종합격": "passed",
+  "불합격":   "rejected",
+  "보류":     "hold",
 };
 
 const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
@@ -142,13 +151,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-01",
     dday: calcDday("2026-07-01"),
-    status: "서류작성중",
+    status: "작성중",
     finalResult: null,
     linked: { schedules: 1, todos: 2 },
     starred: false,
     updatedAt: "2시간 전",
     registeredAt: "2026-06-15",
-    stage: "서류작성중",
+    stage: "작성중",
   },
   {
     id: "j2",
@@ -160,13 +169,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-05",
     dday: calcDday("2026-07-05"),
-    status: "서류작성중",
+    status: "작성중",
     finalResult: null,
     linked: { schedules: 2, todos: 1 },
     starred: true,
     updatedAt: "3시간 전",
     registeredAt: "2026-06-16",
-    stage: "서류작성중",
+    stage: "작성중",
   },
   {
     id: "j3",
@@ -178,13 +187,13 @@ const initialJobData: Job[] = [
     industry: "핀테크",
     deadline: "2026-06-30",
     dday: calcDday("2026-06-30"),
-    status: "서류작성중",
+    status: "작성중",
     finalResult: null,
     linked: { schedules: 1, todos: 3 },
     starred: true,
     updatedAt: "1시간 전",
     registeredAt: "2026-06-18",
-    stage: "서류작성중",
+    stage: "작성중",
   },
   {
     id: "j4",
@@ -233,13 +242,13 @@ const initialJobData: Job[] = [
     industry: "IT/테크",
     deadline: "2026-07-07",
     dday: calcDday("2026-07-07"),
-    status: "면접진행",
+    status: "면접전형",
     finalResult: null,
     linked: { schedules: 1, todos: 0 },
     starred: false,
     updatedAt: "5일 전",
     registeredAt: "2026-06-05",
-    stage: "면접진행",
+    stage: "면접전형",
   },
 ];
 
@@ -282,7 +291,7 @@ const DEFAULT_WIDTHS: Record<string, number> = {
 };
 
 
-const FILTER_CHIPS = ["전체", "★", "마감임박", "|", "서류작성중", "지원완료", "서류합격", "필기진행", "면접진행"];
+const FILTER_CHIPS = ["전체", "★", "마감임박", "|", ...ACTIVE_STATUSES];
 const ROW_CAP = 7;
 
 function lsGet<T>(k: string, fb: T): T {
@@ -428,13 +437,16 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
 
 // ── 칸반 뷰 (드래그앤드롭) ─────────────────────────────────────────
 const COL_THEME: Record<StatusType, { bg: string; text: string; dot: string; border: string }> = {
-  "서류작성중": { bg: "bg-blue-50",             text: "text-blue-700",      dot: "bg-blue-500",            border: "border-l-blue-400" },
-  "지원완료":   { bg: "bg-emerald-50",          text: "text-emerald-700",   dot: "bg-emerald-500",         border: "border-l-emerald-400" },
-  "서류합격":   { bg: "bg-pickd-green-light",   text: "text-pickd-green",   dot: "bg-pickd-green",         border: "border-l-pickd-green" },
-  "필기진행":   { bg: "bg-amber-50",            text: "text-amber-700",     dot: "bg-amber-500",           border: "border-l-amber-400" },
-  "면접진행":   { bg: "bg-pickd-orange-light",  text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
-  "최종합격":   { bg: "bg-green-100",           text: "text-green-700",     dot: "bg-green-600",           border: "border-l-green-600" },
-  "불합격":     { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
+  "작성중":   { bg: "bg-blue-50",             text: "text-blue-700",      dot: "bg-blue-500",            border: "border-l-blue-400" },
+  "지원예정": { bg: "bg-indigo-50",           text: "text-indigo-700",    dot: "bg-indigo-500",          border: "border-l-indigo-400" },
+  "지원완료": { bg: "bg-emerald-50",          text: "text-emerald-700",   dot: "bg-emerald-500",         border: "border-l-emerald-400" },
+  "서류전형": { bg: "bg-sky-50",              text: "text-sky-700",       dot: "bg-sky-500",             border: "border-l-sky-400" },
+  "서류합격": { bg: "bg-pickd-green-light",   text: "text-pickd-green",   dot: "bg-pickd-green",         border: "border-l-pickd-green" },
+  "필기전형": { bg: "bg-amber-50",            text: "text-amber-700",     dot: "bg-amber-500",           border: "border-l-amber-400" },
+  "면접전형": { bg: "bg-pickd-orange-light",  text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
+  "최종합격": { bg: "bg-green-100",           text: "text-green-700",     dot: "bg-green-600",           border: "border-l-green-600" },
+  "불합격":   { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
+  "보류":     { bg: "bg-violet-50",           text: "text-violet-700",    dot: "bg-violet-500",          border: "border-l-violet-400" },
 };
 
 const KANBAN_COL_CAP = 8;
@@ -468,15 +480,7 @@ function KanbanView({
   };
 
   const byStatus = useMemo(() => {
-    const m: Record<StatusType, Job[]> = {
-      "서류작성중": [],
-      "지원완료":   [],
-      "서류합격":   [],
-      "필기진행":   [],
-      "면접진행":   [],
-      "최종합격":   [],
-      "불합격":     [],
-    };
+    const m = Object.fromEntries(STATUS_OPTIONS.map((s) => [s, []])) as Record<StatusType, Job[]>;
     jobs.forEach((j) => {
       m[j.status]?.push(j);
     });
@@ -916,7 +920,7 @@ export function JobPostingTable() {
             ...j,
             status: toStatus,
             stage: toStatus,
-            finalResult: toStatus === "최종합격" ? "합격" : "불합격",
+            finalResult: toStatus === "최종합격" ? "합격" : toStatus === "보류" ? "포기" : "불합격",
             completedAt: new Date().toISOString().split("T")[0],
           };
         }

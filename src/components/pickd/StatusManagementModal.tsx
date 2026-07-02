@@ -9,10 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type AppStage = "서류작성중" | "지원완료" | "서류합격" | "필기진행" | "면접진행" | "최종합격" | "불합격";
+export type AppStage =
+  | "작성중" | "지원예정" | "지원완료" | "서류전형" | "서류합격"
+  | "필기전형" | "면접전형" | "최종합격" | "불합격" | "보류";
 export type FinalResult = "합격" | "불합격" | "포기" | null;
 
-const STAGE_FLOW: AppStage[] = ["서류작성중", "지원완료", "서류합격", "필기진행", "면접진행", "최종합격", "불합격"];
+const STAGE_FLOW: AppStage[] = [
+  "작성중", "지원예정", "지원완료", "서류전형", "서류합격",
+  "필기전형", "면접전형", "최종합격", "불합격", "보류",
+];
 
 const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "포기"];
 
@@ -81,7 +86,7 @@ export function StatusManagementModal({
   open,
   onOpenChange,
   job,
-  currentStage = "서류작성중",
+  currentStage = "작성중",
   currentFinalResult = null,
   onStageChange,
   onFinalResultChange,

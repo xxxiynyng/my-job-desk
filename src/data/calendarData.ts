@@ -2,8 +2,8 @@ export type TaskPriority = "high" | "medium" | "low";
 export type TaskType = "서류" | "면접" | "자소서" | "기타";
 export type EventType = "interview" | "deadline" | "personal" | "task";
 export type ApplicationStatus =
-  | "서류작성중" | "지원완료" | "서류합격"
-  | "필기진행" | "면접진행" | "최종합격" | "불합격";
+  | "작성중" | "지원완료" | "서류합격"
+  | "필기전형" | "면접전형" | "최종합격" | "불합격";
 export type ScheduleType = "posting" | "personal";
 
 export interface CalTask {
@@ -108,7 +108,7 @@ export const mockCalApplications: CalApplication[] = [
     keyDates: [{ date: fmt(new Date(y, m, d)), label: "서류 마감" }, { date: fmt(new Date(y, m, d + 8)), label: "결과 발표" }],
   },
   {
-    id: "a2", company: "SK하이닉스", position: "HR", status: "면접진행", deadline: fmt(new Date(y, m, d + 1)), stage: "면접진행", starred: true, brandColor: "#FF0000",
+    id: "a2", company: "SK하이닉스", position: "HR", status: "면접전형", deadline: fmt(new Date(y, m, d + 1)), stage: "면접전형", starred: true, brandColor: "#FF0000",
     recruitmentStart: fmt(new Date(y, m, d - 5)), recruitmentEnd: fmt(new Date(y, m, d + 10)),
     keyDates: [{ date: fmt(new Date(y, m, d + 1)), label: "1차 면접" }, { date: fmt(new Date(y, m, d + 10)), label: "최종 면접" }],
   },
@@ -118,12 +118,12 @@ export const mockCalApplications: CalApplication[] = [
     keyDates: [{ date: fmt(new Date(y, m, d + 2)), label: "서류 마감" }],
   },
   {
-    id: "a4", company: "카카오", position: "백엔드 개발", status: "필기진행", deadline: fmt(new Date(y, m, d + 5)), stage: "필기진행", starred: false, brandColor: "#FEE500",
+    id: "a4", company: "카카오", position: "백엔드 개발", status: "필기전형", deadline: fmt(new Date(y, m, d + 5)), stage: "필기전형", starred: false, brandColor: "#FEE500",
     recruitmentStart: fmt(new Date(y, m, d - 2)), recruitmentEnd: fmt(new Date(y, m, d + 12)),
     keyDates: [{ date: fmt(new Date(y, m, d + 5)), label: "필기 시험" }, { date: fmt(new Date(y, m, d + 12)), label: "결과 발표" }],
   },
   {
-    id: "a5", company: "LG전자", position: "AI 연구", status: "서류작성중", deadline: fmt(new Date(y, m, d + 7)), stage: "서류작성중", starred: false, brandColor: "#A50034",
+    id: "a5", company: "LG전자", position: "AI 연구", status: "작성중", deadline: fmt(new Date(y, m, d + 7)), stage: "작성중", starred: false, brandColor: "#A50034",
     recruitmentStart: fmt(new Date(y, m, d)), recruitmentEnd: fmt(new Date(y, m, d + 14)),
     keyDates: [{ date: fmt(new Date(y, m, d + 7)), label: "서류 마감" }],
   },
@@ -179,6 +179,6 @@ export function getDateRange(start: string, end: string): string[] {
 export type PostingFilterValue = "all" | "personal" | string;
 
 export const APPLICATION_STATUSES: ApplicationStatus[] = [
-  "서류작성중", "지원완료", "서류합격",
-  "필기진행", "면접진행", "최종합격", "불합격",
+  "작성중", "지원완료", "서류합격",
+  "필기전형", "면접전형", "최종합격", "불합격",
 ];
