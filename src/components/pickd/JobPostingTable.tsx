@@ -51,7 +51,8 @@ import { DragHandle } from "@/components/table/DragHandle";
 import { HeaderCell } from "@/components/table/HeaderCell";
 import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
-import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
+import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
+import { useTableDividers } from "@/components/table/useTableDividers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
@@ -821,25 +822,14 @@ export function JobPostingTable() {
     () => colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean),
     [colOrder],
   );
-  // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
-  const dividers = useMemo(() => {
-    type Divider = { key: string; left: number; onResizeMouseDown?: (e: React.MouseEvent) => void; active?: boolean };
-    const items: Divider[] = [];
-    let x = 48; // 체크박스
-    items.push({ key: "after-checkbox", left: x });
-    x += 36; // ★
-    items.push({ key: "after-star", left: x });
-    x += widths.company;
-    items.push({ key: "company", left: x, onResizeMouseDown: onMouseDown("company"), active: resizingKey === "company" });
-    x += widths.title;
-    items.push({ key: "title", left: x, onResizeMouseDown: onMouseDown("title"), active: resizingKey === "title" });
-    for (const col of orderedCols) {
-      if (!visibleCols.has(col.key)) continue;
-      x += Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
-      items.push({ key: col.key, left: x, onResizeMouseDown: onMouseDown(col.key), active: resizingKey === col.key });
-    }
-    return items;
-  }, [widths, orderedCols, visibleCols, onMouseDown, resizingKey]);
+  // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
+  const dividerBounds = useTableDividers(tableWrapRef, [widths, orderedCols, visibleCols]);
+  const dividers = dividerBounds.map((b) => ({
+    key: b.key,
+    left: b.left,
+    onResizeMouseDown: onMouseDown(b.key),
+    active: resizingKey === b.key,
+  }));
   const colSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   // 컬럼 헤더 드래그(순서 변경)와 행 드래그(커스텀 정렬)를 한 DndContext에서 id로 구분 — 탭2와 동일 패턴
   const handleTableDragEnd = ({ active, over }: DragEndEvent) => {
@@ -933,20 +923,18 @@ export function JobPostingTable() {
     return Array.from(set).sort();
   };
 
-  // 컬럼 키 → HeaderFilter 노드 (필터 없는 컬럼은 undefined)
-  const headerFilterFor = (key: string): React.ReactNode => {
+  // 컬럼 키 → 컬럼 메뉴의 필터 서브메뉴 props (필터 없는 컬럼은 undefined)
+  const filterPropsFor = (key: string): ColumnFilterProps | undefined => {
     const kind = FILTER_KIND[key];
     if (!kind) return undefined;
-    return (
-      <HeaderFilter
-        colKey={key}
-        kind={kind}
-        options={kind === "select" ? distinctValues(key) : []}
-        colFilter={colFilter}
-        setSelectFilter={setSelectFilter}
-        setTextFilter={setTextFilter}
-      />
-    );
+    return {
+      colKey: key,
+      kind,
+      options: kind === "select" ? distinctValues(key) : [],
+      colFilter,
+      setSelectFilter,
+      setTextFilter,
+    };
   };
 
   // 필터/검색이 바뀌면 펼침 상태 초기화 — 목록 길이가 들쭉날쭉해지는 것을 방지
@@ -1202,21 +1190,23 @@ export function JobPostingTable() {
                       </div>
                     </th>
                     <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
-                    {/* 기업명 — 고정 (드래그 없음, 그립 클릭 = 정렬 드롭다운) */}
+                    {/* 기업명 — 고정 (드래그 없음, ∨ = 컬럼 메뉴) */}
                     <HeaderCell
                       label="기업명"
+                      colKey="company"
                       sortDir={colSort?.key === "company" ? colSort.dir : null}
                       onSort={() => toggleColSort("company")}
                       onSortChange={(dir) => setSortDirect("company", dir)}
-                      filter={headerFilterFor("company")}
+                      filter={filterPropsFor("company")}
                     />
                     {/* 공고명 — 고정 */}
                     <HeaderCell
                       label="공고명"
+                      colKey="title"
                       sortDir={colSort?.key === "title" ? colSort.dir : null}
                       onSort={() => toggleColSort("title")}
                       onSortChange={(dir) => setSortDirect("title", dir)}
-                      filter={headerFilterFor("title")}
+                      filter={filterPropsFor("title")}
                     />
                     {/* 드래그 가능 컬럼 */}
                     <SortableContext
@@ -1233,7 +1223,8 @@ export function JobPostingTable() {
                             sortDir={colSort?.key === col.key ? colSort.dir : null}
                             onSortToggle={() => toggleColSort(col.key)}
                             onSortChange={(dir) => setSortDirect(col.key, dir)}
-                            filter={headerFilterFor(col.key)}
+                            filter={filterPropsFor(col.key)}
+                            onHide={() => toggleCol(col.key)}
                           />
                         ))}
                     </SortableContext>

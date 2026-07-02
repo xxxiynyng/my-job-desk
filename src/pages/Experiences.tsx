@@ -462,18 +462,16 @@ export default function Experiences() {
     [visibleCols, orderedTailCols],
   );
 
-  // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
-  const dividers = useMemo(() => {
-    type Divider = { key: string; left: number; onResizeMouseDown?: (e: React.MouseEvent) => void; active?: boolean };
-    const items: Divider[] = [];
-    let x = 48; // 체크박스
-    items.push({ key: "after-checkbox", left: x });
-    for (const key of displayCols) {
-      x += colW[key] ?? DEFAULT_EXP_WIDTHS[key] ?? 100;
-      items.push({ key, left: x, onResizeMouseDown: onResize(key), active: resizingKey === key });
-    }
-    return items;
-  }, [colW, displayCols, onResize, resizingKey]);
+  // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
+  // table-fixed에서 남는 공간이 컬럼에 배분되면 계산값과 실제 경계가 어긋나던 문제 해결(2026-07-02)
+  const expTableWrapRef = useRef<HTMLDivElement>(null);
+  const dividerBounds = useTableDividers(expTableWrapRef, [colW, displayCols]);
+  const dividers = dividerBounds.map((b) => ({
+    key: b.key,
+    left: b.left,
+    onResizeMouseDown: onResize(b.key),
+    active: resizingKey === b.key,
+  }));
 
   const resetCols = () => {
     setVisibleCols(new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key)));
@@ -672,19 +670,17 @@ export default function Experiences() {
     updated: "text",
     manage: "select",
   };
-  const headerFilterFor = (key: ColumnKey): React.ReactNode => {
+  const filterPropsFor = (key: ColumnKey): ColumnFilterProps | undefined => {
     const kind = EXP_FILTER_KIND[key];
     if (!kind) return undefined;
-    return (
-      <HeaderFilter
-        colKey={key}
-        kind={kind}
-        options={kind === "select" ? distinctValues(key) : []}
-        colFilter={colFilter}
-        setSelectFilter={setSelectFilter}
-        setTextFilter={setTextFilter}
-      />
-    );
+    return {
+      colKey: key,
+      kind,
+      options: kind === "select" ? distinctValues(key) : [],
+      colFilter,
+      setSelectFilter,
+      setTextFilter,
+    };
   };
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -1021,7 +1017,7 @@ export default function Experiences() {
                   readMeta={readMeta}
                 />
               ) : view === "list" ? (
-                <div className="bg-card border border-border rounded-xl overflow-hidden relative">
+                <div ref={expTableWrapRef} className="bg-card border border-border rounded-xl overflow-hidden relative">
                   {dividers.map((d) => (
                     <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
                   ))}
@@ -1049,37 +1045,23 @@ export default function Experiences() {
                         {isVisible("type") && (
                           <HeaderCell
                             label="유형"
+                            colKey="type"
                             sortDir={colSort?.key === "type" ? colSort.dir : null}
                             onSort={() => toggleColSort("type")}
                             onSortChange={(d) => setSortDirect("type", d)}
-                            filter={
-                              <HeaderFilter
-                                colKey="type"
-                                kind="select"
-                                options={distinctValues("type")}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
+                            filter={filterPropsFor("type")}
+                            onHide={() => toggleCol("type")}
                           />
                         )}
                         {isVisible("name") && (
                           <HeaderCell
                             label="항목명"
+                            colKey="name"
                             sortDir={colSort?.key === "name" ? colSort.dir : null}
                             onSort={() => toggleColSort("name")}
                             onSortChange={(d) => setSortDirect("name", d)}
-                            filter={
-                              <HeaderFilter
-                                colKey="name"
-                                kind="text"
-                                options={[]}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
+                            filter={filterPropsFor("name")}
+                            onHide={() => toggleCol("name")}
                           />
                         )}
                         {/* 이동 가능한 tail 컬럼 — 그립 드래그로 순서 변경(탭1과 동일 패턴), 클릭 시 정렬 드롭다운 */}
@@ -1092,7 +1074,8 @@ export default function Experiences() {
                               sortDir={colSort?.key === key ? colSort.dir : null}
                               onSortToggle={() => toggleColSort(key)}
                               onSortChange={(d) => setSortDirect(key, d)}
-                              filter={headerFilterFor(key)}
+                              filter={filterPropsFor(key)}
+                              onHide={() => toggleCol(key)}
                             />
                           ))}
                         </SortableContext>
@@ -1450,5 +1433,6 @@ import { DetailEditor } from './experiences/DetailEditor';
 import { ManageIndicator } from './experiences/tableWidgets';
 import { HeaderCell } from "@/components/table/HeaderCell";
 import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
-import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
+import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
+import { useTableDividers } from "@/components/table/useTableDividers";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";
