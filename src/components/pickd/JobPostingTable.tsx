@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type React from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -15,6 +15,7 @@ import {
   arrayMove,
   useSortable,
   horizontalListSortingStrategy,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -602,6 +603,89 @@ function KanbanView({
 }
 
 // ── 드래그로 순서를 바꿀 수 있는 컬럼 헤더 ─────────────────────────────
+// ── 탭1 행 드래그 셸 — 탭2 SortableExpRow와 동일 패턴 (tr + 그립 활성화만 담당) ──
+function SortableJobRow({
+  id,
+  className,
+  children,
+}: {
+  id: string;
+  className?: string;
+  children: (grip: {
+    setActivatorNodeRef: (el: HTMLElement | null) => void;
+    listeners: ReturnType<typeof useSortable>["listeners"];
+  }) => React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  return (
+    <tr ref={setNodeRef} style={style} {...attributes} className={className}>
+      {children({ setActivatorNodeRef, listeners })}
+    </tr>
+  );
+}
+
+// ── 탭1 행 거터 셀 — 그립(드래그+클릭 메뉴) + 체크박스. 탭2 행 거터와 동일 구조 ──
+function JobRowGutterCell({
+  grip,
+  job,
+  checked,
+  onCheckedChange,
+  onStar,
+  onEdit,
+  onDuplicate,
+  onChangeStatus,
+  onDelete,
+}: {
+  grip: {
+    setActivatorNodeRef: (el: HTMLElement | null) => void;
+    listeners: ReturnType<typeof useSortable>["listeners"];
+  };
+  job: { starred: boolean; updatedAt: string; url?: string; status: JobMenuStatus };
+  checked: boolean;
+  onCheckedChange: () => void;
+  onStar: () => void;
+  onEdit: () => void;
+  onDuplicate: () => void;
+  onChangeStatus: (s: JobMenuStatus) => void;
+  onDelete: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      {/* 투명 히트 영역 — 드래그하면 행 이동, 클릭(이동 없이 떼면)하면 컨텍스트 메뉴 */}
+      <DragHandle
+        ref={grip.setActivatorNodeRef}
+        {...grip.listeners}
+        icon={null}
+        onClick={() => setMenuOpen(true)}
+        className="absolute left-0.5 top-1/2 -translate-y-1/2 w-6 h-6 z-20 rounded"
+      />
+      <JobRowContextMenu
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        job={job}
+        onStar={onStar}
+        onEdit={onEdit}
+        onDuplicate={onDuplicate}
+        onChangeStatus={onChangeStatus}
+        onDelete={onDelete}
+      />
+      <div className="ml-5">
+        <Checkbox checked={checked} onCheckedChange={onCheckedChange} className="h-3.5 w-3.5" />
+      </div>
+    </td>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────
 export function JobPostingTable() {
   const [jobs, setJobs] = useState<Job[]>(initialJobData);
@@ -612,12 +696,37 @@ export function JobPostingTable() {
   const [modalJobId, setModalJobId] = useState<string | null>(null);
   const [tableExpanded, setTableExpanded] = useState(false);
   const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+
+  // 행 순서 커스텀 정렬 (드래그, 탭2 sortOrder와 동일 개념 — 탭1 jobs는 메모리 상태라 순서만 저장)
+  const [rowOrder, setRowOrder] = useState<string[]>(() => lsGet<string[]>("pickd.jobs.rowOrder", []));
+  useEffect(() => {
+    try {
+      localStorage.setItem("pickd.jobs.rowOrder", JSON.stringify(rowOrder));
+    } catch {}
+  }, [rowOrder]);
+  const [sortMode, setSortMode] = useState<"custom" | null>(() =>
+    lsGet<string | null>("pickd.jobs.sortMode", null) === "custom" ? "custom" : null,
+  );
+  useEffect(() => {
+    try {
+      if (sortMode === "custom") localStorage.setItem("pickd.jobs.sortMode", JSON.stringify("custom"));
+      else localStorage.removeItem("pickd.jobs.sortMode");
+    } catch {}
+  }, [sortMode]);
+
   const toggleColSort = (key: string) => {
+    setSortMode(null);
     setColSort((prev) => {
       if (!prev || prev.key !== key) return { key, dir: "asc" };
       if (prev.dir === "asc") return { key, dir: "desc" };
       return null;
     });
+  };
+
+  // 헤더 그립 드롭다운 — 방향 직접 지정 (오름/내림/해제)
+  const setSortDirect = (key: string, dir: "asc" | "desc" | null) => {
+    setSortMode(null);
+    setColSort(dir ? { key, dir } : null);
   };
 
   // ── 컬럼별 헤더 필터 (탭2와 동일한 HeaderFilter 공용 컴포넌트) ──
@@ -735,22 +844,40 @@ export function JobPostingTable() {
     return items;
   }, [widths, orderedCols, visibleCols, onMouseDown, resizingKey]);
   const colSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-  const handleColumnDragEnd = useCallback(({ active, over }: DragEndEvent) => {
+  // 컬럼 헤더 드래그(순서 변경)와 행 드래그(커스텀 정렬)를 한 DndContext에서 id로 구분 — 탭2와 동일 패턴
+  const handleTableDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
-    setColOrder((prev) => {
-      const oldIdx = prev.findIndex((k) => k === active.id);
-      const newIdx = prev.findIndex((k) => k === over.id);
-      if (oldIdx === -1 || newIdx === -1) return prev;
-      return arrayMove(prev, oldIdx, newIdx);
-    });
-  }, []);
+    if (ALL_COLUMNS.some((c) => c.key === active.id)) {
+      setColOrder((prev) => {
+        const oldIdx = prev.findIndex((k) => k === active.id);
+        const newIdx = prev.findIndex((k) => k === over.id);
+        if (oldIdx === -1 || newIdx === -1) return prev;
+        return arrayMove(prev, oldIdx, newIdx);
+      });
+      return;
+    }
+    // 행 드래그 — 현재 화면 순서 기준으로 rowOrder 재부여 후 커스텀 정렬로 전환
+    const displayedIds = filtered.map((j) => j.id);
+    const oldIdx = displayedIds.indexOf(String(active.id));
+    const newIdx = displayedIds.indexOf(String(over.id));
+    if (oldIdx === -1 || newIdx === -1) return;
+    const newDisplayed = arrayMove(displayedIds, oldIdx, newIdx);
+    const rest = activeJobs.map((j) => j.id).filter((id) => !newDisplayed.includes(id));
+    setRowOrder([...newDisplayed, ...rest]);
+    setSortMode("custom");
+    setColSort(null);
+  };
 
   // 지원중 vs 완료 분리
   const activeJobs = useMemo(() => jobs.filter((j) => ACTIVE_STATUSES.includes(j.status)), [jobs]);
   const completedJobs = useMemo(() => jobs.filter((j) => COMPLETED_STATUSES.includes(j.status)), [jobs]);
 
-  // 정렬
+  // 정렬 — 커스텀(행 드래그) > 컬럼 정렬 > 기본 순
   const sortedActive = useMemo(() => {
+    if (!colSort && sortMode === "custom" && rowOrder.length) {
+      const pos = new Map(rowOrder.map((id, i) => [id, i]));
+      return [...activeJobs].sort((a, b) => (pos.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (pos.get(b.id) ?? Number.MAX_SAFE_INTEGER));
+    }
     if (!colSort) return [...activeJobs];
     return [...activeJobs].sort((a, b) => {
       const av = a[colSort.key as keyof Job] ?? "";
@@ -758,7 +885,7 @@ export function JobPostingTable() {
       const cmp = String(av).localeCompare(String(bv), "ko", { numeric: true });
       return colSort.dir === "asc" ? cmp : -cmp;
     });
-  }, [activeJobs, colSort]);
+  }, [activeJobs, colSort, sortMode, rowOrder]);
 
   // 검색 (칩 필터 적용 전) — 칩별 카운트 산출용
   const searchedActive = useMemo(() => {
@@ -1060,7 +1187,7 @@ export function JobPostingTable() {
               {dividers.map((d) => (
                 <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
               ))}
-              <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleColumnDragEnd}>
+              <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleTableDragEnd}>
               <table className="w-full min-w-full text-[13px] table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                 <colgroup>
@@ -1089,7 +1216,7 @@ export function JobPostingTable() {
                       label="기업명"
                       sortDir={colSort?.key === "company" ? colSort.dir : null}
                       onSort={() => toggleColSort("company")}
-                      onSortChange={(dir) => setColSort(dir ? { key: "company", dir } : null)}
+                      onSortChange={(dir) => setSortDirect("company", dir)}
                       filter={headerFilterFor("company")}
                     />
                     {/* 공고명 — 고정 */}
@@ -1097,7 +1224,7 @@ export function JobPostingTable() {
                       label="공고명"
                       sortDir={colSort?.key === "title" ? colSort.dir : null}
                       onSort={() => toggleColSort("title")}
-                      onSortChange={(dir) => setColSort(dir ? { key: "title", dir } : null)}
+                      onSortChange={(dir) => setSortDirect("title", dir)}
                       filter={headerFilterFor("title")}
                     />
                     {/* 드래그 가능 컬럼 */}
@@ -1114,7 +1241,7 @@ export function JobPostingTable() {
                             label={col.label}
                             sortDir={colSort?.key === col.key ? colSort.dir : null}
                             onSortToggle={() => toggleColSort(col.key)}
-                            onSortChange={(dir) => setColSort(dir ? { key: col.key, dir } : null)}
+                            onSortChange={(dir) => setSortDirect(col.key, dir)}
                             filter={headerFilterFor(col.key)}
                           />
                         ))}
@@ -1123,44 +1250,42 @@ export function JobPostingTable() {
                     <th className="w-14 bg-[#F8FAFC]" />
                   </tr>
                 </thead>
+                <SortableContext items={visibleJobs.map((j) => j.id)} strategy={verticalListSortingStrategy}>
                 <tbody>
                   {visibleJobs.map((job) => (
-                    <tr
+                    <SortableJobRow
                       key={job.id}
+                      id={job.id}
                       className={cn(
                         "h-11 border-b border-border/50 hover:bg-gray-50 transition-colors group relative",
                         selected.has(job.id) && "bg-accent/30",
                       )}
                     >
-                      {/* 그립 버튼 + 체크박스 */}
-                      <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <JobRowContextMenu
-                          job={{
-                            starred: job.starred,
-                            updatedAt: job.updatedAt,
-                            url: job.url,
-                            status: job.status as JobMenuStatus,
-                          }}
-                          onStar={() => toggleStarred(job.id)}
-                          onEdit={() => setModalJobId(job.id)}
-                          onDuplicate={() => duplicateJob(job.id)}
-                          onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
-                          onDelete={() => deleteJob(job.id)}
-                        />
-                        <div className="ml-5">
-                          <Checkbox
-                            checked={selected.has(job.id)}
-                            onCheckedChange={() => {
-                              setSelected((p) => {
-                                const n = new Set(p);
-                                n.has(job.id) ? n.delete(job.id) : n.add(job.id);
-                                return n;
-                              });
-                            }}
-                            className="h-3.5 w-3.5"
-                          />
-                        </div>
-                      </td>
+                    {(grip) => (
+                    <>
+                      {/* 그립(드래그+클릭 메뉴) + 체크박스 */}
+                      <JobRowGutterCell
+                        grip={grip}
+                        job={{
+                          starred: job.starred,
+                          updatedAt: job.updatedAt,
+                          url: job.url,
+                          status: job.status as JobMenuStatus,
+                        }}
+                        checked={selected.has(job.id)}
+                        onCheckedChange={() => {
+                          setSelected((p) => {
+                            const n = new Set(p);
+                            n.has(job.id) ? n.delete(job.id) : n.add(job.id);
+                            return n;
+                          });
+                        }}
+                        onStar={() => toggleStarred(job.id)}
+                        onEdit={() => setModalJobId(job.id)}
+                        onDuplicate={() => duplicateJob(job.id)}
+                        onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
+                        onDelete={() => deleteJob(job.id)}
+                      />
                       {/* 별표 */}
                       <td className="px-2 py-2.5 text-left whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => toggleStarred(job.id)} aria-label="관심 공고">
@@ -1322,7 +1447,9 @@ export function JobPostingTable() {
                       <JobRowActionCell
                         onEdit={() => setModalJobId(job.id)}
                       />
-                    </tr>
+                    </>
+                    )}
+                    </SortableJobRow>
                   ))}
                   {filtered.length === 0 && (
                     <tr>
@@ -1337,6 +1464,7 @@ export function JobPostingTable() {
                     </tr>
                   ))}
                 </tbody>
+                </SortableContext>
               </table>
               </DndContext>
             </div>

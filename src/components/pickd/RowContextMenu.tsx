@@ -99,6 +99,8 @@ export function JobRowContextMenu({
   onDuplicate,
   onChangeStatus,
   onDelete,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: {
   job: {
     starred: boolean;
@@ -111,6 +113,9 @@ export function JobRowContextMenu({
   onDuplicate: () => void;
   onChangeStatus: (s: JobMenuStatus) => void;
   onDelete: () => void;
+  /** 행 드래그 그립과 겹칠 때 외부에서 열림 제어 (탭2 ExpRowContextMenu와 동일 패턴) */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
 
@@ -120,8 +125,16 @@ export function JobRowContextMenu({
   const starLabel = job.starred ? "즐겨찾기 해제" : "즐겨찾기 토글";
   const starIcon = job.starred ? "★" : "☆";
 
+  const handleOpenChange = (o: boolean) => {
+    if (!o) setSearch("");
+    controlledOnOpenChange?.(o);
+  };
+
   return (
-    <DropdownMenu onOpenChange={(open) => { if (!open) setSearch(""); }}>
+    <DropdownMenu
+      open={controlledOpen}
+      onOpenChange={controlledOpen !== undefined ? handleOpenChange : (o) => { if (!o) setSearch(""); }}
+    >
       <DropdownMenuTrigger asChild>
         <GripTrigger />
       </DropdownMenuTrigger>
