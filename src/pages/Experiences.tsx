@@ -12,6 +12,7 @@ import {
   arrayMove,
   useSortable,
   verticalListSortingStrategy,
+  horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -139,6 +140,14 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
   { key: "manage", label: "관리", defaultVisible: true },
 ];
 
+// 컬럼 순서 드래그(탭1과 동일 패턴) — 유형·항목명은 정체성 컬럼이라 고정, 나머지만 이동 가능
+const EXP_FIXED_COLS: ColumnKey[] = ["type", "name"];
+const EXP_TAIL_COLS: ColumnKey[] = ["org", "period", "keywords", "importance", "updated", "manage"];
+const LS_EXP_COL_ORDER = "pickd.experiences.colOrder";
+const COL_LABEL: Record<ColumnKey, string> = Object.fromEntries(
+  ALL_COLUMNS.map((c) => [c.key, c.label]),
+) as Record<ColumnKey, string>;
+
 const DEFAULT_EXP_WIDTHS: Record<string, number> = {
   type: 90,
   name: 260,
@@ -203,6 +212,7 @@ function SortableExpRow({
   item,
   selected,
   isVisible,
+  orderedTailCols,
   setDetailId,
   toggleSelect,
   duplicateItem,
@@ -213,6 +223,7 @@ function SortableExpRow({
   item: Item;
   selected: Set<string>;
   isVisible: (k: ColumnKey) => boolean;
+  orderedTailCols: ColumnKey[];
   setDetailId: (id: string) => void;
   toggleSelect: (id: string) => void;
   duplicateItem: (id: string) => void;
@@ -289,51 +300,64 @@ function SortableExpRow({
           </span>
         </td>
       )}
-      {isVisible("org") && (
-        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-          <span className="block truncate">{org || "—"}</span>
-        </td>
-      )}
-      {isVisible("period") && (
-        <td className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
-          <span className="block truncate">{period || "—"}</span>
-        </td>
-      )}
-      {isVisible("keywords") && (
-        <td className="px-4 py-2.5 overflow-hidden">
-          <div className="flex flex-nowrap gap-1 overflow-hidden">
-            {item.keywords.slice(0, 3).map((k) => (
-              <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
-                {k}
-              </span>
-            ))}
-            {item.keywords.length > 3 && (
-              <span className="text-[11px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
-            )}
-          </div>
-        </td>
-      )}
-      {isVisible("importance") && (
-        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-          <span className="block truncate">{item.importance ?? "—"}</span>
-        </td>
-      )}
-      {isVisible("updated") && (
-        <td className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
-          <span className="block truncate">{item.updatedAt ?? "—"}</span>
-        </td>
-      )}
-      {isVisible("manage") && (
-        <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
-          <ManageIndicator
-            item={item}
-            onMerge={() => {
-              setDetailId(item.id);
-              setMergeOpen(true);
-            }}
-          />
-        </td>
-      )}
+      {/* 이동 가능한 tail 컬럼 셀 — 헤더 orderedTailCols와 동일 순서로 렌더 */}
+      {orderedTailCols.map((key) => {
+        switch (key) {
+          case "org":
+            return (
+              <td key="org" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+                <span className="block truncate">{org || "—"}</span>
+              </td>
+            );
+          case "period":
+            return (
+              <td key="period" className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
+                <span className="block truncate">{period || "—"}</span>
+              </td>
+            );
+          case "keywords":
+            return (
+              <td key="keywords" className="px-4 py-2.5 overflow-hidden">
+                <div className="flex flex-nowrap gap-1 overflow-hidden">
+                  {item.keywords.slice(0, 3).map((k) => (
+                    <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
+                      {k}
+                    </span>
+                  ))}
+                  {item.keywords.length > 3 && (
+                    <span className="text-[11px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
+                  )}
+                </div>
+              </td>
+            );
+          case "importance":
+            return (
+              <td key="importance" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+                <span className="block truncate">{item.importance ?? "—"}</span>
+              </td>
+            );
+          case "updated":
+            return (
+              <td key="updated" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+                <span className="block truncate">{item.updatedAt ?? "—"}</span>
+              </td>
+            );
+          case "manage":
+            return (
+              <td key="manage" className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+                <ManageIndicator
+                  item={item}
+                  onMerge={() => {
+                    setDetailId(item.id);
+                    setMergeOpen(true);
+                  }}
+                />
+              </td>
+            );
+          default:
+            return null;
+        }
+      })}
       <ExpRowActionCell onEdit={() => setDetailId(item.id)} />
     </tr>
   );
@@ -417,19 +441,39 @@ export default function Experiences() {
     MIN_EXP_WIDTHS,
     MAX_EXP_WIDTHS,
   );
+
+  // 컬럼 순서 (드래그로 변경, 탭1 pickd.jobs.colOrder와 동일 패턴) — 이동 가능한 tail 컬럼만 저장
+  const [colOrder, setColOrder] = useState<ColumnKey[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LS_EXP_COL_ORDER) ?? "[]") as ColumnKey[];
+      if (saved.length === EXP_TAIL_COLS.length && saved.every((k) => EXP_TAIL_COLS.includes(k))) return saved;
+    } catch {}
+    return [...EXP_TAIL_COLS];
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_EXP_COL_ORDER, JSON.stringify(colOrder));
+    } catch {}
+  }, [colOrder]);
+  const orderedTailCols = useMemo(() => colOrder.filter((k) => visibleCols.has(k)), [colOrder, visibleCols]);
+  // 화면 표시 순서 전체: 고정(유형·항목명) + 이동 가능 tail
+  const displayCols = useMemo(
+    () => [...EXP_FIXED_COLS.filter((k) => visibleCols.has(k)), ...orderedTailCols],
+    [visibleCols, orderedTailCols],
+  );
+
   // 컬럼 경계 세로 구분선 — 헤더 렌더링 시점에 한 번만 계산, 테이블 전체 높이를 관통하는 절대 위치 오버레이로 그림
   const dividers = useMemo(() => {
     type Divider = { key: string; left: number; onResizeMouseDown?: (e: React.MouseEvent) => void; active?: boolean };
     const items: Divider[] = [];
     let x = 48; // 체크박스
     items.push({ key: "after-checkbox", left: x });
-    for (const col of ALL_COLUMNS) {
-      if (!visibleCols.has(col.key)) continue;
-      x += colW[col.key] ?? DEFAULT_EXP_WIDTHS[col.key] ?? 100;
-      items.push({ key: col.key, left: x, onResizeMouseDown: onResize(col.key), active: resizingKey === col.key });
+    for (const key of displayCols) {
+      x += colW[key] ?? DEFAULT_EXP_WIDTHS[key] ?? 100;
+      items.push({ key, left: x, onResizeMouseDown: onResize(key), active: resizingKey === key });
     }
     return items;
-  }, [colW, visibleCols, onResize, resizingKey]);
+  }, [colW, displayCols, onResize, resizingKey]);
 
   const resetCols = () => {
     setVisibleCols(new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key)));
@@ -612,11 +656,53 @@ export default function Experiences() {
     });
   };
 
+  // 헤더 그립 드롭다운 — 방향 직접 지정 (오름/내림/해제)
+  const setSortDirect = (key: string, dir: "asc" | "desc" | null) => {
+    setSortMode(null);
+    setColSort(dir ? { key, dir } : null);
+  };
+
+  // 컬럼별 헤더 필터 종류 — importance(중요도)는 값 종류가 적어 필터 제외
+  const EXP_FILTER_KIND: Partial<Record<ColumnKey, "select" | "text">> = {
+    type: "select",
+    name: "text",
+    org: "select",
+    period: "text",
+    keywords: "select",
+    updated: "text",
+    manage: "select",
+  };
+  const headerFilterFor = (key: ColumnKey): React.ReactNode => {
+    const kind = EXP_FILTER_KIND[key];
+    if (!kind) return undefined;
+    return (
+      <HeaderFilter
+        colKey={key}
+        kind={kind}
+        options={kind === "select" ? distinctValues(key) : []}
+        colFilter={colFilter}
+        setSelectFilter={setSelectFilter}
+        setTextFilter={setTextFilter}
+      />
+    );
+  };
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       if (!over || active.id === over.id) return;
+      // 컬럼 헤더 그립 드래그 — tail 컬럼 순서 변경 (행 드래그와 같은 DndContext, id로 구분)
+      if (EXP_TAIL_COLS.includes(String(active.id) as ColumnKey)) {
+        setColOrder((prev) => {
+          const oldIdx = prev.findIndex((k) => k === active.id);
+          const newIdx = prev.findIndex((k) => k === over.id);
+          if (oldIdx === -1 || newIdx === -1) return prev;
+          return arrayMove(prev, oldIdx, newIdx);
+        });
+        return;
+      }
+      // 행 그립 드래그 — 커스텀 정렬로 전환
       setItems((prev) => {
         const oldIdx = prev.findIndex((i) => i.id === String(active.id));
         const newIdx = prev.findIndex((i) => i.id === String(over.id));
@@ -944,14 +1030,9 @@ export default function Experiences() {
                     {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                     <colgroup>
                       <col style={{ width: 48 }} />
-                      {isVisible("type") && <col style={{ width: colW.type }} />}
-                      {isVisible("name") && <col style={{ width: colW.name }} />}
-                      {isVisible("org") && <col style={{ width: colW.org }} />}
-                      {isVisible("period") && <col style={{ width: colW.period }} />}
-                      {isVisible("keywords") && <col style={{ width: colW.keywords }} />}
-                      {isVisible("importance") && <col style={{ width: colW.importance }} />}
-                      {isVisible("updated") && <col style={{ width: colW.updated }} />}
-                      {isVisible("manage") && <col style={{ width: colW.manage }} />}
+                      {displayCols.map((k) => (
+                        <col key={k} style={{ width: colW[k] }} />
+                      ))}
                       <col style={{ width: 56 }} />
                     </colgroup>
                     <thead>
@@ -970,6 +1051,7 @@ export default function Experiences() {
                             label="유형"
                             sortDir={colSort?.key === "type" ? colSort.dir : null}
                             onSort={() => toggleColSort("type")}
+                            onSortChange={(d) => setSortDirect("type", d)}
                             filter={
                               <HeaderFilter
                                 colKey="type"
@@ -987,6 +1069,7 @@ export default function Experiences() {
                             label="항목명"
                             sortDir={colSort?.key === "name" ? colSort.dir : null}
                             onSort={() => toggleColSort("name")}
+                            onSortChange={(d) => setSortDirect("name", d)}
                             filter={
                               <HeaderFilter
                                 colKey="name"
@@ -999,98 +1082,20 @@ export default function Experiences() {
                             }
                           />
                         )}
-                        {isVisible("org") && (
-                          <HeaderCell
-                            label="기관/소속"
-                            sortDir={colSort?.key === "org" ? colSort.dir : null}
-                            onSort={() => toggleColSort("org")}
-                            filter={
-                              <HeaderFilter
-                                colKey="org"
-                                kind="select"
-                                options={distinctValues("org")}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
-                          />
-                        )}
-                        {isVisible("period") && (
-                          <HeaderCell
-                            label="기간"
-                            sortDir={colSort?.key === "period" ? colSort.dir : null}
-                            onSort={() => toggleColSort("period")}
-                            filter={
-                              <HeaderFilter
-                                colKey="period"
-                                kind="text"
-                                options={[]}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
-                          />
-                        )}
-                        {isVisible("keywords") && (
-                          <HeaderCell
-                            label="주요 키워드"
-                            sortDir={colSort?.key === "keywords" ? colSort.dir : null}
-                            onSort={() => toggleColSort("keywords")}
-                            filter={
-                              <HeaderFilter
-                                colKey="keywords"
-                                kind="select"
-                                options={distinctValues("keywords")}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
-                          />
-                        )}
-                        {isVisible("importance") && (
-                          <HeaderCell
-                            label="중요도"
-                            sortDir={colSort?.key === "importance" ? colSort.dir : null}
-                            onSort={() => toggleColSort("importance")}
-                          />
-                        )}
-                        {isVisible("updated") && (
-                          <HeaderCell
-                            label="최근 수정"
-                            sortDir={colSort?.key === "updated" ? colSort.dir : null}
-                            onSort={() => toggleColSort("updated")}
-                            filter={
-                              <HeaderFilter
-                                colKey="updated"
-                                kind="text"
-                                options={[]}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
-                          />
-                        )}
-                        {isVisible("manage") && (
-                          <HeaderCell
-                            label="관리 상태"
-                            sortDir={colSort?.key === "manage" ? colSort.dir : null}
-                            onSort={() => toggleColSort("manage")}
-                            filter={
-                              <HeaderFilter
-                                colKey="manage"
-                                kind="select"
-                                options={distinctValues("manage")}
-                                colFilter={colFilter}
-                                setSelectFilter={setSelectFilter}
-                                setTextFilter={setTextFilter}
-                              />
-                            }
-                          />
-                        )}
+                        {/* 이동 가능한 tail 컬럼 — 그립 드래그로 순서 변경(탭1과 동일 패턴), 클릭 시 정렬 드롭다운 */}
+                        <SortableContext items={orderedTailCols} strategy={horizontalListSortingStrategy}>
+                          {orderedTailCols.map((key) => (
+                            <SortableColumnHeader
+                              key={key}
+                              colKey={key}
+                              label={COL_LABEL[key]}
+                              sortDir={colSort?.key === key ? colSort.dir : null}
+                              onSortToggle={() => toggleColSort(key)}
+                              onSortChange={(d) => setSortDirect(key, d)}
+                              filter={headerFilterFor(key)}
+                            />
+                          ))}
+                        </SortableContext>
                         <th className="w-14 bg-[#F8FAFC]" />
                       </tr>
                     </thead>
@@ -1102,6 +1107,7 @@ export default function Experiences() {
                             item={i}
                             selected={selected}
                             isVisible={isVisible}
+                            orderedTailCols={orderedTailCols}
                             setDetailId={setDetailId}
                             toggleSelect={toggleSelect}
                             duplicateItem={duplicateItem}
@@ -1443,5 +1449,6 @@ import { DetailEditor } from './experiences/DetailEditor';
 
 import { ManageIndicator } from './experiences/tableWidgets';
 import { HeaderCell } from "@/components/table/HeaderCell";
+import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";
