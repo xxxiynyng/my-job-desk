@@ -69,27 +69,19 @@ function MenuSearch({
 
 export type JobMenuStatus =
   | "작성중"
-  | "지원예정"
   | "지원완료"
   | "서류전형"
-  | "서류합격"
   | "필기전형"
   | "면접전형"
-  | "최종합격"
-  | "불합격"
-  | "보류";
+  | "전형완료";
 
 const JOB_STATUS_OPTIONS: JobMenuStatus[] = [
   "작성중",
-  "지원예정",
   "지원완료",
   "서류전형",
-  "서류합격",
   "필기전형",
   "면접전형",
-  "최종합격",
-  "불합격",
-  "보류",
+  "전형완료",
 ];
 
 export function JobRowContextMenu({

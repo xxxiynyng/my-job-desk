@@ -40,11 +40,10 @@ const priorityLabels: Record<string, string> = { high: "긴급", medium: "보통
 const stageStyles: Record<string, string> = {
   "작성중": "bg-blue-50 text-blue-700",
   "지원완료":   "bg-emerald-50 text-emerald-700",
-  "서류합격":   "bg-pickd-green-light text-pickd-green",
+  "서류전형":   "bg-sky-50 text-sky-700",
   "필기전형":   "bg-amber-100 text-amber-700",
   "면접전형":   "bg-pickd-orange-light text-pickd-orange",
-  "최종합격":   "bg-green-100 text-green-700",
-  "불합격":     "bg-muted text-muted-foreground",
+  "전형완료":   "bg-muted text-muted-foreground",
 };
 
 export function ContextPanel({

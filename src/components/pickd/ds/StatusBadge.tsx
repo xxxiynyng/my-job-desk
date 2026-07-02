@@ -1,8 +1,8 @@
 import React from "react";
 
 type StatusKey =
-  | "draft" | "planned" | "applied" | "document" | "document_pass" | "test"
-  | "interview" | "passed" | "rejected" | "hold";
+  | "draft" | "applied" | "document" | "test" | "interview"
+  | "finished" | "passed" | "rejected" | "hold";
 
 type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
 
@@ -13,17 +13,19 @@ interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   size?: "sm" | "md";
 }
 
+// 전형 단계 6개 (2026-07-02 재편: 지원예정·서류합격 삭제, 최종합격/불합격/보류는
+// "전형완료" 단일 단계로 통합 — 세부 결과는 passed/rejected/hold 배지로 구분)
 export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
-  draft:         { label: "작성중",   tone: "neutral" },
-  planned:       { label: "지원예정", tone: "info" },
-  applied:       { label: "지원완료", tone: "brand" },
-  document:      { label: "서류전형", tone: "info" },
-  document_pass: { label: "서류합격", tone: "info" },
-  test:          { label: "필기전형", tone: "info" },
-  interview:     { label: "면접전형", tone: "warning" },
-  passed:        { label: "최종합격", tone: "success" },
-  rejected:      { label: "불합격",   tone: "danger" },
-  hold:          { label: "보류",     tone: "caution" },
+  draft:     { label: "작성중",   tone: "neutral" },
+  applied:   { label: "지원완료", tone: "brand" },
+  document:  { label: "서류전형", tone: "info" },
+  test:      { label: "필기전형", tone: "info" },
+  interview: { label: "면접전형", tone: "warning" },
+  finished:  { label: "전형완료", tone: "neutral" },
+  // 세부 결과 배지 (전형완료 옆에 표시)
+  passed:    { label: "최종합격", tone: "success" },
+  rejected:  { label: "불합격",   tone: "danger" },
+  hold:      { label: "보류",     tone: "caution" },
 };
 
 const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {

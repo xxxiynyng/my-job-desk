@@ -9,15 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type AppStage =
-  | "작성중" | "지원예정" | "지원완료" | "서류전형" | "서류합격"
-  | "필기전형" | "면접전형" | "최종합격" | "불합격" | "보류";
+// 전형 단계 6개 (2026-07-02 재편) — 최종합격/불합격/보류는 "전형완료" + 세부 결과(FinalResult)로 표현
+export type AppStage = "작성중" | "지원완료" | "서류전형" | "필기전형" | "면접전형" | "전형완료";
 export type FinalResult = "합격" | "불합격" | "포기" | null;
 
-const STAGE_FLOW: AppStage[] = [
-  "작성중", "지원예정", "지원완료", "서류전형", "서류합격",
-  "필기전형", "면접전형", "최종합격", "불합격", "보류",
-];
+const STAGE_FLOW: AppStage[] = ["작성중", "지원완료", "서류전형", "필기전형", "면접전형", "전형완료"];
 
 const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "포기"];
 

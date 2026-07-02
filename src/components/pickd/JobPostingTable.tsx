@@ -91,34 +91,35 @@ const COL_MAX_WIDTHS: Record<string, number> = {
 };
 
 // ── 타입 ──────────────────────────────────────────────────────────
-// 정본 10개 상태 (2026-07-02 확정 — 구 "코딩테스트"는 직무 중립 명칭 "필기전형"으로)
-type StatusType =
-  | "작성중" | "지원예정" | "지원완료" | "서류전형" | "서류합격"
-  | "필기전형" | "면접전형" | "최종합격" | "불합격" | "보류";
-const ACTIVE_STATUSES: StatusType[] = ["작성중", "지원예정", "지원완료", "서류전형", "서류합격", "필기전형", "면접전형"];
-const COMPLETED_STATUSES: StatusType[] = ["최종합격", "불합격", "보류"];
+// 전형 단계 6개 (2026-07-02 재편 — 지원예정·서류합격 삭제, 최종합격/불합격/보류는
+// "전형완료" 단일 단계 + 세부 결과(finalResult) 배지로 구분)
+type StatusType = "작성중" | "지원완료" | "서류전형" | "필기전형" | "면접전형" | "전형완료";
+const ACTIVE_STATUSES: StatusType[] = ["작성중", "지원완료", "서류전형", "필기전형", "면접전형"];
+const COMPLETED_STATUSES: StatusType[] = ["전형완료"];
 const STATUS_OPTIONS: StatusType[] = [...ACTIVE_STATUSES, ...COMPLETED_STATUSES];
 
 const STATUS_DS_KEY: Record<
   StatusType,
-  "draft" | "planned" | "applied" | "document" | "document_pass" | "test" | "interview" | "passed" | "rejected" | "hold"
+  "draft" | "applied" | "document" | "test" | "interview" | "finished"
 > = {
   "작성중":   "draft",
-  "지원예정": "planned",
   "지원완료": "applied",
   "서류전형": "document",
-  "서류합격": "document_pass",
   "필기전형": "test",
   "면접전형": "interview",
-  "최종합격": "passed",
-  "불합격":   "rejected",
-  "보류":     "hold",
+  "전형완료": "finished",
 };
 
+// 전형완료의 세부 결과 → 배지 키·표시 라벨
 const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
   합격: "passed",
   불합격: "rejected",
   포기: "hold",
+};
+const FINAL_RESULT_LABEL: Record<NonNullable<FinalResult>, string> = {
+  합격: "최종합격",
+  불합격: "불합격",
+  포기: "보류",
 };
 
 type Job = {
@@ -225,13 +226,13 @@ const initialJobData: Job[] = [
     industry: "이커머스",
     deadline: "2026-06-15",
     dday: calcDday("2026-06-15"),
-    status: "불합격",
+    status: "전형완료",
     finalResult: "불합격",
     linked: { schedules: 0, todos: 0 },
     starred: false,
     updatedAt: "3일 전",
     registeredAt: "2026-05-20",
-    stage: "불합격",
+    stage: "전형완료",
     completedAt: "2026-06-15",
   },
   {
@@ -448,15 +449,11 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
 // ── 칸반 뷰 (드래그앤드롭) ─────────────────────────────────────────
 const COL_THEME: Record<StatusType, { bg: string; text: string; dot: string; border: string }> = {
   "작성중":   { bg: "bg-blue-50",             text: "text-blue-700",      dot: "bg-blue-500",            border: "border-l-blue-400" },
-  "지원예정": { bg: "bg-indigo-50",           text: "text-indigo-700",    dot: "bg-indigo-500",          border: "border-l-indigo-400" },
   "지원완료": { bg: "bg-emerald-50",          text: "text-emerald-700",   dot: "bg-emerald-500",         border: "border-l-emerald-400" },
   "서류전형": { bg: "bg-sky-50",              text: "text-sky-700",       dot: "bg-sky-500",             border: "border-l-sky-400" },
-  "서류합격": { bg: "bg-pickd-green-light",   text: "text-pickd-green",   dot: "bg-pickd-green",         border: "border-l-pickd-green" },
   "필기전형": { bg: "bg-amber-50",            text: "text-amber-700",     dot: "bg-amber-500",           border: "border-l-amber-400" },
   "면접전형": { bg: "bg-pickd-orange-light",  text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
-  "최종합격": { bg: "bg-green-100",           text: "text-green-700",     dot: "bg-green-600",           border: "border-l-green-600" },
-  "불합격":   { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
-  "보류":     { bg: "bg-violet-50",           text: "text-violet-700",    dot: "bg-violet-500",          border: "border-l-violet-400" },
+  "전형완료": { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
 };
 
 const KANBAN_COL_CAP = 8;
@@ -997,11 +994,11 @@ export function JobPostingTable() {
       p.map((j) => {
         if (j.id !== jobId) return j;
         if (COMPLETED_STATUSES.includes(toStatus)) {
+          // 전형완료로 이동 — 세부 결과(최종합격/불합격/보류)는 상태 모달에서 지정 (기존 값 있으면 유지)
           return {
             ...j,
             status: toStatus,
             stage: toStatus,
-            finalResult: toStatus === "최종합격" ? "합격" : toStatus === "보류" ? "포기" : "불합격",
             completedAt: new Date().toISOString().split("T")[0],
           };
         }
@@ -1022,10 +1019,8 @@ export function JobPostingTable() {
     setJobs((p) =>
       p.map((j) => {
         if (j.id !== modalJobId) return j;
-        if (result === "합격")
-          return { ...j, finalResult: result, status: "최종합격", stage: "최종합격", completedAt: new Date().toISOString().split("T")[0] };
-        if (result === "불합격" || result === "포기")
-          return { ...j, finalResult: result, status: "불합격", stage: "불합격", completedAt: new Date().toISOString().split("T")[0] };
+        if (result)
+          return { ...j, finalResult: result, status: "전형완료", stage: "전형완료", completedAt: new Date().toISOString().split("T")[0] };
         return { ...j, finalResult: null };
       }),
     );
@@ -1158,10 +1153,6 @@ export function JobPostingTable() {
               </DropdownMenu>
             )}
           </div>
-          {view === "kanban" && (
-            <div className="px-3 py-1.5 text-sm text-gray-500">칸반 보기</div>
-          )}
-
           {/* 배치 액션 바 — 공용 컴포넌트, 액션 항목만 탭1 전용 */}
           <BatchActionBar
             count={selected.size}
@@ -1360,12 +1351,19 @@ export function JobPostingTable() {
                             case "status":
                               return (
                                 <td key="status" className="px-4 py-2.5 whitespace-nowrap">
-                                  {/* 배지 클릭 → 모달 */}
+                                  {/* 배지 클릭 → 모달. 전형완료는 세부 결과(최종합격/불합격/보류) 배지를 옆에 표시 */}
                                   <button
                                     onClick={() => setModalJobId(job.id)}
-                                    className="transition-opacity hover:opacity-75"
+                                    className="transition-opacity hover:opacity-75 inline-flex items-center gap-1"
                                   >
                                     <StatusBadge status={STATUS_DS_KEY[job.status]} size="sm" />
+                                    {job.status === "전형완료" && job.finalResult && (
+                                      <StatusBadge
+                                        status={FINAL_RESULT_DS_KEY[job.finalResult]}
+                                        label={FINAL_RESULT_LABEL[job.finalResult]}
+                                        size="sm"
+                                      />
+                                    )}
                                   </button>
                                 </td>
                               );
