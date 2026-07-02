@@ -54,8 +54,12 @@ src/
 │   ├── RowContextMenu.tsx               행 그립·컨텍스트 메뉴 (탭1·탭2 공용)
 │   └── RightPanel.tsx                   우측 패널
 ├── components/table/
-│   ├── ColumnDivider.tsx                컬럼 리사이즈 세로 구분선 (탭1·탭2 공용, hover 전용)
-│   └── DragHandle.tsx                   dnd-kit 드래그 핸들 뼈대 (탭1·탭2 공용)
+│   ├── ColumnDivider.tsx                컬럼 리사이즈 세로 구분선 (탭1·탭2 공용, hover 전용, 색=행 구분선과 동일)
+│   ├── DragHandle.tsx                   dnd-kit 드래그 핸들 뼈대 (탭1·탭2 공용)
+│   ├── HeaderCell.tsx                   헤더 셀·정렬 버튼·정렬 드롭다운 (탭1·탭2 공용)
+│   ├── SortableColumnHeader.tsx         드래그 가능한 컬럼 헤더 (탭1·탭2 공용, 그립=드래그+정렬 메뉴)
+│   ├── BatchActionBar.tsx               배치 액션 바 셸 (탭1·탭2 공용, 액션 항목은 탭별 주입)
+│   └── HeaderFilter.tsx                 컬럼별 헤더 필터 (탭1·탭2 공용)
 └── hooks/
     └── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
 ```
@@ -76,7 +80,13 @@ specs.rep.view.v1            대표 스펙 뷰 모드 (card | list)
 pickd.jobs.colWidths         탭1 컬럼 너비
 pickd.jobs.visibleCols       탭1 표시 컬럼
 pickd.jobs.colOrder          탭1 컬럼 순서(드래그로 변경)
+pickd.jobs.rowOrder          탭1 행 커스텀 순서(행 그립 드래그)
+pickd.jobs.sortMode          탭1 정렬 모드("custom" | 없음)
+pickd.experiences.items      탭2 경험 목록(Item[], 공유 키)
+pickd.experiences.visibleCols.v2  탭2 표시 컬럼
 pickd.experiences.colWidths.v2  탭2 컬럼 너비
+pickd.experiences.colOrder   탭2 tail 컬럼 순서(드래그로 변경, 유형·항목명 고정)
+pickd.experiences.sortMode   탭2 정렬 모드("custom" | 없음)
 ```
 
 ## BasicInfoPanel 구조 (경험·스펙 DB > 기본정보 탭)
