@@ -174,8 +174,12 @@ const MAX_EXP_WIDTHS: Record<string, number> = {
   manage: 140,
 };
 
-const PINNED_FILTER_CHIPS = ["전체", "프로젝트", "대외활동", "인턴", "공모전", "자격증"];
-const MORE_FILTER_CHIPS = ["봉사활동", "교환학생", "알바", "학부연구생", "어학", "수상", "수강과목", "교육 이수"];
+// 유형 탭 표기 순서 — 13개 프리셋 기준(상세 서술형 → 스펙·증빙형). 데이터에 있는(count>0) 유형만 노출,
+// 목록에 없는 커스텀 유형은 뒤에 이어 붙인다(SSOT 8-3: 더보기 없음, 가로 스크롤).
+const TYPE_TAB_ORDER = [
+  "프로젝트", "대외활동", "인턴", "공모전", "봉사활동", "교환학생", "알바", "학부연구생",
+  "어학", "자격증", "수상", "수강과목", "교육 이수",
+];
 
 // ────────────────────────────────────────────────────────────────
 // Main Page
@@ -568,6 +572,14 @@ export default function Experiences() {
     return items.filter((i) => i.type === f).length;
   };
 
+  // 유형 탭 — 보유(count>0) 유형 전부 노출: 프리셋 순서 우선, 목록 밖 커스텀 유형은 뒤에 추가
+  const typeTabs = useMemo(() => {
+    const owned = new Set<string>(items.map((i) => i.type));
+    const ordered = TYPE_TAB_ORDER.filter((t) => owned.has(t));
+    const extras = Array.from(owned).filter((t) => !TYPE_TAB_ORDER.includes(t)).sort();
+    return ["전체", ...ordered, ...extras];
+  }, [items]);
+
   const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
   const [sortMode, setSortMode] = useState<"custom" | null>(() => {
     try {
@@ -854,7 +866,7 @@ export default function Experiences() {
               {/* Filter tab-bar */}
               <div className="flex items-center border-b border-border mb-3">
                 <div className="flex items-end -mb-px overflow-x-auto">
-                  {PINNED_FILTER_CHIPS.filter(f => f === '전체' || expChipCount(f) > 0).map((f) => (
+                  {typeTabs.map((f) => (
                     <button
                       key={f}
                       onClick={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
