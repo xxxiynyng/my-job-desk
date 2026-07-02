@@ -1,3 +1,5 @@
 <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pickd">
-  <path d="M10 28 Q28 3 46 28 Q28 53 10 28 Z" fill="#3A67E6"></path>
+  <circle cx="13" cy="28" r="4.2" fill="#3A67E6"></circle>
+  <circle cx="43" cy="28" r="4.2" fill="#3A67E6"></circle>
+  <ellipse cx="28" cy="28" rx="16" ry="12.5" fill="#3A67E6"></ellipse>
 </svg>
