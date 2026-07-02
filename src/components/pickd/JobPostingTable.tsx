@@ -417,9 +417,17 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                       <p className="text-[13px] font-semibold text-foreground truncate">{job.company}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">{job.role} {job.employType}</p>
                     </div>
-                    {job.finalResult && (
-                      <span className="text-[11px] text-muted-foreground shrink-0 font-medium">{job.finalResult}</span>
-                    )}
+                    <span className="inline-flex items-center gap-1 shrink-0">
+                      {/* 원문 URL·파일 미등록(직접입력) 공고 표기 — 5-2 태그 칩 스타일 재사용 */}
+                      {!job.url && (
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
+                          수기등록
+                        </span>
+                      )}
+                      {job.finalResult && (
+                        <span className="text-[11px] text-muted-foreground font-medium">{job.finalResult}</span>
+                      )}
+                    </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-1.5 truncate">{job.title}</p>
                   {job.completedAt && (
