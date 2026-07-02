@@ -47,7 +47,8 @@ import {
 import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
-import { HeaderCell, SortHeaderButton, HEADER_CELL_CLASS } from "@/components/table/HeaderCell";
+import { HeaderCell } from "@/components/table/HeaderCell";
+import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
 import { HeaderFilter, type ColFilterShape } from "@/components/table/HeaderFilter";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -601,61 +602,6 @@ function KanbanView({
 }
 
 // ── 드래그로 순서를 바꿀 수 있는 컬럼 헤더 ─────────────────────────────
-function SortableColumnHeader({
-  col,
-  colSort,
-  toggleColSort,
-  filter,
-}: {
-  col: { key: ColumnKey; label: string };
-  colSort: { key: string; dir: "asc" | "desc" } | null;
-  toggleColSort: (key: string) => void;
-  filter?: React.ReactNode;
-}) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
-    useSortable({ id: col.key });
-
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 1 : undefined,
-  };
-
-  return (
-    // attributes(role/tabIndex/aria-*)는 정렬 가능한 노드(th) 자체에 둔다 — 탭2 행 드래그(Experiences.tsx)와
-    // 동일한 패턴. listeners(포인터 핸들러)만 DragHandle에 위임한다.
-    <th
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      className={HEADER_CELL_CLASS}
-    >
-      {/*
-        left-[2px]로 경계에서 2px 띄워서 시작 — 왼쪽 옆 ColumnDivider의 리사이즈 히트박스([x-10, x-2])와
-        절대 겹치지 않는 여백을 확보한다(겹치면 mousedown이 리사이즈 쪽으로 새서 드래그가 아예 시작되지
-        않거나, 그립 아이콘과 구분선이 같은 자리에 겹쳐 "선이 두 겹으로 보이는" 문제가 생김).
-        z-30으로 ColumnDivider(z-20)보다 위에 둬서 픽셀 경계에서도 그립이 항상 클릭 우선순위를 갖게 함.
-        색상은 행 그립(RowContextMenu의 GripTrigger)과 동일한 gray-400 → gray-600로 통일.
-      */}
-      <DragHandle
-        ref={setActivatorNodeRef}
-        {...listeners}
-        iconClassName="w-3 h-3"
-        className="absolute left-[2px] inset-y-1 w-[15px] z-30 text-gray-400 hover:text-gray-600"
-      />
-      <span className="inline-flex items-center gap-1">
-        <SortHeaderButton
-          label={col.label}
-          dir={colSort?.key === col.key ? colSort.dir : null}
-          onSort={() => toggleColSort(col.key)}
-        />
-        {filter}
-      </span>
-    </th>
-  );
-}
-
 // ── Main Component ─────────────────────────────────────────────────
 export function JobPostingTable() {
   const [jobs, setJobs] = useState<Job[]>(initialJobData);
@@ -1138,11 +1084,12 @@ export function JobPostingTable() {
                       </div>
                     </th>
                     <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
-                    {/* 기업명 — 고정 */}
+                    {/* 기업명 — 고정 (드래그 없음, 그립 클릭 = 정렬 드롭다운) */}
                     <HeaderCell
                       label="기업명"
                       sortDir={colSort?.key === "company" ? colSort.dir : null}
                       onSort={() => toggleColSort("company")}
+                      onSortChange={(dir) => setColSort(dir ? { key: "company", dir } : null)}
                       filter={headerFilterFor("company")}
                     />
                     {/* 공고명 — 고정 */}
@@ -1150,6 +1097,7 @@ export function JobPostingTable() {
                       label="공고명"
                       sortDir={colSort?.key === "title" ? colSort.dir : null}
                       onSort={() => toggleColSort("title")}
+                      onSortChange={(dir) => setColSort(dir ? { key: "title", dir } : null)}
                       filter={headerFilterFor("title")}
                     />
                     {/* 드래그 가능 컬럼 */}
@@ -1162,9 +1110,11 @@ export function JobPostingTable() {
                         .map((col) => (
                           <SortableColumnHeader
                             key={col.key}
-                            col={col}
-                            colSort={colSort}
-                            toggleColSort={toggleColSort}
+                            colKey={col.key}
+                            label={col.label}
+                            sortDir={colSort?.key === col.key ? colSort.dir : null}
+                            onSortToggle={() => toggleColSort(col.key)}
+                            onSortChange={(dir) => setColSort(dir ? { key: col.key, dir } : null)}
                             filter={headerFilterFor(col.key)}
                           />
                         ))}
