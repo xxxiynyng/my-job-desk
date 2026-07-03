@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ChevronDown, EyeOff, ListFilter, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, Copy, EyeOff, ListFilter, Pin, PinOff, Trash2, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,19 +55,28 @@ export function SortHeaderButton({
 }
 
 /**
- * 컬럼 메뉴 (Notion 속성 메뉴 참고, MVP 범위) — 정렬(오름/내림/해제) · 필터 · 컬럼 숨기기.
- * 추후 후보(백로그): 고정(핀), 그룹화, 계산, 너비 초기화, 좌우 컬럼 삽입, 복제·삭제.
+ * 컬럼 메뉴 (Notion 속성 메뉴 참고) — 정렬(오름/내림/해제) · 필터 · 고정 · 복제 · 숨기기 · 삭제.
+ * 각 동작은 콜백을 넘긴 컬럼에서만 노출(고정/복제/삭제는 tail 컬럼 등 대상에만).
+ * 추후 후보(백로그): 그룹화, 계산, 너비 초기화, 좌우 컬럼 삽입.
  */
 export function ColumnMenuContent({
   sortDir,
   onSortChange,
   filter,
+  pinned,
+  onTogglePin,
+  onDuplicate,
   onHide,
+  onDelete,
 }: {
   sortDir: SortDir;
   onSortChange: (dir: SortDir) => void;
   filter?: ColumnFilterProps;
+  pinned?: boolean;
+  onTogglePin?: () => void;
+  onDuplicate?: () => void;
   onHide?: () => void;
+  onDelete?: () => void;
 }) {
   const filterActive = filter ? !!filter.colFilter[filter.colKey] : false;
   return (
@@ -90,21 +99,43 @@ export function ColumnMenuContent({
       >
         <X className="w-3.5 h-3.5" /> 정렬 해제
       </DropdownMenuItem>
-      {(filter || onHide) && <DropdownMenuSeparator />}
       {filter && (
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="gap-2 text-[13px]">
-            <ListFilter className="w-3.5 h-3.5" /> 필터
-            {filterActive && <span className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-[220px] p-2">
-            <HeaderFilterContent {...filter} />
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="gap-2 text-[13px]">
+              <ListFilter className="w-3.5 h-3.5" /> 필터
+              {filterActive && <span className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-[220px] p-2">
+              <HeaderFilterContent {...filter} />
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </>
+      )}
+      {(onTogglePin || onDuplicate || onHide) && <DropdownMenuSeparator />}
+      {onTogglePin && (
+        <DropdownMenuItem onSelect={onTogglePin} className="gap-2 text-[13px]">
+          {pinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+          {pinned ? "고정 해제" : "왼쪽에 고정"}
+        </DropdownMenuItem>
+      )}
+      {onDuplicate && (
+        <DropdownMenuItem onSelect={onDuplicate} className="gap-2 text-[13px]">
+          <Copy className="w-3.5 h-3.5" /> 컬럼 복제
+        </DropdownMenuItem>
       )}
       {onHide && (
         <DropdownMenuItem onSelect={onHide} className="gap-2 text-[13px]">
           <EyeOff className="w-3.5 h-3.5" /> 컬럼 숨기기
+        </DropdownMenuItem>
+      )}
+      {onDelete && (
+        <DropdownMenuItem
+          onSelect={onDelete}
+          className="gap-2 text-[13px] text-destructive focus:text-destructive focus:bg-destructive/10"
+        >
+          <Trash2 className="w-3.5 h-3.5" /> 컬럼 삭제
         </DropdownMenuItem>
       )}
     </DropdownMenuContent>

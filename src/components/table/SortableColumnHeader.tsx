@@ -16,7 +16,7 @@ import type { ColumnFilterProps } from "./HeaderFilter";
  * 드래그 가능한 컬럼 헤더 (탭1·탭2 공용) — dnd-kit useSortable + 정렬 + 컬럼 메뉴.
  *
  * hover 인터랙션 규칙 (2026-07-02): 버튼은 정확히 2개.
- *   [⠿ 그립] 좌측 절대배치(left 2px, 폭 15px) — 드래그 전용(컬럼 이동)
+ *   [⠿ 그립] 좌측 절대배치(left 2px, 폭 16px) — 드래그 전용(컬럼 이동)
  *   [∨ 메뉴] 라벨 우측 16px — 정렬(오름/내림/해제)·필터·숨기기 등 세부 기능 전부 여기로
  * 라벨 클릭 = 정렬 순환(보조 경로), ↑↓ 화살표는 정렬 활성일 때만 렌더.
  *
@@ -31,7 +31,11 @@ export function SortableColumnHeader({
   onSortToggle,
   onSortChange,
   filter,
+  pinned,
+  onTogglePin,
+  onDuplicate,
   onHide,
+  onDelete,
 }: {
   colKey: string;
   label: string;
@@ -41,7 +45,11 @@ export function SortableColumnHeader({
   /** 컬럼 메뉴 — 방향 직접 지정 */
   onSortChange: (dir: SortDir) => void;
   filter?: ColumnFilterProps;
+  pinned?: boolean;
+  onTogglePin?: () => void;
+  onDuplicate?: () => void;
   onHide?: () => void;
+  onDelete?: () => void;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: colKey });
@@ -64,13 +72,22 @@ export function SortableColumnHeader({
         ref={setActivatorNodeRef}
         {...listeners}
         iconClassName="w-3 h-3"
-        className="absolute left-[2px] inset-y-1 w-[15px] z-30 text-gray-400 hover:text-gray-600"
+        className="absolute left-[2px] inset-y-1 w-[16px] z-30 text-gray-400 hover:text-gray-600"
       />
       <span className="inline-flex items-center gap-1">
         <SortHeaderButton label={label} dir={sortDir} onSort={onSortToggle} />
         <DropdownMenu>
           <ColumnMenuTrigger label={label} />
-          <ColumnMenuContent sortDir={sortDir} onSortChange={onSortChange} filter={filter} onHide={onHide} />
+          <ColumnMenuContent
+            sortDir={sortDir}
+            onSortChange={onSortChange}
+            filter={filter}
+            pinned={pinned}
+            onTogglePin={onTogglePin}
+            onDuplicate={onDuplicate}
+            onHide={onHide}
+            onDelete={onDelete}
+          />
         </DropdownMenu>
       </span>
     </th>

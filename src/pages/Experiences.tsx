@@ -172,6 +172,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
 const EXP_FIXED_COLS: ColumnKey[] = ["type", "name"];
 const EXP_TAIL_COLS: ColumnKey[] = ["org", "period", "keywords", "importance", "updated", "manage"];
 const LS_EXP_COL_ORDER = "pickd.experiences.colOrder";
+const LS_EXP_COL_PINNED = "pickd.experiences.colPinned";
 const COL_LABEL: Record<ColumnKey, string> = Object.fromEntries(
   ALL_COLUMNS.map((c) => [c.key, c.label]),
 ) as Record<ColumnKey, string>;
@@ -488,7 +489,32 @@ export default function Experiences() {
       localStorage.setItem(LS_EXP_COL_ORDER, JSON.stringify(colOrder));
     } catch {}
   }, [colOrder]);
-  const orderedTailCols = useMemo(() => colOrder.filter((k) => visibleCols.has(k)), [colOrder, visibleCols]);
+
+  // 컬럼 고정 — 고정된 tail 컬럼은 이동 그룹 맨 앞으로(왼쪽) 모아 유지(탭1·탭2 공통 규칙)
+  const [pinnedCols, setPinnedCols] = useState<Set<ColumnKey>>(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(LS_EXP_COL_PINNED) ?? "[]") as ColumnKey[]);
+    } catch {
+      return new Set();
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_EXP_COL_PINNED, JSON.stringify([...pinnedCols]));
+    } catch {}
+  }, [pinnedCols]);
+  const togglePinCol = (k: ColumnKey) =>
+    setPinnedCols((p) => {
+      const n = new Set(p);
+      n.has(k) ? n.delete(k) : n.add(k);
+      return n;
+    });
+
+  // 표시 순서: 보이는 tail 중 고정 먼저, 그다음 일반 (각 그룹 내부는 colOrder 순서 유지)
+  const orderedTailCols = useMemo(() => {
+    const visible = colOrder.filter((k) => visibleCols.has(k));
+    return [...visible.filter((k) => pinnedCols.has(k)), ...visible.filter((k) => !pinnedCols.has(k))];
+  }, [colOrder, visibleCols, pinnedCols]);
   // 화면 표시 순서 전체: 고정(유형·항목명) + 이동 가능 tail
   const displayCols = useMemo(
     () => [...EXP_FIXED_COLS.filter((k) => visibleCols.has(k)), ...orderedTailCols],
@@ -1114,7 +1140,10 @@ export default function Experiences() {
                               onSortToggle={() => toggleColSort(key)}
                               onSortChange={(d) => setSortDirect(key, d)}
                               filter={filterPropsFor(key)}
+                              pinned={pinnedCols.has(key)}
+                              onTogglePin={() => togglePinCol(key)}
                               onHide={() => toggleCol(key)}
+                              onDelete={() => toggleCol(key)}
                             />
                           ))}
                         </SortableContext>

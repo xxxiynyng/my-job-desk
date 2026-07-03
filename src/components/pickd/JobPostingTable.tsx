@@ -818,10 +818,27 @@ export function JobPostingTable() {
     } catch {}
   }, [colOrder]);
   const tableWrapRef = useRef<HTMLDivElement>(null);
-  const orderedCols = useMemo(
-    () => colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean),
-    [colOrder],
+
+  // 컬럼 고정 — 고정된 컬럼은 이동 그룹 맨 앞(왼쪽)으로 모아 유지 (탭1·탭2 공통 규칙)
+  const [pinnedCols, setPinnedCols] = useState<Set<ColumnKey>>(
+    () => new Set(lsGet<ColumnKey[]>("pickd.jobs.colPinned", [])),
   );
+  useEffect(() => {
+    try {
+      localStorage.setItem("pickd.jobs.colPinned", JSON.stringify([...pinnedCols]));
+    } catch {}
+  }, [pinnedCols]);
+  const togglePin = (k: ColumnKey) =>
+    setPinnedCols((p) => {
+      const n = new Set(p);
+      n.has(k) ? n.delete(k) : n.add(k);
+      return n;
+    });
+
+  const orderedCols = useMemo(() => {
+    const cols = colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean);
+    return [...cols.filter((c) => pinnedCols.has(c.key)), ...cols.filter((c) => !pinnedCols.has(c.key))];
+  }, [colOrder, pinnedCols]);
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   const dividerBounds = useTableDividers(tableWrapRef, [widths, orderedCols, visibleCols]);
   const dividers = dividerBounds.map((b) => ({
@@ -1224,7 +1241,10 @@ export function JobPostingTable() {
                             onSortToggle={() => toggleColSort(col.key)}
                             onSortChange={(dir) => setSortDirect(col.key, dir)}
                             filter={filterPropsFor(col.key)}
+                            pinned={pinnedCols.has(col.key)}
+                            onTogglePin={() => togglePin(col.key)}
                             onHide={() => toggleCol(col.key)}
+                            onDelete={() => toggleCol(col.key)}
                           />
                         ))}
                     </SortableContext>
