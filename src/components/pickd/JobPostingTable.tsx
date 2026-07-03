@@ -58,6 +58,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
+import { StarToggle } from "@/components/table/StarToggle";
 import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
@@ -1199,8 +1200,8 @@ export function JobPostingTable() {
                     })}
                   <col style={{ width: 56 }} />
                 </colgroup>
-                <thead>
-                  <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none border-b border-border">
+                <thead className="bg-[#F8FAFC]">
+                  <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
                     <th className="w-12 pl-1 pr-3 py-3">
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
@@ -1287,18 +1288,9 @@ export function JobPostingTable() {
                         onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
                         onDelete={() => deleteJob(job.id)}
                       />
-                      {/* 별표 */}
+                      {/* 별표 (공용 StarToggle) */}
                       <td className="px-2 py-2.5 text-left whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => toggleStarred(job.id)} aria-label="관심 공고">
-                          <Star
-                            className={cn(
-                              "w-3.5 h-3.5 transition-colors",
-                              job.starred
-                                ? "fill-current text-pickd-orange"
-                                : "text-muted-foreground/30 hover:text-muted-foreground/60",
-                            )}
-                          />
-                        </button>
+                        <StarToggle active={job.starred} onToggle={() => toggleStarred(job.id)} label="관심 공고" />
                       </td>
                       {/* 기업명 — 3차 메타 (보조 정보) */}
                       <td

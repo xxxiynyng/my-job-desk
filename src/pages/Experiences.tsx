@@ -282,6 +282,7 @@ function SortableExpRow({
   setMergeOpen,
   readMeta,
   stickyProps,
+  toggleImportant,
 }: {
   item: Item;
   selected: Set<string>;
@@ -291,6 +292,7 @@ function SortableExpRow({
   toggleSelect: (id: string) => void;
   duplicateItem: (id: string) => void;
   changeItemType: (id: string, type: ItemType) => void;
+  toggleImportant: (id: string) => void;
   confirmDelete: (ids: string[]) => void;
   setMergeOpen: (open: boolean) => void;
   readMeta: (i: Item) => { org: string; period: string };
@@ -408,8 +410,12 @@ function SortableExpRow({
             );
           case "importance":
             return (
-              <td key="importance" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
-                <span className="block truncate">{item.importance ?? "—"}</span>
+              <td key="importance" className={cn("px-4 py-2.5", sp.className)} style={sp.style} onClick={(e) => e.stopPropagation()}>
+                <StarToggle
+                  active={item.importance === "높음"}
+                  onToggle={() => toggleImportant(item.id)}
+                  label="중요 항목"
+                />
               </td>
             );
           case "updated":
@@ -724,6 +730,9 @@ export default function Experiences() {
   const togglePin = (id: string) => setItems((p) => p.map((i) => (i.id === id ? { ...i, pinned: !i.pinned } : i)));
   const updateItem = (id: string, patch: Partial<Item>) =>
     setItems((p) => p.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  // 중요도 별 토글 — 켜짐="높음", 꺼짐=미설정(탭1 즐겨찾기와 동일한 별 UX)
+  const toggleImportant = (id: string) =>
+    setItems((p) => p.map((i) => (i.id === id ? { ...i, importance: i.importance === "높음" ? undefined : "높음" } : i)));
   const deleteItems = (ids: string[]) => {
     setItems((p) => p.filter((i) => !ids.includes(i.id)));
     setSelected(new Set());
@@ -1242,6 +1251,7 @@ export default function Experiences() {
                             changeItemType={changeItemType}
                             confirmDelete={confirmDelete}
                             stickyProps={stickyProps}
+                            toggleImportant={toggleImportant}
                             setMergeOpen={setMergeOpen}
                             readMeta={readMeta}
                           />
@@ -1582,4 +1592,5 @@ import { HeaderCell } from "@/components/table/HeaderCell";
 import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
+import { StarToggle } from "@/components/table/StarToggle";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";
