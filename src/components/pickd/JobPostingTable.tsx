@@ -1243,7 +1243,6 @@ export function JobPostingTable() {
                             filter={filterPropsFor(col.key)}
                             pinned={pinnedCols.has(col.key)}
                             onTogglePin={() => togglePin(col.key)}
-                            onHide={() => toggleCol(col.key)}
                             onDelete={() => toggleCol(col.key)}
                           />
                         ))}

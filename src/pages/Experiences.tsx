@@ -1115,7 +1115,6 @@ export default function Experiences() {
                             onSort={() => toggleColSort("type")}
                             onSortChange={(d) => setSortDirect("type", d)}
                             filter={filterPropsFor("type")}
-                            onHide={() => toggleCol("type")}
                           />
                         )}
                         {isVisible("name") && (
@@ -1126,7 +1125,6 @@ export default function Experiences() {
                             onSort={() => toggleColSort("name")}
                             onSortChange={(d) => setSortDirect("name", d)}
                             filter={filterPropsFor("name")}
-                            onHide={() => toggleCol("name")}
                           />
                         )}
                         {/* 이동 가능한 tail 컬럼 — 그립 드래그로 순서 변경(탭1과 동일 패턴), 클릭 시 정렬 드롭다운 */}
@@ -1142,7 +1140,6 @@ export default function Experiences() {
                               filter={filterPropsFor(key)}
                               pinned={pinnedCols.has(key)}
                               onTogglePin={() => togglePinCol(key)}
-                              onHide={() => toggleCol(key)}
                               onDelete={() => toggleCol(key)}
                             />
                           ))}
