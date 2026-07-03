@@ -1198,7 +1198,8 @@ export function JobPostingTable() {
                       const w = Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
                       return <col key={col.key} style={{ width: w }} />;
                     })}
-                  <col style={{ width: 56 }} />
+                  {/* 액션 거터 — 너비 미지정: table-fixed에서 남는 폭을 흡수해 헤더 배경이 우측 끝까지 채워짐 */}
+                  <col />
                 </colgroup>
                 <thead className="bg-[#F8FAFC]">
                   <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
