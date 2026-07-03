@@ -170,6 +170,7 @@ export function HeaderCell({
   filter,
   onHide,
   className,
+  style,
 }: {
   label: string;
   /** 세로 구분선 실측(useTableDividers)용 data-col 부여 — 리사이즈 가능한 컬럼이면 필수 */
@@ -180,9 +181,11 @@ export function HeaderCell({
   filter?: ColumnFilterProps;
   onHide?: () => void;
   className?: string;
+  /** sticky 고정 등 th에 직접 주입할 인라인 스타일 */
+  style?: React.CSSProperties;
 }) {
   return (
-    <th data-col={colKey} className={cn(HEADER_CELL_CLASS, className)}>
+    <th data-col={colKey} style={style} className={cn(HEADER_CELL_CLASS, className)}>
       <span className="inline-flex items-center gap-1">
         {onSort ? <SortHeaderButton label={label} dir={sortDir} onSort={onSort} /> : <span>{label}</span>}
         {onSortChange && (

@@ -249,6 +249,7 @@ function SortableExpRow({
   confirmDelete,
   setMergeOpen,
   readMeta,
+  stickyProps,
 }: {
   item: Item;
   selected: Set<string>;
@@ -261,6 +262,7 @@ function SortableExpRow({
   confirmDelete: (ids: string[]) => void;
   setMergeOpen: (open: boolean) => void;
   readMeta: (i: Item) => { org: string; period: string };
+  stickyProps: (key: string, header?: boolean) => { style?: React.CSSProperties; className?: string };
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const {
@@ -293,7 +295,11 @@ function SortableExpRow({
       )}
       onClick={() => setDetailId(item.id)}
     >
-      <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      <td
+        className={cn("relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap", stickyProps("__gutter__").className)}
+        style={stickyProps("__gutter__").style}
+        onClick={(e) => e.stopPropagation()}
+      >
         <DragHandle
           ref={setActivatorNodeRef}
           {...listeners}
@@ -323,12 +329,15 @@ function SortableExpRow({
         </div>
       </td>
       {isVisible("type") && (
-        <td className="px-4 py-2.5 overflow-hidden">
+        <td className={cn("px-4 py-2.5 overflow-hidden", stickyProps("type").className)} style={stickyProps("type").style}>
           <TypeChip type={item.type} />
         </td>
       )}
       {isVisible("name") && (
-        <td className="px-4 py-2.5 text-sm font-medium text-foreground overflow-hidden">
+        <td
+          className={cn("px-4 py-2.5 text-sm font-medium text-foreground overflow-hidden", stickyProps("name").className)}
+          style={stickyProps("name").style}
+        >
           <span className="flex items-center gap-1.5 min-w-0">
             <span className="truncate">{item.name}</span>
           </span>
@@ -336,22 +345,23 @@ function SortableExpRow({
       )}
       {/* 이동 가능한 tail 컬럼 셀 — 헤더 orderedTailCols와 동일 순서로 렌더 */}
       {orderedTailCols.map((key) => {
+        const sp = stickyProps(key);
         switch (key) {
           case "org":
             return (
-              <td key="org" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+              <td key="org" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{org || "—"}</span>
               </td>
             );
           case "period":
             return (
-              <td key="period" className="px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden">
+              <td key="period" className={cn("px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{period || "—"}</span>
               </td>
             );
           case "keywords":
             return (
-              <td key="keywords" className="px-4 py-2.5 overflow-hidden">
+              <td key="keywords" className={cn("px-4 py-2.5 overflow-hidden", sp.className)} style={sp.style}>
                 <div className="flex flex-nowrap gap-1 overflow-hidden">
                   {item.keywords.slice(0, 3).map((k) => (
                     <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
@@ -366,19 +376,19 @@ function SortableExpRow({
             );
           case "importance":
             return (
-              <td key="importance" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+              <td key="importance" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{item.importance ?? "—"}</span>
               </td>
             );
           case "updated":
             return (
-              <td key="updated" className="px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden">
+              <td key="updated" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{item.updatedAt ?? "—"}</span>
               </td>
             );
           case "manage":
             return (
-              <td key="manage" className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+              <td key="manage" className={cn("px-4 py-2.5", sp.className)} style={sp.style} onClick={(e) => e.stopPropagation()}>
                 <ManageIndicator
                   item={item}
                   onMerge={() => {
@@ -520,6 +530,35 @@ export default function Experiences() {
     () => [...EXP_FIXED_COLS.filter((k) => visibleCols.has(k)), ...orderedTailCols],
     [visibleCols, orderedTailCols],
   );
+
+  // ── sticky 컬럼 고정 — 고정 컬럼 + 좌측 블록(체크박스·유형·항목명)을 왼쪽에 얼림 ──
+  // 고정이 하나라도 있으면 [체크박스][유형][항목명][고정 tail…]까지 sticky. 가로 스크롤해도 붙어 있음.
+  // 스크롤 시 드리프트되는 세로선 오버레이(z-20)는 sticky 셀의 불투명 배경+z-30이 덮어 가린다.
+  const EXP_GUTTER_W = 48;
+  const frozenMap = useMemo(() => {
+    if (pinnedCols.size === 0) return null;
+    const keys: ColumnKey[] = [
+      ...(["type", "name"] as ColumnKey[]).filter((k) => visibleCols.has(k)),
+      ...orderedTailCols.filter((k) => pinnedCols.has(k)),
+    ];
+    const map = new Map<string, { left: number; last: boolean }>();
+    let x = EXP_GUTTER_W;
+    map.set("__gutter__", { left: 0, last: keys.length === 0 });
+    keys.forEach((k, i) => {
+      map.set(k, { left: x, last: i === keys.length - 1 });
+      x += colW[k] ?? DEFAULT_EXP_WIDTHS[k] ?? 100;
+    });
+    return map;
+  }, [pinnedCols, orderedTailCols, visibleCols, colW]);
+
+  const stickyProps = (key: string, header = false): { style?: React.CSSProperties; className?: string } => {
+    const f = frozenMap?.get(key);
+    if (!f) return {};
+    return {
+      style: { position: "sticky", left: f.left, zIndex: 30 },
+      className: cn(header ? "bg-[#F8FAFC]" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
+    };
+  };
 
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   // table-fixed에서 남는 공간이 컬럼에 배분되면 계산값과 실제 경계가 어긋나던 문제 해결(2026-07-02)
@@ -1098,7 +1137,10 @@ export default function Experiences() {
                     </colgroup>
                     <thead>
                       <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none border-b border-border">
-                        <th className="w-12 pl-1 pr-3 py-3">
+                        <th
+                          className={cn("w-12 pl-1 pr-3 py-3", stickyProps("__gutter__", true).className)}
+                          style={stickyProps("__gutter__", true).style}
+                        >
                           <div className="ml-5">
                             <Checkbox
                               checked={allFilteredSelected}
@@ -1115,6 +1157,8 @@ export default function Experiences() {
                             onSort={() => toggleColSort("type")}
                             onSortChange={(d) => setSortDirect("type", d)}
                             filter={filterPropsFor("type")}
+                            className={stickyProps("type", true).className}
+                            style={stickyProps("type", true).style}
                           />
                         )}
                         {isVisible("name") && (
@@ -1125,6 +1169,8 @@ export default function Experiences() {
                             onSort={() => toggleColSort("name")}
                             onSortChange={(d) => setSortDirect("name", d)}
                             filter={filterPropsFor("name")}
+                            className={stickyProps("name", true).className}
+                            style={stickyProps("name", true).style}
                           />
                         )}
                         {/* 이동 가능한 tail 컬럼 — 그립 드래그로 순서 변경(탭1과 동일 패턴), 클릭 시 정렬 드롭다운 */}
@@ -1141,6 +1187,8 @@ export default function Experiences() {
                               pinned={pinnedCols.has(key)}
                               onTogglePin={() => togglePinCol(key)}
                               onDelete={() => toggleCol(key)}
+                              stickyStyle={stickyProps(key).style}
+                              stickyClassName={stickyProps(key, true).className}
                             />
                           ))}
                         </SortableContext>
@@ -1161,6 +1209,7 @@ export default function Experiences() {
                             duplicateItem={duplicateItem}
                             changeItemType={changeItemType}
                             confirmDelete={confirmDelete}
+                            stickyProps={stickyProps}
                             setMergeOpen={setMergeOpen}
                             readMeta={readMeta}
                           />

@@ -2,6 +2,7 @@ import type React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { DragHandle } from "./DragHandle";
 import {
   ColumnMenuContent,
@@ -36,6 +37,8 @@ export function SortableColumnHeader({
   onDuplicate,
   onHide,
   onDelete,
+  stickyStyle,
+  stickyClassName,
 }: {
   colKey: string;
   label: string;
@@ -50,6 +53,9 @@ export function SortableColumnHeader({
   onDuplicate?: () => void;
   onHide?: () => void;
   onDelete?: () => void;
+  /** sticky 고정 시 dnd transform과 합성해 주입 */
+  stickyStyle?: React.CSSProperties;
+  stickyClassName?: string;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
     useSortable({ id: colKey });
@@ -59,10 +65,17 @@ export function SortableColumnHeader({
     transition,
     opacity: isDragging ? 0.4 : 1,
     zIndex: isDragging ? 1 : undefined,
+    ...stickyStyle,
   };
 
   return (
-    <th ref={setNodeRef} style={style} {...attributes} data-col={colKey} className={HEADER_CELL_CLASS}>
+    <th
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      data-col={colKey}
+      className={cn(HEADER_CELL_CLASS, stickyClassName)}
+    >
       {/*
         left-[2px]로 경계에서 2px 띄워서 시작 — 왼쪽 옆 ColumnDivider의 리사이즈 히트박스([x-10, x-2])와
         절대 겹치지 않는 여백을 확보. z-30으로 ColumnDivider(z-20)보다 위.
