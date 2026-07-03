@@ -217,9 +217,12 @@ export function JobRowContextMenu({
 export function ExpRowContextMenu({
   item,
   jobs,
+  typeOptions = [],
+  currentType,
   onEdit,
   onDuplicate,
   onLinkJob,
+  onChangeType,
   onDelete,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
@@ -228,9 +231,13 @@ export function ExpRowContextMenu({
     updatedAt?: string;
   };
   jobs: { id: string; company: string; title: string }[];
+  /** 유형 변경 서브메뉴 옵션 (13개 프리셋). 비우면 서브메뉴 숨김 */
+  typeOptions?: string[];
+  currentType?: string;
   onEdit: () => void;
   onDuplicate: () => void;
   onLinkJob: (jobId: string) => void;
+  onChangeType?: (type: string) => void;
   onDelete: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -297,6 +304,26 @@ export function ExpRowContextMenu({
                   </DropdownMenuItem>
                 ))
               )}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        )}
+
+        {onChangeType && typeOptions.length > 0 && show("유형 변경") && (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="gap-2.5 text-[13px]">
+              <span className="w-4 text-center shrink-0">🔄</span>
+              유형 변경
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-40 max-h-[280px] overflow-y-auto">
+              {typeOptions.map((t) => (
+                <DropdownMenuItem
+                  key={t}
+                  onSelect={() => onChangeType(t)}
+                  className={cn("text-[13px]", currentType === t && "font-semibold text-primary")}
+                >
+                  {t}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         )}

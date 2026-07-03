@@ -84,6 +84,7 @@ import {
   type Item,
   NARRATIVE_TYPES,
   SPEC_TYPES,
+  ALL_TYPES,
   SHARED_EXP_KEY,
   makeFromPreset,
 } from "./experiences/presets";
@@ -243,6 +244,7 @@ function SortableExpRow({
   setDetailId,
   toggleSelect,
   duplicateItem,
+  changeItemType,
   confirmDelete,
   setMergeOpen,
   readMeta,
@@ -254,6 +256,7 @@ function SortableExpRow({
   setDetailId: (id: string) => void;
   toggleSelect: (id: string) => void;
   duplicateItem: (id: string) => void;
+  changeItemType: (id: string, type: ItemType) => void;
   confirmDelete: (ids: string[]) => void;
   setMergeOpen: (open: boolean) => void;
   readMeta: (i: Item) => { org: string; period: string };
@@ -302,9 +305,12 @@ function SortableExpRow({
           onOpenChange={setMenuOpen}
           item={{ updatedAt: item.updatedAt }}
           jobs={[]}
+          typeOptions={ALL_TYPES}
+          currentType={item.type}
           onEdit={() => setDetailId(item.id)}
           onDuplicate={() => duplicateItem(item.id)}
           onLinkJob={() => {}}
+          onChangeType={(t) => changeItemType(item.id, t as ItemType)}
           onDelete={() => confirmDelete([item.id])}
         />
         <div className="ml-5">
@@ -636,6 +642,12 @@ export default function Experiences() {
     if (!src) return;
     setItems((p) => [...p, { ...src, id: `${id}-${Date.now()}` }]);
     toast("경험을 복제했어요", { duration: 1500 });
+  };
+
+  // 유형 변경 — 유형만 교체(입력값·본문은 보존). 프리셋 필드 구조 상이 시 데이터 유실 방지 위해 값은 유지
+  const changeItemType = (id: string, type: ItemType) => {
+    setItems((p) => p.map((i) => (i.id === id ? { ...i, type } : i)));
+    toast(`유형을 '${type}'(으)로 바꿨어요`, { duration: 1500 });
   };
 
   const copy = (text: string) => {
@@ -1121,6 +1133,7 @@ export default function Experiences() {
                             setDetailId={setDetailId}
                             toggleSelect={toggleSelect}
                             duplicateItem={duplicateItem}
+                            changeItemType={changeItemType}
                             confirmDelete={confirmDelete}
                             setMergeOpen={setMergeOpen}
                             readMeta={readMeta}
