@@ -89,35 +89,67 @@ import {
   makeFromPreset,
 } from "./experiences/presets";
 
-// 유형별 파스텔 색 (2026-07-02) — 배경 50계열·글자 700계열, border는 배경 톤.
-// 서술형(narrative)은 따뜻·활동 계열, 스펙형(spec)은 차분·중립 계열로 묶어 시각적 그룹 힌트.
-// 칩은 여전히 항목명보다 약한 보조 요소(SSOT 5-2) — 파스텔로 채도를 낮춰 톤 유지.
-const TYPE_CHIP_COLOR: Record<string, string> = {
-  // narrative
-  "프로젝트":  "bg-blue-50 text-blue-700 border-blue-100",
-  "대외활동":  "bg-green-50 text-green-700 border-green-100",
-  "경력/인턴": "bg-violet-50 text-violet-700 border-violet-100",
-  "공모전":    "bg-amber-50 text-amber-700 border-amber-100",
-  "봉사활동":  "bg-teal-50 text-teal-700 border-teal-100",
-  "해외경험":  "bg-sky-50 text-sky-700 border-sky-100",
-  "알바":      "bg-orange-50 text-orange-700 border-orange-100",
-  "학부연구생": "bg-indigo-50 text-indigo-700 border-indigo-100",
-  // spec — 차분·중립 계열
-  "어학":      "bg-cyan-50 text-cyan-700 border-cyan-100",
-  "자격증":    "bg-slate-100 text-slate-600 border-slate-200",
-  "수상":      "bg-rose-50 text-rose-700 border-rose-100",
-  "수강과목":  "bg-stone-100 text-stone-600 border-stone-200",
-  "교육 이수": "bg-zinc-100 text-zinc-600 border-zinc-200",
+// Pickd accent 팔레트 (2026-07-02, 브랜드 스티커 accent) — 유형 칩에 시범 적용.
+// 칩은 항목명보다 약한 보조 요소(SSOT 5-2)라 accent 원색을 그대로 채우지 않고
+// 소프트 배경(원색 저알파) + 진하게 조정한 글자 + 얕은 테두리로 파스텔화한다.
+const ACCENT = {
+  sky: "#62aef0",
+  purple: "#d6b6f6",
+  pink: "#ff64c8",
+  orange: "#dd5b00",
+  teal: "#2a9d99",
+  green: "#1aae39",
+  brown: "#523410",
+} as const;
+const NEUTRAL_CHIP = "#6b7280"; // 스펙형·폴백용 중립 회색
+
+// 유형 → accent hex. narrative는 accent 컬러, spec은 중립(값 관리 중심이라 저강조).
+const TYPE_CHIP_ACCENT: Record<string, string> = {
+  프로젝트: ACCENT.sky,
+  대외활동: ACCENT.green,
+  "경력/인턴": ACCENT.purple,
+  공모전: ACCENT.orange,
+  봉사활동: ACCENT.teal,
+  해외경험: ACCENT.pink,
+  알바: ACCENT.brown,
+  학부연구생: ACCENT.purple,
+  어학: NEUTRAL_CHIP,
+  자격증: NEUTRAL_CHIP,
+  수상: NEUTRAL_CHIP,
+  수강과목: NEUTRAL_CHIP,
+  "교육 이수": NEUTRAL_CHIP,
 };
-const TYPE_CHIP_FALLBACK = "bg-gray-50 text-gray-500 border-gray-100";
+
+// hex → {r,g,b}
+const hexToRgb = (hex: string) => {
+  const h = hex.replace("#", "");
+  return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+};
+// 글자용: 흰 배경에서 읽히도록 accent를 어둡게(0.55배). 이미 어두운 색(brown 등)은 거의 그대로.
+const darken = (hex: string, f = 0.55) => {
+  const { r, g, b } = hexToRgb(hex);
+  const d = (v: number) => Math.round(v * f);
+  return `rgb(${d(r)}, ${d(g)}, ${d(b)})`;
+};
+const rgba = (hex: string, a: number) => {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
+function typeChipStyle(type: string): React.CSSProperties {
+  const accent = TYPE_CHIP_ACCENT[type] ?? NEUTRAL_CHIP;
+  return {
+    backgroundColor: rgba(accent, 0.12),
+    color: darken(accent),
+    border: `1px solid ${rgba(accent, 0.22)}`,
+  };
+}
 
 function TypeChip({ type }: { type: ItemType }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium border rounded-md whitespace-nowrap",
-        TYPE_CHIP_COLOR[type] ?? TYPE_CHIP_FALLBACK,
-      )}
+      className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-md whitespace-nowrap"
+      style={typeChipStyle(type)}
     >
       {type}
     </span>

@@ -83,19 +83,19 @@ export function ColumnMenuContent({
     <DropdownMenuContent align="start" sideOffset={4} className="w-44">
       <DropdownMenuItem
         onSelect={() => onSortChange("asc")}
-        className={cn("gap-2 text-[13px]", sortDir === "asc" && "font-medium text-primary")}
+        className={cn("gap-2 text-xs", sortDir === "asc" && "font-medium text-primary")}
       >
         <ArrowUp className="w-3.5 h-3.5" /> 오름차순
       </DropdownMenuItem>
       <DropdownMenuItem
         onSelect={() => onSortChange("desc")}
-        className={cn("gap-2 text-[13px]", sortDir === "desc" && "font-medium text-primary")}
+        className={cn("gap-2 text-xs", sortDir === "desc" && "font-medium text-primary")}
       >
         <ArrowDown className="w-3.5 h-3.5" /> 내림차순
       </DropdownMenuItem>
       <DropdownMenuItem
         onSelect={() => onSortChange(null)}
-        className={cn("gap-2 text-[13px]", sortDir == null && "opacity-40 pointer-events-none")}
+        className={cn("gap-2 text-xs", sortDir == null && "opacity-40 pointer-events-none")}
       >
         <X className="w-3.5 h-3.5" /> 정렬 해제
       </DropdownMenuItem>
@@ -103,7 +103,7 @@ export function ColumnMenuContent({
         <>
           <DropdownMenuSeparator />
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="gap-2 text-[13px]">
+            <DropdownMenuSubTrigger className="gap-2 text-xs">
               <ListFilter className="w-3.5 h-3.5" /> 필터
               {filterActive && <span className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />}
             </DropdownMenuSubTrigger>
@@ -115,25 +115,25 @@ export function ColumnMenuContent({
       )}
       {(onTogglePin || onDuplicate || onHide) && <DropdownMenuSeparator />}
       {onTogglePin && (
-        <DropdownMenuItem onSelect={onTogglePin} className="gap-2 text-[13px]">
+        <DropdownMenuItem onSelect={onTogglePin} className="gap-2 text-xs">
           {pinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
           {pinned ? "고정 해제" : "왼쪽에 고정"}
         </DropdownMenuItem>
       )}
       {onDuplicate && (
-        <DropdownMenuItem onSelect={onDuplicate} className="gap-2 text-[13px]">
+        <DropdownMenuItem onSelect={onDuplicate} className="gap-2 text-xs">
           <Copy className="w-3.5 h-3.5" /> 컬럼 복제
         </DropdownMenuItem>
       )}
       {onHide && (
-        <DropdownMenuItem onSelect={onHide} className="gap-2 text-[13px]">
+        <DropdownMenuItem onSelect={onHide} className="gap-2 text-xs">
           <EyeOff className="w-3.5 h-3.5" /> 컬럼 숨기기
         </DropdownMenuItem>
       )}
       {onDelete && (
         <DropdownMenuItem
           onSelect={onDelete}
-          className="gap-2 text-[13px] text-destructive focus:text-destructive focus:bg-destructive/10"
+          className="gap-2 text-xs text-destructive focus:text-destructive focus:bg-destructive/10"
         >
           <Trash2 className="w-3.5 h-3.5" /> 컬럼 삭제
         </DropdownMenuItem>
