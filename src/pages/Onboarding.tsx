@@ -257,7 +257,7 @@ export default function Onboarding() {
     <aside
       aria-label="내 픽 카드"
       className={cn(
-        "rounded-2xl bg-primary text-primary-foreground p-6 shadow-lg",
+        "rounded-xl bg-primary text-primary-foreground p-6 shadow-lg",
         standalone ? "w-[360px]" : "w-[300px] sticky top-6 shrink-0"
       )}
     >
@@ -289,7 +289,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={() => go(prev)}
-          className="rounded-xl border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-foreground/30"
+          className="rounded-lg border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-foreground/30"
         >
           <ChevronLeft className="-ml-1 mr-0.5 inline h-4 w-4" />이전
         </button>
@@ -298,7 +298,7 @@ export default function Onboarding() {
           disabled={!ok}
           onClick={() => go(next)}
           className={cn(
-            "flex-1 rounded-xl px-5 py-3 text-sm font-bold transition-colors",
+            "flex-1 rounded-lg px-5 py-3 text-sm font-bold transition-colors",
             ok ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
@@ -329,7 +329,7 @@ export default function Onboarding() {
     </div>
   );
 
-  const inputCls = "w-full rounded-xl border border-border bg-background px-3.5 py-3 text-sm focus:border-primary focus:outline-none transition-colors";
+  const inputCls = "w-full rounded-lg border border-border bg-background px-3.5 py-3 text-sm focus:border-primary focus:outline-none transition-colors";
 
   /* ─────────────────────────── 단계별 화면 ─────────────────────────── */
 
@@ -341,7 +341,7 @@ export default function Onboarding() {
   if (s.step === "login") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-        <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-3xl font-extrabold text-primary-foreground shadow-lg">P</div>
+        <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-3xl font-extrabold text-primary-foreground shadow-lg">P</div>
         <h1 className="text-3xl font-extrabold leading-snug tracking-tight">
           흩어진 취업 준비,<br />여기서 <span className="text-primary">픽</span>.
         </h1>
@@ -353,7 +353,7 @@ export default function Onboarding() {
           <button
             type="button"
             onClick={() => onGoogle("demo.user@gmail.com", "데모 사용자")}
-            className="mt-10 inline-flex items-center gap-3 rounded-xl border border-border bg-background px-7 py-3.5 text-sm font-bold shadow-sm transition-shadow hover:shadow"
+            className="mt-10 inline-flex items-center gap-3 rounded-lg border border-border bg-background px-7 py-3.5 text-sm font-bold shadow-sm transition-shadow hover:shadow"
           >
             <GoogleG /> Google로 계속하기
           </button>
@@ -383,14 +383,14 @@ export default function Onboarding() {
     );
     return (
       <Shell>
-        <div className="mx-auto max-w-xl rounded-2xl border border-border bg-card p-8">
+        <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-8">
           <p className="mb-2 text-xs font-bold text-primary">시작하기 전에</p>
           <h1 className="text-2xl font-extrabold leading-snug">서비스 이용을 위해<br />약관에 동의해 주세요</h1>
           <div className="mt-6 space-y-1">
             <button
               type="button"
               onClick={() => { const v = !all; up({ agree: { age: v, tos: v, priv: v, mkt: v } }); }}
-              className="flex w-full items-center gap-3 rounded-xl border border-primary bg-primary/10 px-4 py-3.5 text-sm font-extrabold"
+              className="flex w-full items-center gap-3 rounded-lg border border-primary bg-primary/10 px-4 py-3.5 text-sm font-extrabold"
             >
               <CheckBox on={all} /> 전체 동의할게요
             </button>
@@ -422,7 +422,7 @@ export default function Onboarding() {
         </p>
 
         {/* 선택 부스트 — 건너뛰어도 시작 가능 */}
-        <div className="mt-6 w-[360px] rounded-2xl border border-border bg-card">
+        <div className="mt-6 w-[360px] rounded-xl border border-border bg-card">
           <button
             type="button"
             onClick={() => setBoostOpen(o => !o)}
@@ -445,7 +445,7 @@ export default function Onboarding() {
                 <Label>이미 갖고 있는 자료</Label>
                 <div className="space-y-2">
                   {([["resume", "이력서"], ["essay", "자기소개서"], ["portfolio", "포트폴리오"]] as const).map(([k, l]) => (
-                    <div key={k} className="flex items-center justify-between rounded-xl border border-border px-4 py-2.5 text-sm">
+                    <div key={k} className="flex items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm">
                       {l}
                       <button
                         type="button" role="switch" aria-checked={s.docs[k]} aria-label={`${l} 보유`}
@@ -465,7 +465,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={finish}
-          className="mt-6 w-[360px] rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-6 w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           {boostDone ? "Pickd 시작하기" : "이대로 시작하기"}
         </button>
@@ -478,7 +478,7 @@ export default function Onboarding() {
     <Shell>
       <Progress />
       <div className="flex items-start gap-8">
-        <div className="min-w-0 flex-1 rounded-2xl border border-border bg-card p-8">
+        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-8">
 
           {s.step === "me" && (
             <>
@@ -497,7 +497,7 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <Label>지금 상태</Label>
-                  <div className="flex overflow-hidden rounded-xl border border-border">
+                  <div className="flex overflow-hidden rounded-lg border border-border">
                     {PERSONAS.map((p, i) => (
                       <button
                         key={p} type="button"
@@ -552,7 +552,7 @@ export default function Onboarding() {
               <div className="mt-6 space-y-5">
                 <div>
                   <Label right={<span className="text-xs text-muted-foreground">1~5개 · 선택 {s.jobs.length}</span>}>관심 직무</Label>
-                  <div className="grid min-h-[250px] grid-cols-[150px_1fr] overflow-hidden rounded-xl border border-border">
+                  <div className="grid min-h-[250px] grid-cols-[150px_1fr] overflow-hidden rounded-lg border border-border">
                     <div className="flex flex-col border-r border-border bg-muted/50">
                       {Object.keys(JOB_TREE).map(c => (
                         <button
@@ -677,7 +677,7 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
   );
 
   return (
-    <div className={cn("rounded-2xl border border-border bg-card p-5", className)}>
+    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-bold text-primary">⚡ 프로필 부스트 · {profile.completeness ?? 0}% 완성</p>
@@ -691,14 +691,14 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
       <div className="mt-3">
         {field.type === "input" && (
           <input
-            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
             placeholder={field.placeholder} value={value} onChange={e => setValue(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") save(); }}
           />
         )}
         {field.type === "select" && (
           <select
-            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
             value={value} onChange={e => setValue(e.target.value)}
           >
             <option value="">선택해 주세요</option>
@@ -721,13 +721,13 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
       <div className="mt-3 flex gap-2">
         <button
           type="button" onClick={save}
-          className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           저장할게요
         </button>
         <button
           type="button" onClick={snooze}
-          className="rounded-xl border border-border px-4 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-foreground/30"
+          className="rounded-lg border border-border px-4 py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-foreground/30"
         >
           나중에
         </button>
@@ -783,7 +783,7 @@ function AutoComplete({ value, pool, placeholder, onChange, inputCls }: {
         onBlur={() => setTimeout(() => setOpen(false), 150)}
       />
       {open && value && pool.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-52 overflow-auto rounded-xl border border-border bg-popover shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-52 overflow-auto rounded-lg border border-border bg-popover shadow-lg">
           {hits.length ? hits.map(h => (
             <button key={h} type="button" className="block w-full px-3.5 py-2.5 text-left text-sm hover:bg-muted" onMouseDown={() => { onChange(h); setOpen(false); }}>
               {h}
