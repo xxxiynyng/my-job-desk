@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, cloneElement } from "react";
 import type React from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -644,6 +644,7 @@ function JobRowGutterCell({
   onDuplicate,
   onChangeStatus,
   onDelete,
+  sticky,
 }: {
   grip: {
     setActivatorNodeRef: (el: HTMLElement | null) => void;
@@ -657,10 +658,15 @@ function JobRowGutterCell({
   onDuplicate: () => void;
   onChangeStatus: (s: JobMenuStatus) => void;
   onDelete: () => void;
+  sticky?: { style?: React.CSSProperties; className?: string };
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <td className="relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+    <td
+      className={cn("relative w-12 pl-1 pr-3 py-2.5 whitespace-nowrap", sticky?.className)}
+      style={sticky?.style}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* 투명 히트 영역 — 드래그하면 행 이동, 클릭(이동 없이 떼면)하면 컨텍스트 메뉴 */}
       <DragHandle
         ref={grip.setActivatorNodeRef}
@@ -841,6 +847,36 @@ export function JobPostingTable() {
     const cols = colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean);
     return [...cols.filter((c) => pinnedCols.has(c.key)), ...cols.filter((c) => !pinnedCols.has(c.key))];
   }, [colOrder, pinnedCols]);
+
+  // ── sticky 컬럼 고정 (탭2와 동일 규칙) — 고정 시 좌측 블록(체크박스·★·기업명·공고명)+고정 컬럼을 얼림 ──
+  const frozenMap = useMemo(() => {
+    if (pinnedCols.size === 0) return null;
+    const map = new Map<string, { left: number; last: boolean }>();
+    const pinned = orderedCols.filter((c) => isVisible(c.key) && pinnedCols.has(c.key));
+    // 좌측 고정 블록 순서: 체크박스(48) · ★(36) · 기업명 · 공고명 · 고정 컬럼들
+    const block: { key: string; w: number }[] = [
+      { key: "__gutter__", w: 48 },
+      { key: "__star__", w: 36 },
+      { key: "company", w: widths.company },
+      { key: "title", w: widths.title },
+      ...pinned.map((c) => ({ key: c.key as string, w: Math.max(widths[c.key] ?? 100, COL_MIN_WIDTHS[c.key] ?? 60) })),
+    ];
+    let x = 0;
+    block.forEach((b, i) => {
+      map.set(b.key, { left: x, last: i === block.length - 1 });
+      x += b.w;
+    });
+    return map;
+  }, [pinnedCols, orderedCols, widths]);
+
+  const stickyProps = (key: string, header = false): { style?: React.CSSProperties; className?: string } => {
+    const f = frozenMap?.get(key);
+    if (!f) return {};
+    return {
+      style: { position: "sticky", left: f.left, zIndex: 30 },
+      className: cn(header ? "bg-[#F8FAFC]" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
+    };
+  };
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   const dividerBounds = useTableDividers(tableWrapRef, [widths, orderedCols, visibleCols]);
   const dividers = dividerBounds.map((b) => ({
@@ -1215,12 +1251,18 @@ export function JobPostingTable() {
                 </colgroup>
                 <thead className="bg-[#F8FAFC]">
                   <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
-                    <th className="w-12 pl-1 pr-3 py-3">
+                    <th
+                      className={cn("w-12 pl-1 pr-3 py-3", stickyProps("__gutter__", true).className)}
+                      style={stickyProps("__gutter__", true).style}
+                    >
                       <div className="ml-5">
                         <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} className="h-3.5 w-3.5" />
                       </div>
                     </th>
-                    <th className="w-9 px-2 py-3 text-left whitespace-nowrap">★</th>
+                    <th
+                      className={cn("w-9 px-2 py-3 text-left whitespace-nowrap", stickyProps("__star__", true).className)}
+                      style={stickyProps("__star__", true).style}
+                    >★</th>
                     {/* 기업명 — 고정 (드래그 없음, ∨ = 컬럼 메뉴) */}
                     <HeaderCell
                       label="기업명"
@@ -1229,6 +1271,8 @@ export function JobPostingTable() {
                       onSort={() => toggleColSort("company")}
                       onSortChange={(dir) => setSortDirect("company", dir)}
                       filter={filterPropsFor("company")}
+                      className={stickyProps("company", true).className}
+                      style={stickyProps("company", true).style}
                     />
                     {/* 공고명 — 고정 */}
                     <HeaderCell
@@ -1238,6 +1282,8 @@ export function JobPostingTable() {
                       onSort={() => toggleColSort("title")}
                       onSortChange={(dir) => setSortDirect("title", dir)}
                       filter={filterPropsFor("title")}
+                      className={stickyProps("title", true).className}
+                      style={stickyProps("title", true).style}
                     />
                     {/* 드래그 가능 컬럼 */}
                     <SortableContext
@@ -1258,6 +1304,8 @@ export function JobPostingTable() {
                             pinned={pinnedCols.has(col.key)}
                             onTogglePin={() => togglePin(col.key)}
                             onDelete={() => toggleCol(col.key)}
+                            stickyStyle={stickyProps(col.key).style}
+                            stickyClassName={stickyProps(col.key, true).className}
                           />
                         ))}
                     </SortableContext>
@@ -1281,6 +1329,7 @@ export function JobPostingTable() {
                       {/* 그립(드래그+클릭 메뉴) + 체크박스 */}
                       <JobRowGutterCell
                         grip={grip}
+                        sticky={stickyProps("__gutter__")}
                         job={{
                           starred: job.starred,
                           updatedAt: job.updatedAt,
@@ -1302,12 +1351,17 @@ export function JobPostingTable() {
                         onDelete={() => deleteJob(job.id)}
                       />
                       {/* 별표 (공용 StarToggle) */}
-                      <td className="px-2 py-2.5 text-left whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className={cn("px-2 py-2.5 text-left whitespace-nowrap", stickyProps("__star__").className)}
+                        style={stickyProps("__star__").style}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <StarToggle active={job.starred} onToggle={() => toggleStarred(job.id)} label="관심 공고" />
                       </td>
                       {/* 기업명 — 3차 메타 (보조 정보) */}
                       <td
-                        className="px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap"
+                        className={cn("px-4 py-2.5 text-[13px] text-gray-500 whitespace-nowrap", stickyProps("company").className)}
+                        style={stickyProps("company").style}
                       >
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -1317,7 +1371,10 @@ export function JobPostingTable() {
                         </Tooltip>
                       </td>
                       {/* 공고명 — 1차 정보 (가장 중요) */}
-                      <td className="px-4 py-2.5 text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+                      <td
+                        className={cn("px-4 py-2.5 text-sm font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis", stickyProps("title").className)}
+                        style={stickyProps("title").style}
+                      >
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -1331,10 +1388,12 @@ export function JobPostingTable() {
                           <TooltipContent className="text-xs">{job.title} — 공고 상세 보기</TooltipContent>
                         </Tooltip>
                       </td>
-                      {/* 드래그 가능 컬럼 셀 */}
+                      {/* 드래그 가능 컬럼 셀 — 고정(sticky) 컬럼이면 sp 주입 */}
                       {orderedCols
                         .filter((c) => isVisible(c.key))
                         .map((col) => {
+                          const sp = stickyProps(col.key);
+                          const cell: React.ReactElement | null = (() => {
                           switch (col.key) {
                             case "role":
                               return (
@@ -1456,6 +1515,14 @@ export function JobPostingTable() {
                             default:
                               return null;
                           }
+                          })();
+                          if (!cell) return null;
+                          return sp.style
+                            ? cloneElement(cell, {
+                                className: cn(cell.props.className, sp.className),
+                                style: { ...(cell.props.style ?? {}), ...sp.style },
+                              })
+                            : cell;
                         })}
                       <JobRowActionCell
                         onEdit={() => setModalJobId(job.id)}
