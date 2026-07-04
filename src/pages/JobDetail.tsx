@@ -384,7 +384,7 @@ export default function JobDetail() {
                 "flex items-center gap-2 text-[13px] rounded-lg px-4 py-2.5",
                 job.expired
                   ? "bg-muted/40 text-muted-foreground"
-                  : "bg-[var(--pickd-red-light,#fff1f2)] text-pickd-red"
+                  : "bg-pickd-red-light text-pickd-red"
               )}>
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {job.expired
