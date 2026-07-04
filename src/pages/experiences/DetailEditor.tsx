@@ -352,6 +352,7 @@ export function DetailEditor({
                               onClick={() =>
                                 update({ linkedExperiences: item.linkedExperiences?.filter((x) => x !== id) })
                               }
+                              aria-label={`${exp.name} 연결 해제`}
                             >
                               <X className="w-2.5 h-2.5" />
                             </button>
@@ -395,7 +396,7 @@ export function DetailEditor({
                   </p>
                   <p className="text-[10.5px] text-muted-foreground mt-0.5">이 경험을 더 구체적으로 만들어 봐요.</p>
                 </div>
-                <button onClick={() => setAiOpen(false)} className="p-1 rounded hover:bg-muted text-muted-foreground">
+                <button onClick={() => setAiOpen(false)} aria-label="AI 패널 닫기" className="p-1 rounded hover:bg-muted text-muted-foreground">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>

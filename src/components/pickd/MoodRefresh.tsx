@@ -51,6 +51,7 @@ export function MoodRefresh() {
             >
               <button
                 onClick={() => setOpen(false)}
+                aria-label="닫기"
                 className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />

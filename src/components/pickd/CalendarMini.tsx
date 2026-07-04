@@ -91,6 +91,7 @@ export function CalendarMini({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setCursor(new Date(year, month - 1, 1))}
+            aria-label="이전 달"
             className="w-6 h-6 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -110,6 +111,7 @@ export function CalendarMini({
           )}
           <button
             onClick={() => setCursor(new Date(year, month + 1, 1))}
+            aria-label="다음 달"
             className="w-6 h-6 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <ChevronRight className="w-3.5 h-3.5" />

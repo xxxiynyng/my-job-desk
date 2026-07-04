@@ -207,7 +207,7 @@ export function ScheduleDetailModal({ schedule, onClose }: ScheduleDetailProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
             {editing ? <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-7 text-sm" autoFocus /> : <span>{schedule.title}</span>}
-            {!editing && <button onClick={() => { setTitle(schedule.title); setEditing(true); }} className="text-muted-foreground hover:text-foreground"><Pencil size={12} /></button>}
+            {!editing && <button onClick={() => { setTitle(schedule.title); setEditing(true); }} aria-label="제목 편집" className="text-muted-foreground hover:text-foreground"><Pencil size={12} /></button>}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-2 text-sm">
@@ -246,7 +246,7 @@ export function TaskDetailModal({ task, onClose, onToggle }: TaskDetailProps) {
                 <span className={cn(task.completed && "line-through text-muted-foreground")}>{task.title}</span>
               </>
             )}
-            {!editing && <button onClick={() => { setTitle(task.title); setEditing(true); }} className="text-muted-foreground hover:text-foreground"><Pencil size={12} /></button>}
+            {!editing && <button onClick={() => { setTitle(task.title); setEditing(true); }} aria-label="제목 편집" className="text-muted-foreground hover:text-foreground"><Pencil size={12} /></button>}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-2 text-sm">

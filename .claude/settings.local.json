@@ -60,7 +60,28 @@
       "Bash(git commit *)",
       "Bash(python3 -c \"print\\(48+36+110+200+90+80+110+110+75+100\\)\")",
       "Bash(git -C \"/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06\" status --porcelain)",
-      "Bash(grep -v \"^.*:#\\\\|filter\\\\|chip\\\\|border-b border-border$\")"
+      "Bash(grep -v \"^.*:#\\\\|filter\\\\|chip\\\\|border-b border-border$\")",
+      "Bash(git tag *)",
+      "Bash(npm install *)",
+      "Bash(echo \"TSC_EXIT=$?\")",
+      "Bash(git *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(npx *)",
+      "Bash(npm *)",
+      "Bash(echo *)",
+      "Bash(true)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(diff *)",
+      "Bash(mv *)",
+      "Bash(rm vite.config.ts.timestamp-*)"
     ]
   }
 }

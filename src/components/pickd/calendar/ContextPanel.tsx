@@ -154,7 +154,7 @@ export function ContextPanel({
                         onClick={() => setDetailApp(app)}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <button onClick={(e) => { e.stopPropagation(); onToggleStar(app.id); }} className="shrink-0">
+                          <button onClick={(e) => { e.stopPropagation(); onToggleStar(app.id); }} aria-label={app.starred ? "중요 표시 해제" : "중요 표시"} className="shrink-0">
                             <Star size={13} className={cn(app.starred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30")} />
                           </button>
                           <div className="min-w-0">

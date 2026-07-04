@@ -272,8 +272,8 @@ export function BasicInfoPanel() {
                 }}
                 className="flex-1 min-w-0 text-[13px] text-foreground bg-transparent border-b border-primary/60 outline-none py-0.5"
               />
-              <button onClick={commitInline} className="shrink-0 p-0.5 rounded text-emerald-500 hover:bg-emerald-50"><Check className="w-3 h-3" /></button>
-              <button onClick={cancelInline} className="shrink-0 p-0.5 rounded text-muted-foreground hover:bg-muted"><X className="w-3 h-3" /></button>
+              <button onClick={commitInline} aria-label="저장" className="shrink-0 p-0.5 rounded text-emerald-500 hover:bg-emerald-50"><Check className="w-3 h-3" /></button>
+              <button onClick={cancelInline} aria-label="취소" className="shrink-0 p-0.5 rounded text-muted-foreground hover:bg-muted"><X className="w-3 h-3" /></button>
             </div>
           ) : isMasked ? (
             <span className="flex-1 text-[13px] text-muted-foreground/30 tracking-widest select-none">••••••</span>

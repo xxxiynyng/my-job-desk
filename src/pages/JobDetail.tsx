@@ -771,6 +771,7 @@ export default function JobDetail() {
                 </div>
                 <button
                   onClick={() => setRawOpen(false)}
+                  aria-label="원문 닫기"
                   className="w-7 h-7 rounded-md hover:bg-muted border border-transparent hover:border-border text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-all"
                 >
                   <X className="w-4 h-4" />
