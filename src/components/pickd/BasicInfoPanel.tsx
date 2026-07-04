@@ -15,7 +15,8 @@ type InfoKey =
   | "school" | "major" | "grade"
   | "military" | "veteran" | "disability" | "national" | "driverLicense"
   | "portfolioUrl" | "github" | "linkedin" | "blog"
-  | "enrollYear" | "gradYear" | "gpa" | "minor" | "transfer"
+  | "enrollYear" | "gradYear" | "gpa" | "majorGpa" | "minor" | "transfer"
+  | "dayNight" | "campus"
   | "gender" | "nationality"
   | "hsSchool" | "hsLocation" | "hsEnroll" | "hsGrad" | "hsGradStatus";
 
@@ -41,7 +42,10 @@ const INFO_FIELDS: { key: InfoKey; label: string }[] = [
   { key: "blog",             label: "블로그/노션"           },
   { key: "enrollYear",       label: "입학 연도"            },
   { key: "gradYear",         label: "졸업(예정) 연도"      },
-  { key: "gpa",              label: "학점 (GPA)"           },
+  { key: "gpa",              label: "전체 학점 (GPA)"       },
+  { key: "majorGpa",         label: "전공 학점"             },
+  { key: "dayNight",         label: "주간 / 야간"           },
+  { key: "campus",           label: "본교 / 분교"           },
   { key: "minor",            label: "부전공"               },
   { key: "transfer",         label: "편입 여부"            },
   { key: "gender",           label: "성별"                 },
@@ -57,7 +61,7 @@ const INFO_FIELDS: { key: InfoKey; label: string }[] = [
 const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
   { title: "인적사항",      keys: ["name", "hanjaName", "engName", "birth", "gender", "nationality"] },
   { title: "연락처",        keys: ["email", "phone", "address"] },
-  { title: "학력",          keys: ["school", "major", "grade", "enrollYear", "gradYear", "gpa", "minor", "transfer"] },
+  { title: "학력",          keys: ["school", "major", "grade", "dayNight", "campus", "enrollYear", "gradYear", "gpa", "majorGpa", "minor", "transfer"] },
   { title: "고등학교",      keys: ["hsSchool", "hsLocation", "hsEnroll", "hsGrad", "hsGradStatus"] },
   { title: "온라인 프로필", keys: ["portfolioUrl", "github", "linkedin", "blog"] },
   { title: "병역·면허",     keys: ["military", "veteran", "disability", "national", "driverLicense"] },
@@ -70,7 +74,8 @@ const INFO_DEFAULTS: Record<InfoKey, string> = {
   grade: "4학년 재학", military: "해당 없음", veteran: "해당 없음",
   disability: "해당 없음", national: "해당 없음", driverLicense: "2종 보통",
   portfolioUrl: "", github: "", linkedin: "", blog: "",
-  enrollYear: "", gradYear: "", gpa: "", minor: "", transfer: "해당 없음",
+  enrollYear: "", gradYear: "", gpa: "", majorGpa: "", minor: "", transfer: "해당 없음",
+  dayNight: "주간", campus: "본교",
   gender: "선택 안 함", nationality: "대한민국",
   hsSchool: "", hsLocation: "", hsEnroll: "", hsGrad: "", hsGradStatus: "해당 없음",
 };
@@ -467,11 +472,17 @@ export function BasicInfoPanel() {
           {/* 학력 상세 */}
           <EditSection title="학력 상세">
             <EditGrid>
-              {(["enrollYear","gradYear","gpa","minor"] as InfoKey[]).map((k) => (
+              {(["enrollYear","gradYear","gpa","majorGpa","minor"] as InfoKey[]).map((k) => (
                 <FieldRow key={k} label={INFO_FIELDS.find((x) => x.key === k)!.label} visible={isVis(k)} onToggle={() => toggleVis(k)}>
                   <Input value={dv(k)} onChange={(e) => setDv(k, e.target.value)} className="h-8 text-[12px]" />
                 </FieldRow>
               ))}
+              <FieldRow label="주간 / 야간" visible={isVis("dayNight")} onToggle={() => toggleVis("dayNight")}>
+                <InlineSelect value={dv("dayNight") || "주간"} options={["주간", "야간"]} onChange={(v) => setDv("dayNight", v)} />
+              </FieldRow>
+              <FieldRow label="본교 / 분교" visible={isVis("campus")} onToggle={() => toggleVis("campus")}>
+                <InlineSelect value={dv("campus") || "본교"} options={["본교", "분교"]} onChange={(v) => setDv("campus", v)} />
+              </FieldRow>
               <FieldRow label="편입 여부" visible={isVis("transfer")} onToggle={() => toggleVis("transfer")}>
                 <InlineSelect value={dv("transfer") || "해당 없음"} options={TRANS_OPTS} onChange={(v) => setDv("transfer", v)} />
               </FieldRow>
