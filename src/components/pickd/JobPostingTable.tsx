@@ -1246,7 +1246,8 @@ export function JobPostingTable() {
                       const w = Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
                       return <col key={col.key} style={{ width: w }} />;
                     })}
-                  {/* 액션 거터 — 너비 미지정: table-fixed에서 남는 폭을 흡수해 헤더 배경이 우측 끝까지 채워짐 */}
+                  <col style={{ width: 56 }} />
+                  {/* 스페이서 — 너비 미지정 col+th+td로 남는 폭을 흡수(헤더 배경이 카드 우측 끝까지 채워짐) */}
                   <col />
                 </colgroup>
                 <thead className="bg-[#F8FAFC]">
@@ -1310,7 +1311,9 @@ export function JobPostingTable() {
                         ))}
                     </SortableContext>
                     {/* 액션 거터 헤더 — JobRowActionCell td(w-14)에 대응 */}
-                    <th className="w-14 bg-[#F8FAFC]" />
+                    <th className="w-14" />
+                    {/* 스페이서 헤더 — 남는 폭 흡수(thead 배경으로 우측 끝까지 균일) */}
+                    <th aria-hidden />
                   </tr>
                 </thead>
                 <SortableContext items={visibleJobs.map((j) => j.id)} strategy={verticalListSortingStrategy}>
@@ -1527,6 +1530,8 @@ export function JobPostingTable() {
                       <JobRowActionCell
                         onEdit={() => setModalJobId(job.id)}
                       />
+                      {/* 스페이서 셀 — 헤더 스페이서와 짝, 본문은 투명 */}
+                      <td aria-hidden />
                     </>
                     )}
                     </SortableJobRow>
