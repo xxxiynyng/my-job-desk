@@ -1,29 +1,29 @@
 /**
- * Onboarding.tsx — Pickd 온보딩 v2 (하이브리드: 필수 2단계 + 점진 수집)
+ * Onboarding.tsx — Pickd 온보딩 v2.1 (하이브리드: 필수 2단계 + 점진 수집)
  *
- * v1 대비 변경
- * - 정보등록 4단계 → 2단계 ([1/2] 나, [2/2] 픽). 필수 입력 16개+ → 8~9개
- * - '학적 상태'+'경력 여부'를 퍼소나 1탭으로 통합 (재학/휴학/졸업예정/졸업/경력)
- * - 거주지역·학점·기업유형·집중항목 등은 pending 큐로 이관 → 앱 내 ProfileCompletionCard가 회수
- * - 완료 화면에 선택 부스트(희망 근무지역·보유자료) — 건너뛰어도 시작 가능
- * - 픽 카드에 예상 매칭 공고 수 실시간 표시 (입력의 즉시 보상)
+ * v2 → v2.1
+ * - 데이터셋 분리·확장: onboardingData.ts (학교 118, 전공 100+, 직무 12군 78종, 산업 16) — DATA_VERSION 관리
+ * - 관심 직무 검색: 카테고리 트리 + 전체 직무 검색 필드
+ * - 졸업년도 동적 생성(현재년도 ±6), 프로필 타입(PickdProfileV1) 적용
+ * - 디자인 폴리시: 입력 포커스 링 통일, 픽 카드 칩 +N 캡, 선택 직무 요약 칩
  *
- * 통합 규칙 (CLAUDE.md 준수) — v1과 동일
- * - 페이지 컴포넌트 default export / 보조는 named export
- * - shadcn 시맨틱 토큰만 사용, sonner 토스트, "~어요" 체, 데스크톱 전용
+ * 통합 규칙 (CLAUDE.md · 디자인 시스템 SSOT)
+ * - 페이지 default export / 보조 named export, sonner "~어요" 체, 데스크톱 전용
+ * - shadcn 시맨틱 토큰만 사용 / radius: 버튼·입력 rounded-lg(8px), 카드 rounded-xl(12px), 선택 칩 pill
  *
- * localStorage 키 — v1과 호환 (기존 소비처 수정 불필요)
+ * localStorage 키 — v1과 호환
  * - pickd.onboarding.state.v1 / pickd.onboarding.done.v1 / pickd.profile.v1 / specs.info.values.v2
- * - profile.v1에 persona · pending · snoozed · completeness 필드 추가
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, ChevronLeft, Sparkles, X } from "lucide-react";
-
-/* ─────────────────────────── 데이터 ─────────────────────────── */
+import { Check, ChevronDown, ChevronLeft, Search, Sparkles, X } from "lucide-react";
+import {
+  CAREER_YEARS, CORP_TYPES, DATA_VERSION, DEGREES, FOCUSES, INDUSTRIES, JOB_TREE, MAJORS,
+  PERSONAS, REGIONS, SCHOOLS, STUDENT_PERSONAS, TIMINGS, gradYears, type PickdProfileV1,
+} from "./onboardingData";
 
 const LS = {
   state: "pickd.onboarding.state.v1",
@@ -31,27 +31,6 @@ const LS = {
   profile: "pickd.profile.v1",
   infoValues: "specs.info.values.v2",
 } as const;
-
-const REGIONS = ["서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","제주"];
-const DEGREES = ["고등학교","전문학사","학사","석사","박사"];
-const PERSONAS = ["재학","휴학","졸업예정","졸업","경력"] as const;
-const SCHOOLS = ["부산대학교","부산교육대학교","부산외국어대학교","부경대학교","동아대학교","서울대학교","연세대학교","고려대학교","한양대학교","경북대학교","전남대학교"];
-const MAJORS = ["경영학과","경제학과","컴퓨터공학과","전자공학과","기계공학과","심리학과","국어국문학과","통계학과","화학공학과","산업디자인학과"];
-const JOB_TREE: Record<string, string[]> = {
-  "경영·기획": ["사업개발·기획자","서비스 기획자","전략 기획자","PM·PO","운영 매니저"],
-  "마케팅·광고": ["브랜드 마케터","퍼포먼스 마케터","콘텐츠 마케터","광고 기획(AE)"],
-  "IT·개발": ["프론트엔드 개발자","백엔드 개발자","데이터 분석가","QA 엔지니어"],
-  "금융": ["애널리스트","자산관리사","투자·증권","리스크 관리"],
-  "생산·제조": ["생산관리","품질관리","공정 엔지니어"],
-  "영업·CS": ["B2B 영업","기술영업","고객성공 매니저"],
-};
-const INDUSTRIES = ["IT·플랫폼","금융","제조","유통·커머스","바이오·헬스케어","콘텐츠·미디어","공공·교육","건설·에너지"];
-const CORP_TYPES = ["대기업","중견기업","스타트업","공기업·공공기관","외국계"];
-const TIMINGS = ["이번 분기","6개월 안","1년 안","아직 탐색 중"];
-const FOCUSES = ["서류·이력서","자기소개서","인적성·NCS","면접","포트폴리오","어학·자격증"];
-const CAREER_YEARS = ["1년 미만","1년","2년","3년","4년","5년 이상"];
-
-const STUDENT_PERSONAS = ["재학", "휴학", "졸업예정"];
 
 type Step = "login" | "terms" | "me" | "pick" | "complete";
 const ONB_STEPS: Step[] = ["me", "pick"];
@@ -81,7 +60,7 @@ const INITIAL: OnbState = {
   agree: { age: false, tos: false, priv: false, mkt: false },
   nickname: "", persona: "", careerYears: "",
   school: "", major: "", gradY: "",
-  jobCat: "경영·기획", jobs: [], inds: [], timing: "",
+  jobCat: Object.keys(JOB_TREE)[0], jobs: [], inds: [], timing: "",
   workRegions: [],
   docs: { resume: false, essay: false, portfolio: false },
 };
@@ -142,6 +121,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const [s, setS] = useState<OnbState>(loadState);
   const [boostOpen, setBoostOpen] = useState(false);
+  const [jobQuery, setJobQuery] = useState("");
   const nickRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -179,6 +159,17 @@ export default function Onboarding() {
     return s.jobs.length * 34 + s.inds.length * 11 + (s.timing ? 8 : 0);
   }, [s.jobs, s.inds, s.timing]);
 
+  // 직무 검색 결과 (카테고리 횡단)
+  const jobHits = useMemo(() => {
+    const q = jobQuery.trim();
+    if (!q) return [];
+    const hits: { cat: string; job: string }[] = [];
+    Object.entries(JOB_TREE).forEach(([cat, jobs]) => {
+      jobs.forEach(j => { if (j.includes(q) || cat.includes(q)) hits.push({ cat, job: j }); });
+    });
+    return hits.slice(0, 20);
+  }, [jobQuery]);
+
   const pickChips = useMemo(() => {
     const c: string[] = [];
     if (s.persona) c.push(`👤 ${s.persona}${isCareer && s.careerYears ? ` ${s.careerYears}` : ""}`);
@@ -208,6 +199,7 @@ export default function Onboarding() {
     // 2) 점진 수집 대상 계산 (온보딩에서 받지 않은 항목)
     const pending: string[] = ["degree", "gpa", "region", "corps", "focus"];
     if (isStudent) pending.push("gradM");
+    if (!s.gradY) pending.push("gradY");
     if (s.workRegions.length === 0) pending.push("workRegions");
     if (!s.docs.resume && !s.docs.essay && !s.docs.portfolio) pending.push("docs");
 
@@ -215,7 +207,7 @@ export default function Onboarding() {
     const completeness = Math.round((answered / (answered + pending.length)) * 100);
 
     // 3) 프로필 저장 (v1 소비처 호환 필드 유지)
-    localStorage.setItem(LS.profile, JSON.stringify({
+    const profile: PickdProfileV1 = {
       nickname: s.nickname,
       persona: s.persona,
       status: isCareer ? "졸업" : s.persona,           // v1 status 소비처 호환
@@ -229,7 +221,9 @@ export default function Onboarding() {
       marketingOptIn: s.agree.mkt,
       pending, snoozed: {}, completeness,
       completedAt: new Date().toISOString(),
-    }));
+      dataVersion: DATA_VERSION,
+    };
+    localStorage.setItem(LS.profile, JSON.stringify(profile));
 
     localStorage.setItem(LS.done, "1");
     localStorage.removeItem(LS.state);
@@ -253,6 +247,7 @@ export default function Onboarding() {
     );
   };
 
+  const CHIP_CAP = 12;
   const PickCard = ({ standalone = false }: { standalone?: boolean }) => (
     <aside
       aria-label="내 픽 카드"
@@ -264,7 +259,7 @@ export default function Onboarding() {
       <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wide opacity-85">
         <Sparkles className="h-3.5 w-3.5" /> MY PICK CARD
       </h3>
-      <div className="mt-2 min-h-[28px] text-xl font-extrabold">{s.nickname ? `${s.nickname}님` : " "}</div>
+      <div className="mt-2 min-h-[28px] text-xl font-extrabold">{s.nickname ? `${s.nickname}님` : " "}</div>
       {matchCount > 0 ? (
         <div className="text-xs opacity-90">지금 조건에 맞는 공고 <b>{matchCount}건</b>을 찾았어요</div>
       ) : (
@@ -273,9 +268,16 @@ export default function Onboarding() {
       <div className="mt-4 flex min-h-[32px] flex-wrap gap-1.5">
         {pickChips.length === 0 ? (
           <span className="py-1 text-xs opacity-60">아직 담긴 정보가 없어요</span>
-        ) : pickChips.map(c => (
-          <span key={c} className="rounded-full border border-primary-foreground/30 bg-primary-foreground/15 px-2.5 py-1 text-xs">{c}</span>
-        ))}
+        ) : (
+          <>
+            {pickChips.slice(0, CHIP_CAP).map(c => (
+              <span key={c} className="rounded-full border border-primary-foreground/30 bg-primary-foreground/15 px-2.5 py-1 text-xs">{c}</span>
+            ))}
+            {pickChips.length > CHIP_CAP && (
+              <span className="rounded-full bg-primary-foreground/25 px-2.5 py-1 text-xs font-bold">+{pickChips.length - CHIP_CAP}</span>
+            )}
+          </>
+        )}
       </div>
       <div className="mt-4 border-t border-primary-foreground/20 pt-3 text-[11px] leading-relaxed opacity-75">
         여기 담긴 정보는 전부 내 자산이 돼요.<br />언제든 마이페이지에서 수정할 수 있어요.
@@ -314,7 +316,7 @@ export default function Onboarding() {
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3.5 py-2 text-sm transition-colors",
+        "rounded-full border px-3.5 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
         on ? "border-primary bg-primary/10 font-semibold text-primary" : "border-border bg-background hover:border-primary/50"
       )}
     >
@@ -329,7 +331,7 @@ export default function Onboarding() {
     </div>
   );
 
-  const inputCls = "w-full rounded-lg border border-border bg-background px-3.5 py-3 text-sm focus:border-primary focus:outline-none transition-colors";
+  const inputCls = "w-full rounded-lg border border-border bg-background px-3.5 py-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15";
 
   /* ─────────────────────────── 단계별 화면 ─────────────────────────── */
 
@@ -537,7 +539,7 @@ export default function Onboarding() {
                     <Label>졸업 예정 년도</Label>
                     <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
                       <option value="">선택해 주세요</option>
-                      {Array.from({ length: 8 }, (_, i) => 2024 + i).map(y => <option key={y}>{y}</option>)}
+                      {gradYears().map(y => <option key={y}>{y}</option>)}
                     </select>
                   </div>
                 )}
@@ -552,26 +554,64 @@ export default function Onboarding() {
               <div className="mt-6 space-y-5">
                 <div>
                   <Label right={<span className="text-xs text-muted-foreground">1~5개 · 선택 {s.jobs.length}</span>}>관심 직무</Label>
-                  <div className="grid min-h-[250px] grid-cols-[150px_1fr] overflow-hidden rounded-lg border border-border">
-                    <div className="flex flex-col border-r border-border bg-muted/50">
-                      {Object.keys(JOB_TREE).map(c => (
-                        <button
-                          key={c} type="button" onClick={() => up({ jobCat: c })}
-                          className={cn("border-b border-border px-3.5 py-3 text-left text-sm", s.jobCat === c && "bg-card font-bold text-primary shadow-[inset_3px_0_0] shadow-primary")}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="max-h-[290px] space-y-0.5 overflow-auto p-2.5">
-                      {JOB_TREE[s.jobCat].map(j => (
-                        <label key={j} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm hover:bg-muted">
-                          <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={s.jobs.includes(j)} onChange={() => up({ jobs: toggleIn(s.jobs, j, 5) })} />
-                          {j}
+                  {/* 직무 검색 — 카테고리 횡단 */}
+                  <div className="relative mb-2">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      className={cn(inputCls, "py-2.5 pl-9")}
+                      placeholder="직무 검색 (예: 마케터, 데이터)"
+                      value={jobQuery}
+                      onChange={e => setJobQuery(e.target.value)}
+                    />
+                  </div>
+                  {jobQuery.trim() ? (
+                    <div className="max-h-[290px] space-y-0.5 overflow-auto rounded-lg border border-border p-2.5">
+                      {jobHits.length === 0 ? (
+                        <p className="px-2.5 py-2 text-xs text-muted-foreground">검색 결과가 없어요 — 다른 키워드로 찾아보세요</p>
+                      ) : jobHits.map(({ cat, job }) => (
+                        <label key={`${cat}/${job}`} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm hover:bg-muted">
+                          <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={s.jobs.includes(job)} onChange={() => up({ jobs: toggleIn(s.jobs, job, 5) })} />
+                          <span>{job}</span>
+                          <span className="ml-auto text-xs text-muted-foreground">{cat}</span>
                         </label>
                       ))}
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid min-h-[250px] grid-cols-[160px_1fr] overflow-hidden rounded-lg border border-border">
+                      <div className="flex max-h-[320px] flex-col overflow-y-auto border-r border-border bg-muted/50">
+                        {Object.keys(JOB_TREE).map(c => (
+                          <button
+                            key={c} type="button" onClick={() => up({ jobCat: c })}
+                            className={cn("shrink-0 border-b border-border px-3.5 py-3 text-left text-sm", s.jobCat === c && "bg-card font-bold text-primary shadow-[inset_3px_0_0] shadow-primary")}
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="max-h-[320px] space-y-0.5 overflow-auto p-2.5">
+                        {(JOB_TREE[s.jobCat] ?? []).map(j => (
+                          <label key={j} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm hover:bg-muted">
+                            <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={s.jobs.includes(j)} onChange={() => up({ jobs: toggleIn(s.jobs, j, 5) })} />
+                            {j}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* 선택된 직무 요약 — 어느 카테고리에 있든 한눈에 확인·해제 */}
+                  {s.jobs.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {s.jobs.map(j => (
+                        <button
+                          key={j} type="button"
+                          onClick={() => up({ jobs: s.jobs.filter(x => x !== j) })}
+                          className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"
+                        >
+                          {j} <X className="h-3 w-3" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label right={<span className="text-xs text-muted-foreground">1~3개</span>}>관심 산업</Label>
@@ -615,10 +655,11 @@ interface PendingField {
 const PENDING_FIELDS: PendingField[] = [
   { key: "gpa", title: "학점", why: "학점을 입력하면 지원 가능 공고만 걸러드려요", type: "input", placeholder: "예) 3.85 / 4.5", saveToInfo: "gpa" },
   { key: "region", title: "거주 지역", why: "가까운 채용 행사도 알려드릴게요", type: "select", options: REGIONS, saveToInfo: "address" },
-  { key: "corps", title: "희망 기업 유형", why: "기업 유형을 고르면 추천을 조정해요", type: "chips", options: CORP_TYPES, max: 5 },
+  { key: "corps", title: "희망 기업 유형", why: "기업 유형을 고르면 추천을 조정해요", type: "chips", options: CORP_TYPES, max: 6 },
   { key: "focus", title: "지금 집중하는 것", why: "집중하는 걸 알려주시면 할 일을 제안해요", type: "chips", options: FOCUSES, max: 6 },
   { key: "workRegions", title: "희망 근무 지역", why: "지역 조건이 맞는 공고를 먼저 보여드려요", type: "chips", options: REGIONS, max: 3 },
   { key: "degree", title: "최종 학력", why: "지원 자격 필터가 정확해져요", type: "select", options: DEGREES },
+  { key: "gradY", title: "졸업 년도", why: "신입·경력 구분과 지원 자격 필터에 사용돼요", type: "select", options: gradYears(), saveToInfo: "gradYear" },
   { key: "gradM", title: "졸업 예정 월", why: "채용 일정 추천이 정교해져요", type: "select", options: ["2", "8"] },
 ];
 
@@ -691,14 +732,14 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
       <div className="mt-3">
         {field.type === "input" && (
           <input
-            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
             placeholder={field.placeholder} value={value} onChange={e => setValue(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") save(); }}
           />
         )}
         {field.type === "select" && (
           <select
-            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
             value={value} onChange={e => setValue(e.target.value)}
           >
             <option value="">선택해 주세요</option>
@@ -774,7 +815,7 @@ function AutoComplete({ value, pool, placeholder, onChange, inputCls }: {
   value: string; pool: string[]; placeholder: string; onChange: (v: string) => void; inputCls: string;
 }) {
   const [open, setOpen] = useState(false);
-  const hits = value && pool.length ? pool.filter(p => p.includes(value)).slice(0, 6) : [];
+  const hits = value && pool.length ? pool.filter(p => p.includes(value)).slice(0, 8) : [];
   return (
     <div className="relative">
       <input
