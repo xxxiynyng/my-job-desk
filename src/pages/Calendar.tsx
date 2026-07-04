@@ -78,7 +78,7 @@ export default function Calendar() {
 
   const handleUpdateStatus = useCallback((id: string, status: ApplicationStatus) => {
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status, stage: status } : a)));
-    toast.success("지원 상태가 변경되었습니다");
+    toast.success("지원 상태를 바꿨어요");
   }, []);
 
   return (

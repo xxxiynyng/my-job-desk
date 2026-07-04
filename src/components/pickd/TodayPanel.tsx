@@ -87,7 +87,7 @@ export function TodayPanel() {
             <li
               key={item.id}
               className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-[12px] group"
-              onClick={() => toast(`${item.company} · ${item.title}`, { description: "공고 상세 준비 중" })}
+              onClick={() => toast(`${item.company} · ${item.title}`, { description: "공고 상세는 준비 중이에요" })}
             >
               <span className="w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0 mt-0.5" />
               <span className="flex-1 leading-snug truncate">

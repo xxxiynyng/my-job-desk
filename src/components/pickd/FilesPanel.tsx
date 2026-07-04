@@ -432,7 +432,7 @@ function PreviewModal({
                   </>
                 )}
                 <DropdownMenuItem className="text-xs" onSelect={() => onCopy(f.name)}>파일명 복사</DropdownMenuItem>
-                <DropdownMenuItem className="text-xs" onSelect={() => toast("다운로드 시작", { duration: 1200 })}>다운로드</DropdownMenuItem>
+                <DropdownMenuItem className="text-xs" onSelect={() => toast("다운로드를 시작했어요", { duration: 1200 })}>다운로드</DropdownMenuItem>
                 <DropdownMenuItem className="text-xs" onSelect={() => setRenaming(true)}>이름 변경</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-xs text-destructive" onSelect={() => onDelete(f.id)}>삭제</DropdownMenuItem>
