@@ -56,6 +56,8 @@ import { useTableDividers } from "@/components/table/useTableDividers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
 import { StarToggle } from "@/components/table/StarToggle";
@@ -700,6 +702,8 @@ export function JobPostingTable() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"table" | "kanban">("table");
   const [modalJobId, setModalJobId] = useState<string | null>(null);
+  // 삭제 확인 대기 id 목록(null = 닫힘). 탭2 경험 삭제 확인과 동일 패턴.
+  const [deleteConfirm, setDeleteConfirm] = useState<string[] | null>(null);
   const [tableExpanded, setTableExpanded] = useState(false);
   const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
 
@@ -1013,9 +1017,11 @@ export function JobPostingTable() {
   const updateDeadline = (id: string, v: string) =>
     setJobs((p) => p.map((j) => (j.id === id ? { ...j, deadline: v, dday: calcDday(v) } : j)));
 
-  const deleteSelected = () => {
-    setJobs((p) => p.filter((j) => !selected.has(j.id)));
+  // 실제 삭제 수행 — 확인 다이얼로그 승인 후에만 호출
+  const performDelete = (ids: string[]) => {
+    setJobs((p) => p.filter((j) => !ids.includes(j.id)));
     setSelected(new Set());
+    toast(ids.length === 1 ? "공고를 삭제했어요" : `공고 ${ids.length}개를 삭제했어요`, { duration: 1500 });
   };
 
   // CSV 내보내기 — 기업명/공고명/직무/마감일/상태 (SSOT 9-2)
@@ -1035,11 +1041,6 @@ export function JobPostingTable() {
     const newJob: Job = { ...src, id: `${id}-${Date.now()}`, slug: `${src.slug}-copy` };
     setJobs((p) => [...p, newJob]);
     toast("공고를 복제했어요", { duration: 1500 });
-  };
-
-  const deleteJob = (id: string) => {
-    setJobs((p) => p.filter((j) => j.id !== id));
-    toast("공고를 삭제했어요", { duration: 1500 });
   };
 
   // 상태 변경 (칸반 드래그 포함)
@@ -1213,7 +1214,7 @@ export function JobPostingTable() {
             className="border-b"
             actions={[
               { label: "상태 변경" },
-              { label: "삭제", onClick: deleteSelected, tone: "danger" },
+              { label: "삭제", onClick: () => selected.size && setDeleteConfirm([...selected]), tone: "danger" },
               { label: "내보내기", onClick: () => exportJobs([...activeJobs, ...completedJobs].filter((j) => selected.has(j.id))) },
             ]}
             onClear={() => setSelected(new Set())}
@@ -1351,7 +1352,7 @@ export function JobPostingTable() {
                         onEdit={() => setModalJobId(job.id)}
                         onDuplicate={() => duplicateJob(job.id)}
                         onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
-                        onDelete={() => deleteJob(job.id)}
+                        onDelete={() => setDeleteConfirm([job.id])}
                       />
                       {/* 별표 (공용 StarToggle) */}
                       <td
@@ -1595,6 +1596,36 @@ export function JobPostingTable() {
             onFinalResultChange={handleFinalResultChange}
           />
         )}
+
+        {/* ── 삭제 확인 다이얼로그 (탭2 경험 삭제와 동일 패턴) ──────── */}
+        <Dialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
+          <DialogContent className="max-w-[380px]">
+            <DialogHeader>
+              <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
+              <DialogDescription className="text-sm">
+                {deleteConfirm?.length === 1
+                  ? "이 공고를 삭제하면 되돌릴 수 없어요."
+                  : `${deleteConfirm?.length ?? 0}개의 공고를 삭제하면 되돌릴 수 없어요.`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirm(null)}>
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  if (deleteConfirm) performDelete(deleteConfirm);
+                  setDeleteConfirm(null);
+                }}
+              >
+                삭제
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );
