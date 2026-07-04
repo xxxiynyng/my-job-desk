@@ -800,7 +800,7 @@ export default function JobDetail() {
                 <a
                   href={job.sourceUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
                 >
                   원문 사이트 열기
