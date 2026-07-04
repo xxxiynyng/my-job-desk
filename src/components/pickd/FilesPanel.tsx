@@ -93,6 +93,7 @@ export function FilesPanel() {
   useEffect(() => lsSet(LS_FILES, files), [files]);
 
   const [preview, setPreview] = useState<Preview>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [basicPhotoId, setBasicPhotoId] = useState<string>(() => lsGet<string>(LS_PHOTO_ID, "f0"));
   useEffect(() => lsSet(LS_PHOTO_ID, basicPhotoId), [basicPhotoId]);
 
@@ -143,8 +144,38 @@ export function FilesPanel() {
         }}
         onCopy={copy}
         onRename={renameFile}
-        onDelete={deleteFile}
+        onDelete={(id) => setDeleteConfirmId(id)}
       />
+
+      {/* ── 파일 삭제 확인 다이얼로그 (탭2 경험 삭제와 동일 패턴) ──── */}
+      <Dialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
+        <DialogContent className="max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
+            <DialogDescription className="text-sm">
+              {files.find((f) => f.id === deleteConfirmId)?.name
+                ? `'${files.find((f) => f.id === deleteConfirmId)?.name}' 파일을 삭제하면 되돌릴 수 없어요.`
+                : "이 파일을 삭제하면 되돌릴 수 없어요."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirmId(null)}>
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => {
+                if (deleteConfirmId) deleteFile(deleteConfirmId);
+                setDeleteConfirmId(null);
+              }}
+            >
+              삭제
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }
