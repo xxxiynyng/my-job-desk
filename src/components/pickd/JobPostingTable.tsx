@@ -59,6 +59,7 @@ import { StatusManagementModal, type AppStage, type FinalResult } from "./Status
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip } from "@/components/pickd/ds";
 import { StarToggle } from "@/components/table/StarToggle";
+import { exportCsv } from "@/lib/csv";
 import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
@@ -981,6 +982,17 @@ export function JobPostingTable() {
     setSelected(new Set());
   };
 
+  // CSV 내보내기 — 기업명/공고명/직무/마감일/상태 (SSOT 9-2)
+  const exportJobs = (list: Job[]) => {
+    if (!list.length) return;
+    exportCsv(
+      `공고_${new Date().toISOString().slice(0, 10)}`,
+      ["기업명", "공고명", "직무", "고용형태", "마감일", "현재 상태", "결과"],
+      list.map((j) => [j.company, j.title, j.role, j.employType, j.deadline, j.status, j.finalResult ?? ""]),
+    );
+    toast(`${list.length}개를 CSV로 내보냈어요`, { duration: 1500 });
+  };
+
   const duplicateJob = (id: string) => {
     const src = jobs.find((j) => j.id === id);
     if (!src) return;
@@ -1166,7 +1178,7 @@ export function JobPostingTable() {
             actions={[
               { label: "상태 변경" },
               { label: "삭제", onClick: deleteSelected, tone: "danger" },
-              { label: "내보내기" },
+              { label: "내보내기", onClick: () => exportJobs([...activeJobs, ...completedJobs].filter((j) => selected.has(j.id))) },
             ]}
             onClear={() => setSelected(new Set())}
           />

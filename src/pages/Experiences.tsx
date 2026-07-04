@@ -733,6 +733,20 @@ export default function Experiences() {
   // 중요도 별 토글 — 켜짐="높음", 꺼짐=미설정(탭1 즐겨찾기와 동일한 별 UX)
   const toggleImportant = (id: string) =>
     setItems((p) => p.map((i) => (i.id === id ? { ...i, importance: i.importance === "높음" ? undefined : "높음" } : i)));
+
+  // CSV 내보내기 — 유형/항목명/기관/기간/키워드 (SSOT 9-2)
+  const exportItems = (list: Item[]) => {
+    if (!list.length) return;
+    exportCsv(
+      `경험스펙_${new Date().toISOString().slice(0, 10)}`,
+      ["유형", "항목명", "기관/소속", "기간", "주요 키워드", "중요도"],
+      list.map((i) => {
+        const { org, period } = readMeta(i);
+        return [i.type, i.name, org, period, i.keywords.join(" · "), i.importance === "높음" ? "★" : ""];
+      }),
+    );
+    toast(`${list.length}개를 CSV로 내보냈어요`, { duration: 1500 });
+  };
   const deleteItems = (ids: string[]) => {
     setItems((p) => p.filter((i) => !ids.includes(i.id)));
     setSelected(new Set());
@@ -1147,7 +1161,7 @@ export default function Experiences() {
                 actions={[
                   { label: "삭제", onClick: () => confirmDelete([...selected]), tone: "danger" },
                   { label: "유형 변경" },
-                  { label: "내보내기" },
+                  { label: "내보내기", onClick: () => exportItems(items.filter((i) => selected.has(i.id))) },
                 ]}
                 onClear={() => setSelected(new Set())}
               />
@@ -1538,7 +1552,7 @@ export default function Experiences() {
                 className="h-8 text-xs"
                 onClick={() => {
                   setExcelOpen(false);
-                  toast.success("Excel 파일로 내보냈어요.");
+                  exportItems(filtered);
                 }}
               >
                 내보내기
@@ -1593,4 +1607,5 @@ import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
 import { StarToggle } from "@/components/table/StarToggle";
+import { exportCsv } from "@/lib/csv";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";
