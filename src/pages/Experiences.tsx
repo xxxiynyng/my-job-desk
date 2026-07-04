@@ -554,7 +554,7 @@ export default function Experiences() {
   const togglePinCol = (k: ColumnKey) =>
     setPinnedCols((p) => {
       const n = new Set(p);
-      n.has(k) ? n.delete(k) : n.add(k);
+      if (n.has(k)) n.delete(k); else n.add(k);
       return n;
     });
 
@@ -713,13 +713,13 @@ export default function Experiences() {
   const toggleCol = (k: ColumnKey) =>
     setVisibleCols((p) => {
       const n = new Set(p);
-      n.has(k) ? n.delete(k) : n.add(k);
+      if (n.has(k)) n.delete(k); else n.add(k);
       return n;
     });
   const toggleSelect = (id: string) =>
     setSelected((p) => {
       const n = new Set(p);
-      n.has(id) ? n.delete(id) : n.add(id);
+      if (n.has(id)) n.delete(id); else n.add(id);
       return n;
     });
   const allFilteredSelected = filtered.length > 0 && filtered.every((i) => selected.has(i.id));
