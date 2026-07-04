@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Vite config HMR 재빌드 시 남는 임시 산출물
+vite.config.ts.timestamp-*.mjs
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
