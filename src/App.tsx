@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,8 +10,15 @@ import AICover from "./pages/AICover.tsx";
 import Settings from "./pages/Settings.tsx";
 import Calendar from "./pages/Calendar.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Onboarding from "./pages/Onboarding.tsx";
 
 const queryClient = new QueryClient();
+
+/** 최초 사용자는 온보딩으로 보낸다 (완료 플래그: pickd.onboarding.done.v1) */
+function RequireOnboarded({ children }: { children: ReactNode }) {
+  const done = localStorage.getItem("pickd.onboarding.done.v1") === "1";
+  return done ? <>{children}</> : <Navigate to="/onboarding" replace />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -18,7 +26,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/" element={<RequireOnboarded><Index /></RequireOnboarded>} />
           <Route path="/jobs/:slug" element={<JobDetail />} />
           <Route path="/experiences" element={<Experiences />} />
           <Route path="/basic-info" element={<Navigate to="/experiences?tab=basic-info" replace />} />
