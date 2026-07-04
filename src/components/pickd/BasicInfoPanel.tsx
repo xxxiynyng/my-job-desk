@@ -250,15 +250,15 @@ export function BasicInfoPanel() {
     ),
   })).filter((g) => g.fields.length > 0);
 
-  // 섹션 카드 한 줄(라벨↔값) — 인라인 편집·복사·마스킹 유지, 빈 값은 '미입력'
+  // 섹션 카드 한 줄 — 라벨(상단 고정폭) + 값(줄바꿈, 클릭 복사). 값이 길어도 안 잘리고 아래로 wrap.
   const renderInfoRow = (f: { key: InfoKey; label: string }) => {
     const isMasked  = masked.has(f.key);
     const isEditing = inlineKey === f.key;
     const val       = infoValues[f.key] ?? "";
     return (
-      <div key={f.key} className="group/row flex items-center gap-2 py-2 border-b border-border/40 last:border-0 min-w-0">
-        <span className="text-[12px] text-muted-foreground w-[84px] shrink-0 leading-tight" title={f.label}>{f.label}</span>
-        <div className="flex-1 min-w-0 flex items-center gap-1 justify-end">
+      <div key={f.key} className="group/row flex items-start gap-3 py-2 border-b border-border/40 last:border-0 min-w-0">
+        <span className="text-[12px] text-muted-foreground w-[76px] shrink-0 leading-tight pt-[3px]" title={f.label}>{f.label}</span>
+        <div className="flex-1 min-w-0 flex items-start gap-1">
           {isEditing ? (
             <div className="flex items-center gap-1 flex-1 min-w-0">
               <input
@@ -276,19 +276,19 @@ export function BasicInfoPanel() {
               <button onClick={cancelInline} className="shrink-0 p-0.5 rounded text-muted-foreground hover:bg-muted"><X className="w-3 h-3" /></button>
             </div>
           ) : isMasked ? (
-            <span className="text-[13px] text-muted-foreground/30 tracking-widest select-none">••••••</span>
+            <span className="flex-1 text-[13px] text-muted-foreground/30 tracking-widest select-none">••••••</span>
           ) : val ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button onClick={() => copy(val)} className="inline-flex items-center gap-1 text-[13px] text-foreground hover:text-primary transition-colors min-w-0 max-w-full text-right">
-                  <span className="truncate">{val}</span>
-                  <Copy className="w-3 h-3 opacity-0 group-hover/row:opacity-35 shrink-0 transition-opacity" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-72"><p className="break-all">{val}</p><p className="text-muted-foreground/60 mt-0.5 text-[10px]">클릭하여 복사</p></TooltipContent>
-            </Tooltip>
+            // 클릭 = 복사. 값은 break-words로 줄바꿈되어 잘리지 않음
+            <button
+              onClick={() => copy(val)}
+              title="클릭하여 복사"
+              className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-[13px] text-foreground hover:text-primary transition-colors text-left"
+            >
+              <span className="break-words min-w-0">{val}</span>
+              <Copy className="w-3 h-3 mt-[3px] opacity-0 group-hover/row:opacity-40 shrink-0 transition-opacity" />
+            </button>
           ) : (
-            <button onClick={() => startInline(f.key)} className="text-[12px] text-muted-foreground/50 italic hover:text-primary inline-flex items-center gap-1">
+            <button onClick={() => startInline(f.key)} className="flex-1 text-left text-[12px] text-muted-foreground/50 italic hover:text-primary inline-flex items-center gap-1">
               미입력 <Plus className="w-3 h-3" />
             </button>
           )}
