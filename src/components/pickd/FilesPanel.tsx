@@ -136,6 +136,8 @@ export function FilesPanel() {
         onSetBasicPhoto={(id) => {
           setBasicPhotoId(id);
           lsSet(LS_PHOTO_SHOWN, true);
+          // 기본정보 탭(BasicInfoPanel)에 즉시 반영 — 같은 문서라 storage 이벤트가 안 뜨므로 커스텀 이벤트
+          window.dispatchEvent(new CustomEvent("pickd:basicPhoto"));
           toast("대표 사진으로 설정했어요", { duration: 1200 });
         }}
         onCopy={copy}

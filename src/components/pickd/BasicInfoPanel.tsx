@@ -113,8 +113,24 @@ export function BasicInfoPanel() {
   const [infoVisible, setInfoVisible] = useState<InfoKey[]>(() => lsGet<InfoKey[]>(LS_INFO_VISIBLE, DEFAULT_VISIBLE));
   const [infoValues,  setInfoValues]  = useState<Record<string, string>>(() => ({ ...INFO_DEFAULTS, ...lsGet<Record<string, string>>(LS_INFO_VALUES, {}) }));
   const [photoShown,  setPhotoShown]  = useState<boolean>(() => lsGet<boolean>(LS_PHOTO_SHOWN, true));
-  const [basicPhotoId]                = useState<string>(() => lsGet<string>(LS_PHOTO_ID, "f0"));
-  const [files]                       = useState<FileItem[]>(() => lsGet<FileItem[]>(LS_FILES, []));
+  const [basicPhotoId, setBasicPhotoId] = useState<string>(() => lsGet<string>(LS_PHOTO_ID, "f0"));
+  const [files, setFiles]             = useState<FileItem[]>(() => lsGet<FileItem[]>(LS_FILES, []));
+
+  // 파일함(FilesPanel)에서 대표사진 지정·파일 변경 시 즉시 반영 — 같은 문서에선 storage 이벤트가
+  // 안 뜨므로 커스텀 이벤트로 동기화(2026-07-02, 증명사진↔기본정보 연결 완성).
+  useEffect(() => {
+    const sync = () => {
+      setBasicPhotoId(lsGet<string>(LS_PHOTO_ID, "f0"));
+      setPhotoShown(lsGet<boolean>(LS_PHOTO_SHOWN, true));
+      setFiles(lsGet<FileItem[]>(LS_FILES, []));
+    };
+    window.addEventListener("pickd:basicPhoto", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("pickd:basicPhoto", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
   const [langExams, setLangExams]     = useState<LangExam[]>(() => lsGet<LangExam[]>(LS_LANG_EXAMS, []));
   const [draftLangExams, setDraftLangExams] = useState<LangExam[]>([]);
 
