@@ -301,7 +301,6 @@ export default function JobDetail() {
 
   // 자소서 문항 ref — 작성중인 서류에서 진입 시 마지막 작업 문항으로 스크롤
   const essayRefs = useRef<(HTMLLIElement | null)[]>([]);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fromDoclist = new URLSearchParams(location.search).get("from") === "doclist";

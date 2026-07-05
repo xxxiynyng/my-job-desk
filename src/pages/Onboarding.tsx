@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, ChevronLeft, Search, Sparkles, X } from "lucide-react";
 import {
-  CAREER_YEARS, CORP_TYPES, DATA_VERSION, DEGREES, FOCUSES, INDUSTRIES, JOB_TREE, MAJORS,
+  CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
   PERSONAS, REGIONS, SCHOOLS, STUDENT_PERSONAS, TIMINGS, gradYears, type PickdProfileV1,
 } from "./onboardingData";
 

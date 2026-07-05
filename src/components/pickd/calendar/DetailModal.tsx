@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Pencil, Clock, CalendarDays, CheckSquare, ChevronRight } from "lucide-react";
+import { Pencil, Clock, CalendarDays, ChevronRight } from "lucide-react";
 import { CalApplication, CalSchedule, CalTask, ApplicationStatus, APPLICATION_STATUSES, getDday, getDdayStyle } from "@/data/calendarData";
 
 interface PostingDetailProps {

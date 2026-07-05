@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link2, Upload, Image, X } from "lucide-react";
+import { Link2, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

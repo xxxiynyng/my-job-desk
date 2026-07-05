@@ -20,32 +20,16 @@ import {
   Download,
   X,
   Sparkles,
-  Pin,
-  Copy,
   Search,
   Columns3,
   Check,
   LayoutList,
   LayoutGrid,
   Upload,
-  ChevronLeft,
-  ChevronRight,
-  Layers,
   RotateCcw,
   Pencil,
-  MoreHorizontal,
-  EyeOff,
-  Wand2,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  FileText,
   Filter,
   FilePlus,
-  Eye,
-  Image as ImageIcon,
-  Star,
-  Folder,
   ExternalLink,
   Clipboard,
 } from "lucide-react";
@@ -64,11 +48,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
-  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
@@ -82,8 +61,6 @@ import { cn } from "@/lib/utils";
 import {
   type ItemType,
   type Item,
-  NARRATIVE_TYPES,
-  SPEC_TYPES,
   ALL_TYPES,
   SHARED_EXP_KEY,
   makeFromPreset,
@@ -630,7 +607,6 @@ export default function Experiences() {
   const [excelOpen, setExcelOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
-  const [infoExpanded, setInfoExpanded] = useState(false);
 
   const detail = detailId ? (items.find((i) => i.id === detailId) ?? null) : null;
 
@@ -1597,14 +1573,14 @@ export default function Experiences() {
   );
 }
 
-import { RepExperienceGrid, InfoRow } from './experiences/RepExperienceViews';
+import { RepExperienceGrid } from './experiences/RepExperienceViews';
 
 import { DetailEditor } from './experiences/DetailEditor';
 
 import { ManageIndicator } from './experiences/tableWidgets';
 import { HeaderCell } from "@/components/table/HeaderCell";
 import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
-import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
+import { type ColumnFilterProps } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
 import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";

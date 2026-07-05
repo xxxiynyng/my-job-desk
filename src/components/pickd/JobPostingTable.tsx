@@ -22,7 +22,6 @@ import {
   ChevronDown,
   Columns3,
   Check,
-  X,
   Search,
   Table as TableIcon,
   Star,
@@ -397,7 +396,6 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
             <div className="flex flex-wrap gap-1">
               {jobs.map((job) => {
                 const year = job.completedAt ? new Date(job.completedAt).getFullYear() : new Date().getFullYear();
-                const label = `${job.company} ${job.role}`;
                 return (
                   <div
                     key={job.id}

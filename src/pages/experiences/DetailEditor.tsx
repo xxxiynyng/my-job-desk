@@ -35,7 +35,7 @@ import {
   NARRATIVE_TYPES,
   ALL_TYPES,
 } from "./presets";
-import { type SentenceCard, FieldRow, FieldAdder, KeywordEditor, tagSentence, AnnotatedView, SentenceCardView } from './fieldWidgets';
+import { type SentenceCard, FieldRow, FieldAdder, AnnotatedView, SentenceCardView } from './fieldWidgets';
 
 // ────────────────────────────────────────────────────────────────
 // DetailEditor

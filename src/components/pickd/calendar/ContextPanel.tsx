@@ -62,7 +62,7 @@ export function ContextPanel({
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [scheduleMode, setScheduleMode] = useState<"today" | "all">("today");
   const [taskMode, setTaskMode] = useState<"today" | "all">("today");
-  const [listDate, setListDate] = useState(selectedDate);
+  const [, setListDate] = useState(selectedDate);
   const [listMonth, setListMonth] = useState(new Date());
   const [schedulePeriod, setSchedulePeriod] = useState("1개월");
   const [taskPeriod, setTaskPeriod] = useState("1개월");
