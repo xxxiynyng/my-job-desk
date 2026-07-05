@@ -878,7 +878,7 @@ export function JobPostingTable() {
     if (!f) return {};
     return {
       style: { position: "sticky", left: f.left, zIndex: 30 },
-      className: cn(header ? "bg-[#F8FAFC]" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
+      className: cn(header ? "bg-slate-50" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
     };
   };
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
@@ -1251,7 +1251,7 @@ export function JobPostingTable() {
                   {/* 스페이서 — 너비 미지정 col+th+td로 남는 폭을 흡수(헤더 배경이 카드 우측 끝까지 채워짐) */}
                   <col />
                 </colgroup>
-                <thead className="bg-[#F8FAFC]">
+                <thead className="bg-slate-50">
                   <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
                     <th
                       className={cn("w-12 pl-1 pr-3 py-3", stickyProps("__gutter__", true).className)}

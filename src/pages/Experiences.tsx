@@ -594,7 +594,7 @@ export default function Experiences() {
     if (!f) return {};
     return {
       style: { position: "sticky", left: f.left, zIndex: 30 },
-      className: cn(header ? "bg-[#F8FAFC]" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
+      className: cn(header ? "bg-slate-50" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
     };
   };
 
@@ -1191,7 +1191,7 @@ export default function Experiences() {
                       <col style={{ width: 56 }} />
                     </colgroup>
                     <thead>
-                      <tr className="bg-[#F8FAFC] text-xs font-medium text-gray-600 select-none border-b border-border">
+                      <tr className="bg-slate-50 text-xs font-medium text-gray-600 select-none border-b border-border">
                         <th
                           className={cn("w-12 pl-1 pr-3 py-3", stickyProps("__gutter__", true).className)}
                           style={stickyProps("__gutter__", true).style}
@@ -1247,7 +1247,7 @@ export default function Experiences() {
                             />
                           ))}
                         </SortableContext>
-                        <th className="w-14 bg-[#F8FAFC]" />
+                        <th className="w-14 bg-slate-50" />
                       </tr>
                     </thead>
                     <SortableContext items={sortedFiltered.map((i) => i.id)} strategy={verticalListSortingStrategy}>
