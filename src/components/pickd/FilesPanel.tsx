@@ -220,7 +220,7 @@ function FileGrid({
       <div className="absolute top-0 right-0">
         <button
           onClick={() => inputRef.current?.click()}
-          className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
+          className="text-chip text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
         >
           <Upload className="w-3 h-3" /> 파일 업로드
         </button>
@@ -239,7 +239,7 @@ function FileGrid({
             <div className="py-16 text-center text-muted-foreground rounded-lg border border-dashed border-border">
               <Folder className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm">저장된 파일이 없어요.</p>
-              <p className="text-[11px] mt-1 opacity-60">
+              <p className="text-chip mt-1 opacity-60">
                 파일을 끌어다 놓거나 "파일 업로드"를 눌러 추가하세요.
               </p>
             </div>
@@ -252,8 +252,8 @@ function FileGrid({
                     {/* 폴더 헤더 */}
                     <div className="flex items-center gap-2 mb-3">
                       <Folder className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="text-[13px] font-medium text-foreground">{kind}</span>
-                      <span className="text-[11px] text-muted-foreground tabular-nums">{kindItems.length}</span>
+                      <span className="text-body font-medium text-foreground">{kind}</span>
+                      <span className="text-chip text-muted-foreground tabular-nums">{kindItems.length}</span>
                     </div>
                     {/* 카드 그리드 (탭 리스트와 동일한 카드 언어) */}
                     <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
@@ -278,9 +278,9 @@ function FileGrid({
                             <div className="px-2.5 py-2 min-w-0">
                               <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
                               {rep ? (
-                                <p className="text-[11px] text-primary inline-flex items-center gap-0.5 mt-0.5"><Check className="w-3 h-3" /> 대표 사진</p>
+                                <p className="text-chip text-primary inline-flex items-center gap-0.5 mt-0.5"><Check className="w-3 h-3" /> 대표 사진</p>
                               ) : (
-                                <p className="text-[11px] text-muted-foreground truncate mt-0.5">{f.kind}</p>
+                                <p className="text-chip text-muted-foreground truncate mt-0.5">{f.kind}</p>
                               )}
                             </div>
                           </button>
@@ -355,7 +355,7 @@ function UploadKindModal({
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="text-[11px] text-muted-foreground">파일 종류</label>
+            <label className="text-chip text-muted-foreground">파일 종류</label>
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as FileKind)}
@@ -365,7 +365,7 @@ function UploadKindModal({
             </select>
           </div>
           <div>
-            <label className="text-[11px] text-muted-foreground">파일 이름</label>
+            <label className="text-chip text-muted-foreground">파일 이름</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-8 text-xs" />
           </div>
         </div>
@@ -441,7 +441,7 @@ function PreviewModal({
               <DialogTitle className="text-sm truncate flex items-center gap-2">
                 <span className="truncate">{f.name}</span>
                 {isPhoto && isBasic && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  <span className="inline-flex items-center gap-0.5 text-mini text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                     <Star className="w-2.5 h-2.5" /> 기본정보 대표
                   </span>
                 )}

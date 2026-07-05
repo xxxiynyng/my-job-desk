@@ -189,7 +189,7 @@ function EssayStatus({ status }: { status: string }) {
     status === "초안" ? "bg-pickd-orange-light text-pickd-orange" :
     "bg-muted text-muted-foreground";
   return (
-    <span className={cn("inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", cls)}>
+    <span className={cn("inline-flex text-mini font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", cls)}>
       {status}
     </span>
   );
@@ -209,7 +209,7 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
           setTimeout(() => setCopied(false), 1500);
         } catch {}
       }}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-chip text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
       title="복사하기"
     >
       {copied ? <Check className="w-3 h-3 text-pickd-green" /> : <Copy className="w-3 h-3" />}
@@ -234,7 +234,7 @@ function SectionHeader({
       <div className="flex items-center gap-2">
         <Icon className="w-4 h-4 text-muted-foreground" />
         <h2 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h2>
-        {subtitle && <span className="text-[11px] text-muted-foreground ml-1">{subtitle}</span>}
+        {subtitle && <span className="text-chip text-muted-foreground ml-1">{subtitle}</span>}
       </div>
       {rightSlot}
     </div>
@@ -274,12 +274,12 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
       </button>
 
       {/* Bullet */}
-      <span className="text-muted-foreground select-none shrink-0 mt-0.5 text-[11px]">•</span>
+      <span className="text-muted-foreground select-none shrink-0 mt-0.5 text-chip">•</span>
 
       {/* Text — semibold when highlighted */}
       <span
         className={cn(
-          "text-[13px] leading-relaxed break-words flex-1",
+          "text-body leading-relaxed break-words flex-1",
           highlighted ? "text-foreground font-semibold" : "text-foreground"
         )}
       >
@@ -381,7 +381,7 @@ export default function JobDetail() {
           {(job.expired || (!job.expired && job.dday !== null && job.dday <= 3)) && (
             <div className="px-8 pt-4">
               <div className={cn(
-                "flex items-center gap-2 text-[13px] rounded-lg px-4 py-2.5",
+                "flex items-center gap-2 text-body rounded-lg px-4 py-2.5",
                 job.expired
                   ? "bg-muted/40 text-muted-foreground"
                   : "bg-pickd-red-light text-pickd-red"
@@ -408,7 +408,7 @@ export default function JobDetail() {
                 <span className="text-border">·</span>
                 <span>{job.role}</span>
               </div>
-              <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">
+              <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">
                 {job.title}
               </h1>
 
@@ -490,7 +490,7 @@ export default function JobDetail() {
                         <td className="w-[160px] px-4 py-2.5 text-xs text-muted-foreground font-medium align-top">
                           {k}
                         </td>
-                        <td className="px-4 py-2.5 text-[13px] leading-relaxed">
+                        <td className="px-4 py-2.5 text-body leading-relaxed">
                           <div className="flex items-start justify-between gap-3">
                             <span className={cn(
                               "break-words",
@@ -520,7 +520,7 @@ export default function JobDetail() {
                   highlights.size > 0 && (
                     <button
                       onClick={() => setHighlights(new Set())}
-                      className="text-[11px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                      className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                     >
                       <X className="w-3 h-3" />
                       강조 {highlights.size}개 초기화
@@ -531,7 +531,7 @@ export default function JobDetail() {
 
               {/* Highlight hint — shown once until first highlight */}
               {highlights.size === 0 && (
-                <p className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1.5">
+                <p className="text-chip text-muted-foreground mb-3 flex items-center gap-1.5">
                   <Highlighter className="w-3 h-3" />
                   줄에 마우스를 올리면 중요 표시 버튼이 나타납니다
                 </p>
@@ -581,17 +581,17 @@ export default function JobDetail() {
                     <div key={i} className="relative flex items-start gap-4 group">
                       {/* 스텝 번호 */}
                       <div className="absolute -left-6 flex items-center justify-center w-5 h-5 rounded-full bg-background border-2 border-border group-hover:border-indigo-400 transition-colors mt-2.5">
-                        <span className="text-[10px] font-bold text-muted-foreground group-hover:text-indigo-500 transition-colors">{i + 1}</span>
+                        <span className="text-mini font-bold text-muted-foreground group-hover:text-indigo-500 transition-colors">{i + 1}</span>
                       </div>
                       <div className="flex-1 border border-border rounded-lg px-4 py-3 hover:bg-muted/20 hover:border-indigo-200 transition-all">
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div className="min-w-0">
-                            <p className="text-[13px] font-semibold text-foreground">{p.step}</p>
+                            <p className="text-body font-semibold text-foreground">{p.step}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
                           </div>
                           <div className="text-right shrink-0">
                             <p className="text-xs tabular-nums text-foreground/80">{p.schedule}</p>
-                            {p.note && <p className="text-[11px] text-muted-foreground mt-0.5">{p.note}</p>}
+                            {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
                           </div>
                         </div>
                       </div>
@@ -629,7 +629,7 @@ export default function JobDetail() {
                       <Highlighter className="w-3 h-3" />
                     </button>
                     <p className={cn(
-                      "text-[13px] leading-relaxed flex-1",
+                      "text-body leading-relaxed flex-1",
                       isHighlighted("jd::desc::0") ? "text-foreground font-semibold" : "text-foreground"
                     )}>
                       {job.jobDescription}
@@ -668,7 +668,7 @@ export default function JobDetail() {
 
               {job.essays.length === 0 ? (
                 <div className="border border-border rounded-lg px-4 py-6 text-center">
-                  <p className="text-[13px] text-muted-foreground">이 공고는 별도 문항이 없어요</p>
+                  <p className="text-body text-muted-foreground">이 공고는 별도 문항이 없어요</p>
                 </div>
               ) : (
                 <ol className="space-y-3">
@@ -689,7 +689,7 @@ export default function JobDetail() {
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold",
+                              "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-chip font-bold",
                               e.status === "완료" ? "bg-pickd-green text-white" :
                               e.status === "작성중" ? "bg-indigo-500 text-white" :
                               e.status === "초안" ? "bg-pickd-orange text-white" :
@@ -699,8 +699,8 @@ export default function JobDetail() {
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <EssayStatus status={e.status} />
-                              <span className="text-[11px] text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
-                              {e.updated && <span className="text-[11px] text-muted-foreground/50">수정 {e.updated}</span>}
+                              <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
+                              {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
                             </div>
                           </div>
                           <Button
@@ -727,7 +727,7 @@ export default function JobDetail() {
                           <div className="mt-3 pl-9">
                             <div className="relative bg-background border border-border/60 rounded-lg px-4 py-3">
                               <div className="absolute top-3 left-3 w-0.5 h-[calc(100%-24px)] bg-indigo-300 rounded-full" />
-                              <p className="pl-3 text-[13px] text-foreground/75 leading-relaxed line-clamp-3">
+                              <p className="pl-3 text-body text-foreground/75 leading-relaxed line-clamp-3">
                                 {e.preview}
                               </p>
                             </div>
@@ -765,8 +765,8 @@ export default function JobDetail() {
                     <ScrollText className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-foreground leading-tight">원문 공고</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{job.company} · 원본 채용공고문</p>
+                    <p className="text-body font-semibold text-foreground leading-tight">원문 공고</p>
+                    <p className="text-chip text-muted-foreground truncate">{job.company} · 원본 채용공고문</p>
                   </div>
                 </div>
                 <button
@@ -783,7 +783,7 @@ export default function JobDetail() {
                 <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
                   {/* Mini toolbar */}
                   <div className="px-4 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-muted-foreground tabular-nums">
+                    <span className="text-chip font-mono text-muted-foreground tabular-nums">
                       {job.rawSource.length.toLocaleString()}자
                     </span>
                     <CopyButton text={job.rawSource} label="전체 복사" />
@@ -797,12 +797,12 @@ export default function JobDetail() {
 
               {/* Footer */}
               <div className="px-5 py-3 border-t border-border bg-muted/30 shrink-0 flex items-center justify-between gap-2">
-                <p className="text-[11px] text-muted-foreground">원본 공고 출처</p>
+                <p className="text-chip text-muted-foreground">원본 공고 출처</p>
                 <a
                   href={job.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
+                  className="inline-flex items-center gap-1 text-chip text-primary hover:underline font-medium"
                 >
                   원문 사이트 열기
                   <ExternalLink className="w-3 h-3" />

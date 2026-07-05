@@ -7,7 +7,7 @@ export function DashboardHeader() {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">
+        <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">
           지원자님의 대시보드
         </h1>
         <p className="text-sm text-muted-foreground mt-1.5">

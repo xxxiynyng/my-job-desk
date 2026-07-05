@@ -38,7 +38,7 @@ export function CopyGenerator({
         </DialogHeader>
         <div className="grid grid-cols-2 gap-3 mt-2">
           <div>
-            <p className="text-[11px] text-muted-foreground mb-1">목적</p>
+            <p className="text-chip text-muted-foreground mb-1">목적</p>
             <select
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
@@ -61,7 +61,7 @@ export function CopyGenerator({
             </select>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground mb-1">글자수</p>
+            <p className="text-chip text-muted-foreground mb-1">글자수</p>
             <select
               value={length}
               onChange={(e) => setLength(Number(e.target.value))}
@@ -81,20 +81,20 @@ export function CopyGenerator({
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="min-h-[180px] text-[13px] mt-1"
+          className="min-h-[180px] text-body mt-1"
           placeholder="생성된 문장이 여기에 표시돼요"
         />
         <div className="flex items-center justify-between mt-1">
-          <span className="text-[11px] text-muted-foreground tabular-nums">
+          <span className="text-chip text-muted-foreground tabular-nums">
             현재 {text.length}자 / 목표 {length}자
           </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={generate}>
+            <Button size="sm" variant="outline" className="h-7 text-chip" onClick={generate}>
               다시 만들기
             </Button>
             <Button
               size="sm"
-              className="h-7 text-[11px]"
+              className="h-7 text-chip"
               onClick={() => {
                 navigator.clipboard.writeText(text);
                 toast.success("복사했어요.");

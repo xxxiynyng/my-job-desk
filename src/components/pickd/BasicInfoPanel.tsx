@@ -216,19 +216,19 @@ export function BasicInfoPanel() {
                   if (e.key === "Enter")  { e.preventDefault(); commitInline(); }
                   if (e.key === "Escape") { e.preventDefault(); cancelInline(); }
                 }}
-                className="flex-1 min-w-0 text-[13px] text-foreground bg-transparent border-b border-primary/60 outline-none py-0.5"
+                className="flex-1 min-w-0 text-body text-foreground bg-transparent border-b border-primary/60 outline-none py-0.5"
               />
               <button onClick={commitInline} aria-label="저장" className="shrink-0 p-0.5 rounded text-emerald-500 hover:bg-emerald-50"><Check className="w-3 h-3" /></button>
               <button onClick={cancelInline} aria-label="취소" className="shrink-0 p-0.5 rounded text-muted-foreground hover:bg-muted"><X className="w-3 h-3" /></button>
             </div>
           ) : isMasked ? (
-            <span className="flex-1 text-[13px] text-muted-foreground/30 tracking-widest select-none">••••••</span>
+            <span className="flex-1 text-body text-muted-foreground/30 tracking-widest select-none">••••••</span>
           ) : val ? (
             // 클릭 = 복사. 값은 break-words로 줄바꿈되어 잘리지 않음
             <button
               onClick={() => copy(val)}
               title="클릭하여 복사"
-              className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-[13px] text-foreground hover:text-primary transition-colors text-left"
+              className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-body text-foreground hover:text-primary transition-colors text-left"
             >
               <span className="break-words min-w-0">{val}</span>
               <Copy className="w-3 h-3 mt-[3px] opacity-0 group-hover/row:opacity-40 shrink-0 transition-opacity" />
@@ -274,7 +274,7 @@ export function BasicInfoPanel() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="text-xl font-semibold text-foreground tracking-tight">{infoValues.name || "이름 미입력"}</span>
-                  <span className="text-[13px] text-muted-foreground">
+                  <span className="text-body text-muted-foreground">
                     {[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}
                   </span>
                 </div>
@@ -298,7 +298,7 @@ export function BasicInfoPanel() {
             {visibleGroups.length === 0 && langExams.length === 0 ? (
               <div className="py-16 text-center text-muted-foreground">
                 <p className="text-sm">표시할 정보가 없어요.</p>
-                <p className="text-[11px] mt-1 opacity-60">전체 편집을 눌러 정보를 입력하거나 항목을 표시하세요.</p>
+                <p className="text-chip mt-1 opacity-60">전체 편집을 눌러 정보를 입력하거나 항목을 표시하세요.</p>
               </div>
             ) : (
               <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -309,8 +309,8 @@ export function BasicInfoPanel() {
                     <div key={group.title} className="bg-card border border-border rounded-xl px-4 py-3.5">
                       <div className="flex items-center gap-2 mb-2.5">
                         <Icon className="w-4 h-4 text-primary" />
-                        <h3 className="text-[13px] font-medium text-foreground">{group.title}</h3>
-                        <span className="text-[11px] text-muted-foreground ml-auto tabular-nums">{filled} / {group.fields.length}</span>
+                        <h3 className="text-body font-medium text-foreground">{group.title}</h3>
+                        <span className="text-chip text-muted-foreground ml-auto tabular-nums">{filled} / {group.fields.length}</span>
                       </div>
                       <div>{group.fields.map(renderInfoRow)}</div>
                     </div>
@@ -321,13 +321,13 @@ export function BasicInfoPanel() {
                   <div className="bg-card border border-border rounded-xl px-4 py-3.5">
                     <div className="flex items-center gap-2 mb-2.5">
                       <Globe className="w-4 h-4 text-primary" />
-                      <h3 className="text-[13px] font-medium text-foreground">공인외국어시험</h3>
-                      <span className="text-[11px] text-muted-foreground ml-auto tabular-nums">{langExams.length}개</span>
+                      <h3 className="text-body font-medium text-foreground">공인외국어시험</h3>
+                      <span className="text-chip text-muted-foreground ml-auto tabular-nums">{langExams.length}개</span>
                     </div>
                     <div>
                       {langExams.map((e) => (
                         <div key={e.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/40 last:border-0">
-                          <span className="text-[13px] text-foreground truncate">{[e.lang, e.examName].filter(Boolean).join(" · ") || "—"}</span>
+                          <span className="text-body text-foreground truncate">{[e.lang, e.examName].filter(Boolean).join(" · ") || "—"}</span>
                           <span className="text-xs text-muted-foreground shrink-0">{[e.score, e.date].filter(Boolean).join(" · ")}</span>
                         </div>
                       ))}
@@ -349,7 +349,7 @@ export function BasicInfoPanel() {
               <div className="w-[80px] h-[108px] rounded-xl border border-border overflow-hidden bg-muted/30 shrink-0 shadow-sm">
                 {basicPhoto?.url
                   ? <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 text-[10px]">사진 없음</div>
+                  : <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 text-mini">사진 없음</div>
                 }
               </div>
               <div className="space-y-2">
@@ -357,7 +357,7 @@ export function BasicInfoPanel() {
                   <Checkbox checked={draftPhotoShown} onCheckedChange={(c) => setDraftPhotoShown(!!c)} className="h-3.5 w-3.5" />
                   기본정보에 증명사진 표시
                 </label>
-                <p className="text-[11px] text-muted-foreground/50">사진 업로드 및 교체는 파일함에서 관리하세요.</p>
+                <p className="text-chip text-muted-foreground/50">사진 업로드 및 교체는 파일함에서 관리하세요.</p>
               </div>
             </div>
           </EditSection>
@@ -434,7 +434,7 @@ export function BasicInfoPanel() {
               {draftLangExams.map((exam, idx) => (
                 <div key={exam.id} className="border border-border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] text-muted-foreground">시험 {idx + 1}</span>
+                    <span className="text-chip text-muted-foreground">시험 {idx + 1}</span>
                     <button
                       type="button"
                       onClick={() => removeLangExam(idx)}
@@ -464,7 +464,7 @@ export function BasicInfoPanel() {
                 </div>
               ))}
               {draftLangExams.length === 0 && (
-                <p className="text-[11px] text-muted-foreground/50 py-1">등록된 시험이 없어요.</p>
+                <p className="text-chip text-muted-foreground/50 py-1">등록된 시험이 없어요.</p>
               )}
               <button
                 type="button"
@@ -600,7 +600,7 @@ export function BasicInfoPanel() {
 function EditSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-3.5 pb-6 border-b border-border/40 last:border-0 last:pb-0">
-      <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{title}</h3>
+      <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide">{title}</h3>
       {children}
     </section>
   );
@@ -624,14 +624,14 @@ function FieldRow({
               className="h-3.5 w-3.5"
             />
             <span className={cn(
-              "text-[11px] leading-none transition-colors",
+              "text-chip leading-none transition-colors",
               visible === false ? "text-muted-foreground/30" : "text-muted-foreground/70",
             )}>
               {label}
             </span>
           </label>
         ) : (
-          <span className="text-[11px] text-muted-foreground/70 leading-none">{label}</span>
+          <span className="text-chip text-muted-foreground/70 leading-none">{label}</span>
         )}
       </div>
       <div className={cn("transition-opacity", visible === false && "opacity-35")}>

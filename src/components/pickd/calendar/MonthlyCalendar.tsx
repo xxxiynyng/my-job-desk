@@ -251,7 +251,7 @@ export function MonthlyCalendar({
                 {dayEvents.slice(0, 2).map((event) => (
                   <Badge
                     key={event.id}
-                    className={cn("text-[10px] px-1 py-0 h-4 justify-start truncate rounded-sm font-normal w-full cursor-pointer hover:opacity-80", eventTypeColor[event.type])}
+                    className={cn("text-mini px-1 py-0 h-4 justify-start truncate rounded-sm font-normal w-full cursor-pointer hover:opacity-80", eventTypeColor[event.type])}
                     onClick={(e) => handleEventClick(e, event)}
                     onMouseEnter={() => event.postingId && setHoveredPostingId(event.postingId)}
                     onMouseLeave={() => setHoveredPostingId(null)}
@@ -260,7 +260,7 @@ export function MonthlyCalendar({
                 {dayEvents.length > 2 && (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <span className="text-[10px] text-primary cursor-pointer hover:underline pl-1" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-mini text-primary cursor-pointer hover:underline pl-1" onClick={(e) => e.stopPropagation()}>
                         +{dayEvents.length - 2} more
                       </span>
                     </PopoverTrigger>
@@ -270,7 +270,7 @@ export function MonthlyCalendar({
                         {dayEvents.map((event) => (
                           <div key={event.id} className="flex items-center gap-1.5 cursor-pointer hover:bg-accent/30 rounded p-0.5"
                             onClick={(e) => handleEventClick(e, event)}>
-                            <Badge className={cn("text-[10px] px-1 py-0 h-4 rounded-sm font-normal shrink-0", eventTypeColor[event.type])}>
+                            <Badge className={cn("text-mini px-1 py-0 h-4 rounded-sm font-normal shrink-0", eventTypeColor[event.type])}>
                               {event.type === "interview" ? "면접" : event.type === "deadline" ? "마감" : event.type === "personal" ? "개인" : "할일"}
                             </Badge>
                             <span className="text-xs truncate">{event.title}</span>

@@ -36,10 +36,10 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
         <div className="px-5 pt-5 pb-4 border-b border-border">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground mb-0.5">{app.company}</p>
+              <p className="text-chip text-muted-foreground mb-0.5">{app.company}</p>
               <h2 className="text-[15px] font-bold text-foreground leading-tight">{app.position}</h2>
             </div>
-            <Badge className={cn("text-[11px] h-6 px-2 border-0 shrink-0 mt-0.5", getDdayStyle(dd))}>
+            <Badge className={cn("text-chip h-6 px-2 border-0 shrink-0 mt-0.5", getDdayStyle(dd))}>
               {dd < 0 ? "마감" : `D-${dd}`}
             </Badge>
           </div>
@@ -67,13 +67,13 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
           {/* 주요 일정 타임라인 */}
           {app.keyDates && app.keyDates.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">전형 일정</p>
+              <p className="text-chip font-semibold text-muted-foreground uppercase tracking-wide mb-2">전형 일정</p>
               <div className="relative pl-3">
                 <div className="absolute left-0 top-1 bottom-1 w-px bg-border" />
                 {app.keyDates.map((kd, i) => (
                   <div key={i} className="flex items-center gap-3 py-1 relative">
                     <div className="absolute -left-[5px] w-2.5 h-2.5 rounded-full border-2 border-border bg-background" />
-                    <span className="text-[11px] tabular-nums text-muted-foreground w-20 shrink-0">{kd.date}</span>
+                    <span className="text-chip tabular-nums text-muted-foreground w-20 shrink-0">{kd.date}</span>
                     <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
                     <span className="text-xs font-medium text-foreground">{kd.label}</span>
                   </div>
@@ -84,19 +84,19 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
 
           {/* 연결된 일정 테이블 */}
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            <p className="text-chip font-semibold text-muted-foreground uppercase tracking-wide mb-2">
               연결된 일정 <span className="text-muted-foreground/60 normal-case font-normal">({linkedSchedules.length})</span>
             </p>
             {linkedSchedules.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground/50 py-2">연결된 일정이 없습니다</p>
+              <p className="text-chip text-muted-foreground/50 py-2">연결된 일정이 없습니다</p>
             ) : (
               <div className="rounded-md border border-border overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-muted/40 border-b border-border">
-                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-24">날짜</th>
-                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-16">시간</th>
-                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px]">일정</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-mini w-24">날짜</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-mini w-16">시간</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-mini">일정</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -119,19 +119,19 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
 
           {/* 연결된 할일 테이블 */}
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            <p className="text-chip font-semibold text-muted-foreground uppercase tracking-wide mb-2">
               할 일 <span className="text-muted-foreground/60 normal-case font-normal">({pendingTasks.length}개 미완)</span>
             </p>
             {linkedTasks.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground/50 py-2">연결된 할 일이 없습니다</p>
+              <p className="text-chip text-muted-foreground/50 py-2">연결된 할 일이 없습니다</p>
             ) : (
               <div className="rounded-md border border-border overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-muted/40 border-b border-border">
-                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-6" />
-                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-[10px]">할 일</th>
-                      <th className="text-right px-3 py-1.5 font-normal text-muted-foreground text-[10px] w-12">상태</th>
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-mini w-6" />
+                      <th className="text-left px-3 py-1.5 font-normal text-muted-foreground text-mini">할 일</th>
+                      <th className="text-right px-3 py-1.5 font-normal text-muted-foreground text-mini w-12">상태</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -145,9 +145,9 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
                         </td>
                         <td className="px-3 py-2 text-right">
                           {t.completed ? (
-                            <span className="text-[10px] text-pickd-green">완료</span>
+                            <span className="text-mini text-pickd-green">완료</span>
                           ) : (
-                            <span className="text-[10px] text-muted-foreground">진행중</span>
+                            <span className="text-mini text-muted-foreground">진행중</span>
                           )}
                         </td>
                       </tr>
@@ -213,8 +213,8 @@ export function ScheduleDetailModal({ schedule, onClose }: ScheduleDetailProps) 
         <div className="space-y-2 text-sm">
           <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">날짜</span><span className="text-xs">{schedule.date}</span></div>
           {schedule.time && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">시간</span><span className="text-xs">{schedule.time}</span></div>}
-          {schedule.linkedPosting && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">연결 공고</span><Badge variant="outline" className="text-[10px] h-5">{schedule.linkedPosting}</Badge></div>}
-          {schedule.scheduleType === "personal" && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">유형</span><Badge variant="outline" className="text-[10px] h-5 bg-muted">개인</Badge></div>}
+          {schedule.linkedPosting && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">연결 공고</span><Badge variant="outline" className="text-mini h-5">{schedule.linkedPosting}</Badge></div>}
+          {schedule.scheduleType === "personal" && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">유형</span><Badge variant="outline" className="text-mini h-5 bg-muted">개인</Badge></div>}
         </div>
         {editing && <DialogFooter><Button size="sm" onClick={() => setEditing(false)}>저장</Button></DialogFooter>}
       </DialogContent>
@@ -253,8 +253,8 @@ export function TaskDetailModal({ task, onClose, onToggle }: TaskDetailProps) {
           <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">우선순위</span><span className="text-xs">{priorityLabels[task.priority]}</span></div>
           <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">유형</span><span className="text-xs">{task.type}</span></div>
           {task.dueTime && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">마감 시간</span><span className="text-xs">{task.dueTime}</span></div>}
-          {task.linkedPosting && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">연결 공고</span><Badge variant="outline" className="text-[10px] h-5">{task.linkedPosting}</Badge></div>}
-          {task.carriedOver && <Badge className="bg-orange-100 text-orange-600 border-orange-200 text-[10px]">이월</Badge>}
+          {task.linkedPosting && <div className="flex gap-2"><span className="text-muted-foreground text-xs w-16">연결 공고</span><Badge variant="outline" className="text-mini h-5">{task.linkedPosting}</Badge></div>}
+          {task.carriedOver && <Badge className="bg-orange-100 text-orange-600 border-orange-200 text-mini">이월</Badge>}
         </div>
         {editing && <DialogFooter><Button size="sm" onClick={() => setEditing(false)}>저장</Button></DialogFooter>}
       </DialogContent>

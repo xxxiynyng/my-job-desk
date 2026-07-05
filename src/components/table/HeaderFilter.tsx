@@ -50,11 +50,11 @@ export function HeaderFilterContent({
             if (e.key === "Enter") setTextFilter(colKey, text);
           }}
           placeholder="포함하는 글자"
-          className="h-7 text-[11px]"
+          className="h-7 text-chip"
         />
         <div className="flex items-center justify-between gap-2">
           <button
-            className="text-[11px] text-muted-foreground hover:text-foreground"
+            className="text-chip text-muted-foreground hover:text-foreground"
             onClick={() => {
               setText("");
               setTextFilter(colKey, "");
@@ -62,7 +62,7 @@ export function HeaderFilterContent({
           >
             초기화
           </button>
-          <Button size="sm" className="h-6 text-[11px] px-2" onClick={() => setTextFilter(colKey, text)}>
+          <Button size="sm" className="h-6 text-chip px-2" onClick={() => setTextFilter(colKey, text)}>
             적용
           </Button>
         </div>
@@ -78,11 +78,11 @@ export function HeaderFilterContent({
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}
           placeholder="검색"
-          className="h-7 text-[11px]"
+          className="h-7 text-chip"
         />
       )}
       <div className="max-h-[220px] overflow-y-auto -mx-1 px-1">
-        {filtered.length === 0 && <p className="text-[11px] text-muted-foreground px-1 py-2">옵션이 없어요.</p>}
+        {filtered.length === 0 && <p className="text-chip text-muted-foreground px-1 py-2">옵션이 없어요.</p>}
         {filtered.map((o) => {
           const checked = selectedSet.has(o);
           return (
@@ -104,7 +104,7 @@ export function HeaderFilterContent({
       {active && (
         <div className="pt-1 border-t border-border flex justify-end">
           <button
-            className="text-[11px] text-muted-foreground hover:text-foreground"
+            className="text-chip text-muted-foreground hover:text-foreground"
             onClick={() => setSelectFilter(colKey, [])}
           >
             초기화

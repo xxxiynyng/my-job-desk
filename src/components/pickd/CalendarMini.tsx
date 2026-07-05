@@ -128,10 +128,10 @@ export function CalendarMini({
               </button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-44 p-2">
-              <p className="text-[11px] font-medium text-foreground mb-1.5">캘린더 표시</p>
+              <p className="text-chip font-medium text-foreground mb-1.5">캘린더 표시</p>
               <ul className="space-y-1">
                 {(Object.keys(TYPE_STYLES) as CalEventType[]).map((t) => (
-                  <li key={t} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <li key={t} className="flex items-center gap-1.5 text-chip text-muted-foreground">
                     <span className={cn("w-1.5 h-1.5 rounded-full", TYPE_STYLES[t].dot)} />
                     {t}
                   </li>
@@ -141,12 +141,12 @@ export function CalendarMini({
           </Popover>
           <button
             onClick={() => { const d = new Date(); d.setDate(1); setCursor(d); }}
-            className="text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded hover:bg-muted"
+            className="text-mini text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded hover:bg-muted"
           >오늘</button>
         </div>
       </header>
 
-      <div className="grid grid-cols-7 text-[9px] text-muted-foreground border-b border-border bg-muted/20">
+      <div className="grid grid-cols-7 text-micro text-muted-foreground border-b border-border bg-muted/20">
         {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
           <div key={d} className="px-1 py-1 text-center font-medium">{d}</div>
         ))}
@@ -159,7 +159,7 @@ export function CalendarMini({
             <div
               key={i}
               className={cn(
-                "min-h-[44px] border-r border-b border-border/60 p-1 text-[10px]",
+                "min-h-[44px] border-r border-b border-border/60 p-1 text-mini",
                 (i + 1) % 7 === 0 && "border-r-0",
                 !d && "bg-muted/10",
               )}
@@ -173,7 +173,7 @@ export function CalendarMini({
                     >
                       <div
                         className={cn(
-                          "tabular-nums text-right text-[10px] leading-none",
+                          "tabular-nums text-right text-mini leading-none",
                           isToday(d)
                             ? "text-primary-foreground bg-primary rounded-sm w-4 h-4 inline-flex items-center justify-center ml-auto"
                             : "text-muted-foreground",
@@ -190,7 +190,7 @@ export function CalendarMini({
                             />
                           ))}
                           {evs.length > 4 && (
-                            <span className="text-[9px] text-muted-foreground">+{evs.length - 4}</span>
+                            <span className="text-micro text-muted-foreground">+{evs.length - 4}</span>
                           )}
                         </div>
                       )}
@@ -198,7 +198,7 @@ export function CalendarMini({
                   </PopoverTrigger>
                   {evs.length > 0 && (
                     <PopoverContent align="start" className="w-64 p-2">
-                      <div className="text-[11px] font-medium text-foreground mb-1.5">
+                      <div className="text-chip font-medium text-foreground mb-1.5">
                         {year}.{String(month + 1).padStart(2, "0")}.{String(d).padStart(2, "0")}
                       </div>
                       <ul className="space-y-1">
@@ -212,12 +212,12 @@ export function CalendarMini({
                               >
                                 <span className={cn("mt-1 w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
                                 <span className="flex-1 min-w-0">
-                                  <span className="block text-[11px] text-foreground truncate">{ev.title}</span>
+                                  <span className="block text-chip text-foreground truncate">{ev.title}</span>
                                   {ev.meta && (
-                                    <span className="block text-[10px] text-muted-foreground truncate">{ev.meta}</span>
+                                    <span className="block text-mini text-muted-foreground truncate">{ev.meta}</span>
                                   )}
                                 </span>
-                                <span className={cn("text-[9px] px-1 py-0.5 rounded shrink-0", s.chip)}>
+                                <span className={cn("text-micro px-1 py-0.5 rounded shrink-0", s.chip)}>
                                   {s.label}
                                 </span>
                               </button>

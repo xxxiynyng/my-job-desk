@@ -58,7 +58,7 @@ export default function Settings() {
           <div className="px-10 py-8 max-w-[720px] mx-auto">
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-7">
-              <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">설정</h1>
+              <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">설정</h1>
               {editMode ? (
                 <div className="flex items-center gap-1.5">
                   <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={cancel}>
@@ -71,7 +71,7 @@ export default function Settings() {
               ) : (
                 <button
                   onClick={enterEdit}
-                  className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-muted transition-colors"
+                  className="text-chip text-muted-foreground hover:text-foreground inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-muted transition-colors"
                 >
                   <Pencil className="w-3 h-3" /> 편집
                 </button>
@@ -80,14 +80,14 @@ export default function Settings() {
 
             {/* 취업 희망 정보 */}
             <section className="space-y-3">
-              <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">취업 희망 정보</h3>
-              <p className="text-[11px] text-muted-foreground/70">공고 추천 알고리즘 및 지원서 자동 완성에 활용됩니다.</p>
+              <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide">취업 희망 정보</h3>
+              <p className="text-chip text-muted-foreground/70">공고 추천 알고리즘 및 지원서 자동 완성에 활용됩니다.</p>
 
               {editMode ? (
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 mt-3">
                   {PREFS_FIELDS.map(({ key, label, placeholder }) => (
                     <div key={key} className="min-w-0">
-                      <span className="text-[11px] text-muted-foreground block mb-1">{label}</span>
+                      <span className="text-chip text-muted-foreground block mb-1">{label}</span>
                       <Input
                         value={draft[key]}
                         onChange={(e) => setDraft((p) => ({ ...p, [key]: e.target.value }))}
@@ -105,7 +105,7 @@ export default function Settings() {
                 <div className="grid grid-cols-2 gap-x-10 gap-y-0.5 mt-3">
                   {PREFS_FIELDS.filter(({ key }) => prefs[key]).map(({ key, label }) => (
                     <div key={key} className="flex items-center gap-3 py-1.5 border-b border-border/30">
-                      <span className="text-[11px] text-muted-foreground w-[96px] shrink-0">{label}</span>
+                      <span className="text-chip text-muted-foreground w-[96px] shrink-0">{label}</span>
                       <span className="text-[12.5px] text-foreground truncate">{prefs[key]}</span>
                     </div>
                   ))}
@@ -113,7 +113,7 @@ export default function Settings() {
               ) : (
                 <div className="mt-3 py-10 text-center text-muted-foreground rounded-lg border border-dashed border-border">
                   <p className="text-sm">취업 희망 정보를 입력하세요.</p>
-                  <p className="text-[11px] mt-1">편집을 눌러 시작할 수 있어요.</p>
+                  <p className="text-chip mt-1">편집을 눌러 시작할 수 있어요.</p>
                 </div>
               )}
             </section>

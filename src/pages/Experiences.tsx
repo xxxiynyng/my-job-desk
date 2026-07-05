@@ -148,7 +148,7 @@ function typeChipStyle(type: string): React.CSSProperties {
 function TypeChip({ type }: { type: ItemType }) {
   return (
     <span
-      className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-md whitespace-nowrap"
+      className="inline-flex items-center px-1.5 py-0.5 text-chip font-medium rounded-md whitespace-nowrap"
       style={typeChipStyle(type)}
     >
       {type}
@@ -383,13 +383,13 @@ function SortableExpRow({
         switch (key) {
           case "org":
             return (
-              <td key="org" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
+              <td key="org" className={cn("px-4 py-2.5 text-body text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{org || "—"}</span>
               </td>
             );
           case "period":
             return (
-              <td key="period" className={cn("px-4 py-2.5 text-[13px] text-gray-500 tabular-nums overflow-hidden", sp.className)} style={sp.style}>
+              <td key="period" className={cn("px-4 py-2.5 text-body text-gray-500 tabular-nums overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{period || "—"}</span>
               </td>
             );
@@ -398,12 +398,12 @@ function SortableExpRow({
               <td key="keywords" className={cn("px-4 py-2.5 overflow-hidden", sp.className)} style={sp.style}>
                 <div className="flex flex-nowrap gap-1 overflow-hidden">
                   {item.keywords.slice(0, 3).map((k) => (
-                    <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
+                    <span key={k} className="text-chip px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100 shrink-0">
                       {k}
                     </span>
                   ))}
                   {item.keywords.length > 3 && (
-                    <span className="text-[11px] text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
+                    <span className="text-chip text-muted-foreground shrink-0">+{item.keywords.length - 3}</span>
                   )}
                 </div>
               </td>
@@ -420,7 +420,7 @@ function SortableExpRow({
             );
           case "updated":
             return (
-              <td key="updated" className={cn("px-4 py-2.5 text-[13px] text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
+              <td key="updated" className={cn("px-4 py-2.5 text-body text-gray-500 overflow-hidden", sp.className)} style={sp.style}>
                 <span className="block truncate">{item.updatedAt ?? "—"}</span>
               </td>
             );
@@ -895,7 +895,7 @@ export default function Experiences() {
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-[26px] font-bold text-foreground tracking-[-0.04em] leading-tight">경험·스펙 DB</h1>
+                <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">경험·스펙 DB</h1>
                 <p className="text-sm text-muted-foreground mt-1.5">
                   경험과 스펙을 한 곳에서 정리하고, 자소서·면접에 바로 꺼내 쓰세요.
                 </p>
@@ -915,9 +915,9 @@ export default function Experiences() {
             {/* ── 탭 허브: 경험·스펙 DB / 기본정보 / 파일함 ─────────────── */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="h-9 bg-muted/60">
-                <TabsTrigger value="db" className="text-[13px]">경험·스펙 DB</TabsTrigger>
-                <TabsTrigger value="basic-info" className="text-[13px]">기본정보</TabsTrigger>
-                <TabsTrigger value="files" className="text-[13px]">파일함</TabsTrigger>
+                <TabsTrigger value="db" className="text-body">경험·스펙 DB</TabsTrigger>
+                <TabsTrigger value="basic-info" className="text-body">기본정보</TabsTrigger>
+                <TabsTrigger value="files" className="text-body">파일함</TabsTrigger>
               </TabsList>
 
               <TabsContent value="db" className="space-y-5 mt-4 focus-visible:outline-none">
@@ -956,7 +956,7 @@ export default function Experiences() {
                           >
                             <Filter className="w-3 h-3" />
                             {activeFilterCount > 0 && (
-                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] leading-[14px] text-center">
+                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-micro leading-[14px] text-center">
                                 {activeFilterCount}
                               </span>
                             )}
@@ -968,12 +968,12 @@ export default function Experiences() {
                       </TooltipContent>
                     </Tooltip>
                     <DropdownMenuContent align="end" className="min-w-[220px]">
-                      <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
+                      <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                         활성 필터
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {activeFilterCount === 0 ? (
-                        <div className="px-2 py-3 text-[11px] text-muted-foreground">적용된 필터가 없어요.</div>
+                        <div className="px-2 py-3 text-chip text-muted-foreground">적용된 필터가 없어요.</div>
                       ) : (
                         Object.entries(colFilter).map(([k, f]) => {
                           const colLabel = ALL_COLUMNS.find((c) => c.key === k)?.label ?? k;
@@ -1029,7 +1029,7 @@ export default function Experiences() {
                         </TooltipContent>
                       </Tooltip>
                       <DropdownMenuContent align="end" className="min-w-[180px]">
-                        <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
+                        <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                           표시할 컬럼
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
@@ -1127,7 +1127,7 @@ export default function Experiences() {
                       )}
                     >
                       {f}
-                      <span className={cn("tabular-nums text-[10px]", activeFilter === f && view !== "paste" ? "text-blue-400" : "text-muted-foreground/40")}>
+                      <span className={cn("tabular-nums text-mini", activeFilter === f && view !== "paste" ? "text-blue-400" : "text-muted-foreground/40")}>
                         {expChipCount(f)}
                       </span>
                     </button>
@@ -1181,7 +1181,7 @@ export default function Experiences() {
                     <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
                   ))}
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <table className="w-full min-w-full text-[13px] table-fixed">
+                  <table className="w-full min-w-full text-body table-fixed">
                     {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                     <colgroup>
                       <col style={{ width: 48 }} />
@@ -1308,12 +1308,12 @@ export default function Experiences() {
                           />
                         </div>
                         <p className="text-sm font-semibold text-foreground mt-1.5">{i.name}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                        <p className="text-chip text-muted-foreground mt-0.5">
                           {org || "—"} {period && `· ${period}`}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {i.keywords.map((k) => (
-                            <span key={k} className="text-[11px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
+                            <span key={k} className="text-chip px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500 border border-gray-100">
                               {k}
                             </span>
                           ))}
@@ -1418,7 +1418,7 @@ export default function Experiences() {
                   <label className="block border border-dashed border-border rounded-lg px-6 py-8 text-center cursor-pointer hover:bg-muted/30">
                     <Upload className="w-5 h-5 mx-auto text-muted-foreground" />
                     <p className="text-sm text-foreground mt-2">파일을 끌어다 놓거나 클릭하여 업로드</p>
-                    <p className="text-[11px] text-muted-foreground mt-1">PDF, DOCX, TXT</p>
+                    <p className="text-chip text-muted-foreground mt-1">PDF, DOCX, TXT</p>
                     <input type="file" className="hidden" accept=".pdf,.docx,.txt" />
                   </label>
                 </TabsContent>
@@ -1493,18 +1493,18 @@ export default function Experiences() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      <span className="text-chip text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
                         {c.type}
                       </span>
                       <span className="text-sm font-medium truncate">{c.name}</span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{c.summary}</p>
+                    <p className="text-chip text-muted-foreground mt-0.5">{c.summary}</p>
                   </div>
                 </label>
               ))}
             </div>
             <div className="flex justify-between items-center mt-2">
-              <span className="text-[11px] text-muted-foreground">{checkedCandidates.size}개 선택됨</span>
+              <span className="text-chip text-muted-foreground">{checkedCandidates.size}개 선택됨</span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

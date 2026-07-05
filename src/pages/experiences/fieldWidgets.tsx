@@ -88,7 +88,7 @@ export function FieldRow({
               className="min-h-[32px] text-[13.5px] bg-transparent border-0 px-0 py-0 focus-visible:ring-0 resize-none shadow-none placeholder:text-muted-foreground/50"
             />
           ) : field.type === "file" ? (
-            <button className="text-[13px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            <button className="text-body text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
               <Upload className="w-3 h-3" /> {value || "파일 첨부"}
             </button>
           ) : (
@@ -175,7 +175,7 @@ export function FieldAdder({
               </button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-[11px]">
+          <TooltipContent side="bottom" className="text-chip">
             필드 추가
           </TooltipContent>
         </Tooltip>
@@ -246,7 +246,7 @@ export function FieldAdder({
           </DialogHeader>
           <div className="space-y-2">
             <div>
-              <p className="text-[11px] text-muted-foreground mb-1">항목명</p>
+              <p className="text-chip text-muted-foreground mb-1">항목명</p>
               <Input
                 value={customLabel}
                 onChange={(e) => setCustomLabel(e.target.value)}
@@ -256,7 +256,7 @@ export function FieldAdder({
               />
             </div>
             <div>
-              <p className="text-[11px] text-muted-foreground mb-1">값 (선택)</p>
+              <p className="text-chip text-muted-foreground mb-1">값 (선택)</p>
               <Input
                 value={customValue}
                 onChange={(e) => setCustomValue(e.target.value)}
@@ -296,7 +296,7 @@ export function KeywordEditor({ keywords, onChange }: { keywords: string[]; onCh
       {keywords.map((k) => (
         <span
           key={k}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-[11px] text-foreground/80"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-chip text-foreground/80"
         >
           {k}
           <button
@@ -321,12 +321,12 @@ export function KeywordEditor({ keywords, onChange }: { keywords: string[]; onCh
             }
           }}
           placeholder="키워드 입력 후 Enter"
-          className="text-[11px] px-2 py-0.5 rounded-full border border-border bg-card focus:outline-none focus:border-primary min-w-[120px]"
+          className="text-chip px-2 py-0.5 rounded-full border border-border bg-card focus:outline-none focus:border-primary min-w-[120px]"
         />
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="text-[11px] px-2 py-0.5 rounded-full border border-dashed border-border text-muted-foreground hover:text-foreground hover:bg-muted">
+            <button className="text-chip px-2 py-0.5 rounded-full border border-dashed border-border text-muted-foreground hover:text-foreground hover:bg-muted">
               + 키워드
             </button>
           </DropdownMenuTrigger>
@@ -409,13 +409,13 @@ export function SentenceCardView({
       }}
       className="border border-border rounded-md bg-muted/20 px-3 py-2.5 cursor-grab active:cursor-grabbing"
     >
-      <p className="text-[10px] text-muted-foreground mb-1">{card.question}</p>
+      <p className="text-mini text-muted-foreground mb-1">{card.question}</p>
       <p className="text-[12.5px] text-foreground leading-snug">{card.sentence}</p>
       <div className="mt-2 flex items-center gap-1">
         <Button size="sm" className="h-6 text-[10.5px] px-2" onClick={onApply}>
           반영
         </Button>
-        <span className="text-[10px] text-muted-foreground px-1">드래그해서 넣기</span>
+        <span className="text-mini text-muted-foreground px-1">드래그해서 넣기</span>
         <Button size="sm" variant="ghost" className="h-6 text-[10.5px] px-2 ml-auto" onClick={onRewrite}>
           다시 쓰기
         </Button>

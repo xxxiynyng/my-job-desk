@@ -133,18 +133,18 @@ export function JobRowContextMenu({
       <DropdownMenuContent align="start" sideOffset={4} className="w-56 p-0">
         <MenuSearch value={search} onChange={setSearch} />
 
-        <DropdownMenuLabel className="px-3 py-0.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+        <DropdownMenuLabel className="px-3 py-0.5 text-mini text-muted-foreground font-medium uppercase tracking-wide">
           공고
         </DropdownMenuLabel>
 
         {show(starLabel) && (
-          <DropdownMenuItem onSelect={() => onStar()} className="gap-2.5 text-[13px]">
+          <DropdownMenuItem onSelect={() => onStar()} className="gap-2.5 text-body">
             <span className="w-4 text-center shrink-0">{starIcon}</span>
             {starLabel}
           </DropdownMenuItem>
         )}
         {show("공고 편집") && (
-          <DropdownMenuItem onSelect={() => onEdit()} className="gap-2.5 text-[13px]">
+          <DropdownMenuItem onSelect={() => onEdit()} className="gap-2.5 text-body">
             <span className="w-4 text-center shrink-0">✏️</span>
             공고 편집
           </DropdownMenuItem>
@@ -152,21 +152,21 @@ export function JobRowContextMenu({
         {show("공고 URL 열기") && (
           <DropdownMenuItem
             onSelect={() => { if (job.url) window.open(job.url, "_blank", "noopener,noreferrer"); }}
-            className={cn("gap-2.5 text-[13px]", !job.url && "opacity-40 pointer-events-none")}
+            className={cn("gap-2.5 text-body", !job.url && "opacity-40 pointer-events-none")}
           >
             <span className="w-4 text-center shrink-0">🔗</span>
             공고 URL 열기
           </DropdownMenuItem>
         )}
         {show("복제") && (
-          <DropdownMenuItem onSelect={() => onDuplicate()} className="gap-2.5 text-[13px]">
+          <DropdownMenuItem onSelect={() => onDuplicate()} className="gap-2.5 text-body">
             <span className="w-4 text-center shrink-0">📄</span>
             복제
           </DropdownMenuItem>
         )}
         {show("상태 변경") && (
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="gap-2.5 text-[13px]">
+            <DropdownMenuSubTrigger className="gap-2.5 text-body">
               <span className="w-4 text-center shrink-0">→</span>
               상태 변경
             </DropdownMenuSubTrigger>
@@ -176,7 +176,7 @@ export function JobRowContextMenu({
                   key={s}
                   onSelect={() => onChangeStatus(s)}
                   className={cn(
-                    "text-[13px]",
+                    "text-body",
                     job.status === s && "font-semibold text-primary",
                   )}
                 >
@@ -192,7 +192,7 @@ export function JobRowContextMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => onDelete()}
-              className="gap-2.5 text-[13px] text-destructive focus:text-destructive focus:bg-destructive/10"
+              className="gap-2.5 text-body text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <span className="w-4 text-center shrink-0">🗑</span>
               삭제
@@ -201,7 +201,7 @@ export function JobRowContextMenu({
         )}
 
         <DropdownMenuSeparator />
-        <div className="px-3 py-2 text-[10px] text-muted-foreground leading-relaxed select-none">
+        <div className="px-3 py-2 text-mini text-muted-foreground leading-relaxed select-none">
           <div>최종 편집</div>
           <div className="opacity-60">{job.updatedAt}</div>
         </div>
@@ -263,25 +263,25 @@ export function ExpRowContextMenu({
       <DropdownMenuContent align="start" sideOffset={4} className="w-56 p-0">
         <MenuSearch value={search} onChange={setSearch} />
 
-        <DropdownMenuLabel className="px-3 py-0.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+        <DropdownMenuLabel className="px-3 py-0.5 text-mini text-muted-foreground font-medium uppercase tracking-wide">
           경험
         </DropdownMenuLabel>
 
         {show("경험 편집") && (
-          <DropdownMenuItem onSelect={() => onEdit()} className="gap-2.5 text-[13px]">
+          <DropdownMenuItem onSelect={() => onEdit()} className="gap-2.5 text-body">
             <span className="w-4 text-center shrink-0">✏️</span>
             경험 편집
           </DropdownMenuItem>
         )}
         {show("복제") && (
-          <DropdownMenuItem onSelect={() => onDuplicate()} className="gap-2.5 text-[13px]">
+          <DropdownMenuItem onSelect={() => onDuplicate()} className="gap-2.5 text-body">
             <span className="w-4 text-center shrink-0">📄</span>
             복제
           </DropdownMenuItem>
         )}
         {show("공고에 연결") && (
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="gap-2.5 text-[13px]">
+            <DropdownMenuSubTrigger className="gap-2.5 text-body">
               <span className="w-4 text-center shrink-0">→</span>
               공고에 연결
             </DropdownMenuSubTrigger>
@@ -295,11 +295,11 @@ export function ExpRowContextMenu({
                   <DropdownMenuItem
                     key={j.id}
                     onSelect={() => onLinkJob(j.id)}
-                    className="text-[13px]"
+                    className="text-body"
                   >
                     <div className="min-w-0">
                       <div className="font-medium text-xs truncate">{j.company}</div>
-                      <div className="text-[10px] text-muted-foreground truncate">{j.title}</div>
+                      <div className="text-mini text-muted-foreground truncate">{j.title}</div>
                     </div>
                   </DropdownMenuItem>
                 ))
@@ -310,7 +310,7 @@ export function ExpRowContextMenu({
 
         {onChangeType && typeOptions.length > 0 && show("유형 변경") && (
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="gap-2.5 text-[13px]">
+            <DropdownMenuSubTrigger className="gap-2.5 text-body">
               <span className="w-4 text-center shrink-0">🔄</span>
               유형 변경
             </DropdownMenuSubTrigger>
@@ -319,7 +319,7 @@ export function ExpRowContextMenu({
                 <DropdownMenuItem
                   key={t}
                   onSelect={() => onChangeType(t)}
-                  className={cn("text-[13px]", currentType === t && "font-semibold text-primary")}
+                  className={cn("text-body", currentType === t && "font-semibold text-primary")}
                 >
                   {t}
                 </DropdownMenuItem>
@@ -333,7 +333,7 @@ export function ExpRowContextMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => onDelete()}
-              className="gap-2.5 text-[13px] text-destructive focus:text-destructive focus:bg-destructive/10"
+              className="gap-2.5 text-body text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <span className="w-4 text-center shrink-0">🗑</span>
               삭제
@@ -344,7 +344,7 @@ export function ExpRowContextMenu({
         {item.updatedAt && (
           <>
             <DropdownMenuSeparator />
-            <div className="px-3 py-2 text-[10px] text-muted-foreground leading-relaxed select-none">
+            <div className="px-3 py-2 text-mini text-muted-foreground leading-relaxed select-none">
               <div>최종 편집</div>
               <div className="opacity-60">{item.updatedAt}</div>
             </div>

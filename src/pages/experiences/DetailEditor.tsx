@@ -143,7 +143,7 @@ export function DetailEditor({
       <DialogContent className="max-w-[1140px] w-[95vw] h-[96vh] max-h-[96vh] p-0 gap-0 overflow-hidden [&>button]:hidden flex flex-col">
         <div className="px-6 py-3.5 border-b border-border flex items-center justify-between gap-4 shrink-0">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground mb-1.5">
+            <div className="flex items-center gap-2 text-chip text-muted-foreground mb-1.5">
               <span>경험정리</span>
               <span>›</span>
               <DropdownMenu>
@@ -154,7 +154,7 @@ export function DetailEditor({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-[180px] max-h-[60vh] overflow-y-auto">
-                  <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
+                  <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                     유형 선택
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -182,14 +182,14 @@ export function DetailEditor({
             />
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[11px] text-muted-foreground">{saveState}</span>
+            <span className="text-chip text-muted-foreground">{saveState}</span>
             <div className="inline-flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-md border border-border">
               {(["작성중", "완료"] as Status[]).map((s) => (
                 <button
                   key={s}
                   onClick={() => update({ status: s })}
                   className={cn(
-                    "px-2 py-0.5 rounded text-[11px] transition-colors",
+                    "px-2 py-0.5 rounded text-chip transition-colors",
                     item.status === s
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
@@ -228,13 +228,13 @@ export function DetailEditor({
             </Tooltip>
             <button
               onClick={() => setCopyOpen(true)}
-              className="text-[11px] px-2 py-1 rounded border border-border hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="text-chip px-2 py-1 rounded border border-border hover:bg-muted text-muted-foreground hover:text-foreground"
             >
               복붙용 문장 만들기
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="text-[11px] p-1.5 rounded hover:bg-muted text-muted-foreground">
+                <button className="text-chip p-1.5 rounded hover:bg-muted text-muted-foreground">
                   <MoreHorizontal className="w-3.5 h-3.5" />
                 </button>
               </DropdownMenuTrigger>
@@ -335,7 +335,7 @@ export function DetailEditor({
                 <>
                   <div className="h-px bg-border/60" />
                   <section>
-                    <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    <p className="text-chip font-medium text-muted-foreground uppercase tracking-wide mb-2">
                       연결된 경험
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -345,7 +345,7 @@ export function DetailEditor({
                         return (
                           <span
                             key={id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-[11px] text-accent-foreground"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-chip text-accent-foreground"
                           >
                             {exp.name}
                             <button
@@ -361,7 +361,7 @@ export function DetailEditor({
                       })}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-[11px] px-2 py-0.5 rounded-md border border-dashed border-border text-muted-foreground hover:text-foreground hover:bg-muted">
+                          <button className="text-chip px-2 py-0.5 rounded-md border border-dashed border-border text-muted-foreground hover:text-foreground hover:bg-muted">
                             + 경험 연결
                           </button>
                         </DropdownMenuTrigger>
@@ -402,11 +402,11 @@ export function DetailEditor({
               </div>
               <div className="px-4 py-3 space-y-3">
                 <div className="rounded-md border border-border bg-muted/30 px-3 py-2.5">
-                  <p className="text-[10px] text-muted-foreground mb-1">AI의 질문</p>
-                  <p className="text-[13px] text-foreground leading-snug">{currentQ}</p>
+                  <p className="text-mini text-muted-foreground mb-1">AI의 질문</p>
+                  <p className="text-body text-foreground leading-snug">{currentQ}</p>
                   <button
                     onClick={() => setCurrentQ(generateQuestion())}
-                    className="mt-1.5 text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    className="mt-1.5 text-chip text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
                   >
                     <RotateCcw className="w-3 h-3" /> 다른 질문 받기
                   </button>
@@ -459,13 +459,13 @@ export function DetailEditor({
               <DialogDescription className="text-sm">최종 항목에 반영할 내용을 선택하세요.</DialogDescription>
             </DialogHeader>
             <div className="px-6 py-4 max-h-[60vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-3 mb-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+              <div className="grid grid-cols-2 gap-3 mb-2 text-chip font-medium text-muted-foreground uppercase tracking-wide">
                 <div>기존 항목</div>
                 <div>새로 추출된 항목</div>
               </div>
               {["항목명", "유형", "기간", "역할", "기관", "주요 키워드", "상세 내용"].map((f) => (
                 <div key={f} className="border-t border-border py-3">
-                  <div className="text-[11px] text-muted-foreground mb-2">{f}</div>
+                  <div className="text-chip text-muted-foreground mb-2">{f}</div>
                   <div className="grid grid-cols-2 gap-3">
                     <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-xs hover:bg-muted/30 cursor-pointer">
                       <input type="radio" name={f} defaultChecked className="mt-1" />
@@ -476,7 +476,7 @@ export function DetailEditor({
                       <span>새 추출 내용 예시</span>
                     </label>
                   </div>
-                  <label className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer">
+                  <label className="mt-2 inline-flex items-center gap-1.5 text-chip text-muted-foreground cursor-pointer">
                     <Checkbox className="h-3 w-3" /> 둘 다 유지
                   </label>
                 </div>

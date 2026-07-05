@@ -47,5 +47,5 @@ export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => 
         <TooltipContent className="text-xs">아직 정리 중</TooltipContent>
       </Tooltip>
     );
-  return <span className="text-gray-300 text-[11px]">—</span>;
+  return <span className="text-gray-300 text-chip">—</span>;
 }

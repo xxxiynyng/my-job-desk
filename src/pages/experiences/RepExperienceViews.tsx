@@ -78,10 +78,10 @@ function RepExperienceCard({
       {/* 헤더 */}
       <div className="px-3 pt-3 pb-2.5 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="text-[10px] text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">{item.type}</span>
-          <p className="text-[13px] font-semibold text-foreground mt-1.5 leading-snug">{item.name}</p>
+          <span className="text-mini text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">{item.type}</span>
+          <p className="text-body font-semibold text-foreground mt-1.5 leading-snug">{item.name}</p>
           {(org || period) && (
-            <p className="text-[11px] text-muted-foreground mt-1">{[org, period].filter(Boolean).join(" · ")}</p>
+            <p className="text-chip text-muted-foreground mt-1">{[org, period].filter(Boolean).join(" · ")}</p>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0 mt-0.5">
@@ -130,7 +130,7 @@ function RepExperienceCard({
           <RepSection label="세부 필드">
             {filledFields.map((f) => (
               <div key={f.key} className="flex items-center gap-2 group/row">
-                <span className="text-[11px] text-muted-foreground w-[80px] shrink-0">{f.label}</span>
+                <span className="text-chip text-muted-foreground w-[80px] shrink-0">{f.label}</span>
                 <button
                   onClick={() => onCopy(f.value)}
                   className="group/val inline-flex items-center gap-1 text-xs text-foreground hover:text-primary flex-1 min-w-0 text-left transition-colors"
@@ -163,7 +163,7 @@ function RepSection({
         {onCopyAll && (
           <button
             onClick={onCopyAll}
-            className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5 transition-colors"
+            className="text-mini text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5 transition-colors"
           >
             <Copy className="w-3 h-3" /> 전체 복사
           </button>
@@ -216,7 +216,7 @@ export function InfoRow({
 
   return (
     <div className="flex items-center gap-3 min-w-0 group">
-      <span className="text-[11px] text-muted-foreground w-[96px] shrink-0">{label}</span>
+      <span className="text-chip text-muted-foreground w-[96px] shrink-0">{label}</span>
       {editing ? (
         <input
           ref={inputRef}

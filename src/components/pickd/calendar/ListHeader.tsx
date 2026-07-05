@@ -41,7 +41,7 @@ export function ListHeader({
             {mode === "today" ? `오늘의 ${label}` : `전체 ${label}`}
           </span>
         </button>
-        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{count}</span>
+        <span className="text-mini text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{count}</span>
       </div>
 
       <div className="flex items-center gap-1">
@@ -55,7 +55,7 @@ export function ListHeader({
           <div className="flex items-center gap-0.5">
             <Popover>
               <PopoverTrigger asChild>
-                <button className="text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-border hover:border-primary/30 transition-colors">
+                <button className="text-mini text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-border hover:border-primary/30 transition-colors">
                   {period || "1개월"}
                 </button>
               </PopoverTrigger>

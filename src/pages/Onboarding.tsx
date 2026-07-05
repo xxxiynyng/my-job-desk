@@ -279,7 +279,7 @@ export default function Onboarding() {
           </>
         )}
       </div>
-      <div className="mt-4 border-t border-primary-foreground/20 pt-3 text-[11px] leading-relaxed opacity-75">
+      <div className="mt-4 border-t border-primary-foreground/20 pt-3 text-chip leading-relaxed opacity-75">
         여기 담긴 정보는 전부 내 자산이 돼요.<br />언제든 마이페이지에서 수정할 수 있어요.
       </div>
     </aside>

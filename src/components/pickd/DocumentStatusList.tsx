@@ -101,7 +101,7 @@ export function DocumentStatusList() {
         <div className="px-4 pt-2 pb-1.5 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-foreground">작성중인 서류</h2>
-            <span className="text-[11px] text-muted-foreground">{sorted.length}건</span>
+            <span className="text-chip text-muted-foreground">{sorted.length}건</span>
           </div>
           <div className="inline-flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-md border border-border">
             <button
@@ -154,21 +154,21 @@ export function DocumentStatusList() {
                       )}
                     />
                   </button>
-                  <p className="text-[13px] font-semibold text-foreground leading-tight">
+                  <p className="text-body font-semibold text-foreground leading-tight">
                     {doc.company} {doc.jobTitle} {doc.employType}
                   </p>
                 </div>
 
                 {/* 서브라인: 지원서 · D-day */}
                 <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span className="text-[11px] text-muted-foreground">지원서</span>
-                  <span className="text-muted-foreground/40 text-[10px]">·</span>
-                  <span className={cn("text-[11px] tabular-nums", ddayCls(doc.dday))}>{ddayLabel(doc.dday)}</span>
+                  <span className="text-chip text-muted-foreground">지원서</span>
+                  <span className="text-muted-foreground/40 text-mini">·</span>
+                  <span className={cn("text-chip tabular-nums", ddayCls(doc.dday))}>{ddayLabel(doc.dday)}</span>
                 </div>
 
                 {/* 진행률 바 */}
                 <div className="mt-2.5">
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1 tabular-nums">
+                  <div className="flex items-center justify-between text-mini text-muted-foreground mb-1 tabular-nums">
                     <span>진행률</span>
                     <span>{doc.progress}%</span>
                   </div>
@@ -176,7 +176,7 @@ export function DocumentStatusList() {
                 </div>
 
                 {/* 마감일 · 수정일 */}
-                <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground tabular-nums">
+                <div className="mt-2 flex items-center justify-between text-mini text-muted-foreground tabular-nums">
                   <span>마감 {doc.deadline}</span>
                   <span>{doc.updatedAt}</span>
                 </div>
@@ -208,10 +208,10 @@ export function DocumentStatusList() {
                       )}
                     />
                   </button>
-                  <span className="text-[13px] font-medium text-foreground min-w-0 flex-1 truncate">
+                  <span className="text-body font-medium text-foreground min-w-0 flex-1 truncate">
                     {doc.company} {doc.jobTitle} {doc.employType}
                   </span>
-                  <span className={cn("text-[11px] tabular-nums shrink-0", ddayCls(doc.dday))}>
+                  <span className={cn("text-chip tabular-nums shrink-0", ddayCls(doc.dday))}>
                     {ddayLabel(doc.dday)}
                   </span>
                 </div>
@@ -219,11 +219,11 @@ export function DocumentStatusList() {
                 {/* 2행: 진행률 바 + 퍼센트 */}
                 <div className="flex items-center gap-2 mt-2 pl-6">
                   <Progress value={doc.progress} className="h-1.5 flex-1 max-w-[220px]" />
-                  <span className="text-[10px] text-muted-foreground tabular-nums w-8 text-right">{doc.progress}%</span>
+                  <span className="text-mini text-muted-foreground tabular-nums w-8 text-right">{doc.progress}%</span>
                 </div>
 
                 {/* 3행: 마감일 · 수정일 */}
-                <div className="flex items-center gap-2 mt-1.5 pl-6 text-[10px] text-muted-foreground tabular-nums">
+                <div className="flex items-center gap-2 mt-1.5 pl-6 text-mini text-muted-foreground tabular-nums">
                   <span>지원서</span>
                   <span className="text-muted-foreground/40">·</span>
                   <span>마감 {doc.deadline}</span>

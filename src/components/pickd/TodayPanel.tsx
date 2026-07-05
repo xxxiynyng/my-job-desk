@@ -79,7 +79,7 @@ export function TodayPanel() {
 
       {/* ② 마감 임박 공고 */}
       <section>
-        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">
+        <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide mb-2">
           마감 임박 공고
         </h3>
         <ul className="space-y-0.5">
@@ -91,10 +91,10 @@ export function TodayPanel() {
             >
               <span className="w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0 mt-0.5" />
               <span className="flex-1 leading-snug truncate">
-                <span className="text-muted-foreground text-[10px] mr-1">{item.company}</span>
+                <span className="text-muted-foreground text-mini mr-1">{item.company}</span>
                 {item.title}
               </span>
-              <span className={cn("text-[10px] tabular-nums shrink-0 font-medium", ddayColor(item.dday))}>
+              <span className={cn("text-mini tabular-nums shrink-0 font-medium", ddayColor(item.dday))}>
                 {ddayLabel(item.dday)}
               </span>
             </li>
@@ -104,7 +104,7 @@ export function TodayPanel() {
 
       {/* ③ 오늘의 일정 */}
       <section>
-        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+        <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
           <button
             onClick={() => navigate("/calendar")}
             className="flex-1 text-left flex items-center gap-1 hover:text-foreground transition-colors group"
@@ -122,7 +122,7 @@ export function TodayPanel() {
           </button>
         </h3>
         {scheduleItems.length === 0 ? (
-          <p className="text-[11px] text-muted-foreground px-2 py-1">오늘 일정이 없어요</p>
+          <p className="text-chip text-muted-foreground px-2 py-1">오늘 일정이 없어요</p>
         ) : (
           <ul className="space-y-0.5">
             {scheduleItems.map((item) => (
@@ -133,7 +133,7 @@ export function TodayPanel() {
               >
                 <span className="w-1 h-1 rounded-full bg-primary/60 shrink-0 mt-0.5" />
                 <span className="flex-1 leading-snug truncate">{item.title}</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">{item.time}</span>
+                <span className="text-mini text-muted-foreground tabular-nums shrink-0">{item.time}</span>
               </li>
             ))}
           </ul>
@@ -142,7 +142,7 @@ export function TodayPanel() {
 
       {/* ④ 오늘의 할일 */}
       <section>
-        <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+        <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
           <button
             onClick={() => navigate("/calendar")}
             className="flex-1 text-left flex items-center gap-1 hover:text-foreground transition-colors group"
@@ -172,7 +172,7 @@ export function TodayPanel() {
                   t.done ? "bg-primary border-primary" : "border-muted-foreground/40",
                 )}
               >
-                {t.done && <span className="text-[9px] text-primary-foreground">✓</span>}
+                {t.done && <span className="text-micro text-primary-foreground">✓</span>}
               </span>
               <span className={cn("flex-1 leading-snug", t.done && "line-through text-muted-foreground")}>
                 {t.text}
