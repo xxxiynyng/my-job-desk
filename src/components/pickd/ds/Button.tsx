@@ -14,9 +14,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const SIZES: Record<Size, React.CSSProperties> = {
-  sm: { height: "var(--control-h-sm)", padding: "0 10px", fontSize: "var(--text-body-sm)", gap: "5px", borderRadius: "var(--radius-sm)" },
-  md: { height: "var(--control-h)", padding: "0 14px", fontSize: "var(--text-body)", gap: "6px", borderRadius: "var(--radius-sm)" },
-  lg: { height: "var(--control-h-lg)", padding: "0 18px", fontSize: "var(--text-body-lg)", gap: "7px", borderRadius: "var(--radius-md)" },
+  sm: { height: "var(--control-h-sm)", padding: "0 10px", fontSize: "var(--text-body)", gap: "5px", borderRadius: "var(--radius-sm)" },
+  md: { height: "var(--control-h)", padding: "0 14px", fontSize: "var(--text-sm)", gap: "6px", borderRadius: "var(--radius-sm)" },
+  lg: { height: "var(--control-h-lg)", padding: "0 18px", fontSize: "var(--text-title)", gap: "7px", borderRadius: "var(--radius-md)" },
 };
 
 const VARIANTS: Record<Variant, React.CSSProperties & { "--hover-bg"?: string; "--active-bg"?: string }> = {

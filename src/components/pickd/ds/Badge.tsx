@@ -26,7 +26,7 @@ export function Badge({ tone = "neutral", dot = false, size = "md", children, st
         display: "inline-flex", alignItems: "center", gap: 5,
         height: sm ? 18 : 22, padding: sm ? "0 7px" : "0 9px",
         background: t.bg, color: t.fg,
-        fontSize: sm ? "var(--text-micro)" : "var(--text-caption)",
+        fontSize: sm ? "var(--text-chip)" : "var(--text-xs)",
         fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
         letterSpacing: "-0.01em",
         borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",

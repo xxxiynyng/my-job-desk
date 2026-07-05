@@ -49,7 +49,7 @@ export function StatusBadge({ status = "applied", label, tone, size = "md", styl
         display: "inline-flex", alignItems: "center", gap: 6,
         height: sm ? 20 : 24, padding: sm ? "0 8px" : "0 10px",
         background: t.bg, color: t.fg,
-        fontSize: sm ? "var(--text-nano)" : "var(--text-micro)",
+        fontSize: sm ? "var(--text-mini)" : "var(--text-chip)",
         fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
         letterSpacing: "-0.01em",
         borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",

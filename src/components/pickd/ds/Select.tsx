@@ -26,7 +26,7 @@ export function Select({ label, hint, error, size = "md", disabled = false, chil
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
       {label && (
-        <label htmlFor={fieldId} style={{ fontSize: "var(--text-body-sm)", fontWeight: "var(--weight-medium)" as React.CSSProperties["fontWeight"], color: "var(--text-body-color)" }}>
+        <label htmlFor={fieldId} style={{ fontSize: "var(--text-body)", fontWeight: "var(--weight-medium)" as React.CSSProperties["fontWeight"], color: "var(--text-body-color)" }}>
           {label}
         </label>
       )}
@@ -42,7 +42,7 @@ export function Select({ label, hint, error, size = "md", disabled = false, chil
           background: `${disabled ? "var(--bg-subtle)" : "var(--surface-card)"} url("${CHEVRON}") no-repeat right 10px center`,
           border: `1px solid ${borderColor}`, borderRadius: "var(--radius-sm)",
           boxShadow: focused ? "var(--ring-focus)" : "none",
-          fontSize: "var(--text-body)", color: "var(--text-strong)",
+          fontSize: "var(--text-sm)", color: "var(--text-strong)",
           fontFamily: "var(--font-sans)", appearance: "none", WebkitAppearance: "none",
           outline: "none", cursor: disabled ? "not-allowed" : "pointer",
           transition: "border-color .14s ease, box-shadow .14s ease",
@@ -52,7 +52,7 @@ export function Select({ label, hint, error, size = "md", disabled = false, chil
         {children}
       </select>
       {(hint || error) && (
-        <span style={{ fontSize: "var(--text-caption)", color: error ? "var(--danger)" : "var(--text-muted-color)" }}>
+        <span style={{ fontSize: "var(--text-xs)", color: error ? "var(--danger)" : "var(--text-muted-color)" }}>
           {error ?? hint}
         </span>
       )}

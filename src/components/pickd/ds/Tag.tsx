@@ -22,7 +22,7 @@ export function Tag({ tone = "neutral", onRemove, children, style, ...rest }: Ta
         height: 22, padding: onRemove ? "0 5px 0 9px" : "0 9px",
         background: t.bg, color: t.fg,
         border: `1px solid ${t.border}`, borderRadius: "var(--radius-sm)",
-        fontSize: "var(--text-caption)",
+        fontSize: "var(--text-xs)",
         fontWeight: "var(--weight-medium)" as React.CSSProperties["fontWeight"],
         whiteSpace: "nowrap", ...style,
       }}

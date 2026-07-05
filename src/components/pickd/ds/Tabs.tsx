@@ -31,7 +31,7 @@ export function Tabs({ tabs, value, onChange, style, ...rest }: TabsProps) {
             style={{
               position: "relative", display: "inline-flex", alignItems: "center", gap: 6,
               padding: "0 4px 10px", marginBottom: -1, background: "none", border: "none",
-              cursor: "pointer", fontSize: "var(--text-body)",
+              cursor: "pointer", fontSize: "var(--text-sm)",
               fontWeight: (active ? "var(--weight-semibold)" : "var(--weight-medium)") as React.CSSProperties["fontWeight"],
               color: active ? "var(--text-strong)" : "var(--text-muted-color)",
               borderBottom: `2px solid ${active ? "var(--brand)" : "transparent"}`,
@@ -41,7 +41,7 @@ export function Tabs({ tabs, value, onChange, style, ...rest }: TabsProps) {
             {label}
             {count != null && (
               <span style={{
-                fontSize: "var(--text-micro)", fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
+                fontSize: "var(--text-chip)", fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
                 color: active ? "var(--brand-hover)" : "var(--text-subtle-color)",
                 background: active ? "var(--brand-subtle)" : "var(--bg-muted)",
                 borderRadius: "var(--radius-pill)", padding: "1px 6px",

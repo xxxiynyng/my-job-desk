@@ -11,9 +11,9 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
 }
 
 const SIZES = {
-  sm: { h: "var(--control-h-sm)", font: "var(--text-body-sm)", pad: 10 },
-  md: { h: "var(--control-h)", font: "var(--text-body)", pad: 12 },
-  lg: { h: "var(--control-h-lg)", font: "var(--text-body-lg)", pad: 14 },
+  sm: { h: "var(--control-h-sm)", font: "var(--text-body)", pad: 10 },
+  md: { h: "var(--control-h)", font: "var(--text-sm)", pad: 12 },
+  lg: { h: "var(--control-h-lg)", font: "var(--text-title)", pad: 14 },
 };
 
 export function Input({
@@ -42,7 +42,7 @@ export function Input({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, ...style }}>
       {label && (
-        <label htmlFor={fieldId} style={{ fontSize: "var(--text-body-sm)", fontWeight: "var(--weight-medium)" as React.CSSProperties["fontWeight"], color: "var(--text-body-color)" }}>
+        <label htmlFor={fieldId} style={{ fontSize: "var(--text-body)", fontWeight: "var(--weight-medium)" as React.CSSProperties["fontWeight"], color: "var(--text-body-color)" }}>
           {label}
         </label>
       )}
@@ -74,7 +74,7 @@ export function Input({
         {rightIcon && <span style={{ color: "var(--text-subtle-color)", display: "inline-flex", flex: "none" }}>{rightIcon}</span>}
       </div>
       {(hint || error) && (
-        <span style={{ fontSize: "var(--text-caption)", color: error ? "var(--danger)" : "var(--text-muted-color)" }}>
+        <span style={{ fontSize: "var(--text-xs)", color: error ? "var(--danger)" : "var(--text-muted-color)" }}>
           {error ?? hint}
         </span>
       )}

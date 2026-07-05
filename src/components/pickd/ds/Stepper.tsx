@@ -27,14 +27,14 @@ export function Stepper({ steps = [], current = 0, style, ...rest }: StepperProp
                   background: done ? "var(--brand)" : "var(--surface-card)",
                   border: `2px solid ${done || active ? "var(--brand)" : "var(--border-default)"}`,
                   color: active ? "var(--brand)" : "var(--text-subtle-color)",
-                  fontSize: "var(--text-caption)",
+                  fontSize: "var(--text-xs)",
                   fontWeight: "var(--weight-bold)" as React.CSSProperties["fontWeight"],
                 }}
               >
                 {done ? <CheckIcon /> : i + 1}
               </span>
               <span style={{
-                fontSize: "var(--text-caption)", textAlign: "center", lineHeight: 1.3,
+                fontSize: "var(--text-xs)", textAlign: "center", lineHeight: 1.3,
                 color: active ? "var(--text-strong)" : done ? "var(--text-body-color)" : "var(--text-subtle-color)",
                 fontWeight: (active ? "var(--weight-semibold)" : "var(--weight-regular)") as React.CSSProperties["fontWeight"],
               }}>{label}</span>

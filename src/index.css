@@ -103,16 +103,16 @@
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
     --text-display: 34px;
-    --text-h1: 26px;
+    --text-heading: 26px;
     --text-h2: 21px;
     --text-h3: 18px;
     --text-h4: 16px;
-    --text-body-lg: 15px;
-    --text-body: 14px;
-    --text-body-sm: 13px;
-    --text-caption: 12px;
-    --text-micro: 11px;
-    --text-nano: 10px;
+    --text-title: 15px;
+    --text-sm: 14px;
+    --text-body: 13px;
+    --text-xs: 12px;
+    --text-chip: 11px;
+    --text-mini: 10px;
 
     --leading-tight: 1.25;
     --leading-snug: 1.4;
@@ -253,7 +253,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    font-size: var(--text-body);
+    font-size: var(--text-sm);
     line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
