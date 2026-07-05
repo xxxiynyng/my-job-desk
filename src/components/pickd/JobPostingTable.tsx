@@ -1149,7 +1149,7 @@ export function JobPostingTable() {
                   key={f}
                   onClick={() => setActiveFilter(f)}
                   className={cn(
-                    "h-6 px-2 rounded-md text-mini font-medium transition-colors inline-flex items-center gap-1",
+                    "h-6 px-2 rounded-md text-chip font-medium transition-colors inline-flex items-center gap-1",
                     activeFilter === f
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -1162,7 +1162,7 @@ export function JobPostingTable() {
                   )}
                   <span
                     className={cn(
-                      "text-micro font-bold tabular-nums px-1 py-px rounded-full leading-none",
+                      "text-mini font-bold tabular-nums px-1 py-px rounded-full leading-none",
                       activeFilter === f ? "bg-card/70 text-accent-foreground" : "bg-muted text-muted-foreground/70",
                     )}
                   >
