@@ -10,56 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  INFO_FIELDS, INFO_DEFAULTS, LS_INFO_VALUES, INFO_VALUES_EVENT, type InfoKey,
+} from "@/data/basicInfoFields";
+import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
 
 // ── Types & constants ──────────────────────────────────────────
-
-type InfoKey =
-  | "name" | "hanjaName" | "engName" | "birth"
-  | "email" | "phone" | "address"
-  | "school" | "major" | "grade"
-  | "military" | "veteran" | "disability" | "national" | "driverLicense"
-  | "portfolioUrl" | "github" | "linkedin" | "blog"
-  | "enrollYear" | "gradYear" | "gpa" | "majorGpa" | "minor" | "transfer"
-  | "dayNight" | "campus"
-  | "gender" | "nationality"
-  | "hsSchool" | "hsLocation" | "hsEnroll" | "hsGrad" | "hsGradStatus";
-
-const INFO_FIELDS: { key: InfoKey; label: string }[] = [
-  { key: "name",             label: "이름"                },
-  { key: "hanjaName",        label: "한자 이름"            },
-  { key: "engName",          label: "영문 이름"            },
-  { key: "birth",            label: "생년월일"             },
-  { key: "email",            label: "이메일"               },
-  { key: "phone",            label: "전화번호"             },
-  { key: "address",          label: "주소"                 },
-  { key: "school",           label: "학교"                 },
-  { key: "major",            label: "전공"                 },
-  { key: "grade",            label: "학년 / 졸업 여부"      },
-  { key: "military",         label: "병역 사항"            },
-  { key: "veteran",          label: "보훈 사항"            },
-  { key: "disability",       label: "장애 사항"            },
-  { key: "national",         label: "국가유공자 관련"       },
-  { key: "driverLicense",    label: "운전면허"             },
-  { key: "portfolioUrl",     label: "포트폴리오 URL"       },
-  { key: "github",           label: "GitHub"               },
-  { key: "linkedin",         label: "LinkedIn"             },
-  { key: "blog",             label: "블로그/노션"           },
-  { key: "enrollYear",       label: "입학 연도"            },
-  { key: "gradYear",         label: "졸업(예정) 연도"      },
-  { key: "gpa",              label: "전체 학점 (GPA)"       },
-  { key: "majorGpa",         label: "전공 학점"             },
-  { key: "dayNight",         label: "주간 / 야간"           },
-  { key: "campus",           label: "본교 / 분교"           },
-  { key: "minor",            label: "부전공"               },
-  { key: "transfer",         label: "편입 여부"            },
-  { key: "gender",           label: "성별"                 },
-  { key: "nationality",      label: "국적"                 },
-  { key: "hsSchool",         label: "고등학교"             },
-  { key: "hsLocation",       label: "고등학교 소재지"       },
-  { key: "hsEnroll",         label: "고등학교 입학년월"     },
-  { key: "hsGrad",           label: "고등학교 졸업년월"     },
-  { key: "hsGradStatus",     label: "고등학교 졸업여부"     },
-];
+// InfoKey / INFO_FIELDS / INFO_DEFAULTS / LS_INFO_VALUES 는 SSOT(@/data/basicInfoFields)로 이관.
 
 // 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 어학 / IT활용능력 / 병역·면허
 const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
@@ -83,19 +40,6 @@ const GROUP_ICON: Record<string, LucideIcon> = {
 // 프로필 헤더에 대표로 노출하는 필드 — 섹션 카드에서는 제외(중복 방지)
 const HEADER_KEYS: InfoKey[] = ["name", "hanjaName", "engName"];
 
-const INFO_DEFAULTS: Record<InfoKey, string> = {
-  name: "장윤영", hanjaName: "張潤瑛", engName: "Yoon Jang",
-  birth: "2001.03.15", email: "yoon.jang@example.com", phone: "010-0000-0000",
-  address: "부산광역시 해운대구 센텀로 17", school: "부산대학교", major: "경영학과",
-  grade: "4학년 재학", military: "해당 없음", veteran: "해당 없음",
-  disability: "해당 없음", national: "해당 없음", driverLicense: "2종 보통",
-  portfolioUrl: "", github: "", linkedin: "", blog: "",
-  enrollYear: "", gradYear: "", gpa: "", majorGpa: "", minor: "", transfer: "해당 없음",
-  dayNight: "주간", campus: "본교",
-  gender: "선택 안 함", nationality: "대한민국",
-  hsSchool: "", hsLocation: "", hsEnroll: "", hsGrad: "", hsGradStatus: "해당 없음",
-};
-
 const DEFAULT_VISIBLE: InfoKey[] = [
   "name", "engName", "birth", "email", "phone", "address",
   "school", "major", "grade", "military", "driverLicense",
@@ -104,7 +48,6 @@ const DEFAULT_VISIBLE: InfoKey[] = [
 type FileItem = { id: string; kind: string; name: string; fileKind: "pdf" | "image"; url?: string };
 
 const LS_INFO_VISIBLE = "specs.info.visibleKeys.v4";
-const LS_INFO_VALUES  = "specs.info.values.v2";
 const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
 const LS_PHOTO_ID     = "specs.basicPhoto.id";
 const LS_FILES        = "specs.files.v1";
@@ -184,7 +127,11 @@ export function BasicInfoPanel() {
   const cancelInline = () => setInlineKey(null);
 
   useEffect(() => lsSet(LS_INFO_VISIBLE, infoVisible), [infoVisible]);
-  useEffect(() => lsSet(LS_INFO_VALUES,  infoValues),  [infoValues]);
+  useEffect(() => {
+    lsSet(LS_INFO_VALUES, infoValues);
+    // 완성도 훅(대시보드 배너·탭2 카드)에 즉시 반영
+    window.dispatchEvent(new CustomEvent(INFO_VALUES_EVENT));
+  }, [infoValues]);
   useEffect(() => lsSet(LS_PHOTO_SHOWN,  photoShown),  [photoShown]);
   useEffect(() => lsSet(LS_LANG_EXAMS,  langExams),   [langExams]);
 
@@ -238,9 +185,11 @@ export function BasicInfoPanel() {
     [files, basicPhotoId],
   );
 
-  const filledCount = INFO_FIELDS.filter((f) => (infoValues[f.key] || "").trim()).length;
-  const totalCount  = INFO_FIELDS.length;
-  const pct         = Math.round((filledCount / totalCount) * 100);
+  // 완성도 — 계산 로직 단일 출처(computeProfileCompletion). 라이브 state 기준으로 즉시 반영.
+  const completion  = computeProfileCompletion(infoValues);
+  const filledCount = completion.filled;
+  const totalCount  = completion.total;
+  const pct         = completion.pct;
 
   const visibleGroups = FIELD_GROUPS.map((g) => ({
     title: g.title,
