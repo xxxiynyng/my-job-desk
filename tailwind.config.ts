@@ -17,12 +17,12 @@ export default {
         sans: ["var(--font-sans)"],
       },
       fontSize: {
-        micro:   ['9px',  { lineHeight: '1'   }],
-        mini:    ['10px', { lineHeight: '1.2' }],
-        chip:    ['11px', { lineHeight: '1.3' }],
-        body:    ['13px', { lineHeight: '1.5' }],
-        title:   ['15px', { lineHeight: '1.3' }],
-        heading: ['26px', { lineHeight: '1.1' }],
+        micro:   '9px',
+        mini:    '10px',
+        chip:    '11px',
+        body:    '13px',
+        title:   '15px',
+        heading: '26px',
       },
       colors: {
         border: "hsl(var(--border))",
