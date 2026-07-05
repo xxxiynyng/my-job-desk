@@ -15,6 +15,9 @@ dist-ssr
 # Vite config HMR 재빌드 시 남는 임시 산출물
 vite.config.ts.timestamp-*.mjs
 
+# Claude Code 로컬 권한/설정 (개인 환경 전용 — 커밋 혼입 방지)
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
