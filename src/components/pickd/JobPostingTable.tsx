@@ -433,7 +433,7 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                         </span>
                       )}
                       {job.finalResult && (
-                        <span className="text-chip text-muted-foreground font-medium">{job.finalResult}</span>
+                        <span className="text-chip text-muted-foreground font-medium">{FINAL_RESULT_LABEL[job.finalResult]}</span>
                       )}
                     </span>
                   </div>
