@@ -27,14 +27,14 @@ export function BatchActionBar({
   if (count <= 0) return null;
   return (
     <div className={cn("bg-blue-50 border-blue-200 px-3 py-2 flex items-center gap-1.5", className)}>
-      <span className="text-[12px] font-medium text-blue-700 shrink-0">{count}개 선택됨</span>
+      <span className="text-xs font-medium text-blue-700 shrink-0">{count}개 선택됨</span>
       <span className="w-px h-3.5 bg-blue-200 mx-1 shrink-0" />
       {actions.map((a) => (
         <button
           key={a.label}
           onClick={a.onClick}
           className={cn(
-            "text-[12px] px-2.5 py-1 rounded-md transition-colors font-medium",
+            "text-xs px-2.5 py-1 rounded-md transition-colors font-medium",
             a.tone === "danger" ? "text-red-600 hover:bg-red-50" : "text-blue-700 hover:bg-blue-100",
           )}
         >

@@ -118,7 +118,7 @@ function RepExperienceCard({
           <RepSection label="자소서용 요약" onCopyAll={() => onCopy(docText)}>
             <button
               onClick={() => onCopy(docText)}
-              className="text-[12px] leading-loose text-foreground whitespace-pre-line text-left hover:text-primary transition-colors w-full"
+              className="text-xs leading-loose text-foreground whitespace-pre-line text-left hover:text-primary transition-colors w-full"
             >
               {docText}
             </button>
@@ -133,7 +133,7 @@ function RepExperienceCard({
                 <span className="text-[11px] text-muted-foreground w-[80px] shrink-0">{f.label}</span>
                 <button
                   onClick={() => onCopy(f.value)}
-                  className="group/val inline-flex items-center gap-1 text-[12px] text-foreground hover:text-primary flex-1 min-w-0 text-left transition-colors"
+                  className="group/val inline-flex items-center gap-1 text-xs text-foreground hover:text-primary flex-1 min-w-0 text-left transition-colors"
                 >
                   <span className="truncate">{f.value}</span>
                   <Copy className="w-3 h-3 opacity-0 group-hover/val:opacity-100 shrink-0 transition-opacity text-muted-foreground" />
@@ -159,7 +159,7 @@ function RepSection({
   return (
     <div className="px-3 pt-3 pb-3">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
         {onCopyAll && (
           <button
             onClick={onCopyAll}

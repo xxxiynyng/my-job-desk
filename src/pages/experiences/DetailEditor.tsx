@@ -390,7 +390,7 @@ export function DetailEditor({
             <aside className="border-l border-border bg-card overflow-y-auto">
               <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
                 <div>
-                  <p className="text-[12px] font-semibold text-foreground inline-flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-foreground inline-flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
                     AI 질문
                   </p>
@@ -467,11 +467,11 @@ export function DetailEditor({
                 <div key={f} className="border-t border-border py-3">
                   <div className="text-[11px] text-muted-foreground mb-2">{f}</div>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-[12px] hover:bg-muted/30 cursor-pointer">
+                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-xs hover:bg-muted/30 cursor-pointer">
                       <input type="radio" name={f} defaultChecked className="mt-1" />
                       <span>기존 내용 예시</span>
                     </label>
-                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-[12px] hover:bg-muted/30 cursor-pointer">
+                    <label className="flex items-start gap-2 border border-border rounded-md px-3 py-2.5 text-xs hover:bg-muted/30 cursor-pointer">
                       <input type="radio" name={f} className="mt-1" />
                       <span>새 추출 내용 예시</span>
                     </label>

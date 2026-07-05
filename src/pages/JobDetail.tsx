@@ -587,10 +587,10 @@ export default function JobDetail() {
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div className="min-w-0">
                             <p className="text-[13px] font-semibold text-foreground">{p.step}</p>
-                            <p className="text-[12px] text-muted-foreground mt-0.5">{p.detail}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-[12px] tabular-nums text-foreground/80">{p.schedule}</p>
+                            <p className="text-xs tabular-nums text-foreground/80">{p.schedule}</p>
                             {p.note && <p className="text-[11px] text-muted-foreground mt-0.5">{p.note}</p>}
                           </div>
                         </div>
@@ -718,7 +718,7 @@ export default function JobDetail() {
                         </div>
 
                         {/* 문항 */}
-                        <p className="text-[14px] font-medium text-foreground leading-relaxed pl-9">
+                        <p className="text-sm font-medium text-foreground leading-relaxed pl-9">
                           {e.question}
                         </p>
 
@@ -736,7 +736,7 @@ export default function JobDetail() {
 
                         {/* 미작성 안내 */}
                         {!e.preview && e.status === "미작성" && (
-                          <p className="mt-2 pl-9 text-[12px] text-muted-foreground/50">아직 작성된 내용이 없어요</p>
+                          <p className="mt-2 pl-9 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
                         )}
                       </div>
                     </li>
@@ -789,7 +789,7 @@ export default function JobDetail() {
                     <CopyButton text={job.rawSource} label="전체 복사" />
                   </div>
                   {/* Raw text */}
-                  <pre className="p-5 text-[12px] leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
+                  <pre className="p-5 text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
                     {job.rawSource}
                   </pre>
                 </div>

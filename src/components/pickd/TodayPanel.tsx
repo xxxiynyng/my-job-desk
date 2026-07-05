@@ -86,7 +86,7 @@ export function TodayPanel() {
           {deadlineItems.map((item) => (
             <li
               key={item.id}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-[12px] group"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-xs group"
               onClick={() => toast(`${item.company} · ${item.title}`, { description: "공고 상세는 준비 중이에요" })}
             >
               <span className="w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0 mt-0.5" />
@@ -128,7 +128,7 @@ export function TodayPanel() {
             {scheduleItems.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-[12px]"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-xs"
                 onClick={() => navigate("/calendar")}
               >
                 <span className="w-1 h-1 rounded-full bg-primary/60 shrink-0 mt-0.5" />
@@ -163,7 +163,7 @@ export function TodayPanel() {
           {todos.map((t) => (
             <li
               key={t.id}
-              className="flex items-start gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-[12px]"
+              className="flex items-start gap-2 px-2 py-1.5 rounded-md hover:bg-card cursor-pointer text-xs"
               onClick={() => toggleTodo(t.id)}
             >
               <span

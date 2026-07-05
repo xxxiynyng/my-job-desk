@@ -68,10 +68,10 @@ export function FieldRow({
             onKeyDown={(e) => {
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
-            className="text-[12px] text-foreground bg-transparent border-b border-border focus:outline-none focus:border-primary w-full"
+            className="text-xs text-foreground bg-transparent border-b border-border focus:outline-none focus:border-primary w-full"
           />
         ) : (
-          <span className="text-[12px] text-muted-foreground truncate" onDoubleClick={() => setRenaming(true)}>
+          <span className="text-xs text-muted-foreground truncate" onDoubleClick={() => setRenaming(true)}>
             {field.label}
           </span>
         )}

@@ -139,7 +139,7 @@ export function StatusManagementModal({
               </div>
               <div>
                 <h2 className="text-[15px] font-semibold text-foreground leading-tight">{job.company}</h2>
-                <p className="text-[12px] text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {job.title} · {job.role}
                 </p>
               </div>
@@ -180,7 +180,7 @@ export function StatusManagementModal({
           {/* 전형 흐름 */}
           <Section title="전형 흐름">
             <div className="bg-card border border-border rounded-lg px-4 py-3 space-y-3">
-              <div className="text-[12px] leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1 items-center">
+              <div className="text-xs leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1 items-center">
                 {STAGE_FLOW.map((s, i) => (
                   <span key={s} className="inline-flex items-center gap-1.5">
                     <button
@@ -224,7 +224,7 @@ export function StatusManagementModal({
             }
           >
             <div className="bg-card border border-border rounded-lg overflow-hidden">
-              <table className="w-full text-[12px]">
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="text-[10px] text-muted-foreground bg-muted/30 border-b border-border">
                     <th className="text-left px-3 py-1.5 font-normal w-16">유형</th>

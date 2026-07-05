@@ -1133,7 +1133,7 @@ export function JobPostingTable() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="기업명 / 공고명"
-                  className="h-7 w-44 pl-6 text-[12px] border-border"
+                  className="h-7 w-44 pl-6 text-xs border-border"
                 />
               </div>
             </div>
@@ -1558,7 +1558,7 @@ export function JobPostingTable() {
               <div className="px-3 py-2.5 border-t border-border flex justify-center">
                 <button
                   onClick={() => setTableExpanded((p) => !p)}
-                  className="text-[12px] font-medium text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
                 >
                   {tableExpanded ? (
                     <>접기 <ChevronUp className="w-3.5 h-3.5" /></>

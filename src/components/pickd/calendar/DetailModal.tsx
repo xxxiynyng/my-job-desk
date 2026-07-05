@@ -75,7 +75,7 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
                     <div className="absolute -left-[5px] w-2.5 h-2.5 rounded-full border-2 border-border bg-background" />
                     <span className="text-[11px] tabular-nums text-muted-foreground w-20 shrink-0">{kd.date}</span>
                     <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                    <span className="text-[12px] font-medium text-foreground">{kd.label}</span>
+                    <span className="text-xs font-medium text-foreground">{kd.label}</span>
                   </div>
                 ))}
               </div>

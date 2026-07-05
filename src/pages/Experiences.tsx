@@ -902,10 +902,10 @@ export default function Experiences() {
               </div>
               {activeTab === "db" && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3 rounded-md" onClick={() => setImportOpen(true)}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => setImportOpen(true)}>
                     <Sparkles className="w-3 h-3" /> 자소서에서 추출
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-[12px] px-3 rounded-md" onClick={() => setExcelOpen(true)}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => setExcelOpen(true)}>
                     <Download className="w-3 h-3" /> Excel 내보내기
                   </Button>
                 </div>
@@ -937,7 +937,7 @@ export default function Experiences() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="항목명 검색"
-                      className="h-7 w-36 pl-6 text-[12px] border-border"
+                      className="h-7 w-36 pl-6 text-xs border-border"
                     />
                   </div>
                   {/* Filter */}
@@ -1120,7 +1120,7 @@ export default function Experiences() {
                       key={f}
                       onClick={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
                       className={cn(
-                        "px-3 py-2 text-[12px] flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
+                        "px-3 py-2 text-xs flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
                         activeFilter === f && view !== "paste"
                           ? "text-blue-600 font-semibold border-blue-500"
                           : "border-transparent text-muted-foreground hover:text-foreground",
