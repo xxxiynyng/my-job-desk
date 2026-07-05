@@ -34,7 +34,7 @@ const jobDetails: Record<string, any> = {
     deadlineDate: new Date("2026-04-20T23:59:00"),
     dday: 8, // TODO: MOCK_DATA - 실제 API 연결 시 getDday(job.deadline) 로 교체
     expired: false,
-    status: "서류 작성중",
+    status: "작성중",
     docsInProgress: [
       { id: "samsung-essay-1", name: "삼성전자 자기소개서", progress: 60 },
       { id: "samsung-resume", name: "삼성전자 이력서", progress: 100 },
