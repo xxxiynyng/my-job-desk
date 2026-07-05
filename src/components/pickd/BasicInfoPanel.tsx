@@ -14,8 +14,6 @@ import {
   INFO_FIELDS, INFO_DEFAULTS, DEFAULT_VISIBLE, LS_INFO_VALUES, LS_INFO_VISIBLE,
   INFO_VALUES_EVENT, type InfoKey,
 } from "@/data/basicInfoFields";
-import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
-import { ProfileCompletionCard } from "@/components/pickd/ProfileCompletionCard";
 
 // ── Types & constants ──────────────────────────────────────────
 // InfoKey / INFO_FIELDS / INFO_DEFAULTS / LS_INFO_VALUES 는 SSOT(@/data/basicInfoFields)로 이관.
@@ -118,11 +116,6 @@ export function BasicInfoPanel() {
     setInlineKey(k);
     setInlineDraft(infoValues[k] ?? "");
   };
-  // 완성도 카드 칩 → 비표시 필드면 표시에 추가 후 인라인 편집 열기(사용자가 직접 입력)
-  const fillField = (k: InfoKey) => {
-    if (!infoVisible.includes(k)) setInfoVisible((p) => [...p, k]);
-    startInline(k);
-  };
   const commitInline = () => {
     if (inlineKey) {
       setInfoValues((p) => ({ ...p, [inlineKey]: inlineDraft }));
@@ -194,12 +187,6 @@ export function BasicInfoPanel() {
     () => files.find((f) => f.kind === "증명사진" && f.id === basicPhotoId) ?? files.find((f) => f.kind === "증명사진"),
     [files, basicPhotoId],
   );
-
-  // 완성도 — 계산 로직 단일 출처(computeProfileCompletion). 라이브 state 기준으로 즉시 반영.
-  const completion  = computeProfileCompletion(infoValues, infoVisible);
-  const filledCount = completion.filled;
-  const totalCount  = completion.total;
-  const pct         = completion.pct;
 
   const visibleGroups = FIELD_GROUPS.map((g) => ({
     title: g.title,
@@ -273,13 +260,6 @@ export function BasicInfoPanel() {
         {!editMode && (
           <div className="pt-6 space-y-4">
 
-            {/* ── 완성도 카드(점진 수집) — 단일 출처 completion 공유 ── */}
-            <ProfileCompletionCard
-              completion={completion}
-              onFillField={fillField}
-              onFillAll={enterEdit}
-            />
-
             {/* ── 프로필 헤더 카드 ── */}
             <div className="bg-card border border-border rounded-2xl px-5 py-4 flex items-center gap-4">
               {photoShown && basicPhoto?.url ? (
@@ -305,13 +285,9 @@ export function BasicInfoPanel() {
                 </div>
               </div>
               <div className="shrink-0 text-right">
-                <div className="text-[11px] text-muted-foreground mb-1.5 tabular-nums">작성 완성도 {filledCount}/{totalCount}</div>
-                <div className="w-[150px] h-1.5 bg-muted rounded-full overflow-hidden ml-auto">
-                  <div className={cn("h-full rounded-full transition-all", pct === 100 ? "bg-emerald-500" : "bg-primary/70")} style={{ width: `${pct}%` }} />
-                </div>
                 <button
                   onClick={enterEdit}
-                  className="mt-2.5 text-[12px] text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
+                  className="text-[12px] text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
                 >
                   <Pencil className="w-3 h-3" /> 전체 편집
                 </button>
