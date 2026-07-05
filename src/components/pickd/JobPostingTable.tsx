@@ -1162,7 +1162,7 @@ export function JobPostingTable() {
                   )}
                   <span
                     className={cn(
-                      "text-micro font-bold tabular-nums px-1 py-px rounded-full leading-none",
+                      "text-mini font-bold tabular-nums px-1 py-px rounded-full leading-none",
                       activeFilter === f ? "bg-card/70 text-accent-foreground" : "bg-muted text-muted-foreground/70",
                     )}
                   >
