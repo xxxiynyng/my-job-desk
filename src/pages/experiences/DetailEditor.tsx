@@ -123,7 +123,7 @@ export function DetailEditor({
   const applySentence = (s: string) => {
     const next = (item.document ? item.document.trim() + "\n" : "") + s;
     update({ document: next });
-    toast.success("문장을 본문 끝에 추가했어요.");
+    toast.success("문장을 본문 끝에 추가했어요");
   };
   const onDropSentence = (e: React.DragEvent<HTMLTextAreaElement>) => {
     const text = e.dataTransfer.getData("text/plain");
@@ -165,7 +165,7 @@ export function DetailEditor({
                       onClick={() => {
                         if (t === item.type) return;
                         update({ type: t, fields: PRESETS[t].fields.map((f) => ({ ...f })) });
-                        toast.success(`유형이 ${t}(으)로 변경되었어요.`);
+                        toast.success(`유형을 ${t}(으)로 바꿨어요`);
                       }}
                     >
                       <span>{t}</span>
@@ -491,7 +491,7 @@ export function DetailEditor({
                 className="h-8 text-xs"
                 onClick={() => {
                   setMergeOpen(false);
-                  toast.success("합치기가 완료되었어요.");
+                  toast.success("합쳤어요");
                 }}
               >
                 합치기

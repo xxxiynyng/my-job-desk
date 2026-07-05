@@ -750,7 +750,7 @@ export default function Experiences() {
   const deleteItems = (ids: string[]) => {
     setItems((p) => p.filter((i) => !ids.includes(i.id)));
     setSelected(new Set());
-    toast.success(`${ids.length}개 항목이 삭제되었어요.`);
+    toast.success(`${ids.length}개 항목을 삭제했어요`);
   };
   const confirmDelete = (ids: string[]) => {
     setPendingDeleteIds(ids);
@@ -1525,7 +1525,7 @@ export default function Experiences() {
                     setItems((p) => [...newItems, ...p]);
                     setExtractDoneOpen(false);
                     setCheckedCandidates(new Set(EXTRACT_MOCK_CANDIDATES.map((c) => c.id)));
-                    toast.success(`${newItems.length}개의 경험이 추가되었어요.`);
+                    toast.success(`${newItems.length}개 경험을 추가했어요`);
                   }}
                 >
                   선택 저장하기

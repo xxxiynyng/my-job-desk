@@ -97,7 +97,7 @@ export function CopyGenerator({
               className="h-7 text-chip"
               onClick={() => {
                 navigator.clipboard.writeText(text);
-                toast.success("복사했어요.");
+                toast.success("복사했어요");
               }}
             >
               <Copy className="w-3 h-3" /> 복사하기
