@@ -138,7 +138,7 @@ export function StatusManagementModal({
                 <Building2 className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-[15px] font-semibold text-foreground leading-tight">{job.company}</h2>
+                <h2 className="text-title font-semibold text-foreground leading-tight">{job.company}</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {job.title} · {job.role}
                 </p>

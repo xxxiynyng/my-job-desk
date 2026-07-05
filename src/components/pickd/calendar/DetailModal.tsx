@@ -37,7 +37,7 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="min-w-0">
               <p className="text-chip text-muted-foreground mb-0.5">{app.company}</p>
-              <h2 className="text-[15px] font-bold text-foreground leading-tight">{app.position}</h2>
+              <h2 className="text-title font-bold text-foreground leading-tight">{app.position}</h2>
             </div>
             <Badge className={cn("text-chip h-6 px-2 border-0 shrink-0 mt-0.5", getDdayStyle(dd))}>
               {dd < 0 ? "마감" : `D-${dd}`}

@@ -233,7 +233,7 @@ function SectionHeader({
     <div className="flex items-end justify-between mb-3">
       <div className="flex items-center gap-2">
         <Icon className="w-4 h-4 text-muted-foreground" />
-        <h2 className="text-[15px] font-semibold text-foreground tracking-tight">{title}</h2>
+        <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
         {subtitle && <span className="text-chip text-muted-foreground ml-1">{subtitle}</span>}
       </div>
       {rightSlot}

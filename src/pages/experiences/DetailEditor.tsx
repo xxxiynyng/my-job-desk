@@ -178,7 +178,7 @@ export function DetailEditor({
             <input
               value={item.name}
               onChange={(e) => update({ name: e.target.value })}
-              className="text-[16px] font-semibold text-foreground bg-transparent w-full focus:outline-none"
+              className="text-title font-semibold text-foreground bg-transparent w-full focus:outline-none"
             />
           </div>
           <div className="flex items-center gap-2 shrink-0">
