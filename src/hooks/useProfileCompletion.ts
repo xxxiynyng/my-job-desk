@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import {
   INFO_FIELDS,
   INFO_DEFAULTS,
+  CORE_KEYS,
+  DEFAULT_VISIBLE,
   LS_INFO_VALUES,
+  LS_INFO_VISIBLE,
   INFO_VALUES_EVENT,
   type InfoKey,
 } from "@/data/basicInfoFields";
@@ -31,13 +34,31 @@ function readValues(): Record<string, string> {
   }
 }
 
-/** 순수 계산 — 완성도 로직 단일 출처. values는 기본값 병합된 Record<InfoKey,string>. */
-export function computeProfileCompletion(values: Record<string, string>): ProfileCompletion {
-  const incomplete = INFO_FIELDS.filter((f) => !(values[f.key] || "").trim());
-  const total = INFO_FIELDS.length;
+function readVisibleKeys(): InfoKey[] {
+  try {
+    const raw = localStorage.getItem(LS_INFO_VISIBLE);
+    return raw ? (JSON.parse(raw) as InfoKey[]) : DEFAULT_VISIBLE;
+  } catch {
+    return DEFAULT_VISIBLE;
+  }
+}
+
+/**
+ * 순수 계산 — 완성도 로직 단일 출처.
+ * 분모 = 코어 필드 ∪ 표시(visible) 필드 (하이브리드). 코어는 표시 여부와 무관하게 항상 포함.
+ * values는 기본값 병합된 Record<InfoKey,string>, visibleKeys는 사용자가 표시하기로 한 필드.
+ */
+export function computeProfileCompletion(
+  values: Record<string, string>,
+  visibleKeys: InfoKey[],
+): ProfileCompletion {
+  const denomKeys = new Set<InfoKey>([...CORE_KEYS, ...visibleKeys]);
+  const fields = INFO_FIELDS.filter((f) => denomKeys.has(f.key));
+  const incomplete = fields.filter((f) => !(values[f.key] || "").trim());
+  const total = fields.length;
   const filled = total - incomplete.length;
   return {
-    pct: Math.round((filled / total) * 100),
+    pct: total ? Math.round((filled / total) * 100) : 100,
     filled,
     total,
     incomplete,
@@ -51,14 +72,19 @@ export function computeProfileCompletion(values: Record<string, string>): Profil
  * BasicInfoPanel이 값 저장 시 INFO_VALUES_EVENT를 쏘면 즉시 재계산된다.
  */
 export function useProfileCompletion(): ProfileCompletion {
-  const [state, setState] = useState<ProfileCompletion>(() => computeProfileCompletion(readValues()));
+  const [state, setState] = useState<ProfileCompletion>(() =>
+    computeProfileCompletion(readValues(), readVisibleKeys()),
+  );
 
-  const refresh = useCallback(() => setState(computeProfileCompletion(readValues())), []);
+  const refresh = useCallback(
+    () => setState(computeProfileCompletion(readValues(), readVisibleKeys())),
+    [],
+  );
 
   useEffect(() => {
     // 같은 문서 내 편집(BasicInfoPanel) + 다른 탭 편집(storage) 모두 반영
     const onStorage = (e: StorageEvent) => {
-      if (e.key === null || e.key === LS_INFO_VALUES) refresh();
+      if (e.key === null || e.key === LS_INFO_VALUES || e.key === LS_INFO_VISIBLE) refresh();
     };
     window.addEventListener(INFO_VALUES_EVENT, refresh);
     window.addEventListener("storage", onStorage);

@@ -64,6 +64,19 @@ export const INFO_DEFAULTS: Record<InfoKey, string> = {
 };
 
 export const LS_INFO_VALUES = "specs.info.values.v2";
+export const LS_INFO_VISIBLE = "specs.info.visibleKeys.v4";
+
+/** 표시 필드 기본 세트 — 사용자가 visibleKeys를 저장하기 전 기본값 */
+export const DEFAULT_VISIBLE: InfoKey[] = [
+  "name", "engName", "birth", "email", "phone", "address",
+  "school", "major", "grade", "military", "driverLicense",
+];
+
+/**
+ * 코어 필드 — 표시(visible) 여부와 무관하게 완성도 분모에 항상 포함하는 항상 필요한 집합.
+ * 완성도 = 채워진 분모 필드 / (코어 ∪ 표시 필드).
+ */
+export const CORE_KEYS: InfoKey[] = ["name", "email", "phone", "school", "major"];
 
 /** 기본정보 값이 바뀔 때 같은 문서 내 컴포넌트에 즉시 알리는 커스텀 이벤트명 */
 export const INFO_VALUES_EVENT = "pickd:infoValues";

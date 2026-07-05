@@ -11,7 +11,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
-  INFO_FIELDS, INFO_DEFAULTS, LS_INFO_VALUES, INFO_VALUES_EVENT, type InfoKey,
+  INFO_FIELDS, INFO_DEFAULTS, DEFAULT_VISIBLE, LS_INFO_VALUES, LS_INFO_VISIBLE,
+  INFO_VALUES_EVENT, type InfoKey,
 } from "@/data/basicInfoFields";
 import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileCompletionCard } from "@/components/pickd/ProfileCompletionCard";
@@ -41,14 +42,8 @@ const GROUP_ICON: Record<string, LucideIcon> = {
 // 프로필 헤더에 대표로 노출하는 필드 — 섹션 카드에서는 제외(중복 방지)
 const HEADER_KEYS: InfoKey[] = ["name", "hanjaName", "engName"];
 
-const DEFAULT_VISIBLE: InfoKey[] = [
-  "name", "engName", "birth", "email", "phone", "address",
-  "school", "major", "grade", "military", "driverLicense",
-];
-
 type FileItem = { id: string; kind: string; name: string; fileKind: "pdf" | "image"; url?: string };
 
-const LS_INFO_VISIBLE = "specs.info.visibleKeys.v4";
 const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
 const LS_PHOTO_ID     = "specs.basicPhoto.id";
 const LS_FILES        = "specs.files.v1";
@@ -137,7 +132,11 @@ export function BasicInfoPanel() {
   };
   const cancelInline = () => setInlineKey(null);
 
-  useEffect(() => lsSet(LS_INFO_VISIBLE, infoVisible), [infoVisible]);
+  useEffect(() => {
+    lsSet(LS_INFO_VISIBLE, infoVisible);
+    // 표시 필드가 완성도 분모에 영향 → 훅(배너·카드)에 즉시 반영
+    window.dispatchEvent(new CustomEvent(INFO_VALUES_EVENT));
+  }, [infoVisible]);
   useEffect(() => {
     lsSet(LS_INFO_VALUES, infoValues);
     // 완성도 훅(대시보드 배너·탭2 카드)에 즉시 반영
@@ -197,7 +196,7 @@ export function BasicInfoPanel() {
   );
 
   // 완성도 — 계산 로직 단일 출처(computeProfileCompletion). 라이브 state 기준으로 즉시 반영.
-  const completion  = computeProfileCompletion(infoValues);
+  const completion  = computeProfileCompletion(infoValues, infoVisible);
   const filledCount = completion.filled;
   const totalCount  = completion.total;
   const pct         = completion.pct;
