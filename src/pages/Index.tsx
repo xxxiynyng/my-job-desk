@@ -3,6 +3,7 @@ import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { DashboardHeader } from "@/components/pickd/DashboardHeader";
 import { QuickJobRegistration } from "@/components/pickd/QuickJobRegistration";
 import { JobPostingTable } from "@/components/pickd/JobPostingTable";
+import { ProfileCompletionBanner } from "@/components/pickd/ProfileCompletionBanner";
 import { TodayPanel } from "@/components/pickd/TodayPanel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const Index = () => {
           <div className="max-w-[1320px] w-full mx-auto flex flex-col gap-6">
             <DashboardHeader />
             <QuickJobRegistration />
+            <ProfileCompletionBanner />
             <JobPostingTable />
           </div>
         </div>
