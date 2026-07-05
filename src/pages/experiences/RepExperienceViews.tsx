@@ -236,6 +236,7 @@ export function InfoRow({
         <div className="flex items-center gap-1 min-w-0">
           {hidden ? (
             <button
+              aria-label="값 보기"
               onClick={onReveal}
               className="inline-flex items-center text-muted-foreground/60 hover:text-foreground -mx-1 px-1 py-0.5 rounded transition-colors"
             >
@@ -251,6 +252,7 @@ export function InfoRow({
             </button>
           )}
           <button
+            aria-label="편집"
             onClick={() => setEditing(true)}
             className="p-0.5 rounded text-muted-foreground/70 hover:text-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
           >
@@ -258,6 +260,7 @@ export function InfoRow({
           </button>
           {onToggleHidden && (
             <button
+              aria-label={hidden ? "값 보기" : "값 가리기"}
               onClick={onToggleHidden}
               className="p-0.5 rounded text-muted-foreground/70 hover:text-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
             >

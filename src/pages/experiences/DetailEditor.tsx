@@ -234,7 +234,7 @@ export function DetailEditor({
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="text-chip p-1.5 rounded hover:bg-muted text-muted-foreground">
+                <button aria-label="더 보기" className="text-chip p-1.5 rounded hover:bg-muted text-muted-foreground">
                   <MoreHorizontal className="w-3.5 h-3.5" />
                 </button>
               </DropdownMenuTrigger>

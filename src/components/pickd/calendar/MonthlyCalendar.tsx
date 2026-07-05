@@ -145,9 +145,9 @@ export function MonthlyCalendar({
       {/* Header */}
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevMonth}><ChevronLeft size={16} /></Button>
+          <Button aria-label="이전 달" variant="ghost" size="icon" className="h-8 w-8" onClick={prevMonth}><ChevronLeft size={16} /></Button>
           <h2 className="text-lg font-semibold text-foreground">{year}년 {MONTHS_KO[month]}</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={nextMonth}><ChevronRight size={16} /></Button>
+          <Button aria-label="다음 달" variant="ghost" size="icon" className="h-8 w-8" onClick={nextMonth}><ChevronRight size={16} /></Button>
         </div>
         <div className="flex items-center gap-2">
           <Button variant={viewMode === "month" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => onViewModeChange("month")}>월간</Button>

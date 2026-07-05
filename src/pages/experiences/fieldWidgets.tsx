@@ -102,7 +102,7 @@ export function FieldRow({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="opacity-0 group-hover/value:opacity-100 p-1 rounded hover:bg-muted text-muted-foreground shrink-0">
+            <button aria-label="필드 메뉴" className="opacity-0 group-hover/value:opacity-100 p-1 rounded hover:bg-muted text-muted-foreground shrink-0">
               <MoreHorizontal className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
@@ -300,6 +300,7 @@ export function KeywordEditor({ keywords, onChange }: { keywords: string[]; onCh
         >
           {k}
           <button
+            aria-label={`키워드 ${k} 삭제`}
             onClick={() => onChange(keywords.filter((x) => x !== k))}
             className="text-muted-foreground hover:text-foreground"
           >
