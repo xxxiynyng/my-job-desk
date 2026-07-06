@@ -1,15 +1,16 @@
 /**
- * Onboarding.tsx — Pickd 온보딩 v2.1 (하이브리드: 필수 2단계 + 점진 수집)
+ * Onboarding.tsx — Pickd 온보딩 v2.2 (하이브리드: 필수 3단계 + 점진 수집)
  *
- * v2 → v2.1
- * - 데이터셋 분리·확장: onboardingData.ts (학교 118, 전공 100+, 직무 12군 78종, 산업 16) — DATA_VERSION 관리
- * - 관심 직무 검색: 카테고리 트리 + 전체 직무 검색 필드
- * - 졸업년도 동적 생성(현재년도 ±6), 프로필 타입(PickdProfileV1) 적용
- * - 디자인 폴리시: 입력 포커스 링 통일, 픽 카드 칩 +N 캡, 선택 직무 요약 칩
+ * v2.1 → v2.2 (기획 트랙 확정 반영)
+ * - 정보등록 2단계 → 3단계: [1/3] 나 · [2/3] 픽 · [3/3] 추천 맞춤 설정(선택·건너뛰기)
+ * - 졸업(예정) 시기 = 년 + 월(2/8월) 함께 수집, 재학생 "아직 미정" 옵션(pending 이관)
+ * - 전공 "해당 없음" 옵션 / 예상 매칭 공고 수 표시 삭제
+ * - 완료 화면은 픽 카드 + 시작 버튼만
  *
- * 통합 규칙 (CLAUDE.md · 디자인 시스템 SSOT)
- * - 페이지 default export / 보조 named export, sonner "~어요" 체, 데스크톱 전용
- * - shadcn 시맨틱 토큰만 사용 / radius: 버튼·입력 rounded-lg(8px), 카드 rounded-xl(12px), 선택 칩 pill
+ * 디자인 트랙 확정 반영
+ * - 로고 = 브랜드 마크(logo-mark.svg), 이모지 → lucide 아이콘
+ * - 픽 카드 = 흰 카드 + 헤어라인 보더(솔리드 블루 폐기), 칩은 무채색 태그칩
+ * - font-bold(800 제거), warm-white 배경, shadcn 시맨틱 토큰만
  *
  * localStorage 키 — v1과 호환
  * - pickd.onboarding.state.v1 / pickd.onboarding.done.v1 / pickd.profile.v1 / specs.info.values.v2
@@ -19,10 +20,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, ChevronLeft, ClipboardList, Layers, Search, Sparkles, X } from "lucide-react";
+import {
+  CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
+  MapPin, Search, Sparkles, User, X, type LucideIcon,
+} from "lucide-react";
 import {
   CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
-  PERSONAS, REGIONS, SCHOOLS, STUDENT_PERSONAS, TIMINGS, gradYears, type PickdProfileV1,
+  PERSONAS, REGIONS, SCHOOLS, TIMINGS, gradYears, type PickdProfileV1,
 } from "./onboardingData";
 
 const LS = {
@@ -32,8 +36,8 @@ const LS = {
   infoValues: "specs.info.values.v2",
 } as const;
 
-type Step = "login" | "terms" | "me" | "pick" | "complete";
-const ONB_STEPS: Step[] = ["me", "pick"];
+type Step = "login" | "terms" | "me" | "pick" | "tune" | "complete";
+const ONB_STEPS: Step[] = ["me", "pick", "tune"];
 
 interface OnbState {
   step: Step;
@@ -45,7 +49,10 @@ interface OnbState {
   careerYears: string;
   school: string;
   major: string;
+  majorNA: boolean;
   gradY: string;
+  gradM: string;
+  gradUndecided: boolean;
   jobCat: string;
   jobs: string[];
   inds: string[];
@@ -59,7 +66,8 @@ const INITIAL: OnbState = {
   googleEmail: "", googleName: "",
   agree: { age: false, tos: false, priv: false, mkt: false },
   nickname: "", persona: "", careerYears: "",
-  school: "", major: "", gradY: "",
+  school: "", major: "", majorNA: false,
+  gradY: "", gradM: "", gradUndecided: false,
   jobCat: Object.keys(JOB_TREE)[0], jobs: [], inds: [], timing: "",
   workRegions: [],
   docs: { resume: false, essay: false, portfolio: false },
@@ -120,7 +128,6 @@ function useGoogleLogin(onSuccess: (email: string, name: string) => void) {
 export default function Onboarding() {
   const navigate = useNavigate();
   const [s, setS] = useState<OnbState>(loadState);
-  const [boostOpen, setBoostOpen] = useState(false);
   const [jobQuery, setJobQuery] = useState("");
   const nickRef = useRef<HTMLInputElement>(null);
 
@@ -142,22 +149,19 @@ export default function Onboarding() {
   };
 
   /* ── 파생 상태 ── */
-  const isStudent = STUDENT_PERSONAS.includes(s.persona);
   const isCareer = s.persona === "경력";
+  const needsGrad = !!s.persona && !isCareer;       // 재학·휴학·졸업예정·졸업
   const nickOk = s.nickname.trim().length >= 2;
+  const gradOk = s.gradUndecided || (!!s.gradY && !!s.gradM);
   const valid: Record<Step, boolean> = {
     login: true,
     terms: s.agree.age && s.agree.tos && s.agree.priv,
-    me: nickOk && !!s.persona && !!s.school && !!s.major && (!isStudent || !!s.gradY) && (!isCareer || !!s.careerYears),
+    me: nickOk && !!s.persona && !!s.school && (s.majorNA || !!s.major)
+      && (!needsGrad || gradOk) && (!isCareer || !!s.careerYears),
     pick: s.jobs.length > 0 && s.inds.length > 0 && !!s.timing,
+    tune: true,
     complete: true,
   };
-
-  // 예상 매칭 공고 수 — 입력의 즉시 보상 (결정적 의사값, 백엔드 연동 시 교체 지점)
-  const matchCount = useMemo(() => {
-    if (s.jobs.length === 0) return 0;
-    return s.jobs.length * 34 + s.inds.length * 11 + (s.timing ? 8 : 0);
-  }, [s.jobs, s.inds, s.timing]);
 
   // 직무 검색 결과 (카테고리 횡단)
   const jobHits = useMemo(() => {
@@ -170,15 +174,16 @@ export default function Onboarding() {
     return hits.slice(0, 20);
   }, [jobQuery]);
 
+  // 픽 카드 칩 (아이콘 + 텍스트, 이모지 미사용)
   const pickChips = useMemo(() => {
-    const c: string[] = [];
-    if (s.persona) c.push(`👤 ${s.persona}${isCareer && s.careerYears ? ` ${s.careerYears}` : ""}`);
-    if (s.school) c.push(`🎓 ${s.school}`);
-    if (s.major) c.push(s.major);
-    s.jobs.forEach(j => c.push(j));
-    s.inds.forEach(i => c.push(`#${i}`));
-    if (s.timing) c.push(`🗓 ${s.timing}`);
-    s.workRegions.forEach(r => c.push(`📍 ${r}`));
+    const c: { icon?: LucideIcon; text: string }[] = [];
+    if (s.persona) c.push({ icon: User, text: `${s.persona}${isCareer && s.careerYears ? ` ${s.careerYears}` : ""}` });
+    if (s.school) c.push({ icon: GraduationCap, text: s.school });
+    if (!s.majorNA && s.major) c.push({ text: s.major });
+    s.jobs.forEach(j => c.push({ text: j }));
+    s.inds.forEach(i => c.push({ text: `#${i}` }));
+    if (s.timing) c.push({ icon: CalendarDays, text: s.timing });
+    s.workRegions.forEach(r => c.push({ icon: MapPin, text: r }));
     return c;
   }, [s, isCareer]);
 
@@ -192,14 +197,13 @@ export default function Onboarding() {
     fill("name", s.nickname);
     fill("email", s.googleEmail);
     fill("school", s.school);
-    fill("major", s.major);
+    fill("major", s.majorNA ? "" : s.major);
     fill("gradYear", s.gradY);
     localStorage.setItem(LS.infoValues, JSON.stringify(merged));
 
     // 2) 점진 수집 대상 계산 (온보딩에서 받지 않은 항목)
     const pending: string[] = ["degree", "gpa", "region", "corps", "focus"];
-    if (isStudent) pending.push("gradM");
-    if (!s.gradY) pending.push("gradY");
+    if (s.gradUndecided) pending.push("gradY", "gradM");   // 졸업 시기 미정 → 나중에 회수
     if (s.workRegions.length === 0) pending.push("workRegions");
     if (!s.docs.resume && !s.docs.essay && !s.docs.portfolio) pending.push("docs");
 
@@ -214,6 +218,8 @@ export default function Onboarding() {
       career: isCareer ? "경력" : "신입",               // v1 career 소비처 호환
       careerYears: s.careerYears,
       gradY: s.gradY,
+      gradM: s.gradM,
+      gradUndecided: s.gradUndecided,
       jobs: s.jobs, industries: s.inds,
       timing: s.timing,
       workRegions: s.workRegions, docs: s.docs,
@@ -229,7 +235,7 @@ export default function Onboarding() {
     localStorage.removeItem(LS.state);
     toast.success("픽 카드를 저장했어요");
     navigate("/", { replace: true });
-  }, [s, isCareer, isStudent, navigate]);
+  }, [s, isCareer, navigate]);
 
   /* ─────────────────────── 공통 UI 조각 ─────────────────────── */
 
@@ -238,48 +244,53 @@ export default function Onboarding() {
     return (
       <div className="mb-8 flex items-center gap-3">
         <div className="flex flex-1 gap-1.5">
-          {[0, 1].map(i => (
-            <span key={i} className={cn("h-1 flex-1 rounded-full transition-colors", i <= idx ? "bg-primary" : "bg-muted")} />
+          {[0, 1, 2].map(i => (
+            <span key={i} className={cn("h-[3px] flex-1 rounded-full transition-colors", i <= idx ? "bg-primary" : "bg-muted")} />
           ))}
         </div>
-        <span className="text-xs font-bold text-muted-foreground">{idx + 1} / 2</span>
+        <span className="text-xs font-bold text-muted-foreground">{idx + 1} / 3{s.step === "tune" ? " · 선택" : ""}</span>
       </div>
     );
   };
 
   const CHIP_CAP = 12;
-  const PickCard = ({ standalone = false }: { standalone?: boolean }) => (
+  const PickCard = ({ standalone = false, done = false }: { standalone?: boolean; done?: boolean }) => (
     <aside
       aria-label="내 픽 카드"
       className={cn(
-        "rounded-xl bg-primary text-primary-foreground p-6 shadow-lg",
+        "rounded-xl border border-border bg-card p-5",
         standalone ? "w-[360px]" : "w-[300px] sticky top-6 shrink-0"
       )}
     >
-      <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wide opacity-85">
-        <Sparkles className="h-3.5 w-3.5" /> MY PICK CARD
-      </h3>
-      <div className="mt-2 min-h-[28px] text-xl font-extrabold">{s.nickname ? `${s.nickname}님` : " "}</div>
-      {matchCount > 0 ? (
-        <div className="text-xs opacity-90">지금 조건에 맞는 공고 <b>{matchCount}건</b>을 찾았어요</div>
-      ) : (
-        <div className="text-xs opacity-70">입력할수록 공고 추천이 정확해져요</div>
-      )}
+      <div className="flex items-center justify-between">
+        <h3 className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 text-primary" /> 내 픽 카드
+        </h3>
+        {done && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
+            <Check className="h-3 w-3" /> 완성
+          </span>
+        )}
+      </div>
+      <div className="mt-2 min-h-[26px] text-lg font-bold text-foreground">{s.nickname ? `${s.nickname}님` : " "}</div>
+      <div className="text-xs text-muted-foreground">입력할수록 공고 추천이 정확해져요</div>
       <div className="mt-4 flex min-h-[32px] flex-wrap gap-1.5">
         {pickChips.length === 0 ? (
-          <span className="py-1 text-xs opacity-60">아직 담긴 정보가 없어요</span>
+          <span className="py-1 text-xs text-muted-foreground">아직 담긴 정보가 없어요</span>
         ) : (
           <>
-            {pickChips.slice(0, CHIP_CAP).map(c => (
-              <span key={c} className="rounded-full border border-primary-foreground/30 bg-primary-foreground/15 px-2.5 py-1 text-xs">{c}</span>
+            {pickChips.slice(0, CHIP_CAP).map((ch, i) => (
+              <span key={i} className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/60 px-2 py-1 text-[11px] text-muted-foreground">
+                {ch.icon && <ch.icon className="h-3 w-3" />}{ch.text}
+              </span>
             ))}
             {pickChips.length > CHIP_CAP && (
-              <span className="rounded-full bg-primary-foreground/25 px-2.5 py-1 text-xs font-bold">+{pickChips.length - CHIP_CAP}</span>
+              <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-bold text-muted-foreground">+{pickChips.length - CHIP_CAP}</span>
             )}
           </>
         )}
       </div>
-      <div className="mt-4 border-t border-primary-foreground/20 pt-3 text-chip leading-relaxed opacity-75">
+      <div className="mt-4 border-t border-border pt-3 text-[11px] leading-relaxed text-muted-foreground">
         여기 담긴 정보는 전부 내 자산이 돼요.<br />언제든 마이페이지에서 수정할 수 있어요.
       </div>
     </aside>
@@ -291,7 +302,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={() => go(prev)}
-          className="rounded-lg border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:border-foreground/30"
+          className="rounded-lg border border-border bg-background px-5 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30"
         >
           <ChevronLeft className="-ml-1 mr-0.5 inline h-4 w-4" />이전
         </button>
@@ -300,14 +311,14 @@ export default function Onboarding() {
           disabled={!ok}
           onClick={() => go(next)}
           className={cn(
-            "flex-1 rounded-lg px-5 py-3 text-sm font-bold transition-colors",
+            "flex-1 rounded-lg px-5 py-3 text-sm font-semibold transition-colors",
             ok ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
           다음
         </button>
       </div>
-      {!ok && <p className="mt-2 text-right text-xs text-muted-foreground">{reason}</p>}
+      {!ok && reason && <p className="mt-2 text-right text-xs text-muted-foreground">{reason}</p>}
     </div>
   );
 
@@ -316,7 +327,7 @@ export default function Onboarding() {
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3.5 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+        "rounded-full border px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
         on ? "border-primary bg-primary/10 font-semibold text-primary" : "border-border bg-background hover:border-primary/50"
       )}
     >
@@ -331,6 +342,7 @@ export default function Onboarding() {
     </div>
   );
 
+  const linkBtnCls = "text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary";
   const inputCls = "w-full rounded-lg border border-border bg-background px-3.5 py-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15";
 
   /* ─────────────────────────── 단계별 화면 ─────────────────────────── */
@@ -395,12 +407,12 @@ export default function Onboarding() {
       <Shell>
         <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-8">
           <p className="mb-2 text-xs font-bold text-primary">시작하기 전에</p>
-          <h1 className="text-2xl font-extrabold leading-snug">서비스 이용을 위해<br />약관에 동의해 주세요</h1>
+          <h1 className="text-[26px] font-bold leading-snug tracking-tight">서비스 이용을 위해<br />약관에 동의해 주세요</h1>
           <div className="mt-6 space-y-1">
             <button
               type="button"
               onClick={() => { const v = !all; up({ agree: { age: v, tos: v, priv: v, mkt: v } }); }}
-              className="flex w-full items-center gap-3 rounded-lg border border-primary bg-primary/10 px-4 py-3.5 text-sm font-extrabold"
+              className="flex w-full items-center gap-3 rounded-lg border border-primary bg-primary/10 px-4 py-3.5 text-sm font-bold"
             >
               <CheckBox on={all} /> 전체 동의할게요
             </button>
@@ -421,79 +433,35 @@ export default function Onboarding() {
   }
 
   if (s.step === "complete") {
-    const boostDone = s.workRegions.length > 0 || s.docs.resume || s.docs.essay || s.docs.portfolio;
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10">
-        <PickCard standalone />
-        <h1 className="mt-8 text-2xl font-extrabold">픽 카드 완성! 🎉</h1>
+        <PickCard standalone done />
+        <h1 className="mt-7 text-[22px] font-bold tracking-tight">픽 카드 완성!</h1>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          {matchCount > 0 ? <>맞는 공고 <b className="text-foreground">{matchCount}건</b>이 기다리고 있어요.</> : "이 정보로 맞춤 공고를 찾아드릴게요."}
-          <br />나머지 정보는 쓰면서 채워도 충분해요.
+          이 정보로 맞춤 공고를 찾아드릴게요.<br />나머지 정보는 쓰면서 채워도 충분해요.
         </p>
-
-        {/* 선택 부스트 — 건너뛰어도 시작 가능 */}
-        <div className="mt-6 w-[360px] rounded-xl border border-border bg-card">
-          <button
-            type="button"
-            onClick={() => setBoostOpen(o => !o)}
-            className="flex w-full items-center justify-between px-5 py-3.5 text-sm font-bold"
-          >
-            <span>⚡ 30초 부스트 <span className="ml-1 text-xs font-semibold text-muted-foreground">선택 · 추천이 더 정확해져요</span></span>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", boostOpen && "rotate-180")} />
-          </button>
-          {boostOpen && (
-            <div className="space-y-4 border-t border-border px-5 py-4">
-              <div>
-                <Label right={<span className="text-xs text-muted-foreground">최대 3개</span>}>희망 근무 지역</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {REGIONS.map(r => (
-                    <Chip key={r} on={s.workRegions.includes(r)} onClick={() => up({ workRegions: toggleIn(s.workRegions, r, 3) })}>{r}</Chip>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label>이미 갖고 있는 자료</Label>
-                <div className="space-y-2">
-                  {([["resume", "이력서"], ["essay", "자기소개서"], ["portfolio", "포트폴리오"]] as const).map(([k, l]) => (
-                    <div key={k} className="flex items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm">
-                      {l}
-                      <button
-                        type="button" role="switch" aria-checked={s.docs[k]} aria-label={`${l} 보유`}
-                        onClick={() => up({ docs: { ...s.docs, [k]: !s.docs[k] } })}
-                        className={cn("relative h-6 w-11 rounded-full transition-colors", s.docs[k] ? "bg-primary" : "bg-muted")}
-                      >
-                        <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-all", s.docs[k] ? "left-[22px]" : "left-0.5")} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
         <button
           type="button"
           onClick={finish}
-          className="mt-6 w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-7 w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          {boostDone ? "Pickd 시작하기" : "이대로 시작하기"}
+          Pickd 시작하기
         </button>
       </div>
     );
   }
 
-  /* ── 정보등록 2단계 (공통 2단 레이아웃: 폼 + 픽 카드) ── */
+  /* ── 정보등록 3단계 (공통 2단 레이아웃: 폼 + 픽 카드) ── */
   return (
     <Shell>
       <Progress />
       <div className="flex items-start gap-8">
-        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-8">
+        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-6">
 
           {s.step === "me" && (
             <>
               <StepHead n={1} q="먼저, 어떻게 불러드릴까요?" sub="학점·거주지역 같은 건 나중에 채워도 돼요. 딱 필요한 것만 물어볼게요." />
-              <div className="mt-6 space-y-5">
+              <div className="mt-5 space-y-5">
                 <div>
                   <Label>닉네임</Label>
                   <input
@@ -511,10 +479,14 @@ export default function Onboarding() {
                     {PERSONAS.map((p, i) => (
                       <button
                         key={p} type="button"
-                        onClick={() => up({ persona: p, careerYears: p === "경력" ? s.careerYears : "", gradY: STUDENT_PERSONAS.includes(p) ? s.gradY : "" })}
+                        onClick={() => up({
+                          persona: p,
+                          careerYears: p === "경력" ? s.careerYears : "",
+                          ...(p === "경력" ? { gradY: "", gradM: "", gradUndecided: false } : {}),
+                        })}
                         className={cn(
-                          "flex-1 py-2.5 text-sm transition-colors", i > 0 && "border-l border-border",
-                          s.persona === p ? "bg-primary font-bold text-primary-foreground" : "bg-background hover:bg-muted"
+                          "h-10 flex-1 text-sm transition-colors", i > 0 && "border-l border-border",
+                          s.persona === p ? "bg-primary font-bold text-primary-foreground" : "bg-background hover:bg-accent"
                         )}
                       >
                         {p}
@@ -537,32 +509,62 @@ export default function Onboarding() {
                     <AutoComplete value={s.school} placeholder="학교명 검색" pool={SCHOOLS} onChange={v => up({ school: v })} inputCls={inputCls} />
                   </div>
                   <div>
-                    <Label>전공</Label>
-                    <AutoComplete value={s.major} placeholder="전공 검색" pool={MAJORS} onChange={v => up({ major: v })} inputCls={inputCls} />
+                    <Label right={
+                      <button type="button" className={linkBtnCls} onClick={() => up({ majorNA: !s.majorNA, major: "" })}>
+                        {s.majorNA ? "전공 입력" : "해당 없음"}
+                      </button>
+                    }>전공</Label>
+                    {s.majorNA ? (
+                      <div className={cn(inputCls, "flex items-center text-muted-foreground")}>전공 없이 진행해요</div>
+                    ) : (
+                      <AutoComplete value={s.major} placeholder="전공 검색" pool={MAJORS} onChange={v => up({ major: v })} inputCls={inputCls} />
+                    )}
                   </div>
                 </div>
                 <p className="-mt-3 text-xs text-muted-foreground">목록에 없다면 그대로 입력해도 돼요.</p>
-                {isStudent && (
+                {needsGrad && (
                   <div>
-                    <Label>졸업 예정 년도</Label>
-                    <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
-                      <option value="">선택해 주세요</option>
-                      {gradYears().map(y => <option key={y}>{y}</option>)}
-                    </select>
+                    <Label right={
+                      <button type="button" className={linkBtnCls} onClick={() => up({ gradUndecided: !s.gradUndecided, gradY: "", gradM: "" })}>
+                        {s.gradUndecided ? "직접 입력" : "아직 미정"}
+                      </button>
+                    }>졸업(예정) 시기</Label>
+                    {s.gradUndecided ? (
+                      <p className="text-xs text-muted-foreground">아직 미정이에요 — 나중에 알려주셔도 돼요.</p>
+                    ) : (
+                      <div className="flex gap-2.5">
+                        <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
+                          <option value="">년도</option>
+                          {gradYears().map(y => <option key={y}>{y}</option>)}
+                        </select>
+                        <div className="flex shrink-0 overflow-hidden rounded-lg border border-border">
+                          {["2", "8"].map((m, i) => (
+                            <button
+                              key={m} type="button" onClick={() => up({ gradM: m })}
+                              className={cn(
+                                "h-full px-5 text-sm transition-colors", i > 0 && "border-l border-border",
+                                s.gradM === m ? "bg-primary font-bold text-primary-foreground" : "bg-background hover:bg-accent"
+                              )}
+                            >
+                              {m}월
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-              <NavRow prev="terms" next="pick" ok={valid.me} reason="닉네임·상태·학교·전공을 입력하면 계속할 수 있어요" />
+              <NavRow prev="terms" next="pick" ok={valid.me} reason="닉네임·상태·학교·전공·졸업 시기를 입력하면 계속할 수 있어요" />
             </>
           )}
 
           {s.step === "pick" && (
             <>
               <StepHead n={2} q="어떤 일을 하고 싶으세요?" sub="이 선택으로 공고 적합도를 계산하고 맞춤 추천을 만들어요." />
-              <div className="mt-6 space-y-5">
+              <div className="mt-5 space-y-5">
                 <div>
                   <Label right={<span className="text-xs text-muted-foreground">1~5개 · 선택 {s.jobs.length}</span>}>관심 직무</Label>
-                  {/* 직무 검색 — 카테고리 횡단 */}
                   <div className="relative mb-2">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
@@ -586,7 +588,7 @@ export default function Onboarding() {
                     </div>
                   ) : (
                     <div className="grid min-h-[250px] grid-cols-[160px_1fr] overflow-hidden rounded-lg border border-border">
-                      <div className="flex max-h-[320px] flex-col overflow-y-auto border-r border-border bg-muted/50">
+                      <div className="flex max-h-[320px] flex-col overflow-y-auto border-r border-border bg-[hsl(var(--muted))]/40">
                         {Object.keys(JOB_TREE).map(c => (
                           <button
                             key={c} type="button" onClick={() => up({ jobCat: c })}
@@ -606,7 +608,6 @@ export default function Onboarding() {
                       </div>
                     </div>
                   )}
-                  {/* 선택된 직무 요약 — 어느 카테고리에 있든 한눈에 확인·해제 */}
                   {s.jobs.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {s.jobs.map(j => (
@@ -634,13 +635,200 @@ export default function Onboarding() {
                   </div>
                 </div>
               </div>
-              <NavRow prev="me" next="complete" ok={valid.pick} reason="관심 직무·산업·지원 시기를 선택하면 계속할 수 있어요" />
+              <NavRow prev="me" next="tune" ok={valid.pick} reason="관심 직무·산업·지원 시기를 선택하면 계속할 수 있어요" />
+            </>
+          )}
+
+          {s.step === "tune" && (
+            <>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold text-primary">온보딩 3 / 3 · 선택</p>
+                  <h1 className="mt-2 text-[22px] font-bold leading-snug tracking-tight">거의 다 왔어요 — 추천을 조금 더 다듬을까요?</h1>
+                  <p className="mt-1.5 text-sm text-muted-foreground">선택 사항이에요. 건너뛰어도 언제든 채울 수 있어요.</p>
+                </div>
+                <button type="button" onClick={() => go("complete")} className={cn(linkBtnCls, "shrink-0 whitespace-nowrap")}>
+                  건너뛰고 시작하기
+                </button>
+              </div>
+              <div className="mt-6 space-y-5">
+                <div>
+                  <Label right={<span className="text-xs text-muted-foreground">최대 3개</span>}>희망 근무 지역</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {REGIONS.map(r => (
+                      <Chip key={r} on={s.workRegions.includes(r)} onClick={() => up({ workRegions: toggleIn(s.workRegions, r, 3) })}>{r}</Chip>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>이미 갖고 있는 자료</Label>
+                  <div className="space-y-2">
+                    {([["resume", "이력서"], ["essay", "자기소개서"], ["portfolio", "포트폴리오"]] as const).map(([k, l]) => (
+                      <div key={k} className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm">
+                        {l}
+                        <button
+                          type="button" role="switch" aria-checked={s.docs[k]} aria-label={`${l} 보유`}
+                          onClick={() => up({ docs: { ...s.docs, [k]: !s.docs[k] } })}
+                          className={cn("relative h-6 w-11 rounded-full transition-colors", s.docs[k] ? "bg-primary" : "bg-muted")}
+                        >
+                          <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-all", s.docs[k] ? "left-[22px]" : "left-0.5")} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-xs text-muted-foreground">있다고 표시하면, 나중에 경험 정리할 때 불러오기를 먼저 추천해 드려요.</p>
+                </div>
+              </div>
+              <NavRow prev="pick" next="complete" ok reason="" />
             </>
           )}
         </div>
         <PickCard />
       </div>
     </Shell>
+  );
+}
+
+/* ─────────────── 점진 수집: ProfileCompletionCard (앱 내 배치용) ───────────────
+ * 사용: 탭1(공고) 또는 마이페이지 상단에 <ProfileCompletionCard />
+ * 규칙: pending 큐에서 스누즈되지 않은 첫 항목 1개만 노출, '나중에' → 3일 스누즈
+ */
+
+interface PendingField {
+  key: string;
+  title: string;
+  why: string;
+  type: "input" | "select" | "chips";
+  options?: string[];
+  max?: number;
+  placeholder?: string;
+  saveToInfo?: string;
+}
+
+const CORP_TYPES_PENDING = ["대기업", "중견기업", "스타트업", "공기업·공공기관", "외국계", "금융권"];
+const FOCUSES_PENDING = ["서류·이력서", "자기소개서", "인적성·NCS", "면접", "포트폴리오", "어학·자격증"];
+
+const PENDING_FIELDS: PendingField[] = [
+  { key: "gpa", title: "학점", why: "학점을 입력하면 지원 가능 공고만 걸러드려요", type: "input", placeholder: "예) 3.85 / 4.5", saveToInfo: "gpa" },
+  { key: "region", title: "거주 지역", why: "가까운 채용 행사도 알려드릴게요", type: "select", options: REGIONS, saveToInfo: "address" },
+  { key: "corps", title: "희망 기업 유형", why: "기업 유형을 고르면 추천을 조정해요", type: "chips", options: CORP_TYPES_PENDING, max: 6 },
+  { key: "focus", title: "지금 집중하는 것", why: "집중하는 걸 알려주시면 할 일을 제안해요", type: "chips", options: FOCUSES_PENDING, max: 6 },
+  { key: "workRegions", title: "희망 근무 지역", why: "지역 조건이 맞는 공고를 먼저 보여드려요", type: "chips", options: REGIONS, max: 3 },
+  { key: "gradY", title: "졸업 년도", why: "신입·경력 구분과 지원 자격 필터에 사용돼요", type: "select", options: gradYears(), saveToInfo: "gradYear" },
+  { key: "gradM", title: "졸업 예정 월", why: "채용 일정 추천이 정교해져요", type: "select", options: ["2", "8"] },
+];
+
+export function ProfileCompletionCard({ className }: { className?: string }) {
+  const [profile, setProfile] = useState<any>(() => {
+    try { return JSON.parse(localStorage.getItem(LS.profile) ?? "null"); } catch { return null; }
+  });
+  const [value, setValue] = useState<string>("");
+  const [multi, setMulti] = useState<string[]>([]);
+
+  const field = useMemo(() => {
+    if (!profile?.pending?.length) return null;
+    const now = Date.now();
+    const key = (profile.pending as string[]).find(k => {
+      const until = profile.snoozed?.[k];
+      return !until || new Date(until).getTime() < now;
+    });
+    return PENDING_FIELDS.find(f => f.key === key) ?? null;
+  }, [profile]);
+
+  if (!field) return null;
+
+  const persist = (next: any) => {
+    localStorage.setItem(LS.profile, JSON.stringify(next));
+    setProfile(next);
+    setValue(""); setMulti([]);
+  };
+
+  const save = () => {
+    const v = field.type === "chips" ? multi : value.trim();
+    if (field.type === "chips" ? multi.length === 0 : !value.trim()) return;
+    const next = {
+      ...profile,
+      [field.key]: v,
+      pending: profile.pending.filter((k: string) => k !== field.key),
+      completeness: Math.min(100, (profile.completeness ?? 0) + Math.round((100 - (profile.completeness ?? 0)) / profile.pending.length)),
+    };
+    if (field.saveToInfo && typeof v === "string") {
+      try {
+        const info = JSON.parse(localStorage.getItem(LS.infoValues) ?? "{}");
+        if (!info[field.saveToInfo]) { info[field.saveToInfo] = v; localStorage.setItem(LS.infoValues, JSON.stringify(info)); }
+      } catch { /* noop */ }
+    }
+    persist(next);
+    toast.success("픽 카드에 담았어요");
+  };
+
+  const snooze = () => {
+    const until = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+    persist({ ...profile, snoozed: { ...(profile.snoozed ?? {}), [field.key]: until } });
+  };
+
+  const chipCls = (on: boolean) => cn(
+    "rounded-full border px-3 py-1.5 text-xs transition-colors",
+    on ? "border-primary bg-primary/10 font-semibold text-primary" : "border-border bg-background hover:border-primary/50"
+  );
+
+  return (
+    <div className={cn("rounded-xl border border-border bg-card p-5", className)}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="flex items-center gap-1 text-xs font-bold text-primary"><Sparkles className="h-3.5 w-3.5" /> 프로필 부스트 · {profile.completeness ?? 0}% 완성</p>
+          <h3 className="mt-1 text-sm font-bold">{field.title}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">{field.why}</p>
+        </div>
+        <button type="button" aria-label="나중에" onClick={snooze} className="text-muted-foreground transition-colors hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="mt-3">
+        {field.type === "input" && (
+          <input
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+            placeholder={field.placeholder} value={value} onChange={e => setValue(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") save(); }}
+          />
+        )}
+        {field.type === "select" && (
+          <select
+            className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+            value={value} onChange={e => setValue(e.target.value)}
+          >
+            <option value="">선택해 주세요</option>
+            {field.options!.map(o => <option key={o}>{o}</option>)}
+          </select>
+        )}
+        {field.type === "chips" && (
+          <div className="flex flex-wrap gap-1.5">
+            {field.options!.map(o => (
+              <button
+                key={o} type="button" className={chipCls(multi.includes(o))}
+                onClick={() => setMulti(m => m.includes(o) ? m.filter(x => x !== o) : m.length >= (field.max ?? 9) ? m : [...m, o])}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button" onClick={save}
+          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          저장할게요
+        </button>
+        <button
+          type="button" onClick={snooze}
+          className="rounded-lg border border-border px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30"
+        >
+          나중에
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -663,8 +851,8 @@ function Shell({ children }: { children: React.ReactNode }) {
 function StepHead({ n, q, sub }: { n: number; q: React.ReactNode; sub?: string }) {
   return (
     <>
-      <p className="text-xs font-bold text-primary">온보딩 {n} / 2</p>
-      <h1 className="mt-2 text-2xl font-extrabold leading-snug tracking-tight">{q}</h1>
+      <p className="text-xs font-bold text-primary">온보딩 {n} / 3</p>
+      <h1 className="mt-2 text-[22px] font-bold leading-snug tracking-tight">{q}</h1>
       {sub && <p className="mt-1.5 text-sm text-muted-foreground">{sub}</p>}
     </>
   );
