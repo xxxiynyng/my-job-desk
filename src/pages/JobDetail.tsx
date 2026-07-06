@@ -178,15 +178,22 @@ function hlKey(section: string, group: string, idx: number) {
   return `${section}::${group}::${idx}`;
 }
 
-// ---------- Essay status chip ----------
+// ---------- Essay state palette (JobDetail 색 가이드) ----------
+// 단일 accent = primary 블루(진행/CTA). 상태는 dot+라벨(SSOT 상태 처리 패턴).
+// blue=작성중(진행) · amber=초안 · green=완료 · gray=미작성. 오프브랜드 indigo 폐기.
+const ESSAY_STATE: Record<string, { chip: string; dot: string }> = {
+  완료: { chip: "bg-pickd-green-light text-pickd-green", dot: "bg-pickd-green" },
+  작성중: { chip: "bg-pickd-blue-light text-pickd-blue", dot: "bg-pickd-blue" },
+  초안: { chip: "bg-pickd-orange-light text-pickd-orange", dot: "bg-pickd-orange" },
+  미작성: { chip: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/40" },
+};
+
+// ---------- Essay status chip (dot + 라벨) ----------
 function EssayStatus({ status }: { status: string }) {
-  const cls =
-    status === "완료" ? "bg-pickd-green-light text-pickd-green" :
-    status === "작성중" ? "bg-indigo-100 text-indigo-600" :
-    status === "초안" ? "bg-pickd-orange-light text-pickd-orange" :
-    "bg-muted text-muted-foreground";
+  const s = ESSAY_STATE[status] ?? ESSAY_STATE["미작성"];
   return (
-    <span className={cn("inline-flex text-mini font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", cls)}>
+    <span className={cn("inline-flex items-center gap-1.5 text-mini font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", s.chip)}>
+      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
       {status}
     </span>
   );
@@ -440,7 +447,7 @@ export default function JobDetail() {
               </span>
               <span className="text-border">·</span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 {job.status}
               </span>
             </div>
@@ -631,7 +638,15 @@ export default function JobDetail() {
             title="자기소개서"
             subtitle={`${job.essays.length}문항`}
             right={job.essays.length > 0 && (
-              <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-pickd-green transition-all"
+                    style={{ width: `${(essayDone / job.essays.length) * 100}%` }}
+                  />
+                </div>
+                <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
+              </div>
             )}
           >
             {job.essays.length === 0 ? (
@@ -647,11 +662,8 @@ export default function JobDetail() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <span className={cn(
-                          "shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-mini font-bold",
-                          e.status === "완료" ? "bg-pickd-green text-white" :
-                          e.status === "작성중" ? "bg-indigo-500 text-white" :
-                          e.status === "초안" ? "bg-pickd-orange text-white" :
-                          "bg-muted text-muted-foreground"
+                          "shrink-0 w-5 h-5 rounded-full border flex items-center justify-center text-mini font-bold tabular-nums bg-background",
+                          e.status === "완료" ? "border-pickd-green text-pickd-green" : "border-border text-muted-foreground"
                         )}>
                           {e.status === "완료" ? <Check className="w-3 h-3" /> : e.no}
                         </span>
@@ -661,15 +673,12 @@ export default function JobDetail() {
                       </div>
                       <Button
                         size="sm"
-                        variant={e.status === "미작성" ? "outline" : "default"}
-                        className={cn(
-                          "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
-                          e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
-                        )}
+                        variant={e.status === "완료" ? "ghost" : e.status === "미작성" ? "outline" : "default"}
+                        className="shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md"
                         onClick={() => goToTab3(e.no)}
                       >
                         <PenLine className="w-3 h-3" />
-                        {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
+                        {e.status === "완료" ? "수정" : e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
                       </Button>
                     </div>
 
