@@ -161,7 +161,7 @@ export function ContextPanel({
                             <span className="font-medium text-sm truncate block">{app.position}</span>
                             <div className="flex items-center gap-1.5">
                               <span className="text-chip text-muted-foreground">{app.company}</span>
-                              <Badge className={cn("text-micro h-4 px-1 border-0", stageStyles[app.stage] || "bg-muted text-muted-foreground")}>{app.stage}</Badge>
+                              <Badge className={cn("text-mini h-4 px-1 border-0", stageStyles[app.stage] || "bg-muted text-muted-foreground")}>{app.stage}</Badge>
                             </div>
                           </div>
                         </div>
@@ -203,7 +203,7 @@ export function ContextPanel({
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-medium truncate text-sm">{s.title}</span>
                       {s.linkedPosting && <span className="text-mini text-muted-foreground">{s.linkedPosting}</span>}
-                      {s.scheduleType === "personal" && <Badge variant="outline" className="text-micro h-4 bg-muted border-0">개인</Badge>}
+                      {s.scheduleType === "personal" && <Badge variant="outline" className="text-mini h-4 bg-muted border-0">개인</Badge>}
                     </div>
                     {s.time && <span className="text-chip text-muted-foreground flex items-center gap-0.5 shrink-0"><Clock size={10} />{s.time}</span>}
                   </div>
@@ -235,13 +235,13 @@ export function ContextPanel({
                       task.carriedOver && !task.completed && "bg-orange-50/50"
                     )}>
                     {task.carriedOver && (
-                      <Badge className="absolute top-1 right-1 bg-orange-100 text-orange-600 border-orange-200 text-micro h-4 px-1">이월</Badge>
+                      <Badge className="absolute top-1 right-1 bg-orange-100 text-orange-600 border-orange-200 text-mini h-4 px-1">이월</Badge>
                     )}
                     <Checkbox checked={task.completed} onCheckedChange={() => onToggleTask(task.id)} className="mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setDetailTask(task)}>
                       <p className={cn("text-sm", task.completed && "line-through text-muted-foreground")}>{task.title}</p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <Badge variant="outline" className={cn("text-micro h-3.5 px-1 border-0", priorityStyles[task.priority])}>{priorityLabels[task.priority]}</Badge>
+                        <Badge variant="outline" className={cn("text-mini h-3.5 px-1 border-0", priorityStyles[task.priority])}>{priorityLabels[task.priority]}</Badge>
                         {task.linkedPosting && <span className="text-mini text-muted-foreground">{task.linkedPosting}</span>}
                         {task.dueTime && <span className="text-mini text-muted-foreground flex items-center gap-0.5"><Clock size={9} />{task.dueTime}</span>}
                       </div>

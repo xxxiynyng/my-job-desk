@@ -932,7 +932,7 @@ export default function Experiences() {
                           >
                             <Filter className="w-3 h-3" />
                             {activeFilterCount > 0 && (
-                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-micro leading-[14px] text-center">
+                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-mini leading-[14px] text-center">
                                 {activeFilterCount}
                               </span>
                             )}

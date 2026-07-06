@@ -146,7 +146,7 @@ export function CalendarMini({
         </div>
       </header>
 
-      <div className="grid grid-cols-7 text-micro text-muted-foreground border-b border-border bg-muted/20">
+      <div className="grid grid-cols-7 text-mini text-muted-foreground border-b border-border bg-muted/20">
         {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
           <div key={d} className="px-1 py-1 text-center font-medium">{d}</div>
         ))}
@@ -190,7 +190,7 @@ export function CalendarMini({
                             />
                           ))}
                           {evs.length > 4 && (
-                            <span className="text-micro text-muted-foreground">+{evs.length - 4}</span>
+                            <span className="text-mini text-muted-foreground">+{evs.length - 4}</span>
                           )}
                         </div>
                       )}
@@ -217,7 +217,7 @@ export function CalendarMini({
                                     <span className="block text-mini text-muted-foreground truncate">{ev.meta}</span>
                                   )}
                                 </span>
-                                <span className={cn("text-micro px-1 py-0.5 rounded shrink-0", s.chip)}>
+                                <span className={cn("text-mini px-1 py-0.5 rounded shrink-0", s.chip)}>
                                   {s.label}
                                 </span>
                               </button>

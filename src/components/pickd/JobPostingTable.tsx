@@ -396,7 +396,7 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                       <FolderSvgIcon />
                     </div>
                     <div className="flex flex-col items-center gap-0.5 w-full">
-                      <span className="text-micro text-muted-foreground/60 leading-none tabular-nums">{year}</span>
+                      <span className="text-mini text-muted-foreground/60 leading-none tabular-nums">{year}</span>
                       <span className="text-mini text-muted-foreground leading-tight text-center line-clamp-2 w-full px-0.5">
                         {job.company}
                       </span>

@@ -172,7 +172,7 @@ export function TodayPanel() {
                   t.done ? "bg-primary border-primary" : "border-muted-foreground/40",
                 )}
               >
-                {t.done && <span className="text-micro text-primary-foreground">✓</span>}
+                {t.done && <span className="text-mini text-primary-foreground">✓</span>}
               </span>
               <span className={cn("flex-1 leading-snug", t.done && "line-through text-muted-foreground")}>
                 {t.text}
