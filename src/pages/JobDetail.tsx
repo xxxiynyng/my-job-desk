@@ -634,40 +634,69 @@ export default function JobDetail() {
             </div>
           </Section>
 
-          {/* 5 · 제출 서류 — 확인 체크리스트 */}
-          {submitDocs.length > 0 && (
-            <Section
-              n={5}
-              title="제출 서류"
-              right={<span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{submitDocs.length} 확인</span>}
-            >
-              <ul className="space-y-0.5">
-                {submitDocs.map((d) => {
-                  const checked = checkedDocs.has(d);
-                  return (
-                    <li key={d} className="group flex items-center gap-1">
+          {/* 5 · 제출 서류 — 확인 체크리스트 (+ 공고 외 직접 추가) */}
+          <Section
+            n={5}
+            title="제출 서류"
+            right={<span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{allDocs.length} 확인</span>}
+          >
+            <ul className="space-y-0.5">
+              {allDocs.map((d) => {
+                const checked = checkedDocs.has(d);
+                const isCustom = customDocs.includes(d);
+                return (
+                  <li key={d} className="group flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleDoc(d)}
+                      className="flex-1 min-w-0 flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
+                    >
+                      <span className={cn(
+                        "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
+                        checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
+                      )}>
+                        {checked && <Check className="w-3 h-3" />}
+                      </span>
+                      <span className={cn("text-body leading-relaxed select-text truncate", checked ? "text-muted-foreground line-through" : "text-foreground")}>
+                        {d}
+                      </span>
+                      {isCustom && <span className="shrink-0 text-chip text-muted-foreground/60">직접 추가</span>}
+                    </button>
+                    {isCustom && (
                       <button
                         type="button"
-                        onClick={() => toggleDoc(d)}
-                        className="flex-1 flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
+                        onClick={() => removeCustomDoc(d)}
+                        title="삭제"
+                        aria-label="삭제"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 w-6 h-6 flex items-center justify-center rounded text-muted-foreground/60 hover:text-destructive hover:bg-muted"
                       >
-                        <span className={cn(
-                          "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
-                          checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
-                        )}>
-                          {checked && <Check className="w-3 h-3" />}
-                        </span>
-                        <span className={cn("text-body leading-relaxed select-text", checked ? "text-muted-foreground line-through" : "text-foreground")}>
-                          {d}
-                        </span>
+                        <X className="w-3 h-3" />
                       </button>
-                      <CopyButton text={d} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </Section>
-          )}
+                    )}
+                    <CopyButton text={d} />
+                  </li>
+                );
+              })}
+            </ul>
+
+            {allDocs.length === 0 && (
+              <p className="text-chip text-muted-foreground/60 mt-1 mb-2">공고에 명시된 제출 서류가 없어요. 직접 준비할 서류를 추가해보세요.</p>
+            )}
+
+            {/* 공고에 없는 서류 직접 추가 */}
+            <div className="mt-2.5 flex items-center gap-2">
+              <input
+                value={newDoc}
+                onChange={(e) => setNewDoc(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomDoc(); } }}
+                placeholder="공고 외 준비 서류 추가 (예: 포트폴리오, 경력증명서)"
+                className="flex-1 h-8 px-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
+              />
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1 shrink-0" onClick={addCustomDoc} disabled={!newDoc.trim()}>
+                <Plus className="w-3.5 h-3.5" /> 추가
+              </Button>
+            </div>
+          </Section>
 
           {/* 6 · 자기소개서 (맨 아래) — 공고 원문은 상단 '원문 보기' 버튼 → 우측 슬라이드 패널 */}
           <Section
