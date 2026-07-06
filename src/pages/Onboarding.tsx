@@ -458,8 +458,8 @@ export default function Onboarding() {
   /* ── 정보등록 3단계 (공통 2단 레이아웃: 폼 + 픽 카드) ── */
   return (
     <Shell>
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-8">
+        <div className="min-w-0 w-full rounded-xl border border-border bg-card p-5 sm:p-6 lg:w-[600px] lg:flex-none">
 
           {s.step === "me" && (
             <>
@@ -770,7 +770,7 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-5 py-6">
+      <div className="mx-auto max-w-5xl px-5 py-6">
         <div className="mb-6 flex items-center gap-2 text-lg font-bold tracking-tight">
           <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
           Pickd
