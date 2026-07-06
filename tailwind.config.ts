@@ -17,7 +17,6 @@ export default {
         sans: ["var(--font-sans)"],
       },
       fontSize: {
-        micro:   '9px',
         mini:    '10px',
         chip:    '11px',
         body:    '13px',
