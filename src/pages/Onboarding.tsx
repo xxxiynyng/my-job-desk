@@ -356,40 +356,46 @@ export default function Onboarding() {
 
   if (s.step === "login") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-        <div className="mb-6 flex h-[100px] w-[100px] items-center justify-center rounded-[26px] border border-border bg-card">
-          <img src="/logo-mark.svg" alt="Pickd" className="h-[52px] w-auto" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16 text-center">
+        <div className="mb-7 flex h-[72px] w-[72px] items-center justify-center rounded-2xl bg-primary/10">
+          <img src="/logo-mark.svg" alt="Pickd" className="h-10 w-auto" />
         </div>
-        <h1 className="text-[28px] font-bold leading-snug tracking-tight">
+        <h1 className="text-[30px] font-bold leading-[1.3] tracking-tight">
           흩어진 취업 준비,<br />여기서 <span className="text-primary">픽</span>.
         </h1>
-        <p className="mt-2.5 text-sm text-muted-foreground">1분이면 나에게 맞는 공고 추천이 시작돼요</p>
-
-        {clientId ? (
-          <div ref={btnRef} className="mt-9" />
-        ) : (
-          <button
-            type="button"
-            onClick={() => onGoogle("demo.user@gmail.com", "데모 사용자")}
-            className="mt-9 inline-flex items-center gap-3 rounded-lg border border-border bg-card px-7 py-3.5 text-sm font-semibold transition-colors hover:border-foreground/30"
-          >
-            <GoogleG /> Google로 계속하기
-          </button>
-        )}
-        <p className="mt-3.5 max-w-xs text-xs text-muted-foreground">
-          {clientId ? "구글 계정으로 바로 시작할 수 있어요. 약관은 다음 단계에서 확인해요."
-            : "데모 모드예요 — VITE_GOOGLE_CLIENT_ID를 설정하면 실제 구글 로그인이 붙어요."}
+        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+          공고·일정·경험·자소서를 한 곳에서.<br className="sm:hidden" /> 1분이면 시작해요.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
-            <ClipboardList className="h-[15px] w-[15px] text-primary" />공고·일정 한눈에
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
-            <Layers className="h-[15px] w-[15px] text-primary" />경험은 한 번만
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
-            <Sparkles className="h-[15px] w-[15px] text-primary" />AI 자소서 초안
-          </span>
+
+        <div className="mt-9 w-full max-w-[320px]">
+          {clientId ? (
+            <div ref={btnRef} className="flex justify-center" />
+          ) : (
+            <button
+              type="button"
+              onClick={() => onGoogle("demo.user@gmail.com", "데모 사용자")}
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-card px-7 py-3.5 text-sm font-semibold shadow-sm transition-colors hover:border-foreground/30"
+            >
+              <GoogleG /> Google로 계속하기
+            </button>
+          )}
+          <p className="mt-3 text-xs text-muted-foreground">가입은 무료예요. 약관은 다음 단계에서 확인해요.</p>
+        </div>
+
+        <div className="mt-12 flex flex-col items-stretch gap-2.5 text-left">
+          {([[ClipboardList, "공고·일정을 한눈에", "마감·전형 일정을 놓치지 않게"],
+             [Layers, "경험은 한 번만 정리", "자소서·이력서에 그대로 재사용"],
+             [Sparkles, "AI 자소서 초안까지", "내 경험으로 초안을 빠르게"]] as const).map(([Icon, title, desc]) => (
+            <div key={title} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <Icon className="h-[18px] w-[18px] text-primary" />
+              </span>
+              <div>
+                <div className="text-[13px] font-bold text-foreground">{title}</div>
+                <div className="text-xs text-muted-foreground">{desc}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
