@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
-  CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
+  ArrowRight, CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
   MapPin, Search, Sparkles, User, X, type LucideIcon,
 } from "lucide-react";
 import {
@@ -464,19 +464,19 @@ export default function Onboarding() {
   if (s.step === "complete") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10">
-        <div className="w-full max-w-[360px]">
-          <PickCard standalone done />
-        </div>
-        <h1 className="mt-7 text-[22px] font-bold tracking-tight">픽 카드가 완성됐어요</h1>
+        <h1 className="text-[22px] font-bold tracking-tight">픽 카드가 완성됐어요</h1>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           이 정보로 맞는 공고를 찾아드릴게요.<br />나머지는 쓰면서 채워도 충분해요.
         </p>
+        <div className="mt-6 w-full max-w-[360px]">
+          <PickCard standalone done />
+        </div>
         <button
           type="button"
           onClick={finish}
-          className="mt-7 w-full max-w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-7 inline-flex w-full max-w-[360px] items-center justify-center gap-1.5 rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          Pickd 시작하기
+          Pickd 시작하기 <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     );
