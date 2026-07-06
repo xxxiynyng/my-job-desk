@@ -36,8 +36,8 @@ const LS = {
   infoValues: "specs.info.values.v2",
 } as const;
 
-type Step = "login" | "terms" | "me" | "pick" | "tune" | "complete";
-const ONB_STEPS: Step[] = ["me", "pick", "tune"];
+type Step = "login" | "terms" | "me" | "pick" | "complete";
+const ONB_STEPS: Step[] = ["me", "pick"];
 
 interface OnbState {
   step: Step;
@@ -166,7 +166,6 @@ export default function Onboarding() {
     me: nickOk && !!s.persona && !!s.school && (s.majorNA || !!s.major)
       && (!needsGrad || gradOk) && (!isCareer || !!s.careerYears),
     pick: s.jobs.length > 0 && s.inds.length > 0 && !!s.timing,
-    tune: true,
     complete: true,
   };
 
@@ -250,11 +249,11 @@ export default function Onboarding() {
     return (
       <div className="mb-8 flex items-center gap-3">
         <div className="flex flex-1 gap-1.5">
-          {[0, 1, 2].map(i => (
+          {[0, 1].map(i => (
             <span key={i} className={cn("h-[3px] flex-1 rounded-full transition-colors", i <= idx ? "bg-primary" : "bg-muted")} />
           ))}
         </div>
-        <span className="text-xs font-bold text-muted-foreground">{idx + 1} / 3{s.step === "tune" ? " · 선택" : ""}</span>
+        <span className="text-xs font-bold text-muted-foreground">{idx + 1} / 2</span>
       </div>
     );
   };
@@ -647,51 +646,7 @@ export default function Onboarding() {
                   </div>
                 </div>
               </div>
-              <NavRow prev="me" next="tune" ok={valid.pick} reason="관심 직무·산업·지원 시기를 선택하면 계속할 수 있어요" />
-            </>
-          )}
-
-          {s.step === "tune" && (
-            <>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold text-primary">온보딩 3 / 3 · 선택</p>
-                  <h1 className="mt-2 text-[22px] font-bold leading-snug tracking-tight">거의 다 왔어요 — 추천을 조금 더 다듬을까요?</h1>
-                  <p className="mt-1.5 text-sm text-muted-foreground">선택 사항이에요. 건너뛰어도 언제든 채울 수 있어요.</p>
-                </div>
-                <button type="button" onClick={() => go("complete")} className={cn(linkBtnCls, "shrink-0 whitespace-nowrap")}>
-                  건너뛰고 시작하기
-                </button>
-              </div>
-              <div className="mt-6 space-y-5">
-                <div>
-                  <Label right={<span className="text-xs text-muted-foreground">최대 3개</span>}>희망 근무 지역</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {REGIONS.map(r => (
-                      <Chip key={r} on={s.workRegions.includes(r)} onClick={() => up({ workRegions: toggleIn(s.workRegions, r, 3) })}>{r}</Chip>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label>이미 갖고 있는 자료</Label>
-                  <div className="space-y-2">
-                    {([["resume", "이력서"], ["essay", "자기소개서"], ["portfolio", "포트폴리오"]] as const).map(([k, l]) => (
-                      <div key={k} className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm">
-                        {l}
-                        <button
-                          type="button" role="switch" aria-checked={s.docs[k]} aria-label={`${l} 보유`}
-                          onClick={() => up({ docs: { ...s.docs, [k]: !s.docs[k] } })}
-                          className={cn("relative h-6 w-11 rounded-full transition-colors", s.docs[k] ? "bg-primary" : "bg-muted")}
-                        >
-                          <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-all", s.docs[k] ? "left-[22px]" : "left-0.5")} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-1.5 text-xs text-muted-foreground">있다고 표시하면, 나중에 경험 정리할 때 불러오기를 먼저 추천해 드려요.</p>
-                </div>
-              </div>
-              <NavRow prev="pick" next="complete" ok reason="" />
+              <NavRow prev="me" next="complete" ok={valid.pick} reason="관심 직무·산업·지원 시기를 선택하면 계속할 수 있어요" />
             </>
           )}
         </div>
@@ -863,7 +818,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function StepHead({ n, q, sub }: { n: number; q: React.ReactNode; sub?: string }) {
   return (
     <>
-      <p className="text-xs font-bold text-primary">온보딩 {n} / 3</p>
+      <p className="text-xs font-bold text-primary">온보딩 {n} / 2</p>
       <h1 className="mt-2 text-[22px] font-bold leading-snug tracking-tight">{q}</h1>
       {sub && <p className="mt-1.5 text-sm text-muted-foreground">{sub}</p>}
     </>
