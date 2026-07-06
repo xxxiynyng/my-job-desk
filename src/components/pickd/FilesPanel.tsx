@@ -4,36 +4,24 @@ import {
   Folder,
   FileText,
   Image as ImageIcon,
-  MoreHorizontal,
   Check,
   Star,
+  Pencil,
+  Download,
+  Trash2,
+  Copy,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // ── Types & constants ──────────────────────────────────────────
 
-type FileKind =
-  | "증명사진"
-  | "성적증명서"
-  | "졸업증명서"
-  | "재학증명서"
-  | "어학 성적표"
-  | "자격증 사본"
-  | "수상 증빙"
-  | "교육 수료증"
-  | "기타 제출서류";
+// 프리셋 9종 + 사용자 지정 종류(직접 입력) 허용 → 안 맞는 '다른 파일'도 제자리 폴더를 갖는다.
+type FileKind = string;
 
 const FILE_KINDS: FileKind[] = [
   "증명사진",
@@ -205,7 +193,11 @@ function FileGrid({
     return map;
   }, [files]);
 
-  const activeKinds = FILE_KINDS.filter((k) => (byKind[k]?.length ?? 0) > 0);
+  // 프리셋 순서 우선 + 목록 밖 사용자 지정 종류는 뒤에 가나다순(탭2 유형 탭과 같은 원칙)
+  const activeKinds = [
+    ...FILE_KINDS.filter((k) => (byKind[k]?.length ?? 0) > 0),
+    ...Object.keys(byKind).filter((k) => !FILE_KINDS.includes(k)).sort((a, b) => a.localeCompare(b, "ko")),
+  ];
 
   const handleFiles = (fl: FileList | null) => {
     if (!fl || fl.length === 0) return;
@@ -307,9 +299,9 @@ function FileGrid({
       <UploadKindModal
         pending={pendingFile}
         onCancel={() => setPendingFile(null)}
-        onConfirm={(kind) => {
+        onConfirm={(kind, name) => {
           if (!pendingFile) return;
-          onUpload(kind, pendingFile.name, pendingFile.fileKind, pendingFile.url);
+          onUpload(kind, name, pendingFile.fileKind, pendingFile.url);
           setPendingFile(null);
         }}
       />
@@ -319,6 +311,8 @@ function FileGrid({
 
 // ── UploadKindModal ────────────────────────────────────────────
 
+const CUSTOM_KIND = "__custom__";
+
 function UploadKindModal({
   pending,
   onCancel,
@@ -326,14 +320,16 @@ function UploadKindModal({
 }: {
   pending: { name: string; fileKind: "pdf" | "image"; url?: string } | null;
   onCancel: () => void;
-  onConfirm: (kind: FileKind) => void;
+  onConfirm: (kind: FileKind, name: string) => void;
 }) {
-  const [kind, setKind] = useState<FileKind>("기타 제출서류");
+  const [kind, setKind] = useState<string>("기타 제출서류");
+  const [customKind, setCustomKind] = useState("");
   const [name, setName] = useState(pending?.name ?? "");
 
   useEffect(() => {
     if (pending) {
       setName(pending.name);
+      setCustomKind("");
       const n = pending.name.toLowerCase();
       if (pending.fileKind === "image" && /photo|profile|증명/i.test(n)) setKind("증명사진");
       else if (/toeic|toefl|opic|어학/i.test(n)) setKind("어학 성적표");
@@ -347,32 +343,56 @@ function UploadKindModal({
     }
   }, [pending]);
 
+  const effectiveKind = kind === CUSTOM_KIND ? customKind.trim() : kind;
+  const canSubmit = !!effectiveKind && !!name.trim();
+
   return (
     <Dialog open={!!pending} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-base">파일 등록</DialogTitle>
-          <DialogDescription className="text-xs">파일 종류와 이름을 확인해주세요.</DialogDescription>
+          <DialogDescription className="text-xs">종류를 고르거나 직접 입력해 보관할 위치를 정하세요.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          {/* 미리보기 타일 + 이름 */}
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+              pending?.fileKind === "image" ? "bg-sky-50" : "bg-red-50",
+            )}>
+              {pending?.fileKind === "image"
+                ? <ImageIcon className="w-5 h-5 text-sky-400" />
+                : <FileText className="w-5 h-5 text-red-400" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <label className="text-chip text-muted-foreground">파일 이름</label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-8 text-xs" />
+            </div>
+          </div>
           <div>
             <label className="text-chip text-muted-foreground">파일 종류</label>
             <select
               value={kind}
-              onChange={(e) => setKind(e.target.value as FileKind)}
+              onChange={(e) => setKind(e.target.value)}
               className="mt-1 w-full h-8 px-2 text-xs rounded-md border border-border bg-background"
             >
               {FILE_KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
+              <option value={CUSTOM_KIND}>+ 직접 입력…</option>
             </select>
-          </div>
-          <div>
-            <label className="text-chip text-muted-foreground">파일 이름</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-8 text-xs" />
+            {kind === CUSTOM_KIND && (
+              <Input
+                autoFocus
+                value={customKind}
+                onChange={(e) => setCustomKind(e.target.value)}
+                placeholder="예: 포트폴리오, 경력기술서, 활동 증빙"
+                className="mt-2 h-8 text-xs"
+              />
+            )}
           </div>
         </div>
         <div className="flex items-center justify-end gap-2 pt-1">
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onCancel}>취소</Button>
-          <Button size="sm" className="h-8 text-xs" onClick={() => onConfirm(kind)}>
+          <Button size="sm" className="h-8 text-xs" disabled={!canSubmit} onClick={() => onConfirm(effectiveKind, name.trim())}>
             <Check className="w-3.5 h-3.5" /> 등록
           </Button>
         </div>
@@ -425,7 +445,7 @@ function PreviewModal({
     <Dialog open={!!preview} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-2 pr-6">
+          <div className="pr-6">
             {renaming ? (
               <input
                 autoFocus
@@ -436,42 +456,22 @@ function PreviewModal({
                   if (e.key === "Enter") { onRename(f.id, draftName); setRenaming(false); }
                   if (e.key === "Escape") { setDraftName(f.name); setRenaming(false); }
                 }}
-                className="text-sm bg-transparent border-b border-primary/60 outline-none py-0.5 flex-1 min-w-0"
+                className="text-sm bg-transparent border-b border-primary/60 outline-none py-0.5 w-full min-w-0"
               />
             ) : (
               <DialogTitle className="text-sm truncate flex items-center gap-2">
                 <span className="truncate">{f.name}</span>
                 {isPhoto && isBasic && (
-                  <span className="inline-flex items-center gap-0.5 text-mini text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  <span className="inline-flex items-center gap-0.5 text-mini text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
                     <Star className="w-2.5 h-2.5" /> 기본정보 대표
                   </span>
                 )}
               </DialogTitle>
             )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button aria-label="파일 메뉴" className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                {isPhoto && (
-                  <>
-                    <DropdownMenuItem className="text-xs" disabled={isBasic} onSelect={() => onSetBasicPhoto(f.id)}>
-                      <Star className="w-3 h-3" /> 대표 지정
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem className="text-xs" onSelect={() => onCopy(f.name)}>파일명 복사</DropdownMenuItem>
-                <DropdownMenuItem className="text-xs" onSelect={() => toast("다운로드를 시작했어요", { duration: 1200 })}>다운로드</DropdownMenuItem>
-                <DropdownMenuItem className="text-xs" onSelect={() => setRenaming(true)}>이름 변경</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-xs text-destructive" onSelect={() => onDelete(f.id)}>삭제</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </DialogHeader>
+
+        {/* 미리보기 */}
         <div className="bg-muted/30 border border-border rounded-lg overflow-hidden flex items-center justify-center min-h-[420px]">
           {f.fileKind === "image" ? (
             f.url ? (
@@ -492,6 +492,39 @@ function PreviewModal({
               <p className="text-xs">PDF 미리보기</p>
             </div>
           )}
+        </div>
+
+        {/* 액션 바 — 숨은 ⋯ 메뉴 대신 보이는 버튼으로 */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 text-chip text-muted-foreground">
+            <span className="px-2 py-0.5 rounded-md bg-muted">{f.kind}</span>
+            <span className="uppercase tracking-wide">{f.fileKind === "image" ? "이미지" : "PDF"}</span>
+          </span>
+          <div className="flex items-center gap-1.5">
+            {isPhoto && (
+              <Button
+                variant={isBasic ? "outline" : "default"}
+                size="sm"
+                className="h-8 text-xs"
+                disabled={isBasic}
+                onClick={() => onSetBasicPhoto(f.id)}
+              >
+                <Star className="w-3.5 h-3.5" /> {isBasic ? "대표 사진" : "대표 지정"}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => onCopy(f.name)} title="파일명 복사" aria-label="파일명 복사">
+              <Copy className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setRenaming(true)}>
+              <Pencil className="w-3.5 h-3.5" /> 이름 변경
+            </Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => toast("다운로드를 시작했어요", { duration: 1200 })}>
+              <Download className="w-3.5 h-3.5" /> 다운로드
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => onDelete(f.id)}>
+              <Trash2 className="w-3.5 h-3.5" /> 삭제
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
