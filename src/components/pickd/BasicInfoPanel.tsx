@@ -206,6 +206,11 @@ export function BasicInfoPanel() {
     ),
   })).filter((g) => g.fields.length > 0);
 
+  // 인적사항 = 프로필 카드로 통합(사진·이름·전체편집). 나머지 섹션은 일반 카드.
+  const personalKeys = FIELD_GROUPS.find((g) => g.title === "인적사항")!.keys.filter((k) => !HEADER_KEYS.includes(k));
+  const personalFields = INFO_FIELDS.filter((f) => personalKeys.includes(f.key) && infoVisible.includes(f.key));
+  const otherGroups = visibleGroups.filter((g) => g.title !== "인적사항");
+
   // 섹션 카드 한 줄 — 라벨(상단 고정폭) + 값(줄바꿈, 클릭 복사). 값이 길어도 안 잘리고 아래로 wrap.
   const renderInfoRow = (f: { key: InfoKey; label: string }) => {
     const isMasked  = masked.has(f.key);
@@ -268,102 +273,103 @@ export function BasicInfoPanel() {
       <div className="relative">
         {/* ── 뷰 모드 ──────────────────────────────── */}
         {!editMode && (
-          <div className="pt-6 space-y-4">
+          <div className="pt-6">
+            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
 
-            {/* ── 프로필 헤더 카드 (컴팩트 신원 바) ── */}
-            <div className="bg-card border border-border rounded-2xl px-5 py-3.5 flex items-center gap-3.5">
-              {photoShown && basicPhoto?.url ? (
-                <div className="w-[56px] h-[72px] rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0">
-                  <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-[56px] h-[72px] rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <User className="w-7 h-7 text-muted-foreground/50" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
-                <span className="text-xl font-semibold text-foreground tracking-tight">{infoValues.name || "이름 미입력"}</span>
-                <span className="text-body text-muted-foreground">
-                  {[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}
-                </span>
-              </div>
-              <button
-                onClick={enterEdit}
-                className="shrink-0 text-xs text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
-              >
-                <Pencil className="w-3 h-3" /> 전체 편집
-              </button>
-            </div>
-
-            {/* ── 섹션 카드 그리드 ── */}
-            {visibleGroups.length === 0 && langExams.length === 0 ? (
-              <div className="py-16 text-center text-muted-foreground">
-                <p className="text-sm">표시할 정보가 없어요.</p>
-                <p className="text-chip mt-1 opacity-60">전체 편집을 눌러 정보를 입력하거나 항목을 표시하세요.</p>
-              </div>
-            ) : (
-              <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
-                {visibleGroups.map((group) => {
-                  const Icon = GROUP_ICON[group.title] ?? User;
-                  const filled = group.fields.filter((f) => infoValues[f.key]).length;
-                  return (
-                    <div key={group.title} className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
-                      <div className="flex items-center gap-2 mb-2.5">
-                        <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <h3 className="text-body font-medium text-foreground">{group.title}</h3>
-                        <div className="ml-auto flex items-center gap-1.5">
-                          {filled > 0 && (
-                            <button
-                              onClick={() => copySection(group.title, group.fields)}
-                              title="이 섹션 값을 라벨과 함께 복사"
-                              className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
-                            >
-                              <Copy className="w-3 h-3" /> 복사
-                            </button>
-                          )}
-                          <span className="text-chip text-muted-foreground tabular-nums">{filled} / {group.fields.length}</span>
-                        </div>
-                      </div>
-                      <div>{group.fields.map(renderInfoRow)}</div>
+              {/* 인적사항 = 프로필 카드 (사진·이름·전체편집 통합, 항상 표시) */}
+              <div className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
+                <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border/50">
+                  {photoShown && basicPhoto?.url ? (
+                    <div className="w-12 h-[60px] rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0">
+                      <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
                     </div>
-                  );
-                })}
-
-                {langExams.length > 0 && (
-                  <div className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <h3 className="text-body font-medium text-foreground">공인외국어시험</h3>
-                      <div className="ml-auto flex items-center gap-1.5">
-                        <button
-                          onClick={() => {
-                            const lines = langExams
-                              .map((e) => [e.lang, e.examName, e.score, e.date].filter(Boolean).join(" "))
-                              .filter(Boolean);
-                            if (lines.length === 0) { toast("복사할 값이 없어요", { duration: 1200 }); return; }
-                            navigator.clipboard.writeText(lines.join("\n"));
-                            toast(`공인외국어시험 ${lines.length}개 항목을 복사했어요`, { duration: 1400 });
-                          }}
-                          title="어학 성적을 한 번에 복사"
-                          className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
-                        >
-                          <Copy className="w-3 h-3" /> 복사
-                        </button>
-                        <span className="text-chip text-muted-foreground tabular-nums">{langExams.length}개</span>
-                      </div>
+                  ) : (
+                    <div className="w-12 h-[60px] rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <User className="w-6 h-6 text-muted-foreground/50" />
                     </div>
-                    <div>
-                      {langExams.map((e) => (
-                        <div key={e.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/40 last:border-0">
-                          <span className="text-body text-foreground truncate">{[e.lang, e.examName].filter(Boolean).join(" · ") || "—"}</span>
-                          <span className="text-xs text-muted-foreground shrink-0">{[e.score, e.date].filter(Boolean).join(" · ")}</span>
-                        </div>
-                      ))}
-                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-title font-semibold text-foreground tracking-tight truncate">{infoValues.name || "이름 미입력"}</div>
+                    {(infoValues.hanjaName || infoValues.engName) && (
+                      <div className="text-chip text-muted-foreground truncate">{[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}</div>
+                    )}
                   </div>
+                  <button
+                    onClick={enterEdit}
+                    title="전체 편집"
+                    aria-label="전체 편집"
+                    className="shrink-0 w-7 h-7 rounded-lg border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {personalFields.length > 0 ? (
+                  <div>{personalFields.map(renderInfoRow)}</div>
+                ) : (
+                  <p className="text-chip text-muted-foreground/50 py-1">표시할 항목이 없어요. 전체 편집으로 추가하세요.</p>
                 )}
               </div>
-            )}
+
+              {otherGroups.map((group) => {
+                const Icon = GROUP_ICON[group.title] ?? User;
+                const filled = group.fields.filter((f) => infoValues[f.key]).length;
+                return (
+                  <div key={group.title} className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <h3 className="text-body font-medium text-foreground">{group.title}</h3>
+                      <div className="ml-auto flex items-center gap-1.5">
+                        {filled > 0 && (
+                          <button
+                            onClick={() => copySection(group.title, group.fields)}
+                            title="이 섹션 값을 라벨과 함께 복사"
+                            className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
+                          >
+                            <Copy className="w-3 h-3" /> 복사
+                          </button>
+                        )}
+                        <span className="text-chip text-muted-foreground tabular-nums">{filled} / {group.fields.length}</span>
+                      </div>
+                    </div>
+                    <div>{group.fields.map(renderInfoRow)}</div>
+                  </div>
+                );
+              })}
+
+              {langExams.length > 0 && (
+                <div className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <h3 className="text-body font-medium text-foreground">공인외국어시험</h3>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          const lines = langExams
+                            .map((e) => [e.lang, e.examName, e.score, e.date].filter(Boolean).join(" "))
+                            .filter(Boolean);
+                          if (lines.length === 0) { toast("복사할 값이 없어요", { duration: 1200 }); return; }
+                          navigator.clipboard.writeText(lines.join("\n"));
+                          toast(`공인외국어시험 ${lines.length}개 항목을 복사했어요`, { duration: 1400 });
+                        }}
+                        title="어학 성적을 한 번에 복사"
+                        className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
+                      >
+                        <Copy className="w-3 h-3" /> 복사
+                      </button>
+                      <span className="text-chip text-muted-foreground tabular-nums">{langExams.length}개</span>
+                    </div>
+                  </div>
+                  <div>
+                    {langExams.map((e) => (
+                      <div key={e.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/40 last:border-0">
+                        <span className="text-body text-foreground truncate">{[e.lang, e.examName].filter(Boolean).join(" · ") || "—"}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{[e.score, e.date].filter(Boolean).join(" · ")}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
