@@ -1237,8 +1237,9 @@ export function JobPostingTable() {
                       return <col key={col.key} style={{ width: w }} />;
                     })}
                   <col style={{ width: 56 }} />
-                  {/* 스페이서 — 너비 미지정 col+th+td로 남는 폭을 흡수(헤더 배경이 카드 우측 끝까지 채워짐) */}
-                  <col />
+                  {/* 스페이서 — width:100%로 남는 폭을 흡수(헤더 배경이 카드 우측 끝까지 채워짐).
+                      table-fixed에서 width:auto col은 남는 폭을 안 먹어 헤더 배경이 끊겼음(2026-07-06 수정). */}
+                  <col style={{ width: "100%" }} />
                 </colgroup>
                 <thead className="bg-slate-50">
                   <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
