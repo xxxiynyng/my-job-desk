@@ -103,6 +103,10 @@ export interface PickdProfileV1 {
   career: string;
   careerYears: string;
   gradY: string;
+  /** 졸업 예정 월 — "2" | "8" | "" */
+  gradM: string;
+  /** 졸업 시기 미정(재학생 배려) */
+  gradUndecided?: boolean;
   jobs: string[];
   industries: string[];
   timing: string;
