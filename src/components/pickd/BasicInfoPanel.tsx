@@ -270,38 +270,29 @@ export function BasicInfoPanel() {
         {!editMode && (
           <div className="pt-6 space-y-4">
 
-            {/* ── 프로필 헤더 카드 ── */}
-            <div className="bg-card border border-border rounded-2xl px-5 py-4 flex items-center gap-4">
+            {/* ── 프로필 헤더 카드 (컴팩트 신원 바) ── */}
+            <div className="bg-card border border-border rounded-2xl px-5 py-3.5 flex items-center gap-3.5">
               {photoShown && basicPhoto?.url ? (
-                <div className="w-[76px] h-[92px] rounded-xl border border-border overflow-hidden bg-muted/30 shrink-0">
+                <div className="w-[56px] h-[72px] rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0">
                   <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="w-[76px] h-[92px] rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <User className="w-9 h-9 text-primary/50" />
+                <div className="w-[56px] h-[72px] rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <User className="w-7 h-7 text-muted-foreground/50" />
                 </div>
               )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-xl font-semibold text-foreground tracking-tight">{infoValues.name || "이름 미입력"}</span>
-                  <span className="text-body text-muted-foreground">
-                    {[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}
-                  </span>
-                </div>
-                {[infoValues.school, infoValues.major, infoValues.grade].some(Boolean) && (
-                  <p className="text-body text-muted-foreground mt-1.5">
-                    {[infoValues.school, infoValues.major, infoValues.grade].filter(Boolean).join("  ·  ")}
-                  </p>
-                )}
+              <div className="flex-1 min-w-0 flex items-baseline gap-2 flex-wrap">
+                <span className="text-xl font-semibold text-foreground tracking-tight">{infoValues.name || "이름 미입력"}</span>
+                <span className="text-body text-muted-foreground">
+                  {[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}
+                </span>
               </div>
-              <div className="shrink-0 text-right">
-                <button
-                  onClick={enterEdit}
-                  className="text-xs text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
-                >
-                  <Pencil className="w-3 h-3" /> 전체 편집
-                </button>
-              </div>
+              <button
+                onClick={enterEdit}
+                className="shrink-0 text-xs text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3 h-3" /> 전체 편집
+              </button>
             </div>
 
             {/* ── 섹션 카드 그리드 ── */}
