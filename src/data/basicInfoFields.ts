@@ -1,5 +1,5 @@
 // 기본정보 필드 정의 — 단일 출처(SSOT).
-// BasicInfoPanel(뷰·편집)과 useProfileCompletion(완성도 파생)이 이 한 곳을 공유한다.
+// BasicInfoPanel(뷰·편집)이 이 정의를 사용한다.
 // 값 저장 키: specs.info.values.v2 (Record<InfoKey, string>)
 
 export type InfoKey =

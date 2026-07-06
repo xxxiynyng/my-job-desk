@@ -45,7 +45,8 @@
 ## 라우트 구조 (App.tsx)
 
 ```
-/               → Index.tsx          지원 대시보드
+/onboarding     → Onboarding.tsx      온보딩 (미완료 시 / 진입이 리다이렉트)
+/               → Index.tsx          지원 대시보드 (RequireOnboarded)
 /jobs/:slug     → JobDetail.tsx       공고 상세
 /experiences    → Experiences.tsx     경험·스펙 DB (탭: db / basic-info / files)
 /basic-info     → redirect → /experiences?tab=basic-info
@@ -64,10 +65,13 @@ src/
 │   ├── Index.tsx                        대시보드 (지원 현황, 오늘 할 일)
 │   ├── Experiences.tsx                  경험·스펙 DB — 가장 큰 파일(~3100줄)
 │   │   └── tabs: db | basic-info | files
+│   ├── experiences/                     탭2 분리 모듈 — DetailEditor(상세 편집)·CopyGenerator(복사 생성)·RepExperienceViews(대표 스펙 뷰)·fieldWidgets·tableWidgets·presets·mockData
 │   ├── JobDetail.tsx                    공고 상세 + 자소서 작성
 │   ├── AICover.tsx                      AI 자소서 생성
 │   ├── Calendar.tsx                     일정 캘린더
-│   └── Settings.tsx                     설정
+│   ├── Settings.tsx                     설정
+│   ├── Onboarding.tsx                   온보딩 (+ onboardingData.ts)
+│   └── NotFound.tsx                     404
 ├── components/pickd/
 │   ├── PickdSidebar.tsx                 좌측 60px 아이콘 사이드바
 │   ├── BasicInfoPanel.tsx               기본정보 탭 (Experiences에서 렌더)
@@ -75,9 +79,17 @@ src/
 │   ├── DashboardHeader.tsx              대시보드 상단
 │   ├── JobPostingTable.tsx              공고 목록 테이블 (탭1)
 │   ├── JobRegistrationModal.tsx         공고 등록 모달
+│   ├── QuickJobRegistration.tsx         공고 빠른 등록
+│   ├── StatusManagementModal.tsx        상태 관리 모달 (일정·할일 포함)
 │   ├── RowContextMenu.tsx               행 그립·컨텍스트 메뉴 (탭1·탭2 공용)
-│   └── RightPanel.tsx                   우측 패널
+│   ├── TodayPanel.tsx                   대시보드 오늘 패널
+│   ├── DocumentStatusList.tsx           대시보드 서류 현황 (⚠️ 목 dday 고정값)
+│   ├── CalendarMini.tsx                 대시보드 미니 캘린더
+│   ├── MoodRefresh.tsx                  대시보드 기분전환 카드
+│   ├── calendar/                        캘린더 페이지 모듈 — MonthlyCalendar·ListHeader·ContextPanel·CreateModal·DetailModal·ProgressRing
+│   └── ds/                              디자인시스템 프리미티브 — 사용 중: StatusBadge·DdayChip / 나머지 11종(Button·Card 등)은 미사용 예비
 ├── components/table/
+│   ├── StarToggle.tsx                   중요도 별 토글 (탭1 즐겨찾기·탭2 중요도 공용)
 │   ├── ColumnDivider.tsx                컬럼 리사이즈 세로 구분선 (탭1·탭2 공용, hover 전용, 색=행 구분선과 동일)
 │   ├── DragHandle.tsx                   dnd-kit 드래그 핸들 뼈대 (탭1·탭2 공용)
 │   ├── HeaderCell.tsx                   헤더 셀·정렬 버튼·컬럼 메뉴(정렬/필터/숨기기) (탭1·탭2 공용)
@@ -86,7 +98,8 @@ src/
 │   ├── HeaderFilter.tsx                 컬럼 필터 본문 — 컬럼 메뉴의 필터 서브메뉴에 주입 (탭1·탭2 공용)
 │   └── useTableDividers.ts              컬럼 경계 실측 훅 — 세로선 위치는 th 실측값 사용 (탭1·탭2 공용)
 └── hooks/
-    └── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
+    ├── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
+    └── use-mobile.tsx                   shadcn 기본 훅
 ```
 
 ## 데이터 지속성 (localStorage 키)
