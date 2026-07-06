@@ -8,13 +8,8 @@ import {
   Copy,
   Check,
   X,
-  ClipboardList,
-  ListChecks,
-  BookOpen,
-  ScrollText,
   Highlighter,
   AlertCircle,
-  FileText,
   CalendarDays,
 } from "lucide-react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
@@ -197,8 +192,8 @@ function EssayStatus({ status }: { status: string }) {
   );
 }
 
-// ---------- Small utilities ----------
-function CopyButton({ text, label = "복사" }: { text: string; label?: string }) {
+// ---------- Copy button (복붙/오려두기 도우미) ----------
+function CopyButton({ text, label = "복사", always = false }: { text: string; label?: string; always?: boolean }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -211,7 +206,10 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
           setTimeout(() => setCopied(false), 1500);
         } catch {}
       }}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-chip text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+      className={cn(
+        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-chip text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0",
+        !always && "opacity-0 group-hover:opacity-100"
+      )}
       title="복사하기"
     >
       {copied ? <Check className="w-3 h-3 text-pickd-green" /> : <Copy className="w-3 h-3" />}
@@ -220,27 +218,34 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
   );
 }
 
-// ---------- Section header (label-only, no boxes) ----------
-function SectionHeader({
-  icon: Icon,
+// ---------- Numbered section (clear stage separation, no heavy box) ----------
+function Section({
+  n,
   title,
   subtitle,
-  rightSlot,
+  right,
+  children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  n: number;
   title: string;
   subtitle?: string;
-  rightSlot?: React.ReactNode;
+  right?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        <Icon className="w-4 h-4 text-muted-foreground" />
-        <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
-        {subtitle && <span className="text-chip text-muted-foreground ml-1">{subtitle}</span>}
+    <section className="pt-8 mt-8 border-t border-border first:border-t-0 first:mt-0 first:pt-0">
+      <div className="flex items-center justify-between mb-4 gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="shrink-0 w-5 h-5 rounded-full bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
+            {n}
+          </span>
+          <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
+          {subtitle && <span className="text-chip text-muted-foreground">{subtitle}</span>}
+        </div>
+        {right}
       </div>
-      {rightSlot}
-    </div>
+      {children}
+    </section>
   );
 }
 
@@ -275,7 +280,7 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
       <span className="text-muted-foreground select-none shrink-0 mt-0.5 text-chip">•</span>
       <span
         className={cn(
-          "text-body leading-relaxed break-words flex-1",
+          "text-body leading-relaxed break-words flex-1 select-text",
           highlighted ? "text-foreground font-semibold" : "text-foreground"
         )}
       >
@@ -285,7 +290,7 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
   );
 }
 
-// ---------- Requirement group (seamless, no box) ----------
+// ---------- Requirement group (seamless list + 그룹 통째 복사) ----------
 function ReqGroup({
   label,
   items,
@@ -300,8 +305,11 @@ function ReqGroup({
   onToggle: (key: string) => void;
 }) {
   return (
-    <div>
-      <h3 className="text-xs font-semibold text-muted-foreground mb-1">{label}</h3>
+    <div className="group">
+      <div className="flex items-center gap-2 mb-1">
+        <h3 className="text-xs font-semibold text-muted-foreground">{label}</h3>
+        <CopyButton text={items.map((t) => `· ${t}`).join("\n")} />
+      </div>
       <ul className="space-y-0.5">
         {items.map((text, idx) => {
           const key = hlKey(section, label, idx);
@@ -327,7 +335,6 @@ export default function JobDetail() {
   const location = useLocation();
   const job = getJob(slug);
 
-  const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
 
   // 제출 서류 확인 체크 상태 (localStorage 지속)
@@ -339,8 +346,7 @@ export default function JobDetail() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(docsKey);
-      if (raw) setCheckedDocs(new Set(JSON.parse(raw)));
-      else setCheckedDocs(new Set());
+      setCheckedDocs(raw ? new Set(JSON.parse(raw)) : new Set());
     } catch {}
   }, [docsKey]);
 
@@ -367,9 +373,7 @@ export default function JobDetail() {
       .filter(({ status }: any) => status === "작성중" || status === "초안")
       .pop()?.i ?? 0;
     const el = essayRefs.current[lastActiveIdx];
-    if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
-    }
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
   }, []);
 
   const toggleHighlight = (key: string) => {
@@ -380,10 +384,8 @@ export default function JobDetail() {
       return next;
     });
   };
-
   const isHighlighted = (key: string) => highlights.has(key);
 
-  // Navigate to Tab3 (AI Cover) immediately — no confirmation
   const goToTab3 = (essayNo: number) => {
     navigate(`/ai-cover?from=job&slug=${slug ?? "samsung"}&essay=${essayNo}`);
   };
@@ -395,358 +397,221 @@ export default function JobDetail() {
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main scroll area */}
-        <div className="flex-1 overflow-y-auto">
-
-          {/* Sticky top bar */}
-          <div className="sticky top-0 z-20 bg-background/95 backdrop-blur">
-            <div className="px-8 py-3 flex items-center justify-between">
-              <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Link to="/" className="hover:text-foreground transition-colors">
-                  지원 대시보드
-                </Link>
-                <ChevronRight className="w-3 h-3" />
-                <span className="text-foreground font-medium">{job.company} {job.division ?? ""}</span>
-              </nav>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={rawOpen ? "default" : "ghost"}
-                  size="sm"
-                  className="h-7 text-xs gap-1.5 rounded-md"
-                  onClick={() => setRawOpen((v) => !v)}
-                >
-                  <ScrollText className="w-3.5 h-3.5" />
-                  {rawOpen ? "원문 닫기" : "원문 보기"}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs gap-1.5 rounded-md"
-                  onClick={() => navigate("/")}
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  대시보드로
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="px-8 pt-4 pb-16 max-w-[780px]">
-
-            {/* Title + inline meta (no border block) */}
-            <header className="mb-9">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
-                <span className="font-medium text-foreground">{job.company}</span>
-                {job.division && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span>{job.division}</span>
-                  </>
-                )}
-                <span className="text-border">·</span>
-                <span>{job.role}</span>
-              </div>
-              <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">
-                {job.title}
-              </h1>
-
-              {/* one inline meta row — replaces the old 기본정보 table */}
-              <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-                <span className={cn("inline-flex items-center gap-1 font-semibold tabular-nums", urgent ? "text-pickd-red" : "text-foreground")}>
-                  <CalendarDays className="w-3.5 h-3.5" />
-                  마감 {job.deadline} · D-{job.dday}
-                </span>
-                <span className="text-border">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                  {job.status}
-                </span>
-                {job.location && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span>{job.location}</span>
-                  </>
-                )}
-                {job.employment && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span>{job.employment}</span>
-                  </>
-                )}
-              </div>
-
-              {/* urgency / expired note — kept minimal */}
-              {(job.expired || urgent) && (
-                <div className={cn(
-                  "mt-3 inline-flex items-center gap-1.5 text-chip rounded-md px-2.5 py-1",
-                  job.expired ? "bg-muted/50 text-muted-foreground" : "bg-pickd-red-light text-pickd-red"
-                )}>
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  {job.expired ? "마감된 공고입니다" : `제출 기한이 얼마 남지 않았어요`}
-                </div>
-              )}
-            </header>
-
-            {/* ===== ZONE 1 · 지원 준비 ===== */}
-            <p className="text-chip font-semibold text-primary/80 tracking-wide mb-4">지원 준비</p>
-
-            {/* 제출 서류 확인 */}
-            {submitDocs.length > 0 && (
-              <section className="mb-9">
-                <SectionHeader
-                  icon={ListChecks}
-                  title="제출 서류"
-                  rightSlot={
-                    <span className="text-chip text-muted-foreground tabular-nums">
-                      {checkedDocs.size}/{submitDocs.length} 확인
-                    </span>
-                  }
-                />
-                <ul className="space-y-0.5">
-                  {submitDocs.map((d) => {
-                    const checked = checkedDocs.has(d);
-                    return (
-                      <li key={d}>
-                        <button
-                          type="button"
-                          onClick={() => toggleDoc(d)}
-                          className="w-full flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
-                        >
-                          <span className={cn(
-                            "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
-                            checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
-                          )}>
-                            {checked && <Check className="w-3 h-3" />}
-                          </span>
-                          <span className={cn(
-                            "text-body leading-relaxed",
-                            checked ? "text-muted-foreground line-through" : "text-foreground"
-                          )}>
-                            {d}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            )}
-
-            {/* 자소서 작성 */}
-            <section className="mb-9">
-              <SectionHeader
-                icon={FileText}
-                title="자기소개서"
-                subtitle={`${job.essays.length}문항`}
-                rightSlot={
-                  job.essays.length > 0 && (
-                    <span className="text-chip text-muted-foreground tabular-nums">
-                      {essayDone}/{job.essays.length} 완료
-                    </span>
-                  )
-                }
-              />
-
-              {job.essays.length === 0 ? (
-                <p className="text-body text-muted-foreground px-2 py-3">이 공고는 별도 문항이 없어요</p>
-              ) : (
-                <ol className="divide-y divide-border/50">
-                  {job.essays.map((e: any, idx: number) => (
-                    <li
-                      key={e.no}
-                      ref={(el) => { essayRefs.current[idx] = el; }}
-                      className="py-4 first:pt-1"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className={cn(
-                            "shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-mini font-bold",
-                            e.status === "완료" ? "bg-pickd-green text-white" :
-                            e.status === "작성중" ? "bg-indigo-500 text-white" :
-                            e.status === "초안" ? "bg-pickd-orange text-white" :
-                            "bg-muted text-muted-foreground"
-                          )}>
-                            {e.status === "완료" ? <Check className="w-3 h-3" /> : e.no}
-                          </span>
-                          <EssayStatus status={e.status} />
-                          <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
-                          {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant={e.status === "미작성" ? "outline" : "default"}
-                          className={cn(
-                            "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
-                            e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
-                          )}
-                          onClick={() => goToTab3(e.no)}
-                        >
-                          <PenLine className="w-3 h-3" />
-                          {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
-                        </Button>
-                      </div>
-
-                      <p className="mt-2 pl-7 text-sm font-medium text-foreground leading-relaxed">
-                        {e.question}
-                      </p>
-
-                      {e.preview ? (
-                        <p className="mt-1.5 pl-7 text-body text-muted-foreground leading-relaxed line-clamp-2">
-                          {e.preview}
-                        </p>
-                      ) : e.status === "미작성" ? (
-                        <p className="mt-1 pl-7 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
-
-            {/* subtle divider between zones — only strong-ish separation on the page */}
-            <div className="border-t border-border/60 my-10" />
-
-            {/* ===== ZONE 2 · 공고 확인 ===== */}
-            <p className="text-chip font-semibold text-muted-foreground tracking-wide mb-4">공고 확인</p>
-
-            {/* 지원 자격 · 우대 · 가산점 */}
-            <section className="mb-9">
-              <SectionHeader
-                icon={ClipboardList}
-                title="지원 자격 · 우대"
-                rightSlot={
-                  highlights.size > 0 ? (
-                    <button
-                      onClick={() => setHighlights(new Set())}
-                      className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                    >
-                      <X className="w-3 h-3" />
-                      강조 {highlights.size}개 초기화
-                    </button>
-                  ) : (
-                    <span className="text-chip text-muted-foreground/70 flex items-center gap-1">
-                      <Highlighter className="w-3 h-3" />
-                      줄에 올려 중요 표시
-                    </span>
-                  )
-                }
-              />
-              <div className="space-y-5">
-                {reqGroups.map(([label, items]) => (
-                  <ReqGroup
-                    key={label}
-                    label={label}
-                    items={items}
-                    section="eligibility"
-                    isHighlighted={isHighlighted}
-                    onToggle={toggleHighlight}
-                  />
-                ))}
-              </div>
-            </section>
-
-            {/* 전형 일정 */}
-            <section className="mb-9">
-              <SectionHeader icon={CalendarDays} title="전형 일정" />
-              <div className="relative pl-6">
-                <div className="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
-                <div className="space-y-5">
-                  {job.process.map((p: any, i: number) => (
-                    <div key={i} className="relative flex items-start justify-between gap-4">
-                      <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-full bg-background border-2 border-border flex items-center justify-center">
-                        <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-body font-medium text-foreground">{p.step}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-xs tabular-nums text-foreground/80">{p.schedule}</p>
-                        {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            {/* 직무 설명 · 요구 역량 */}
-            <section>
-              <SectionHeader icon={BookOpen} title="직무 설명 · 요구 역량" />
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1">직무 설명</h3>
-                  <p className="text-body text-foreground leading-relaxed">{job.jobDescription}</p>
-                </div>
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1">요구 역량</h3>
-                  <ul className="space-y-0.5">
-                    {job.competencies.map((c: string, i: number) => {
-                      const key = hlKey("jd", "competency", i);
-                      return (
-                        <HighlightableLine
-                          key={i}
-                          lineKey={key}
-                          text={c}
-                          highlighted={isHighlighted(key)}
-                          onToggle={toggleHighlight}
-                        />
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </section>
+      <div className="flex-1 overflow-y-auto">
+        {/* Sticky top bar */}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border/60">
+          <div className="mx-auto max-w-[860px] px-8 py-3 flex items-center justify-between">
+            <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
+              <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
+              <ChevronRight className="w-3 h-3 shrink-0" />
+              <span className="text-foreground font-medium truncate">{job.company} {job.division ?? ""}</span>
+            </nav>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs gap-1.5 rounded-md shrink-0"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              대시보드로
+            </Button>
           </div>
         </div>
 
-        {/* Right slide panel: raw source */}
-        <aside
-          className={cn(
-            "border-l border-border flex flex-col shrink-0 transition-all duration-300 overflow-hidden",
-            rawOpen ? "w-[440px]" : "w-0"
-          )}
-        >
-          {rawOpen && (
-            <div className="flex flex-col h-full w-[440px]">
-              <div className="px-5 py-3.5 border-b border-border bg-muted/30 flex items-center justify-between shrink-0 gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
-                    <ScrollText className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-body font-semibold text-foreground leading-tight">원문 공고</p>
-                    <p className="text-chip text-muted-foreground truncate">{job.company} · 원본 채용공고문</p>
-                  </div>
+        {/* Centered content column */}
+        <div className="mx-auto max-w-[860px] px-8 pt-6 pb-24">
+
+          {/* Title + minimal at-a-glance meta */}
+          <header className="mb-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
+              <span className="font-medium text-foreground">{job.company}</span>
+              {job.division && (<><span className="text-border">·</span><span>{job.division}</span></>)}
+              <span className="text-border">·</span>
+              <span>{job.role}</span>
+            </div>
+            <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">
+              {job.title}
+            </h1>
+
+            <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
+              <span className={cn("inline-flex items-center gap-1 font-semibold tabular-nums", urgent ? "text-pickd-red" : "text-foreground")}>
+                <CalendarDays className="w-3.5 h-3.5" />
+                마감 {job.deadline} · D-{job.dday}
+              </span>
+              <span className="text-border">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                {job.status}
+              </span>
+            </div>
+
+            {(job.expired || urgent) && (
+              <div className={cn(
+                "mt-3 inline-flex items-center gap-1.5 text-chip rounded-md px-2.5 py-1",
+                job.expired ? "bg-muted/50 text-muted-foreground" : "bg-pickd-red-light text-pickd-red"
+              )}>
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {job.expired ? "마감된 공고입니다" : "제출 기한이 얼마 남지 않았어요"}
+              </div>
+            )}
+          </header>
+
+          {/* 1 · 기본 정보 — 복사하기 쉬운 정보 목록 */}
+          <Section
+            n={1}
+            title="기본 정보"
+            right={<CopyButton always label="전체 복사" text={Object.entries(job.basic).map(([k, v]) => `${k}: ${v}`).join("\n")} />}
+          >
+            <dl className="divide-y divide-border/40">
+              {Object.entries(job.basic).map(([k, v]) => (
+                <div key={k} className="group flex items-start gap-3 py-2">
+                  <dt className="w-28 shrink-0 text-xs text-muted-foreground pt-0.5">{k}</dt>
+                  <dd className={cn(
+                    "flex-1 text-body leading-relaxed break-words select-text",
+                    k === "D-day" && urgent ? "text-pickd-red font-semibold" : "text-foreground"
+                  )}>
+                    {String(v)}
+                  </dd>
+                  <CopyButton text={String(v)} />
                 </div>
+              ))}
+            </dl>
+          </Section>
+
+          {/* 2 · 직무 설명 · 요구 역량 */}
+          <Section n={2} title="직무 설명 · 요구 역량">
+            <div className="space-y-5">
+              <div className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xs font-semibold text-muted-foreground">직무 설명</h3>
+                  <CopyButton text={job.jobDescription} />
+                </div>
+                <p className="text-body text-foreground leading-relaxed select-text">{job.jobDescription}</p>
+              </div>
+              <div className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xs font-semibold text-muted-foreground">요구 역량</h3>
+                  <CopyButton text={job.competencies.map((c: string) => `· ${c}`).join("\n")} />
+                </div>
+                <ul className="space-y-0.5">
+                  {job.competencies.map((c: string, i: number) => {
+                    const key = hlKey("jd", "competency", i);
+                    return (
+                      <HighlightableLine key={i} lineKey={key} text={c} highlighted={isHighlighted(key)} onToggle={toggleHighlight} />
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          {/* 3 · 지원 자격 · 우대 · 가산점 */}
+          <Section
+            n={3}
+            title="지원 자격 · 우대"
+            right={
+              highlights.size > 0 ? (
                 <button
-                  onClick={() => setRawOpen(false)}
-                  aria-label="원문 닫기"
-                  className="w-7 h-7 rounded-md hover:bg-muted border border-transparent hover:border-border text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-all"
+                  onClick={() => setHighlights(new Set())}
+                  className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
+                  강조 {highlights.size}개 초기화
                 </button>
-              </div>
+              ) : (
+                <span className="text-chip text-muted-foreground/70 flex items-center gap-1">
+                  <Highlighter className="w-3 h-3" />
+                  줄에 올려 중요 표시
+                </span>
+              )
+            }
+          >
+            <div className="space-y-5">
+              {reqGroups.map(([label, items]) => (
+                <ReqGroup
+                  key={label}
+                  label={label}
+                  items={items}
+                  section="eligibility"
+                  isHighlighted={isHighlighted}
+                  onToggle={toggleHighlight}
+                />
+              ))}
+            </div>
+          </Section>
 
-              <div className="flex-1 overflow-y-auto p-4 bg-muted/10">
-                <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
-                  <div className="px-4 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between group">
-                    <span className="text-chip font-mono text-muted-foreground tabular-nums">
-                      {job.rawSource.length.toLocaleString()}자
-                    </span>
-                    <CopyButton text={job.rawSource} label="전체 복사" />
+          {/* 4 · 전형 절차 */}
+          <Section n={4} title="전형 절차">
+            <div className="relative pl-6">
+              <div className="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
+              <div className="space-y-5">
+                {job.process.map((p: any, i: number) => (
+                  <div key={i} className="relative flex items-start justify-between gap-4">
+                    <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-full bg-background border-2 border-border flex items-center justify-center">
+                      <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-body font-medium text-foreground">{p.step}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs tabular-nums text-foreground/80 select-text">{p.schedule}</p>
+                      {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
+                    </div>
                   </div>
-                  <pre className="p-5 text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
-                    {job.rawSource}
-                  </pre>
-                </div>
+                ))}
               </div>
+            </div>
+          </Section>
 
-              <div className="px-5 py-3 border-t border-border bg-muted/30 shrink-0 flex items-center justify-between gap-2">
-                <p className="text-chip text-muted-foreground">원본 공고 출처</p>
+          {/* 5 · 제출 서류 — 확인 체크리스트 */}
+          {submitDocs.length > 0 && (
+            <Section
+              n={5}
+              title="제출 서류"
+              right={<span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{submitDocs.length} 확인</span>}
+            >
+              <ul className="space-y-0.5">
+                {submitDocs.map((d) => {
+                  const checked = checkedDocs.has(d);
+                  return (
+                    <li key={d} className="group flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleDoc(d)}
+                        className="flex-1 flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
+                      >
+                        <span className={cn(
+                          "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
+                          checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
+                        )}>
+                          {checked && <Check className="w-3 h-3" />}
+                        </span>
+                        <span className={cn("text-body leading-relaxed select-text", checked ? "text-muted-foreground line-through" : "text-foreground")}>
+                          {d}
+                        </span>
+                      </button>
+                      <CopyButton text={d} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </Section>
+          )}
+
+          {/* 6 · 공고 원문 (추출 전문) */}
+          <Section
+            n={6}
+            title="공고 원문"
+            subtitle="추출된 원본"
+            right={<CopyButton always label="전체 복사" text={job.rawSource} />}
+          >
+            <div className="rounded-lg bg-muted/20 border border-border/50">
+              <pre className="p-4 text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text max-h-[420px] overflow-y-auto">
+                {job.rawSource}
+              </pre>
+              <div className="px-4 py-2 border-t border-border/50 flex items-center justify-between gap-2">
+                <span className="text-chip text-muted-foreground tabular-nums">{job.rawSource.length.toLocaleString()}자</span>
                 <a
                   href={job.sourceUrl}
                   target="_blank"
@@ -758,8 +623,72 @@ export default function JobDetail() {
                 </a>
               </div>
             </div>
-          )}
-        </aside>
+          </Section>
+
+          {/* 7 · 자기소개서 (맨 아래) */}
+          <Section
+            n={7}
+            title="자기소개서"
+            subtitle={`${job.essays.length}문항`}
+            right={job.essays.length > 0 && (
+              <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
+            )}
+          >
+            {job.essays.length === 0 ? (
+              <p className="text-body text-muted-foreground px-2 py-3">이 공고는 별도 문항이 없어요</p>
+            ) : (
+              <ol className="divide-y divide-border/50">
+                {job.essays.map((e: any, idx: number) => (
+                  <li
+                    key={e.no}
+                    ref={(el) => { essayRefs.current[idx] = el; }}
+                    className="py-4 first:pt-1"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <span className={cn(
+                          "shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-mini font-bold",
+                          e.status === "완료" ? "bg-pickd-green text-white" :
+                          e.status === "작성중" ? "bg-indigo-500 text-white" :
+                          e.status === "초안" ? "bg-pickd-orange text-white" :
+                          "bg-muted text-muted-foreground"
+                        )}>
+                          {e.status === "완료" ? <Check className="w-3 h-3" /> : e.no}
+                        </span>
+                        <EssayStatus status={e.status} />
+                        <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
+                        {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={e.status === "미작성" ? "outline" : "default"}
+                        className={cn(
+                          "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
+                          e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                        )}
+                        onClick={() => goToTab3(e.no)}
+                      >
+                        <PenLine className="w-3 h-3" />
+                        {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
+                      </Button>
+                    </div>
+
+                    <div className="group mt-2 pl-7 flex items-start gap-2">
+                      <p className="text-sm font-medium text-foreground leading-relaxed select-text flex-1">{e.question}</p>
+                      <CopyButton text={e.question} />
+                    </div>
+
+                    {e.preview ? (
+                      <p className="mt-1.5 pl-7 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
+                    ) : e.status === "미작성" ? (
+                      <p className="mt-1 pl-7 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Section>
+        </div>
       </div>
     </div>
   );
