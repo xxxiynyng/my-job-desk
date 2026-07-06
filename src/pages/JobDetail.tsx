@@ -740,15 +740,7 @@ export default function JobDetail() {
             title="자기소개서"
             subtitle={`${job.essays.length}문항`}
             right={job.essays.length > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-pickd-green transition-all"
-                    style={{ width: `${(essayDone / job.essays.length) * 100}%` }}
-                  />
-                </div>
-                <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
-              </div>
+              <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
             )}
           >
             {job.essays.length === 0 ? (
