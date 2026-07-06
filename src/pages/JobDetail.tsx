@@ -11,6 +11,8 @@ import {
   Highlighter,
   AlertCircle,
   CalendarDays,
+  ScrollText,
+  Plus,
 } from "lucide-react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
@@ -185,7 +187,7 @@ const ESSAY_STATE: Record<string, { chip: string; dot: string }> = {
   완료: { chip: "bg-pickd-green-light text-pickd-green", dot: "bg-pickd-green" },
   작성중: { chip: "bg-pickd-blue-light text-pickd-blue", dot: "bg-pickd-blue" },
   초안: { chip: "bg-pickd-orange-light text-pickd-orange", dot: "bg-pickd-orange" },
-  미작성: { chip: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/40" },
+  미작성: { chip: "text-muted-foreground", dot: "bg-muted-foreground/40" },
 };
 
 // ---------- Essay status chip (dot + 라벨) ----------
@@ -243,7 +245,7 @@ function Section({
     <section className="pt-8 mt-8 border-t border-border first:border-t-0 first:mt-0 first:pt-0">
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="shrink-0 w-5 h-5 rounded-full bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
+          <span className="shrink-0 w-5 h-5 rounded-md bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
             {n}
           </span>
           <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
@@ -342,6 +344,7 @@ export default function JobDetail() {
   const location = useLocation();
   const job = getJob(slug);
 
+  const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
 
   // 제출 서류 확인 체크 상태 (localStorage 지속)
@@ -368,6 +371,39 @@ export default function JobDetail() {
       return next;
     });
   };
+
+  // 공고 외 직접 준비하는 제출 서류(포트폴리오·경력증명서 등)를 사용자가 추가 — localStorage 지속
+  const customDocsKey = `pickd.jobs.${slug ?? "samsung"}.customDocs.v1`;
+  const [customDocs, setCustomDocs] = useState<string[]>([]);
+  const [newDoc, setNewDoc] = useState("");
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(customDocsKey);
+      setCustomDocs(raw ? JSON.parse(raw) : []);
+    } catch {}
+  }, [customDocsKey]);
+  const persistCustomDocs = (next: string[]) => {
+    setCustomDocs(next);
+    try { localStorage.setItem(customDocsKey, JSON.stringify(next)); } catch {}
+  };
+  const addCustomDoc = () => {
+    const v = newDoc.trim();
+    if (!v) return;
+    if ([...submitDocs, ...customDocs].includes(v)) { toast("이미 있는 서류예요"); setNewDoc(""); return; }
+    persistCustomDocs([...customDocs, v]);
+    setNewDoc("");
+    toast("서류를 추가했어요");
+  };
+  const removeCustomDoc = (d: string) => {
+    persistCustomDocs(customDocs.filter((x) => x !== d));
+    setCheckedDocs((prev) => {
+      const n = new Set(prev);
+      n.delete(d);
+      try { localStorage.setItem(docsKey, JSON.stringify([...n])); } catch {}
+      return n;
+    });
+  };
+  const allDocs = [...submitDocs, ...customDocs];
 
   // 자소서 문항 ref — 작성중인 서류에서 진입 시 마지막 작업 문항으로 스크롤
   const essayRefs = useRef<(HTMLLIElement | null)[]>([]);
@@ -404,24 +440,36 @@ export default function JobDetail() {
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 overflow-y-auto bg-white">
         {/* Sticky top bar */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border/60">
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
           <div className="mx-auto max-w-[860px] px-8 py-3 flex items-center justify-between">
             <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
               <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
               <ChevronRight className="w-3 h-3 shrink-0" />
               <span className="text-foreground font-medium truncate">{job.company} {job.division ?? ""}</span>
             </nav>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs gap-1.5 rounded-md shrink-0"
-              onClick={() => navigate("/")}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              대시보드로
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant={rawOpen ? "default" : "ghost"}
+                size="sm"
+                className="h-7 text-xs gap-1.5 rounded-md"
+                onClick={() => setRawOpen((v) => !v)}
+              >
+                <ScrollText className="w-3.5 h-3.5" />
+                {rawOpen ? "원문 닫기" : "원문 보기"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1.5 rounded-md"
+                onClick={() => navigate("/")}
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                대시보드로
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -547,26 +595,41 @@ export default function JobDetail() {
             </div>
           </Section>
 
-          {/* 4 · 전형 절차 */}
-          <Section n={4} title="전형 절차">
+          {/* 4 · 전형 절차 — 일정 미정도 흔하므로 '미정' 표기 대비 */}
+          <Section
+            n={4}
+            title="전형 절차"
+            right={<span className="text-chip text-muted-foreground/70">일정이 없으면 ‘미정’으로 표시돼요</span>}
+          >
             <div className="relative pl-6">
               <div className="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
               <div className="space-y-5">
-                {job.process.map((p: any, i: number) => (
-                  <div key={i} className="relative flex items-start justify-between gap-4">
-                    <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-full bg-background border-2 border-border flex items-center justify-center">
-                      <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
+                {job.process.map((p: any, i: number) => {
+                  const hasSchedule = !!(p.schedule && String(p.schedule).trim());
+                  return (
+                    <div key={i} className="relative flex items-start justify-between gap-4">
+                      <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-md bg-background border-2 border-border flex items-center justify-center">
+                        <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-body font-medium text-foreground">{p.step}</p>
+                        {p.detail && <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        {hasSchedule ? (
+                          <p className="text-xs tabular-nums text-foreground/80 select-text">{p.schedule}</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground/60">일정 미정</p>
+                        )}
+                        {p.note ? (
+                          <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>
+                        ) : !hasSchedule ? (
+                          <p className="text-chip text-muted-foreground/50 mt-0.5">확정되면 업데이트하세요</p>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-body font-medium text-foreground">{p.step}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs tabular-nums text-foreground/80 select-text">{p.schedule}</p>
-                      {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </Section>
@@ -606,35 +669,9 @@ export default function JobDetail() {
             </Section>
           )}
 
-          {/* 6 · 공고 원문 (추출 전문) */}
+          {/* 6 · 자기소개서 (맨 아래) — 공고 원문은 상단 '원문 보기' 버튼 → 우측 슬라이드 패널 */}
           <Section
             n={6}
-            title="공고 원문"
-            subtitle="추출된 원본"
-            right={<CopyButton always label="전체 복사" text={job.rawSource} />}
-          >
-            <div className="rounded-lg bg-muted/20 border border-border/50">
-              <pre className="p-4 text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text max-h-[420px] overflow-y-auto">
-                {job.rawSource}
-              </pre>
-              <div className="px-4 py-2 border-t border-border/50 flex items-center justify-between gap-2">
-                <span className="text-chip text-muted-foreground tabular-nums">{job.rawSource.length.toLocaleString()}자</span>
-                <a
-                  href={job.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-chip text-primary hover:underline font-medium"
-                >
-                  원문 사이트 열기
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
-          </Section>
-
-          {/* 7 · 자기소개서 (맨 아래) */}
-          <Section
-            n={7}
             title="자기소개서"
             subtitle={`${job.essays.length}문항`}
             right={job.essays.length > 0 && (
@@ -652,24 +689,28 @@ export default function JobDetail() {
             {job.essays.length === 0 ? (
               <p className="text-body text-muted-foreground px-2 py-3">이 공고는 별도 문항이 없어요</p>
             ) : (
-              <ol className="divide-y divide-border/50">
+              <ol className="divide-y divide-border">
                 {job.essays.map((e: any, idx: number) => (
                   <li
                     key={e.no}
                     ref={(el) => { essayRefs.current[idx] = el; }}
-                    className="py-4 first:pt-1"
+                    className="py-5 first:pt-2"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span className={cn(
-                          "shrink-0 w-5 h-5 rounded-full border flex items-center justify-center text-mini font-bold tabular-nums bg-background",
-                          e.status === "완료" ? "border-pickd-green text-pickd-green" : "border-border text-muted-foreground"
-                        )}>
-                          {e.status === "완료" ? <Check className="w-3 h-3" /> : e.no}
-                        </span>
-                        <EssayStatus status={e.status} />
-                        <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
-                        {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          <span className="text-chip font-semibold text-muted-foreground tabular-nums">Q{e.no}</span>
+                          <EssayStatus status={e.status} />
+                          <span className="text-chip text-muted-foreground">
+                            {e.charLimit.toLocaleString()}자{e.updated ? ` · 수정 ${e.updated}` : ""}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-foreground leading-relaxed select-text">{e.question}</p>
+                        {e.preview ? (
+                          <p className="mt-1.5 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
+                        ) : e.status === "미작성" ? (
+                          <p className="mt-1 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
+                        ) : null}
                       </div>
                       <Button
                         size="sm"
@@ -685,23 +726,63 @@ export default function JobDetail() {
                         {e.status === "완료" ? "수정" : e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
                       </Button>
                     </div>
-
-                    <div className="group mt-2 pl-7 flex items-start gap-2">
-                      <p className="text-sm font-medium text-foreground leading-relaxed select-text flex-1">{e.question}</p>
-                      <CopyButton text={e.question} />
-                    </div>
-
-                    {e.preview ? (
-                      <p className="mt-1.5 pl-7 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
-                    ) : e.status === "미작성" ? (
-                      <p className="mt-1 pl-7 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
-                    ) : null}
                   </li>
                 ))}
               </ol>
             )}
           </Section>
         </div>
+        </div>
+
+        {/* Right slide panel: 공고 원문 (좌우 대조용) */}
+        <aside
+          className={cn(
+            "border-l border-border flex flex-col shrink-0 transition-all duration-300 overflow-hidden bg-white",
+            rawOpen ? "w-[440px]" : "w-0"
+          )}
+        >
+          {rawOpen && (
+            <div className="flex flex-col h-full w-[440px]">
+              <div className="px-5 py-3.5 border-b border-border bg-muted/20 flex items-center justify-between shrink-0 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center shrink-0">
+                    <ScrollText className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-body font-semibold text-foreground leading-tight">공고 원문</p>
+                    <p className="text-chip text-muted-foreground truncate">{job.company} · 추출된 원본</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setRawOpen(false)}
+                  aria-label="원문 닫기"
+                  className="w-7 h-7 rounded-md hover:bg-muted border border-transparent hover:border-border text-muted-foreground hover:text-foreground flex items-center justify-center shrink-0 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 bg-muted/10">
+                <pre className="text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
+                  {job.rawSource}
+                </pre>
+              </div>
+
+              <div className="px-5 py-3 border-t border-border bg-muted/20 shrink-0 flex items-center justify-between gap-2">
+                <CopyButton always label="전체 복사" text={job.rawSource} />
+                <a
+                  href={job.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-chip text-primary hover:underline font-medium"
+                >
+                  원문 사이트 열기
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          )}
+        </aside>
       </div>
     </div>
   );
