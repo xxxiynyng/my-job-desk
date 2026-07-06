@@ -236,8 +236,10 @@ function FileGrid({
           className={cn("rounded-xl transition-colors", dragOver && "ring-2 ring-primary/40 bg-primary/5 p-2")}
         >
           {activeKinds.length === 0 ? (
-            <div className="py-16 text-center text-muted-foreground rounded-lg border border-dashed border-border">
-              <Folder className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+            <div className="py-16 text-center text-muted-foreground rounded-xl border border-dashed border-border">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+                <Folder className="w-6 h-6 text-muted-foreground/50" />
+              </div>
               <p className="text-sm">저장된 파일이 없어요.</p>
               <p className="text-chip mt-1 opacity-60">
                 파일을 끌어다 놓거나 "파일 업로드"를 눌러 추가하세요.
@@ -249,13 +251,15 @@ function FileGrid({
                 const kindItems = byKind[kind] || [];
                 return (
                   <div key={kind}>
-                    {/* 폴더 헤더 */}
+                    {/* 폴더 헤더 — 소프트 타일 아이콘 */}
                     <div className="flex items-center gap-2 mb-3">
-                      <Folder className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="w-6 h-6 rounded-md bg-muted flex items-center justify-center shrink-0">
+                        <Folder className="w-3.5 h-3.5 text-muted-foreground" />
+                      </span>
                       <span className="text-body font-medium text-foreground">{kind}</span>
                       <span className="text-chip text-muted-foreground tabular-nums">{kindItems.length}</span>
                     </div>
-                    {/* 카드 그리드 (탭 리스트와 동일한 카드 언어) */}
+                    {/* 카드 그리드 */}
                     <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
                       {kindItems.map((f) => {
                         const rep = isBasicPhoto?.(f.id) && f.kind === "증명사진";
@@ -266,16 +270,21 @@ function FileGrid({
                             title={f.name}
                             className="group text-left bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-sm transition-all"
                           >
-                            <div className="h-[92px] bg-muted/40 flex items-center justify-center overflow-hidden">
+                            <div className="h-[104px] bg-muted/30 flex items-center justify-center overflow-hidden">
                               {f.fileKind === "image" && f.url ? (
                                 <img src={f.url} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                              ) : f.fileKind === "image" ? (
-                                <ImageIcon className="w-9 h-9 text-blue-500/70" />
                               ) : (
-                                <FileText className="w-9 h-9 text-red-500/80" />
+                                <div className={cn(
+                                  "w-11 h-11 rounded-xl flex items-center justify-center",
+                                  f.fileKind === "image" ? "bg-sky-50" : "bg-red-50",
+                                )}>
+                                  {f.fileKind === "image"
+                                    ? <ImageIcon className="w-5 h-5 text-sky-400" />
+                                    : <FileText className="w-5 h-5 text-red-400" />}
+                                </div>
                               )}
                             </div>
-                            <div className="px-2.5 py-2 min-w-0">
+                            <div className="px-2.5 py-2 min-w-0 border-t border-border/60">
                               <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
                               {rep ? (
                                 <p className="text-chip text-primary inline-flex items-center gap-0.5 mt-0.5"><Check className="w-3 h-3" /> 대표 사진</p>
@@ -286,14 +295,6 @@ function FileGrid({
                           </button>
                         );
                       })}
-                      {/* 업로드 카드 */}
-                      <button
-                        onClick={() => inputRef.current?.click()}
-                        className="border border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors min-h-[132px]"
-                      >
-                        <Upload className="w-5 h-5" />
-                        <span className="text-xs">파일 업로드</span>
-                      </button>
                     </div>
                   </div>
                 );
@@ -477,13 +478,17 @@ function PreviewModal({
               <img src={f.url} alt={f.name} className="max-h-[60vh] object-contain" />
             ) : (
               <div className="flex flex-col items-center text-muted-foreground py-12">
-                <ImageIcon className="w-10 h-10 mb-2" />
+                <div className="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-3">
+                  <ImageIcon className="w-7 h-7 text-sky-400" />
+                </div>
                 <p className="text-xs">이미지 미리보기</p>
               </div>
             )
           ) : (
             <div className="flex flex-col items-center text-muted-foreground py-12">
-              <FileText className="w-10 h-10 mb-2" />
+              <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-3">
+                <FileText className="w-7 h-7 text-red-400" />
+              </div>
               <p className="text-xs">PDF 미리보기</p>
             </div>
           )}
