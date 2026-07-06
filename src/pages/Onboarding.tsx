@@ -154,12 +154,6 @@ export default function Onboarding() {
   const nickOk = s.nickname.trim().length >= 2;
   const gradOk = !!s.gradY && !!s.gradM;
 
-  // 픽 카드 진행 게이지 (8칸: 3단계 전체 걸쳐 채워짐)
-  const pickFilled = [
-    nickOk, !!s.persona, !!s.school, (s.majorNA || !!s.major),
-    (isCareer ? !!s.careerYears : gradOk), s.jobs.length > 0, s.inds.length > 0, !!s.timing,
-  ].filter(Boolean).length;
-
   const valid: Record<Step, boolean> = {
     login: true,
     terms: s.agree.age && s.agree.tos && s.agree.priv,
@@ -271,19 +265,12 @@ export default function Onboarding() {
         <h3 className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
           <Sparkles className="h-3.5 w-3.5 text-primary" /> 내 픽 카드
         </h3>
-        {done ? (
+        {done && (
           <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
             <Check className="h-3 w-3" /> 완성
           </span>
-        ) : (
-          <span className="text-[11px] font-medium text-muted-foreground">{pickFilled} / 8</span>
         )}
       </div>
-      {!done && (
-        <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(pickFilled / 8) * 100}%` }} />
-        </div>
-      )}
       <div className="mt-3 min-h-[26px] text-lg font-bold text-foreground">{s.nickname ? `${s.nickname}님` : " "}</div>
       <div className="text-xs text-muted-foreground">입력할수록 공고 추천이 정확해져요</div>
       <div className="mt-4 flex min-h-[32px] flex-wrap gap-1.5">
@@ -491,7 +478,7 @@ export default function Onboarding() {
 
           {s.step === "me" && (
             <>
-              <StepHead n={1} q="먼저, 어떻게 불러드릴까요?" sub="딱 필요한 것만 물어볼게요. 나머지는 나중에 채워도 돼요." />
+              <StepHead q="먼저, 어떻게 불러드릴까요?" sub="딱 필요한 것만 물어볼게요. 나머지는 나중에 채워도 돼요." />
               <div className="mt-4 space-y-4">
                 <div>
                   <Label>닉네임</Label>
@@ -566,7 +553,7 @@ export default function Onboarding() {
 
           {s.step === "pick" && (
             <>
-              <StepHead n={2} q="어떤 일을 하고 싶으세요?" sub="이 선택으로 공고 적합도를 계산하고 맞춤 추천을 만들어요." />
+              <StepHead q="어떤 일을 하고 싶으세요?" sub="이 선택으로 공고 적합도를 계산하고 맞춤 추천을 만들어요." />
               <div className="mt-5 space-y-5">
                 <div>
                   <Label right={<span className="text-xs text-muted-foreground">1~5개 · 선택 {s.jobs.length}</span>}>관심 직무</Label>
@@ -809,11 +796,10 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StepHead({ n, q, sub }: { n: number; q: React.ReactNode; sub?: string }) {
+function StepHead({ q, sub }: { q: React.ReactNode; sub?: string }) {
   return (
     <>
-      <p className="text-xs font-bold text-primary">온보딩 {n} / 2</p>
-      <h1 className="mt-2 text-[22px] font-bold leading-snug tracking-tight">{q}</h1>
+      <h1 className="text-[22px] font-bold leading-snug tracking-tight">{q}</h1>
       {sub && <p className="mt-1.5 text-sm text-muted-foreground">{sub}</p>}
     </>
   );
