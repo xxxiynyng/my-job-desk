@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, ChevronLeft, Search, Sparkles, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ClipboardList, Layers, Search, Sparkles, X } from "lucide-react";
 import {
   CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
   PERSONAS, REGIONS, SCHOOLS, STUDENT_PERSONAS, TIMINGS, gradYears, type PickdProfileV1,
@@ -343,31 +343,39 @@ export default function Onboarding() {
   if (s.step === "login") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-        <img src="/logo-mark.svg" alt="Pickd" className="mb-7 h-14 w-auto" />
-        <h1 className="text-3xl font-extrabold leading-snug tracking-tight">
+        <div className="mb-6 flex h-[100px] w-[100px] items-center justify-center rounded-[26px] border border-border bg-card">
+          <img src="/logo-mark.svg" alt="Pickd" className="h-[52px] w-auto" />
+        </div>
+        <h1 className="text-[28px] font-bold leading-snug tracking-tight">
           흩어진 취업 준비,<br />여기서 <span className="text-primary">픽</span>.
         </h1>
-        <p className="mt-3 text-muted-foreground">1분이면 나에게 맞는 공고 추천이 시작돼요</p>
+        <p className="mt-2.5 text-sm text-muted-foreground">1분이면 나에게 맞는 공고 추천이 시작돼요</p>
 
         {clientId ? (
-          <div ref={btnRef} className="mt-10" />
+          <div ref={btnRef} className="mt-9" />
         ) : (
           <button
             type="button"
             onClick={() => onGoogle("demo.user@gmail.com", "데모 사용자")}
-            className="mt-10 inline-flex items-center gap-3 rounded-lg border border-border bg-background px-7 py-3.5 text-sm font-bold shadow-sm transition-shadow hover:shadow"
+            className="mt-9 inline-flex items-center gap-3 rounded-lg border border-border bg-card px-7 py-3.5 text-sm font-semibold transition-colors hover:border-foreground/30"
           >
             <GoogleG /> Google로 계속하기
           </button>
         )}
-        <p className="mt-4 max-w-xs text-xs text-muted-foreground">
+        <p className="mt-3.5 max-w-xs text-xs text-muted-foreground">
           {clientId ? "구글 계정으로 바로 시작할 수 있어요. 약관은 다음 단계에서 확인해요."
             : "데모 모드예요 — VITE_GOOGLE_CLIENT_ID를 설정하면 실제 구글 로그인이 붙어요."}
         </p>
-        <div className="mt-14 flex gap-6 text-xs text-muted-foreground">
-          <span><b className="text-foreground">공고·일정</b> 한눈에</span>
-          <span><b className="text-foreground">경험</b>은 한 번만 정리</span>
-          <span><b className="text-foreground">AI 자소서</b> 초안까지</span>
+        <div className="mt-8 flex flex-wrap justify-center gap-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
+            <ClipboardList className="h-[15px] w-[15px] text-primary" />공고·일정 한눈에
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
+            <Layers className="h-[15px] w-[15px] text-primary" />경험은 한 번만
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs text-muted-foreground">
+            <Sparkles className="h-[15px] w-[15px] text-primary" />AI 자소서 초안
+          </span>
         </div>
       </div>
     );
