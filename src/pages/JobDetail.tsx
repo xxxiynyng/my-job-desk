@@ -318,11 +318,8 @@ function ReqGroup({
   onToggle: (key: string) => void;
 }) {
   return (
-    <div className="group">
-      <div className="flex items-center gap-2 mb-1">
-        <h3 className="text-xs font-semibold text-muted-foreground">{label}</h3>
-        <CopyButton text={items.map((t) => `· ${t}`).join("\n")} />
-      </div>
+    <div>
+      <h3 className="text-xs font-semibold text-muted-foreground mb-1">{label}</h3>
       <ul className="space-y-0.5">
         {items.map((text, idx) => {
           const key = hlKey(section, label, idx);
@@ -445,6 +442,16 @@ export default function JobDetail() {
     | keyof typeof STATUS_MAP
     | undefined;
 
+  // 섹션별 '복사' 포맷 — 라벨·불릿을 살려 붙여넣었을 때 서식 유지
+  const basicCopy = Object.entries(job.basic).map(([k, v]) => `${k}: ${v}`).join("\n");
+  const jdCopy = `[직무 설명]\n${job.jobDescription}\n\n[요구 역량]\n${job.competencies
+    .map((c: string) => `· ${c}`)
+    .join("\n")}`;
+  const eligibilityCopy = reqGroups
+    .map(([label, items]) => `[${label}]\n${items.map((t) => `· ${t}`).join("\n")}`)
+    .join("\n\n");
+  const docsCopy = allDocs.map((d) => `· ${d}`).join("\n");
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
@@ -525,11 +532,11 @@ export default function JobDetail() {
           <Section
             n={1}
             title="기본 정보"
-            right={<CopyButton always label="전체 복사" text={Object.entries(job.basic).map(([k, v]) => `${k}: ${v}`).join("\n")} />}
+            right={<CopyButton always label="복사" text={basicCopy} />}
           >
             <dl className="divide-y divide-border/40">
               {Object.entries(job.basic).map(([k, v]) => (
-                <div key={k} className="group flex items-start gap-3 py-2">
+                <div key={k} className="flex items-start gap-3 py-2">
                   <dt className="w-28 shrink-0 text-xs text-muted-foreground pt-0.5">{k}</dt>
                   <dd className={cn(
                     "flex-1 text-body leading-relaxed break-words select-text",
@@ -537,27 +544,20 @@ export default function JobDetail() {
                   )}>
                     {String(v)}
                   </dd>
-                  <CopyButton text={String(v)} />
                 </div>
               ))}
             </dl>
           </Section>
 
           {/* 2 · 직무 설명 · 요구 역량 */}
-          <Section n={2} title="직무 설명 · 요구 역량">
+          <Section n={2} title="직무 설명 · 요구 역량" right={<CopyButton always label="복사" text={jdCopy} />}>
             <div className="space-y-5">
-              <div className="group">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xs font-semibold text-muted-foreground">직무 설명</h3>
-                  <CopyButton text={job.jobDescription} />
-                </div>
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground mb-1">직무 설명</h3>
                 <p className="text-body text-foreground leading-relaxed select-text">{job.jobDescription}</p>
               </div>
-              <div className="group">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xs font-semibold text-muted-foreground">요구 역량</h3>
-                  <CopyButton text={job.competencies.map((c: string) => `· ${c}`).join("\n")} />
-                </div>
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground mb-1">요구 역량</h3>
                 <ul className="space-y-0.5">
                   {job.competencies.map((c: string, i: number) => {
                     const key = hlKey("jd", "competency", i);
@@ -575,20 +575,18 @@ export default function JobDetail() {
             n={3}
             title="지원 자격 · 우대"
             right={
-              highlights.size > 0 ? (
-                <button
-                  onClick={() => setHighlights(new Set())}
-                  className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" />
-                  강조 {highlights.size}개 초기화
-                </button>
-              ) : (
-                <span className="text-chip text-muted-foreground/70 flex items-center gap-1">
-                  <Highlighter className="w-3 h-3" />
-                  줄에 올려 중요 표시
-                </span>
-              )
+              <div className="flex items-center gap-2">
+                {highlights.size > 0 && (
+                  <button
+                    onClick={() => setHighlights(new Set())}
+                    className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                  >
+                    <X className="w-3 h-3" />
+                    강조 {highlights.size}개 초기화
+                  </button>
+                )}
+                <CopyButton always label="복사" text={eligibilityCopy} />
+              </div>
             }
           >
             <div className="space-y-5">
@@ -648,6 +646,7 @@ export default function JobDetail() {
             right={
               <div className="flex items-center gap-2">
                 <span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{allDocs.length} 확인</span>
+                {allDocs.length > 0 && <CopyButton always label="복사" text={docsCopy} />}
                 <button
                   type="button"
                   onClick={() => setAddingDoc(true)}
@@ -693,7 +692,6 @@ export default function JobDetail() {
                         <X className="w-3 h-3" />
                       </button>
                     )}
-                    <CopyButton text={d} />
                   </li>
                 );
               })}
@@ -705,9 +703,10 @@ export default function JobDetail() {
               </p>
             )}
 
-            {/* 공고에 없는 서류 직접 추가 — 우측 상단 + 버튼으로 열림 */}
+            {/* 공고에 없는 서류 직접 추가 — 목록 행처럼 자연스러운 입력 + 체크로 확인 */}
             {addingDoc && (
-              <div className="mt-2 flex items-center gap-2 pl-6">
+              <div className="flex items-center gap-2.5 px-2 py-1.5 -mx-2">
+                <span className="shrink-0 w-4 h-4 rounded-[5px] border border-dashed border-border bg-background" />
                 <input
                   autoFocus
                   value={newDoc}
@@ -717,12 +716,20 @@ export default function JobDetail() {
                     if (e.key === "Escape") { setNewDoc(""); setAddingDoc(false); }
                   }}
                   onBlur={() => { if (!newDoc.trim()) setAddingDoc(false); }}
-                  placeholder="준비 서류 입력 후 Enter (예: 포트폴리오, 경력증명서)"
-                  className="flex-1 h-8 px-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
+                  placeholder="준비 서류 추가 (예: 포트폴리오, 경력증명서)"
+                  className="flex-1 min-w-0 bg-transparent border-0 outline-none p-0 text-body text-foreground placeholder:text-muted-foreground/50"
                 />
-                <Button size="sm" variant="ghost" className="h-8 text-xs shrink-0 text-muted-foreground" onClick={() => { setNewDoc(""); setAddingDoc(false); }}>
-                  닫기
-                </Button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={addCustomDoc}
+                  disabled={!newDoc.trim()}
+                  aria-label="추가"
+                  title="추가"
+                  className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-pickd-green hover:bg-pickd-green-light transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                </button>
               </div>
             )}
           </Section>
@@ -763,7 +770,7 @@ export default function JobDetail() {
                             {e.charLimit.toLocaleString()}자{e.updated ? ` · 수정 ${e.updated}` : ""}
                           </span>
                         </div>
-                        <p className="text-title font-semibold text-foreground leading-relaxed select-text">{e.question}</p>
+                        <p className="text-sm font-semibold text-foreground leading-relaxed select-text">{e.question}</p>
                         {e.preview ? (
                           <p className="mt-1.5 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
                         ) : e.status === "미작성" ? (
