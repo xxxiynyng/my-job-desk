@@ -144,6 +144,16 @@ export function BasicInfoPanel() {
     toast("복사했어요", { duration: 1200 });
   };
 
+  // 섹션 전체를 "라벨: 값" 여러 줄로 복사 — 지원서 폼에 붙여넣기 편하게(복붙 워크플로 핵심).
+  const copySection = (title: string, fields: { key: InfoKey; label: string }[]) => {
+    const lines = fields
+      .filter((f) => infoValues[f.key])
+      .map((f) => `${f.label}: ${infoValues[f.key]}`);
+    if (lines.length === 0) { toast("복사할 값이 없어요", { duration: 1200 }); return; }
+    navigator.clipboard.writeText(lines.join("\n"));
+    toast(`${title} ${lines.length}개 항목을 복사했어요`, { duration: 1400 });
+  };
+
   const toggleMask = (k: InfoKey) =>
     setMasked((prev) => {
       const next = new Set(prev);
@@ -227,11 +237,11 @@ export function BasicInfoPanel() {
             // 클릭 = 복사. 값은 break-words로 줄바꿈되어 잘리지 않음
             <button
               onClick={() => copy(val)}
-              title="클릭하여 복사"
-              className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-body text-foreground hover:text-primary transition-colors text-left"
+              title="클릭하면 복사돼요"
+              className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-body text-foreground text-left rounded-md px-1.5 -mx-1.5 py-0.5 hover:bg-muted transition-colors"
             >
               <span className="break-words min-w-0">{val}</span>
-              <Copy className="w-3 h-3 mt-[3px] opacity-0 group-hover/row:opacity-40 shrink-0 transition-opacity" />
+              <Copy className="w-3 h-3 mt-[3px] opacity-0 group-hover/row:opacity-60 shrink-0 transition-opacity text-muted-foreground" />
             </button>
           ) : (
             <button onClick={() => startInline(f.key)} className="flex-1 text-left text-xs text-muted-foreground/50 italic hover:text-primary inline-flex items-center gap-1">
@@ -279,9 +289,9 @@ export function BasicInfoPanel() {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {infoValues.school && <span className="text-xs px-2.5 py-1 rounded-md bg-primary/10 text-primary">{infoValues.school}</span>}
-                  {infoValues.major && <span className="text-xs px-2.5 py-1 rounded-md bg-muted text-muted-foreground">{infoValues.major}</span>}
-                  {infoValues.grade && <span className="text-xs px-2.5 py-1 rounded-md bg-muted text-muted-foreground">{infoValues.grade}</span>}
+                  {infoValues.school && <span className="text-xs px-2.5 py-1 rounded-md bg-muted text-foreground inline-flex items-center gap-1"><GraduationCap className="w-3 h-3 text-muted-foreground" />{infoValues.school}</span>}
+                  {infoValues.major && <span className="text-xs px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground">{infoValues.major}</span>}
+                  {infoValues.grade && <span className="text-xs px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground">{infoValues.grade}</span>}
                 </div>
               </div>
               <div className="shrink-0 text-right">
@@ -306,11 +316,22 @@ export function BasicInfoPanel() {
                   const Icon = GROUP_ICON[group.title] ?? User;
                   const filled = group.fields.filter((f) => infoValues[f.key]).length;
                   return (
-                    <div key={group.title} className="bg-card border border-border rounded-xl px-4 py-3.5">
+                    <div key={group.title} className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
                       <div className="flex items-center gap-2 mb-2.5">
-                        <Icon className="w-4 h-4 text-primary" />
+                        <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
                         <h3 className="text-body font-medium text-foreground">{group.title}</h3>
-                        <span className="text-chip text-muted-foreground ml-auto tabular-nums">{filled} / {group.fields.length}</span>
+                        <div className="ml-auto flex items-center gap-1.5">
+                          {filled > 0 && (
+                            <button
+                              onClick={() => copySection(group.title, group.fields)}
+                              title="이 섹션 값을 라벨과 함께 복사"
+                              className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
+                            >
+                              <Copy className="w-3 h-3" /> 복사
+                            </button>
+                          )}
+                          <span className="text-chip text-muted-foreground tabular-nums">{filled} / {group.fields.length}</span>
+                        </div>
                       </div>
                       <div>{group.fields.map(renderInfoRow)}</div>
                     </div>
@@ -318,11 +339,27 @@ export function BasicInfoPanel() {
                 })}
 
                 {langExams.length > 0 && (
-                  <div className="bg-card border border-border rounded-xl px-4 py-3.5">
+                  <div className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <Globe className="w-4 h-4 text-primary" />
+                      <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
                       <h3 className="text-body font-medium text-foreground">공인외국어시험</h3>
-                      <span className="text-chip text-muted-foreground ml-auto tabular-nums">{langExams.length}개</span>
+                      <div className="ml-auto flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            const lines = langExams
+                              .map((e) => [e.lang, e.examName, e.score, e.date].filter(Boolean).join(" "))
+                              .filter(Boolean);
+                            if (lines.length === 0) { toast("복사할 값이 없어요", { duration: 1200 }); return; }
+                            navigator.clipboard.writeText(lines.join("\n"));
+                            toast(`공인외국어시험 ${lines.length}개 항목을 복사했어요`, { duration: 1400 });
+                          }}
+                          title="어학 성적을 한 번에 복사"
+                          className="opacity-0 group-hover/sec:opacity-100 transition-opacity shrink-0 inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-primary px-1.5 py-0.5 rounded hover:bg-muted"
+                        >
+                          <Copy className="w-3 h-3" /> 복사
+                        </button>
+                        <span className="text-chip text-muted-foreground tabular-nums">{langExams.length}개</span>
+                      </div>
                     </div>
                     <div>
                       {langExams.map((e) => (
