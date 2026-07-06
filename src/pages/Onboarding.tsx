@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
-  MapPin, Search, Sparkles, User, X, type LucideIcon,
+  MapPin, Search, ShieldCheck, Sparkles, User, WalletCards, X, type LucideIcon,
 } from "lucide-react";
 import {
   CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
@@ -259,7 +259,7 @@ export default function Onboarding() {
       aria-label="내 픽 카드"
       className={cn(
         "rounded-xl border border-border bg-card p-5",
-        standalone ? "w-[360px]" : "w-[300px] sticky top-6 shrink-0"
+        standalone ? "w-full" : "w-full lg:w-[300px] lg:sticky lg:top-6 lg:shrink-0 lg:order-last"
       )}
     >
       <div className="flex items-center justify-between">
@@ -435,15 +435,23 @@ export default function Onboarding() {
   if (s.step === "complete") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10">
-        <PickCard standalone done />
-        <h1 className="mt-7 text-[22px] font-bold tracking-tight">픽 카드 완성!</h1>
+        <div className="w-full max-w-[360px]">
+          <PickCard standalone done />
+        </div>
+        <h1 className="mt-7 text-[22px] font-bold tracking-tight">픽 카드가 완성됐어요</h1>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          이 정보로 맞춤 공고를 찾아드릴게요.<br />나머지 정보는 쓰면서 채워도 충분해요.
+          이 정보로 맞는 공고를 찾아드릴게요.<br />나머지는 쓰면서 채워도 충분해요.
         </p>
+        <div className="mt-5 flex w-full max-w-[360px] items-start gap-2.5 rounded-lg border border-border bg-card px-4 py-3">
+          <WalletCards className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            이제 경험을 한 번만 정리해두면,<br />지원할 때마다 자소서에 그대로 꺼내 쓸 수 있어요.
+          </p>
+        </div>
         <button
           type="button"
           onClick={finish}
-          className="mt-7 w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-6 w-full max-w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Pickd 시작하기
         </button>
@@ -455,12 +463,16 @@ export default function Onboarding() {
   return (
     <Shell>
       <Progress />
-      <div className="flex items-start gap-8">
-        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+        <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-5 sm:p-6">
 
           {s.step === "me" && (
             <>
               <StepHead n={1} q="먼저, 어떻게 불러드릴까요?" sub="학점·거주지역 같은 건 나중에 채워도 돼요. 딱 필요한 것만 물어볼게요." />
+              <div className="mt-4 flex items-center gap-1.5 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                입력한 정보는 나만 볼 수 있고, 공고 추천에만 쓰여요
+              </div>
               <div className="mt-5 space-y-5">
                 <div>
                   <Label>닉네임</Label>
@@ -587,7 +599,7 @@ export default function Onboarding() {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid min-h-[250px] grid-cols-[160px_1fr] overflow-hidden rounded-lg border border-border">
+                    <div className="grid min-h-[250px] grid-cols-[120px_1fr] overflow-hidden rounded-lg border border-border sm:grid-cols-[160px_1fr]">
                       <div className="flex max-h-[320px] flex-col overflow-y-auto border-r border-border bg-[hsl(var(--muted))]/40">
                         {Object.keys(JOB_TREE).map(c => (
                           <button
