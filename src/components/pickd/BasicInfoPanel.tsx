@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Copy, Pencil, Check, X, Eye, EyeOff, Plus,
+  Copy, Pencil, Check, X, Eye, EyeOff, Plus, Info,
   User, Mail, GraduationCap, School, Link2, ShieldCheck, Globe,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -375,7 +375,14 @@ export function BasicInfoPanel() {
 
       {/* ── 편집 모드 ─────────────────────────────── */}
       {editMode && (
-        <div className="pt-6 space-y-6">
+        <div className="pt-6">
+          {/* 편집 안내 — 체크박스 의미를 명확히 */}
+          <div className="mb-4 flex items-start gap-2 text-chip text-muted-foreground">
+            <Info className="w-3.5 h-3.5 mt-px shrink-0" />
+            <span>체크한 항목만 기본정보 화면에 표시돼요. 값은 언제든 입력할 수 있어요.</span>
+          </div>
+
+          <div className="space-y-4 pb-24">
 
           {/* 증명사진 */}
           <EditSection title="증명사진">
@@ -618,9 +625,15 @@ export function BasicInfoPanel() {
             )}
           </EditSection>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-border/60">
-            <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={cancel}>취소</Button>
-            <Button size="sm" className="h-8 text-xs" onClick={save}>저장</Button>
+          </div>
+
+          {/* 저장 바 — 하단 고정으로 어디서든 저장 */}
+          <div className="sticky bottom-0 py-3 bg-background/95 backdrop-blur border-t border-border flex items-center gap-3">
+            <span className="text-chip text-muted-foreground">변경한 내용은 저장을 눌러야 반영돼요</span>
+            <div className="flex gap-2 ml-auto">
+              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={cancel}>취소</Button>
+              <Button size="sm" className="h-8 text-xs" onClick={save}>저장</Button>
+            </div>
           </div>
         </div>
       )}
@@ -633,8 +646,8 @@ export function BasicInfoPanel() {
 
 function EditSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-3.5 pb-6 border-b border-border/40 last:border-0 last:pb-0">
-      <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide">{title}</h3>
+    <section className="bg-card border border-border rounded-2xl px-5 py-4 space-y-3.5">
+      <h3 className="text-body font-semibold text-foreground">{title}</h3>
       {children}
     </section>
   );
@@ -649,7 +662,7 @@ function FieldRow({
 }: { label: string; visible?: boolean; onToggle?: () => void; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-1.5">
         {onToggle !== undefined ? (
           <label className="flex items-center gap-1.5 cursor-pointer select-none">
             <Checkbox
@@ -658,17 +671,18 @@ function FieldRow({
               className="h-3.5 w-3.5"
             />
             <span className={cn(
-              "text-chip leading-none transition-colors",
-              visible === false ? "text-muted-foreground/30" : "text-muted-foreground/70",
+              "text-xs leading-none transition-colors",
+              visible === false ? "text-muted-foreground/40" : "text-foreground/70",
             )}>
               {label}
             </span>
+            {visible === false && <span className="text-mini text-muted-foreground/50 leading-none">· 미표시</span>}
           </label>
         ) : (
-          <span className="text-chip text-muted-foreground/70 leading-none">{label}</span>
+          <span className="text-xs text-foreground/70 leading-none">{label}</span>
         )}
       </div>
-      <div className={cn("transition-opacity", visible === false && "opacity-35")}>
+      <div className={cn("transition-opacity", visible === false && "opacity-40")}>
         {children}
       </div>
     </div>
