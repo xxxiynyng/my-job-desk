@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
-  MapPin, Search, ShieldCheck, Sparkles, User, WalletCards, X, type LucideIcon,
+  MapPin, Search, Sparkles, User, WalletCards, X, type LucideIcon,
 } from "lucide-react";
 import {
   CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
@@ -152,7 +152,7 @@ export default function Onboarding() {
   const isCareer = s.persona === "경력";
   const needsGrad = !!s.persona && !isCareer;       // 재학·휴학·졸업예정·졸업
   const nickOk = s.nickname.trim().length >= 2;
-  const gradOk = s.gradUndecided || (!!s.gradY && !!s.gradM);
+  const gradOk = !!s.gradY && !!s.gradM;
 
   // 픽 카드 진행 게이지 (8칸: 3단계 전체 걸쳐 채워짐)
   const pickFilled = [
@@ -210,7 +210,6 @@ export default function Onboarding() {
 
     // 2) 점진 수집 대상 계산 (온보딩에서 받지 않은 항목)
     const pending: string[] = ["degree", "gpa", "region", "corps", "focus"];
-    if (s.gradUndecided) pending.push("gradY", "gradM");   // 졸업 시기 미정 → 나중에 회수
     if (s.workRegions.length === 0) pending.push("workRegions");
     if (!s.docs.resume && !s.docs.essay && !s.docs.portfolio) pending.push("docs");
 
@@ -356,14 +355,6 @@ export default function Onboarding() {
     </div>
   );
 
-  // 그룹 안에서 쓰는 가벼운 라벨 (묶음 헤더보다 약하게)
-  const FieldLabel = ({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) => (
-    <div className="mb-1.5 flex items-baseline justify-between">
-      <span className="text-xs text-muted-foreground">{children}</span>
-      {right}
-    </div>
-  );
-
   // 세그먼트 단일 선택 — 회색 트랙 + 흰 칩(블루는 CTA 전용, SSOT 0장)
   const Segmented = ({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) => (
     <div className="flex gap-1 rounded-lg bg-muted p-1">
@@ -371,7 +362,7 @@ export default function Onboarding() {
         <button
           key={o} type="button" onClick={() => onChange(o)}
           className={cn(
-            "flex-1 rounded-md py-2 text-[13px] transition-colors",
+            "flex-1 rounded-md py-1.5 text-[13px] transition-colors",
             value === o ? "bg-background font-semibold text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -507,12 +498,8 @@ export default function Onboarding() {
 
           {s.step === "me" && (
             <>
-              <StepHead n={1} q="먼저, 어떻게 불러드릴까요?" sub="학점·거주지역 같은 건 나중에 채워도 돼요. 딱 필요한 것만 물어볼게요." />
-              <div className="mt-4 flex items-center gap-1.5 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
-                입력한 정보는 나만 볼 수 있고, 공고 추천에만 쓰여요
-              </div>
-              <div className="mt-5 space-y-5">
+              <StepHead n={1} q="먼저, 어떻게 불러드릴까요?" sub="딱 필요한 것만 물어볼게요. 나머지는 나중에 채워도 돼요." />
+              <div className="mt-4 space-y-4">
                 <div>
                   <Label>닉네임</Label>
                   <input
@@ -532,7 +519,7 @@ export default function Onboarding() {
                     onChange={p => up({
                       persona: p,
                       careerYears: p === "경력" ? s.careerYears : "",
-                      ...(p === "경력" ? { gradY: "", gradM: "", gradUndecided: false } : {}),
+                      ...(p === "경력" ? { gradY: "", gradM: "" } : {}),
                     })}
                   />
                 </div>
@@ -545,64 +532,40 @@ export default function Onboarding() {
                     </select>
                   </div>
                 )}
-
-                {/* 학력 그룹 */}
-                <div className="rounded-lg border border-border bg-muted/20 p-4">
-                  <div className="mb-3.5 flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
-                    <GraduationCap className="h-3.5 w-3.5 text-primary" /> 학력
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <Label>학교</Label>
+                    <AutoComplete value={s.school} placeholder="학교명 검색" pool={SCHOOLS} onChange={v => up({ school: v })} inputCls={inputCls} />
                   </div>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div>
-                      <FieldLabel>학교명</FieldLabel>
-                      <AutoComplete value={s.school} placeholder="학교명 검색" pool={SCHOOLS} onChange={v => up({ school: v })} inputCls={inputCls} />
-                    </div>
-                    <div>
-                      <FieldLabel right={
-                        <button type="button" className={linkBtnCls} onClick={() => up({ majorNA: !s.majorNA, major: "" })}>
-                          {s.majorNA ? "전공 입력" : "해당 없음"}
-                        </button>
-                      }>전공</FieldLabel>
-                      {s.majorNA ? (
-                        <div className={cn(inputCls, "flex items-center text-muted-foreground")}>전공 없이 진행해요</div>
-                      ) : (
-                        <AutoComplete value={s.major} placeholder="전공 검색" pool={MAJORS} onChange={v => up({ major: v })} inputCls={inputCls} />
-                      )}
-                    </div>
+                  <div>
+                    <Label right={
+                      <button type="button" className={linkBtnCls} onClick={() => up({ majorNA: !s.majorNA, major: "" })}>
+                        {s.majorNA ? "전공 입력" : "해당 없음"}
+                      </button>
+                    }>전공</Label>
+                    {s.majorNA ? (
+                      <div className={cn(inputCls, "flex items-center text-muted-foreground")}>전공 없이 진행해요</div>
+                    ) : (
+                      <AutoComplete value={s.major} placeholder="전공 검색" pool={MAJORS} onChange={v => up({ major: v })} inputCls={inputCls} />
+                    )}
                   </div>
-                  <p className="mt-1.5 text-xs text-muted-foreground">목록에 없다면 그대로 입력해도 돼요.</p>
-                  {needsGrad && (
-                    <div className="mt-4">
-                      <FieldLabel right={
-                        <button type="button" className={linkBtnCls} onClick={() => up({ gradUndecided: !s.gradUndecided, gradY: "", gradM: "" })}>
-                          {s.gradUndecided ? "직접 입력" : "아직 미정"}
-                        </button>
-                      }>졸업(예정) 시기</FieldLabel>
-                      {s.gradUndecided ? (
-                        <p className="rounded-lg bg-muted px-3.5 py-3 text-xs text-muted-foreground">아직 미정이에요 — 나중에 알려주셔도 돼요.</p>
-                      ) : (
-                        <div className="flex items-stretch gap-2.5">
-                          <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
-                            <option value="">년도</option>
-                            {gradYears().map(y => <option key={y}>{y}</option>)}
-                          </select>
-                          <div className="flex shrink-0 items-stretch gap-1 rounded-lg bg-muted p-1">
-                            {["2", "8"].map(m => (
-                              <button
-                                key={m} type="button" onClick={() => up({ gradM: m })}
-                                className={cn(
-                                  "flex w-[52px] items-center justify-center rounded-md text-[13px] transition-colors",
-                                  s.gradM === m ? "bg-background font-semibold text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                )}
-                              >
-                                {m}월
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
+                {needsGrad && (
+                  <div>
+                    <Label>졸업(예정) 시기</Label>
+                    <div className="flex gap-2.5">
+                      <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
+                        <option value="">년도</option>
+                        {gradYears().map(y => <option key={y}>{y}</option>)}
+                      </select>
+                      <select className={cn(inputCls, "w-24 shrink-0")} value={s.gradM} onChange={e => up({ gradM: e.target.value })}>
+                        <option value="">월</option>
+                        <option value="2">2월</option>
+                        <option value="8">8월</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
               </div>
               <NavRow prev="terms" next="pick" ok={valid.me} reason="닉네임·상태·학교·전공·졸업 시기를 입력하면 계속할 수 있어요" />
             </>
