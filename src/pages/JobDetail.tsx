@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
+import { StatusBadge, STATUS_MAP } from "@/components/pickd/ds/StatusBadge";
+import { DdayChip } from "@/components/pickd/ds/DdayChip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -243,7 +245,7 @@ function Section({
 }) {
   return (
     <section className="mb-5 last:mb-0">
-      <div className="bg-card border border-border rounded-2xl px-6 py-5">
+      <div className="group bg-card border border-border rounded-2xl px-6 py-5">
         <div className="flex items-center justify-between mb-4 gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="shrink-0 w-5 h-5 rounded-md bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
@@ -378,6 +380,7 @@ export default function JobDetail() {
   const customDocsKey = `pickd.jobs.${slug ?? "samsung"}.customDocs.v1`;
   const [customDocs, setCustomDocs] = useState<string[]>([]);
   const [newDoc, setNewDoc] = useState("");
+  const [addingDoc, setAddingDoc] = useState(false);
   useEffect(() => {
     try {
       const raw = localStorage.getItem(customDocsKey);
@@ -437,6 +440,10 @@ export default function JobDetail() {
 
   const essayDone = job.essays.filter((e: any) => e.status === "완료").length;
   const urgent = !job.expired && job.dday !== null && job.dday <= 3;
+  // 지원 상태 라벨 → 탭1 StatusBadge 상태 키 매핑(같은 배지로 통일)
+  const statusKey = Object.entries(STATUS_MAP).find(([, v]) => v.label === job.status)?.[0] as
+    | keyof typeof STATUS_MAP
+    | undefined;
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -490,16 +497,17 @@ export default function JobDetail() {
               {job.title}
             </h1>
 
-            <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-              <span className={cn("inline-flex items-center gap-1 font-semibold tabular-nums", urgent ? "text-pickd-red" : "text-foreground")}>
-                <CalendarDays className="w-3.5 h-3.5" />
-                마감 {job.deadline} · D-{job.dday}
-              </span>
-              <span className="text-border">·</span>
+            <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                {job.status}
+                <CalendarDays className="w-3.5 h-3.5" />
+                마감 {job.deadline}
               </span>
+              <DdayChip days={job.dday} size="sm" />
+              {statusKey ? (
+                <StatusBadge status={statusKey} size="sm" />
+              ) : (
+                <StatusBadge label={job.status} tone="neutral" size="sm" />
+              )}
             </div>
 
             {(job.expired || urgent) && (
@@ -637,7 +645,20 @@ export default function JobDetail() {
           <Section
             n={5}
             title="제출 서류"
-            right={<span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{allDocs.length} 확인</span>}
+            right={
+              <div className="flex items-center gap-2">
+                <span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{allDocs.length} 확인</span>
+                <button
+                  type="button"
+                  onClick={() => setAddingDoc(true)}
+                  title="준비 서류 추가"
+                  aria-label="준비 서류 추가"
+                  className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity w-6 h-6 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary/50"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            }
           >
             <ul className="space-y-0.5">
               {allDocs.map((d) => {
@@ -678,23 +699,32 @@ export default function JobDetail() {
               })}
             </ul>
 
-            {allDocs.length === 0 && (
-              <p className="text-chip text-muted-foreground/60 mt-1 mb-2">공고에 명시된 제출 서류가 없어요. 직접 준비할 서류를 추가해보세요.</p>
+            {allDocs.length === 0 && !addingDoc && (
+              <p className="text-chip text-muted-foreground/60 mt-1">
+                공고에 명시된 제출 서류가 없어요. 우측 상단 <span className="inline-flex items-center align-middle"><Plus className="w-3 h-3" /></span> 로 직접 추가할 수 있어요.
+              </p>
             )}
 
-            {/* 공고에 없는 서류 직접 추가 */}
-            <div className="mt-2.5 flex items-center gap-2">
-              <input
-                value={newDoc}
-                onChange={(e) => setNewDoc(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomDoc(); } }}
-                placeholder="공고 외 준비 서류 추가 (예: 포트폴리오, 경력증명서)"
-                className="flex-1 h-8 px-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
-              />
-              <Button size="sm" variant="outline" className="h-8 text-xs gap-1 shrink-0" onClick={addCustomDoc} disabled={!newDoc.trim()}>
-                <Plus className="w-3.5 h-3.5" /> 추가
-              </Button>
-            </div>
+            {/* 공고에 없는 서류 직접 추가 — 우측 상단 + 버튼으로 열림 */}
+            {addingDoc && (
+              <div className="mt-2 flex items-center gap-2 pl-6">
+                <input
+                  autoFocus
+                  value={newDoc}
+                  onChange={(e) => setNewDoc(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); addCustomDoc(); }
+                    if (e.key === "Escape") { setNewDoc(""); setAddingDoc(false); }
+                  }}
+                  onBlur={() => { if (!newDoc.trim()) setAddingDoc(false); }}
+                  placeholder="준비 서류 입력 후 Enter (예: 포트폴리오, 경력증명서)"
+                  className="flex-1 h-8 px-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
+                />
+                <Button size="sm" variant="ghost" className="h-8 text-xs shrink-0 text-muted-foreground" onClick={() => { setNewDoc(""); setAddingDoc(false); }}>
+                  닫기
+                </Button>
+              </div>
+            )}
           </Section>
 
           {/* 6 · 자기소개서 (맨 아래) — 공고 원문은 상단 '원문 보기' 버튼 → 우측 슬라이드 패널 */}
