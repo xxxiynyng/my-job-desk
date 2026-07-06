@@ -379,21 +379,18 @@ export default function Onboarding() {
               <GoogleG /> Google로 계속하기
             </button>
           )}
-          <p className="mt-3 text-xs text-muted-foreground">가입은 무료예요. 약관은 다음 단계에서 확인해요.</p>
         </div>
 
-        <div className="mt-12 flex flex-col items-stretch gap-2.5 text-left">
+        <div className="mt-12 grid w-full max-w-[560px] grid-cols-3 gap-3">
           {([[ClipboardList, "공고·일정을 한눈에", "마감·전형 일정을 놓치지 않게"],
              [Layers, "경험은 한 번만 정리", "자소서·이력서에 그대로 재사용"],
              [Sparkles, "AI 자소서 초안까지", "내 경험으로 초안을 빠르게"]] as const).map(([Icon, title, desc]) => (
-            <div key={title} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+            <div key={title} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-3 py-4 text-center">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <Icon className="h-[18px] w-[18px] text-primary" />
               </span>
-              <div>
-                <div className="text-[13px] font-bold text-foreground">{title}</div>
-                <div className="text-xs text-muted-foreground">{desc}</div>
-              </div>
+              <div className="text-[13px] font-bold text-foreground">{title}</div>
+              <div className="text-xs leading-relaxed text-muted-foreground">{desc}</div>
             </div>
           ))}
         </div>
