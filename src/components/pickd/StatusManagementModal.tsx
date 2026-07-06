@@ -11,16 +11,23 @@ import {
 
 // 전형 단계 6개 (2026-07-02 재편) — 최종합격/불합격/보류는 "전형완료" + 세부 결과(FinalResult)로 표현
 export type AppStage = "작성중" | "지원완료" | "서류전형" | "필기전형" | "면접전형" | "전형완료";
-export type FinalResult = "합격" | "불합격" | "포기" | null;
+export type FinalResult = "합격" | "불합격" | "보류" | null;
 
 const STAGE_FLOW: AppStage[] = ["작성중", "지원완료", "서류전형", "필기전형", "면접전형", "전형완료"];
 
-const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "포기"];
+const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "보류"];
+
+// 표시 라벨 (탭1 FINAL_RESULT_LABEL과 동일 표기)
+const FINAL_RESULT_LABEL: Record<NonNullable<FinalResult>, string> = {
+  합격: "최종합격",
+  불합격: "불합격",
+  보류: "보류",
+};
 
 const finalResultStyles: Record<NonNullable<FinalResult>, string> = {
   합격: "bg-pickd-green-light text-pickd-green border-pickd-green/30",
   불합격: "bg-pickd-red-light text-pickd-red border-pickd-red/30",
-  포기: "bg-muted text-muted-foreground border-border",
+  보류: "bg-muted text-muted-foreground border-border",
 };
 
 type ItemType = "일정" | "할 일";
@@ -199,6 +206,26 @@ export function StatusManagementModal({
                 ))}
               </div>
 
+              {/* 세부 결과 — 전형완료 선택 시에만 노출 (같은 항목 재클릭 시 해제) */}
+              {activeStage === "전형완료" && (
+                <div className="flex items-center gap-1.5 pt-2.5 border-t border-border/50">
+                  <span className="text-chip text-muted-foreground mr-1">최종 결과</span>
+                  {FINAL_RESULT_OPTIONS.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setFinalResult(activeFinalResult === r ? null : r)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-full border text-mini font-semibold transition-colors",
+                        activeFinalResult === r
+                          ? finalResultStyles[r]
+                          : "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
+                      )}
+                    >
+                      {FINAL_RESULT_LABEL[r]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </Section>
 

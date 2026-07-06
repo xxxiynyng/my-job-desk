@@ -58,7 +58,7 @@ import { StatusManagementModal, type AppStage, type FinalResult } from "./Status
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DocumentStatusList } from "./DocumentStatusList";
-import { StatusBadge, DdayChip } from "@/components/pickd/ds";
+import { StatusBadge, DdayChip, calcDday } from "@/components/pickd/ds";
 import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";
 import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
@@ -118,12 +118,12 @@ const STATUS_DS_KEY: Record<
 const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
   합격: "passed",
   불합격: "rejected",
-  포기: "hold",
+  보류: "hold",
 };
 const FINAL_RESULT_LABEL: Record<NonNullable<FinalResult>, string> = {
   합격: "최종합격",
   불합격: "불합격",
-  포기: "보류",
+  보류: "보류",
 };
 
 type Job = {
@@ -308,15 +308,6 @@ function lsGet<T>(k: string, fb: T): T {
   } catch {
     return fb;
   }
-}
-
-// 마감일(YYYY-MM-DD) → 오늘 기준 남은 일수 (음수면 지남)
-function calcDday(deadline: string): number {
-  if (!deadline) return 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dl = new Date(deadline + "T00:00:00");
-  return Math.round((dl.getTime() - today.getTime()) / 86400000);
 }
 
 // ── 폴더 SVG 아이콘 ────────────────────────────────────────────────
