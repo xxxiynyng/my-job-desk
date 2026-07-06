@@ -242,18 +242,20 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="pt-8 mt-8 border-t border-border first:border-t-0 first:mt-0 first:pt-0">
-      <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="shrink-0 w-5 h-5 rounded-md bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
-            {n}
-          </span>
-          <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
-          {subtitle && <span className="text-chip text-muted-foreground">{subtitle}</span>}
+    <section className="mb-5 last:mb-0">
+      <div className="bg-card border border-border rounded-2xl px-6 py-5">
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="shrink-0 w-5 h-5 rounded-md bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums">
+              {n}
+            </span>
+            <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
+            {subtitle && <span className="text-chip text-muted-foreground">{subtitle}</span>}
+          </div>
+          {right}
         </div>
-        {right}
+        {children}
       </div>
-      {children}
     </section>
   );
 }
@@ -474,10 +476,10 @@ export default function JobDetail() {
         </div>
 
         {/* Centered content column */}
-        <div className="mx-auto max-w-[860px] px-8 pt-6 pb-24">
+        <div className="mx-auto max-w-[860px] px-8 pt-11 pb-24">
 
           {/* Title + minimal at-a-glance meta */}
-          <header className="mb-2">
+          <header className="mb-8">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
               <span className="font-medium text-foreground">{job.company}</span>
               {job.division && (<><span className="text-border">·</span><span>{job.division}</span></>)}
@@ -601,16 +603,13 @@ export default function JobDetail() {
             title="전형 절차"
             right={<span className="text-chip text-muted-foreground/70">일정이 없으면 ‘미정’으로 표시돼요</span>}
           >
-            <div className="relative pl-6">
-              <div className="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
-              <div className="space-y-5">
-                {job.process.map((p: any, i: number) => {
-                  const hasSchedule = !!(p.schedule && String(p.schedule).trim());
-                  return (
-                    <div key={i} className="relative flex items-start justify-between gap-4">
-                      <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-md bg-background border-2 border-border flex items-center justify-center">
-                        <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
-                      </div>
+            <div>
+              {job.process.map((p: any, i: number) => {
+                const hasSchedule = !!(p.schedule && String(p.schedule).trim());
+                return (
+                  <div key={i} className="flex items-start gap-3.5 py-3 border-b border-border/40 last:border-0">
+                    <span className="shrink-0 w-5 pt-0.5 text-body font-semibold text-muted-foreground/50 tabular-nums text-right">{i + 1}</span>
+                    <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <p className="text-body font-medium text-foreground">{p.step}</p>
                         {p.detail && <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>}
@@ -628,9 +627,9 @@ export default function JobDetail() {
                         ) : null}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </Section>
 
@@ -734,7 +733,7 @@ export default function JobDetail() {
                             {e.charLimit.toLocaleString()}자{e.updated ? ` · 수정 ${e.updated}` : ""}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-foreground leading-relaxed select-text">{e.question}</p>
+                        <p className="text-title font-semibold text-foreground leading-relaxed select-text">{e.question}</p>
                         {e.preview ? (
                           <p className="mt-1.5 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
                         ) : e.status === "미작성" ? (
@@ -743,11 +742,12 @@ export default function JobDetail() {
                       </div>
                       <Button
                         size="sm"
-                        variant={e.status === "완료" ? "ghost" : "outline"}
+                        variant="outline"
                         className={cn(
-                          "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
-                          (e.status === "작성중" || e.status === "초안") &&
-                            "border-primary text-primary hover:bg-primary/5 hover:text-primary"
+                          "shrink-0 h-8 text-xs gap-1 whitespace-nowrap rounded-md border-border",
+                          (e.status === "작성중" || e.status === "초안")
+                            ? "text-primary hover:text-primary"
+                            : "text-muted-foreground"
                         )}
                         onClick={() => goToTab3(e.no)}
                       >
