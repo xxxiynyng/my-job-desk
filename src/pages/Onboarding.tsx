@@ -37,7 +37,6 @@ const LS = {
 } as const;
 
 type Step = "login" | "terms" | "me" | "pick" | "complete";
-const ONB_STEPS: Step[] = ["me", "pick"];
 
 interface OnbState {
   step: Step;
@@ -238,19 +237,6 @@ export default function Onboarding() {
 
   /* ─────────────────────── 공통 UI 조각 ─────────────────────── */
 
-  const Progress = () => {
-    const idx = ONB_STEPS.indexOf(s.step as (typeof ONB_STEPS)[number]);
-    return (
-      <div className="mb-8 flex items-center gap-3">
-        <div className="flex flex-1 gap-1.5">
-          {[0, 1].map(i => (
-            <span key={i} className={cn("h-[3px] flex-1 rounded-full transition-colors", i <= idx ? "bg-primary" : "bg-muted")} />
-          ))}
-        </div>
-        <span className="text-xs font-bold text-muted-foreground">{idx + 1} / 2</span>
-      </div>
-    );
-  };
 
   const CHIP_CAP = 12;
   const PickCard = ({ standalone = false, done = false }: { standalone?: boolean; done?: boolean }) => (
@@ -437,7 +423,7 @@ export default function Onboarding() {
             <TermRow k="priv" label="개인정보 수집·이용 동의" />
             <TermRow k="mkt" label="합격에 도움되는 공고·일정 소식 받기" opt />
             {a.mkt && (
-              <p className="ml-12 rounded-lg bg-muted px-3 py-2.5 text-xs text-muted-foreground">
+              <p className="ml-12 rounded-lg bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground/80">
                 관심 직무의 새 공고, 마감 임박 알림, 채용 설명회 소식을 보내드려요. 언제든 끌 수 있어요.
               </p>
             )}
@@ -472,13 +458,12 @@ export default function Onboarding() {
   /* ── 정보등록 3단계 (공통 2단 레이아웃: 폼 + 픽 카드) ── */
   return (
     <Shell>
-      <Progress />
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
         <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-5 sm:p-6">
 
           {s.step === "me" && (
             <>
-              <StepHead q="먼저, 어떻게 불러드릴까요?" sub="딱 필요한 것만 물어볼게요. 나머지는 나중에 채워도 돼요." />
+              <StepHead q="먼저, 어떻게 불러드릴까요?" sub="1분이면 끝나요. 꼭 필요한 것만 받을게요." />
               <div className="mt-4 space-y-4">
                 <div>
                   <Label>닉네임</Label>
@@ -533,12 +518,12 @@ export default function Onboarding() {
                 {needsGrad && (
                   <div>
                     <Label>졸업(예정) 시기</Label>
-                    <div className="flex gap-2.5">
+                    <div className="grid grid-cols-[3fr_2fr] gap-2.5">
                       <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
                         <option value="">년도</option>
                         {gradYears().map(y => <option key={y}>{y}</option>)}
                       </select>
-                      <select className={cn(inputCls, "w-24 shrink-0")} value={s.gradM} onChange={e => up({ gradM: e.target.value })}>
+                      <select className={inputCls} value={s.gradM} onChange={e => up({ gradM: e.target.value })}>
                         <option value="">월</option>
                         <option value="2">2월</option>
                         <option value="8">8월</option>
