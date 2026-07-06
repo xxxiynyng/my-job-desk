@@ -343,7 +343,7 @@ export default function Onboarding() {
   if (s.step === "login") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-        <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-3xl font-extrabold text-primary-foreground shadow-lg">P</div>
+        <img src="/logo-mark.svg" alt="Pickd" className="mb-7 h-14 w-auto" />
         <h1 className="text-3xl font-extrabold leading-snug tracking-tight">
           흩어진 취업 준비,<br />여기서 <span className="text-primary">픽</span>.
         </h1>
@@ -642,8 +642,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-5 py-6">
-        <div className="mb-6 flex items-center gap-2 text-lg font-extrabold tracking-tight">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-sm text-primary-foreground">P</span>
+        <div className="mb-6 flex items-center gap-2 text-lg font-bold tracking-tight">
+          <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
           Pickd
         </div>
         {children}
