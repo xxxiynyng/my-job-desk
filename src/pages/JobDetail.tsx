@@ -8,7 +8,6 @@ import {
   Copy,
   Check,
   X,
-  Info,
   ClipboardList,
   ListChecks,
   BookOpen,
@@ -16,6 +15,7 @@ import {
   Highlighter,
   AlertCircle,
   FileText,
+  CalendarDays,
 } from "lucide-react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,8 @@ const jobDetails: Record<string, any> = {
     dday: 8, // TODO: MOCK_DATA - 실제 API 연결 시 getDday(job.deadline) 로 교체
     expired: false,
     status: "작성중",
+    location: "경기 수원시 영통구 삼성로 129 (수원사업장)",
+    employment: "정규직 (3개월 수습)",
     docsInProgress: [
       { id: "samsung-essay-1", name: "삼성전자 자기소개서", progress: 60 },
       { id: "samsung-resume", name: "삼성전자 이력서", progress: 100 },
@@ -209,7 +211,7 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
           setTimeout(() => setCopied(false), 1500);
         } catch {}
       }}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-chip text-muted-foreground hover:text-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-chip text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
       title="복사하기"
     >
       {copied ? <Check className="w-3 h-3 text-pickd-green" /> : <Copy className="w-3 h-3" />}
@@ -218,6 +220,7 @@ function CopyButton({ text, label = "복사" }: { text: string; label?: string }
   );
 }
 
+// ---------- Section header (label-only, no boxes) ----------
 function SectionHeader({
   icon: Icon,
   title,
@@ -230,7 +233,7 @@ function SectionHeader({
   rightSlot?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between mb-3">
+    <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         <Icon className="w-4 h-4 text-muted-foreground" />
         <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
@@ -253,13 +256,10 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
   return (
     <li
       className={cn(
-        "group/line flex items-start gap-2 px-3 py-1.5 -mx-3 rounded transition-colors",
-        highlighted
-          ? "bg-[var(--warning-subtle)]"
-          : "hover:bg-muted/30"
+        "group/line flex items-start gap-2 px-2 py-1.5 -mx-2 rounded transition-colors",
+        highlighted ? "bg-[var(--warning-subtle)]" : "hover:bg-muted/30"
       )}
     >
-      {/* Highlight toggle button — visible on hover or when highlighted */}
       <button
         onClick={() => onToggle(lineKey)}
         title={highlighted ? "강조 해제" : "중요 표시"}
@@ -272,11 +272,7 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
       >
         <Highlighter className="w-3 h-3" />
       </button>
-
-      {/* Bullet */}
       <span className="text-muted-foreground select-none shrink-0 mt-0.5 text-chip">•</span>
-
-      {/* Text — semibold when highlighted */}
       <span
         className={cn(
           "text-body leading-relaxed break-words flex-1",
@@ -286,6 +282,41 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
         {text}
       </span>
     </li>
+  );
+}
+
+// ---------- Requirement group (seamless, no box) ----------
+function ReqGroup({
+  label,
+  items,
+  section,
+  isHighlighted,
+  onToggle,
+}: {
+  label: string;
+  items: string[];
+  section: string;
+  isHighlighted: (key: string) => boolean;
+  onToggle: (key: string) => void;
+}) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold text-muted-foreground mb-1">{label}</h3>
+      <ul className="space-y-0.5">
+        {items.map((text, idx) => {
+          const key = hlKey(section, label, idx);
+          return (
+            <HighlightableLine
+              key={idx}
+              lineKey={key}
+              text={text}
+              highlighted={isHighlighted(key)}
+              onToggle={onToggle}
+            />
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -299,13 +330,38 @@ export default function JobDetail() {
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
 
+  // 제출 서류 확인 체크 상태 (localStorage 지속)
+  const submitDocs: string[] = job.eligibility["제출 서류"] ?? [];
+  const reqGroups = Object.entries(job.eligibility).filter(([k]) => k !== "제출 서류") as [string, string[]][];
+  const docsKey = `pickd.jobs.${slug ?? "samsung"}.docsChecked.v1`;
+  const [checkedDocs, setCheckedDocs] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(docsKey);
+      if (raw) setCheckedDocs(new Set(JSON.parse(raw)));
+      else setCheckedDocs(new Set());
+    } catch {}
+  }, [docsKey]);
+
+  const toggleDoc = (d: string) => {
+    setCheckedDocs((prev) => {
+      const next = new Set(prev);
+      if (next.has(d)) next.delete(d);
+      else next.add(d);
+      try {
+        localStorage.setItem(docsKey, JSON.stringify([...next]));
+      } catch {}
+      return next;
+    });
+  };
+
   // 자소서 문항 ref — 작성중인 서류에서 진입 시 마지막 작업 문항으로 스크롤
   const essayRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   useEffect(() => {
     const fromDoclist = new URLSearchParams(location.search).get("from") === "doclist";
     if (!fromDoclist) return;
-    // 마지막으로 작업 중인 문항(작성중 or 초안) 찾기
     const lastActiveIdx = [...job.essays]
       .map((e: any, i: number) => ({ i, status: e.status }))
       .filter(({ status }: any) => status === "작성중" || status === "초안")
@@ -332,6 +388,9 @@ export default function JobDetail() {
     navigate(`/ai-cover?from=job&slug=${slug ?? "samsung"}&essay=${essayNo}`);
   };
 
+  const essayDone = job.essays.filter((e: any) => e.status === "완료").length;
+  const urgent = !job.expired && job.dday !== null && job.dday <= 3;
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
@@ -341,7 +400,7 @@ export default function JobDetail() {
         <div className="flex-1 overflow-y-auto">
 
           {/* Sticky top bar */}
-          <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
+          <div className="sticky top-0 z-20 bg-background/95 backdrop-blur">
             <div className="px-8 py-3 flex items-center justify-between">
               <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Link to="/" className="hover:text-foreground transition-colors">
@@ -352,9 +411,8 @@ export default function JobDetail() {
               </nav>
 
               <div className="flex items-center gap-2">
-                {/* 원문 보기 — triggers right slide panel */}
                 <Button
-                  variant={rawOpen ? "default" : "outline"}
+                  variant={rawOpen ? "default" : "ghost"}
                   size="sm"
                   className="h-7 text-xs gap-1.5 rounded-md"
                   onClick={() => setRawOpen((v) => !v)}
@@ -362,7 +420,6 @@ export default function JobDetail() {
                   <ScrollText className="w-3.5 h-3.5" />
                   {rawOpen ? "원문 닫기" : "원문 보기"}
                 </Button>
-
                 <Button
                   variant="ghost"
                   size="sm"
@@ -376,27 +433,12 @@ export default function JobDetail() {
             </div>
           </div>
 
-          {/* Expired / D-3 notice */}
-          {(job.expired || (!job.expired && job.dday !== null && job.dday <= 3)) && (
-            <div className="px-8 pt-4">
-              <div className={cn(
-                "flex items-center gap-2 text-body rounded-lg px-4 py-2.5",
-                job.expired
-                  ? "bg-muted/40 text-muted-foreground"
-                  : "bg-pickd-red-light text-pickd-red"
-              )}>
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {job.expired
-                  ? "마감된 공고입니다"
-                  : `마감 D-${job.dday} · 서류 제출 기한이 얼마 남지 않았습니다`}
-              </div>
-            </div>
-          )}
+          {/* Content */}
+          <div className="px-8 pt-4 pb-16 max-w-[780px]">
 
-          {/* Document header — title area */}
-          <div className="px-8 pt-6 pb-5 border-b border-border">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+            {/* Title + inline meta (no border block) */}
+            <header className="mb-9">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
                 <span className="font-medium text-foreground">{job.company}</span>
                 {job.division && (
                   <>
@@ -411,112 +453,172 @@ export default function JobDetail() {
                 {job.title}
               </h1>
 
-              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
-                <SummaryItem label="지원 기간" value={job.period} />
-                <SummaryItem
-                  label="마감"
-                  value={
-                    <span className={cn("font-medium", job.dday !== null && job.dday <= 3 ? "text-pickd-red" : "text-foreground")}>
-                      {job.deadline}
-                    </span>
-                  }
-                />
-                <SummaryItem
-                  label="D-day"
-                  value={
-                    <span className={cn("font-semibold tabular-nums", job.dday !== null && job.dday <= 3 ? "text-pickd-red" : "text-foreground")}>
-                      D-{job.dday}
-                    </span>
-                  }
-                />
-                <SummaryItem label="지원 상태" value={
-                  <span className="px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-                    {job.status}
-                  </span>
-                } />
+              {/* one inline meta row — replaces the old 기본정보 table */}
+              <div className="mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
+                <span className={cn("inline-flex items-center gap-1 font-semibold tabular-nums", urgent ? "text-pickd-red" : "text-foreground")}>
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  마감 {job.deadline} · D-{job.dday}
+                </span>
+                <span className="text-border">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                  {job.status}
+                </span>
+                {job.location && (
+                  <>
+                    <span className="text-border">·</span>
+                    <span>{job.location}</span>
+                  </>
+                )}
+                {job.employment && (
+                  <>
+                    <span className="text-border">·</span>
+                    <span>{job.employment}</span>
+                  </>
+                )}
               </div>
 
-              {/* Essay progress summary */}
-              {job.essays.length > 0 && (() => {
-                const doneCount = job.essays.filter((e: any) => e.status === "완료").length;
-                return (
-                  <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">자소서</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {job.essays.map((e: any) => (
-                        <div
-                          key={e.no}
-                          title={`Q${e.no}: ${e.status}`}
+              {/* urgency / expired note — kept minimal */}
+              {(job.expired || urgent) && (
+                <div className={cn(
+                  "mt-3 inline-flex items-center gap-1.5 text-chip rounded-md px-2.5 py-1",
+                  job.expired ? "bg-muted/50 text-muted-foreground" : "bg-pickd-red-light text-pickd-red"
+                )}>
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {job.expired ? "마감된 공고입니다" : `제출 기한이 얼마 남지 않았어요`}
+                </div>
+              )}
+            </header>
+
+            {/* ===== ZONE 1 · 지원 준비 ===== */}
+            <p className="text-chip font-semibold text-primary/80 tracking-wide mb-4">지원 준비</p>
+
+            {/* 제출 서류 확인 */}
+            {submitDocs.length > 0 && (
+              <section className="mb-9">
+                <SectionHeader
+                  icon={ListChecks}
+                  title="제출 서류"
+                  rightSlot={
+                    <span className="text-chip text-muted-foreground tabular-nums">
+                      {checkedDocs.size}/{submitDocs.length} 확인
+                    </span>
+                  }
+                />
+                <ul className="space-y-0.5">
+                  {submitDocs.map((d) => {
+                    const checked = checkedDocs.has(d);
+                    return (
+                      <li key={d}>
+                        <button
+                          type="button"
+                          onClick={() => toggleDoc(d)}
+                          className="w-full flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
+                        >
+                          <span className={cn(
+                            "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
+                            checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
+                          )}>
+                            {checked && <Check className="w-3 h-3" />}
+                          </span>
+                          <span className={cn(
+                            "text-body leading-relaxed",
+                            checked ? "text-muted-foreground line-through" : "text-foreground"
+                          )}>
+                            {d}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
+
+            {/* 자소서 작성 */}
+            <section className="mb-9">
+              <SectionHeader
+                icon={FileText}
+                title="자기소개서"
+                subtitle={`${job.essays.length}문항`}
+                rightSlot={
+                  job.essays.length > 0 && (
+                    <span className="text-chip text-muted-foreground tabular-nums">
+                      {essayDone}/{job.essays.length} 완료
+                    </span>
+                  )
+                }
+              />
+
+              {job.essays.length === 0 ? (
+                <p className="text-body text-muted-foreground px-2 py-3">이 공고는 별도 문항이 없어요</p>
+              ) : (
+                <ol className="divide-y divide-border/50">
+                  {job.essays.map((e: any, idx: number) => (
+                    <li
+                      key={e.no}
+                      ref={(el) => { essayRefs.current[idx] = el; }}
+                      className="py-4 first:pt-1"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <span className={cn(
+                            "shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-mini font-bold",
+                            e.status === "완료" ? "bg-pickd-green text-white" :
+                            e.status === "작성중" ? "bg-indigo-500 text-white" :
+                            e.status === "초안" ? "bg-pickd-orange text-white" :
+                            "bg-muted text-muted-foreground"
+                          )}>
+                            {e.status === "완료" ? <Check className="w-3 h-3" /> : e.no}
+                          </span>
+                          <EssayStatus status={e.status} />
+                          <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
+                          {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={e.status === "미작성" ? "outline" : "default"}
                           className={cn(
-                            "w-2.5 h-2.5 rounded-full transition-colors",
-                            e.status === "완료" ? "bg-pickd-green" :
-                            e.status === "작성중" ? "bg-indigo-500" :
-                            e.status === "초안" ? "bg-pickd-orange" :
-                            "bg-border"
+                            "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
+                            e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
                           )}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {doneCount}/{job.essays.length} 완료
-                    </span>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+                          onClick={() => goToTab3(e.no)}
+                        >
+                          <PenLine className="w-3 h-3" />
+                          {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
+                        </Button>
+                      </div>
 
-          {/* Body */}
-          <div className="px-8 py-6 space-y-10 max-w-[900px]">
+                      <p className="mt-2 pl-7 text-sm font-medium text-foreground leading-relaxed">
+                        {e.question}
+                      </p>
 
-            {/* Section 1. 기본 정보 */}
-            <section>
-              <SectionHeader icon={Info} title="1. 기본 정보" subtitle="기본 정보" />
-              <div className="border border-border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <tbody>
-                    {Object.entries(job.basic).map(([k, v], i) => (
-                      <tr
-                        key={k}
-                        className={cn(
-                          "group border-b border-border/60 last:border-b-0 hover:bg-muted/20",
-                          i % 2 === 1 && "bg-muted/10"
-                        )}
-                      >
-                        <td className="w-[160px] px-4 py-2.5 text-xs text-muted-foreground font-medium align-top">
-                          {k}
-                        </td>
-                        <td className="px-4 py-2.5 text-body leading-relaxed">
-                          <div className="flex items-start justify-between gap-3">
-                            <span className={cn(
-                              "break-words",
-                              k === "D-day" && job.dday !== null && job.dday <= 3
-                                ? "text-pickd-red font-semibold"
-                                : "text-foreground"
-                            )}>
-                              {String(v)}
-                            </span>
-                            <CopyButton text={String(v)} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      {e.preview ? (
+                        <p className="mt-1.5 pl-7 text-body text-muted-foreground leading-relaxed line-clamp-2">
+                          {e.preview}
+                        </p>
+                      ) : e.status === "미작성" ? (
+                        <p className="mt-1 pl-7 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
+              )}
             </section>
 
-            {/* Section 2. 지원 핵심 정보 — 중요 표시 기능 포함 */}
-            <section>
+            {/* subtle divider between zones — only strong-ish separation on the page */}
+            <div className="border-t border-border/60 my-10" />
+
+            {/* ===== ZONE 2 · 공고 확인 ===== */}
+            <p className="text-chip font-semibold text-muted-foreground tracking-wide mb-4">공고 확인</p>
+
+            {/* 지원 자격 · 우대 · 가산점 */}
+            <section className="mb-9">
               <SectionHeader
                 icon={ClipboardList}
-                title="2. 지원 핵심 정보"
-                subtitle="지원 요건"
+                title="지원 자격 · 우대"
                 rightSlot={
-                  highlights.size > 0 && (
+                  highlights.size > 0 ? (
                     <button
                       onClick={() => setHighlights(new Set())}
                       className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
@@ -524,75 +626,46 @@ export default function JobDetail() {
                       <X className="w-3 h-3" />
                       강조 {highlights.size}개 초기화
                     </button>
+                  ) : (
+                    <span className="text-chip text-muted-foreground/70 flex items-center gap-1">
+                      <Highlighter className="w-3 h-3" />
+                      줄에 올려 중요 표시
+                    </span>
                   )
                 }
               />
-
-              {/* Highlight hint — shown once until first highlight */}
-              {highlights.size === 0 && (
-                <p className="text-chip text-muted-foreground mb-3 flex items-center gap-1.5">
-                  <Highlighter className="w-3 h-3" />
-                  줄에 마우스를 올리면 중요 표시 버튼이 나타납니다
-                </p>
-              )}
-
-              <div className="border border-border rounded-lg overflow-hidden">
-                {Object.entries(job.eligibility).map(([groupKey, items]: any, i) => (
-                  <div
-                    key={groupKey}
-                    className={cn(
-                      "grid grid-cols-[160px_1fr] border-b border-border/60 last:border-b-0",
-                      i % 2 === 1 && "bg-muted/10"
-                    )}
-                  >
-                    <div className="px-4 py-3 text-xs font-medium text-muted-foreground border-r border-border/60 self-start pt-3.5">
-                      {groupKey}
-                    </div>
-                    <div className="px-4 py-2">
-                      <ul className="space-y-0.5">
-                        {items.map((text: string, idx: number) => {
-                          const key = hlKey("eligibility", groupKey, idx);
-                          return (
-                            <HighlightableLine
-                              key={idx}
-                              lineKey={key}
-                              text={text}
-                              highlighted={isHighlighted(key)}
-                              onToggle={toggleHighlight}
-                            />
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  </div>
+              <div className="space-y-5">
+                {reqGroups.map(([label, items]) => (
+                  <ReqGroup
+                    key={label}
+                    label={label}
+                    items={items}
+                    section="eligibility"
+                    isHighlighted={isHighlighted}
+                    onToggle={toggleHighlight}
+                  />
                 ))}
               </div>
             </section>
 
-            {/* Section 3. 전형 정보 */}
-            <section>
-              <SectionHeader icon={ListChecks} title="3. 전형 정보" subtitle="전형 절차" />
+            {/* 전형 일정 */}
+            <section className="mb-9">
+              <SectionHeader icon={CalendarDays} title="전형 일정" />
               <div className="relative pl-6">
-                {/* 수직 타임라인 선 */}
-                <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border" />
-                <div className="space-y-3">
+                <div className="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
+                <div className="space-y-5">
                   {job.process.map((p: any, i: number) => (
-                    <div key={i} className="relative flex items-start gap-4 group">
-                      {/* 스텝 번호 */}
-                      <div className="absolute -left-6 flex items-center justify-center w-5 h-5 rounded-full bg-background border-2 border-border group-hover:border-indigo-400 transition-colors mt-2.5">
-                        <span className="text-mini font-bold text-muted-foreground group-hover:text-indigo-500 transition-colors">{i + 1}</span>
+                    <div key={i} className="relative flex items-start justify-between gap-4">
+                      <div className="absolute -left-6 top-0 w-[18px] h-[18px] rounded-full bg-background border-2 border-border flex items-center justify-center">
+                        <span className="text-mini font-bold text-muted-foreground">{i + 1}</span>
                       </div>
-                      <div className="flex-1 border border-border rounded-lg px-4 py-3 hover:bg-muted/20 hover:border-indigo-200 transition-all">
-                        <div className="flex items-start justify-between gap-4 flex-wrap">
-                          <div className="min-w-0">
-                            <p className="text-body font-semibold text-foreground">{p.step}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-xs tabular-nums text-foreground/80">{p.schedule}</p>
-                            {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
-                          </div>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-body font-medium text-foreground">{p.step}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs tabular-nums text-foreground/80">{p.schedule}</p>
+                        {p.note && <p className="text-chip text-muted-foreground mt-0.5">{p.note}</p>}
                       </div>
                     </div>
                   ))}
@@ -600,45 +673,16 @@ export default function JobDetail() {
               </div>
             </section>
 
-            {/* Section 4. 직무 설명 · 요구 역량 — 중요 표시 포함 */}
+            {/* 직무 설명 · 요구 역량 */}
             <section>
-              <SectionHeader icon={BookOpen} title="4. 직무 설명 · 요구 역량" subtitle="직무 설명" />
-              <div className="grid grid-cols-2 gap-3">
-                {/* 직무 설명 */}
-                <div className="border border-border rounded-lg p-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-2">직무 설명</h3>
-                  <div
-                    className={cn(
-                      "group/line flex items-start gap-2 px-2 py-1.5 -mx-2 rounded transition-colors",
-                      isHighlighted("jd::desc::0")
-                        ? "bg-[var(--warning-subtle)]"
-                        : "hover:bg-muted/30"
-                    )}
-                  >
-                    <button
-                      onClick={() => toggleHighlight("jd::desc::0")}
-                      title={isHighlighted("jd::desc::0") ? "강조 해제" : "중요 표시"}
-                      className={cn(
-                        "shrink-0 mt-0.5 w-4 h-4 flex items-center justify-center rounded transition-all",
-                        isHighlighted("jd::desc::0")
-                          ? "opacity-100 text-[var(--warning)]"
-                          : "opacity-0 group-hover/line:opacity-100 text-muted-foreground hover:text-[var(--warning)]"
-                      )}
-                    >
-                      <Highlighter className="w-3 h-3" />
-                    </button>
-                    <p className={cn(
-                      "text-body leading-relaxed flex-1",
-                      isHighlighted("jd::desc::0") ? "text-foreground font-semibold" : "text-foreground"
-                    )}>
-                      {job.jobDescription}
-                    </p>
-                  </div>
+              <SectionHeader icon={BookOpen} title="직무 설명 · 요구 역량" />
+              <div className="space-y-5">
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-1">직무 설명</h3>
+                  <p className="text-body text-foreground leading-relaxed">{job.jobDescription}</p>
                 </div>
-
-                {/* 요구 역량 */}
-                <div className="border border-border rounded-lg p-4">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-2">요구 역량</h3>
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-1">요구 역량</h3>
                   <ul className="space-y-0.5">
                     {job.competencies.map((c: string, i: number) => {
                       const key = hlKey("jd", "competency", i);
@@ -656,95 +700,6 @@ export default function JobDetail() {
                 </div>
               </div>
             </section>
-
-            {/* Section 5. 자소서 문항 */}
-            <section>
-              <SectionHeader
-                icon={PenLine}
-                title="5. 자소서 문항"
-                subtitle={`${job.essays.length}문항`}
-              />
-
-              {job.essays.length === 0 ? (
-                <div className="border border-border rounded-lg px-4 py-6 text-center">
-                  <p className="text-body text-muted-foreground">이 공고는 별도 문항이 없어요</p>
-                </div>
-              ) : (
-                <ol className="space-y-3">
-                  {job.essays.map((e: any, idx: number) => (
-                    <li
-                      key={e.no}
-                      ref={(el) => { essayRefs.current[idx] = el; }}
-                      className={cn(
-                        "rounded-xl border bg-card transition-shadow hover:shadow-sm",
-                        e.status === "작성중" && "border-indigo-200 bg-indigo-50/30",
-                        e.status === "초안" && "border-pickd-orange/30 bg-orange-50/20",
-                        e.status === "완료" && "border-pickd-green/30 bg-green-50/20",
-                        e.status === "미작성" && "border-border",
-                      )}
-                    >
-                      <div className="p-5">
-                        {/* 상단: 번호 + 상태 + 메타 + 버튼 */}
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className={cn(
-                              "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-chip font-bold",
-                              e.status === "완료" ? "bg-pickd-green text-white" :
-                              e.status === "작성중" ? "bg-indigo-500 text-white" :
-                              e.status === "초안" ? "bg-pickd-orange text-white" :
-                              "bg-muted text-muted-foreground"
-                            )}>
-                              {e.status === "완료" ? <Check className="w-3.5 h-3.5" /> : e.no}
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <EssayStatus status={e.status} />
-                              <span className="text-chip text-muted-foreground tabular-nums">{e.charLimit.toLocaleString()}자 이내</span>
-                              {e.updated && <span className="text-chip text-muted-foreground/50">수정 {e.updated}</span>}
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant={e.status === "미작성" ? "outline" : "default"}
-                            className={cn(
-                              "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
-                              e.status !== "미작성" && "bg-indigo-600 hover:bg-indigo-700 text-white border-0"
-                            )}
-                            onClick={() => goToTab3(e.no)}
-                          >
-                            <PenLine className="w-3 h-3" />
-                            {e.status === "미작성" ? "작성하기" : "이어서 작성하기"}
-                          </Button>
-                        </div>
-
-                        {/* 문항 */}
-                        <p className="text-sm font-medium text-foreground leading-relaxed pl-9">
-                          {e.question}
-                        </p>
-
-                        {/* 작성 내용 미리보기 */}
-                        {e.preview && (
-                          <div className="mt-3 pl-9">
-                            <div className="relative bg-background border border-border/60 rounded-lg px-4 py-3">
-                              <div className="absolute top-3 left-3 w-0.5 h-[calc(100%-24px)] bg-indigo-300 rounded-full" />
-                              <p className="pl-3 text-body text-foreground/75 leading-relaxed line-clamp-3">
-                                {e.preview}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* 미작성 안내 */}
-                        {!e.preview && e.status === "미작성" && (
-                          <p className="mt-2 pl-9 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
-
-            <div className="h-12" />
           </div>
         </div>
 
@@ -757,7 +712,6 @@ export default function JobDetail() {
         >
           {rawOpen && (
             <div className="flex flex-col h-full w-[440px]">
-              {/* Panel header */}
               <div className="px-5 py-3.5 border-b border-border bg-muted/30 flex items-center justify-between shrink-0 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
@@ -777,24 +731,20 @@ export default function JobDetail() {
                 </button>
               </div>
 
-              {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-4 bg-muted/10">
                 <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">
-                  {/* Mini toolbar */}
-                  <div className="px-4 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between">
+                  <div className="px-4 py-2 border-b border-border/60 bg-muted/20 flex items-center justify-between group">
                     <span className="text-chip font-mono text-muted-foreground tabular-nums">
                       {job.rawSource.length.toLocaleString()}자
                     </span>
                     <CopyButton text={job.rawSource} label="전체 복사" />
                   </div>
-                  {/* Raw text */}
                   <pre className="p-5 text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
                     {job.rawSource}
                   </pre>
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="px-5 py-3 border-t border-border bg-muted/30 shrink-0 flex items-center justify-between gap-2">
                 <p className="text-chip text-muted-foreground">원본 공고 출처</p>
                 <a
@@ -811,15 +761,6 @@ export default function JobDetail() {
           )}
         </aside>
       </div>
-    </div>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-foreground">{value}</span>
     </div>
   );
 }
