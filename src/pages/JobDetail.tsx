@@ -673,8 +673,12 @@ export default function JobDetail() {
                       </div>
                       <Button
                         size="sm"
-                        variant={e.status === "완료" ? "ghost" : e.status === "미작성" ? "outline" : "default"}
-                        className="shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md"
+                        variant={e.status === "완료" ? "ghost" : "outline"}
+                        className={cn(
+                          "shrink-0 h-7 text-xs gap-1 whitespace-nowrap rounded-md",
+                          (e.status === "작성중" || e.status === "초안") &&
+                            "border-primary text-primary hover:bg-primary/5 hover:text-primary"
+                        )}
                         onClick={() => goToTab3(e.no)}
                       >
                         <PenLine className="w-3 h-3" />
