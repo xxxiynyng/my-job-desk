@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   CalendarDays, Check, ChevronLeft, ClipboardList, GraduationCap, Layers,
-  MapPin, Search, Sparkles, User, WalletCards, X, type LucideIcon,
+  MapPin, Search, Sparkles, User, X, type LucideIcon,
 } from "lucide-react";
 import {
   CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
@@ -471,16 +471,10 @@ export default function Onboarding() {
         <p className="mt-2 text-center text-sm text-muted-foreground">
           이 정보로 맞는 공고를 찾아드릴게요.<br />나머지는 쓰면서 채워도 충분해요.
         </p>
-        <div className="mt-5 flex w-full max-w-[360px] items-start gap-2.5 rounded-lg border border-border bg-card px-4 py-3">
-          <WalletCards className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            이제 경험을 한 번만 정리해두면,<br />지원할 때마다 자소서에 그대로 꺼내 쓸 수 있어요.
-          </p>
-        </div>
         <button
           type="button"
           onClick={finish}
-          className="mt-6 w-full max-w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-7 w-full max-w-[360px] rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Pickd 시작하기
         </button>
