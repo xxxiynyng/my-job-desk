@@ -288,11 +288,11 @@ export function BasicInfoPanel() {
                     {[infoValues.hanjaName, infoValues.engName].filter(Boolean).join(" · ")}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {infoValues.school && <span className="text-xs px-2.5 py-1 rounded-md bg-muted text-foreground inline-flex items-center gap-1"><GraduationCap className="w-3 h-3 text-muted-foreground" />{infoValues.school}</span>}
-                  {infoValues.major && <span className="text-xs px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground">{infoValues.major}</span>}
-                  {infoValues.grade && <span className="text-xs px-2.5 py-1 rounded-md bg-muted/60 text-muted-foreground">{infoValues.grade}</span>}
-                </div>
+                {[infoValues.school, infoValues.major, infoValues.grade].some(Boolean) && (
+                  <p className="text-body text-muted-foreground mt-1.5">
+                    {[infoValues.school, infoValues.major, infoValues.grade].filter(Boolean).join("  ·  ")}
+                  </p>
+                )}
               </div>
               <div className="shrink-0 text-right">
                 <button
