@@ -1,5 +1,16 @@
 import { cn } from "@/lib/utils";
 
+// 마감일(YYYY-MM-DD) → 오늘 기준 남은 일수 (음수면 지남) — D-day 계산 단일 정본.
+// 구 getDday(calendarData)·JobPostingTable 로컬 구현을 이 함수로 통합(2026-07-06).
+export function calcDday(deadline: string): number {
+  if (!deadline) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dl = new Date(deadline.length === 10 ? deadline + "T00:00:00" : deadline);
+  dl.setHours(0, 0, 0, 0);
+  return Math.round((dl.getTime() - today.getTime()) / 86400000);
+}
+
 interface DdayChipProps {
   days: number;
   size?: "sm" | "md";

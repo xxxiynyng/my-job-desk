@@ -3,7 +3,7 @@ export { Badge } from "./Badge";
 export { Button } from "./Button";
 export { Card } from "./Card";
 export { Checkbox } from "./Checkbox";
-export { DdayChip } from "./DdayChip";
+export { DdayChip, calcDday } from "./DdayChip";
 export { IconButton } from "./IconButton";
 export { Input } from "./Input";
 export { Select } from "./Select";

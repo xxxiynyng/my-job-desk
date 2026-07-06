@@ -147,13 +147,8 @@ export function formatShortKoreanDate(date: Date): string {
   return `${date.getMonth() + 1}월 ${date.getDate()}일 ${dayName}요일`;
 }
 
-export function getDday(deadlineStr: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const deadline = new Date(deadlineStr);
-  deadline.setHours(0, 0, 0, 0);
-  return Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
+// D-day 계산 정본은 ds/DdayChip.calcDday — 여기선 재수출만 (구 자체 구현 제거, 2026-07-06)
+export { calcDday as getDday } from "@/components/pickd/ds/DdayChip";
 
 export function getDdayStyle(dday: number): string {
   if (dday === 0) return "bg-red-500 text-white font-bold animate-pulse";

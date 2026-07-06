@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { Star, LayoutGrid, LayoutList } from "lucide-react";
 import { Link } from "react-router-dom";
+import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { calcDday } from "@/components/pickd/ds";
 
 type Doc = {
   id: string;
@@ -11,62 +13,23 @@ type Doc = {
   jobTitle: string;
   employType: string;
   deadline: string;
-  dday: number;
+  dday: number; // 마감일 기반 실계산 (calcDday) — 고정값 금지
   updatedAt: string;
   progress: number;
   starred: boolean;
 };
 
-const initial: Doc[] = [
-  {
-    id: "d1",
-    slug: "toss",
-    company: "토스",
-    jobTitle: "Product Designer",
-    employType: "인턴",
-    deadline: "2026-04-14",
-    dday: 2,
-    updatedAt: "2시간 전",
-    progress: 60,
-    starred: true,
-  },
-  {
-    id: "d2",
-    slug: "kakao",
-    company: "카카오",
-    jobTitle: "백엔드 엔지니어",
-    employType: "신입",
-    deadline: "2026-04-15",
-    dday: 3,
-    updatedAt: "3시간 전",
-    progress: 40,
-    starred: false,
-  },
-  {
-    id: "d3",
-    slug: "naver",
-    company: "네이버",
-    jobTitle: "프론트엔드 개발자",
-    employType: "신입",
-    deadline: "2026-04-18",
-    dday: 6,
-    updatedAt: "어제",
-    progress: 85,
-    starred: false,
-  },
-  {
-    id: "d4",
-    slug: "samsung",
-    company: "삼성전자",
-    jobTitle: "SW 엔지니어",
-    employType: "신입",
-    deadline: "2026-04-20",
-    dday: 8,
-    updatedAt: "1일 전",
-    progress: 100,
-    starred: false,
-  },
-];
+// 목데이터 — 마감일은 오늘 기준 상대 날짜로 생성, dday는 calcDday로 파생(구 고정 dday 상수 제거, 2026-07-06)
+const mockDeadline = (daysFromNow: number) => format(addDays(new Date(), daysFromNow), "yyyy-MM-dd");
+
+const initial: Doc[] = (
+  [
+    { id: "d1", slug: "toss", company: "토스", jobTitle: "Product Designer", employType: "인턴", deadline: mockDeadline(2), updatedAt: "2시간 전", progress: 60, starred: true },
+    { id: "d2", slug: "kakao", company: "카카오", jobTitle: "백엔드 엔지니어", employType: "신입", deadline: mockDeadline(3), updatedAt: "3시간 전", progress: 40, starred: false },
+    { id: "d3", slug: "naver", company: "네이버", jobTitle: "프론트엔드 개발자", employType: "신입", deadline: mockDeadline(6), updatedAt: "어제", progress: 85, starred: false },
+    { id: "d4", slug: "samsung", company: "삼성전자", jobTitle: "SW 엔지니어", employType: "신입", deadline: mockDeadline(8), updatedAt: "1일 전", progress: 100, starred: false },
+  ] satisfies Omit<Doc, "dday">[]
+).map((d) => ({ ...d, dday: calcDday(d.deadline) }));
 
 export function DocumentStatusList() {
   const [docs, setDocs] = useState<Doc[]>(initial);
