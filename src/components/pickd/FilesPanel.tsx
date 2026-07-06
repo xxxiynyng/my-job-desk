@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Check,
   Star,
+  Plus,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -206,6 +207,7 @@ function FileGrid({
   }, [files]);
 
   const activeKinds = FILE_KINDS.filter((k) => (byKind[k]?.length ?? 0) > 0);
+  const missingKinds = FILE_KINDS.filter((k) => (byKind[k]?.length ?? 0) === 0);
 
   const handleFiles = (fl: FileList | null) => {
     if (!fl || fl.length === 0) return;
@@ -220,7 +222,7 @@ function FileGrid({
       <div className="absolute top-0 right-0">
         <button
           onClick={() => inputRef.current?.click()}
-          className="text-chip text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
+          className="text-xs text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors shrink-0"
         >
           <Upload className="w-3 h-3" /> 파일 업로드
         </button>
@@ -228,6 +230,14 @@ function FileGrid({
 
       {/* ── 콘텐츠 ───────────────────────────────── */}
       <div className="pt-6">
+        {/* 준비 현황 요약 — 파일 수·보유 종류 한눈에 */}
+        {activeKinds.length > 0 && (
+          <div className="flex items-center gap-2 mb-4 text-chip text-muted-foreground">
+            <span className="tabular-nums">파일 <b className="font-medium text-foreground">{files.length}</b>개</span>
+            <span className="opacity-40">·</span>
+            <span className="tabular-nums">서류 종류 <b className="font-medium text-foreground">{activeKinds.length}</b>/{FILE_KINDS.length} 보유</span>
+          </div>
+        )}
         {/* 드래그 존 */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -301,6 +311,28 @@ function FileGrid({
             </div>
           )}
         </div>
+
+        {/* 아직 없는 서류 — 준비 체크(정리·확인). 클릭하면 바로 업로드 */}
+        {activeKinds.length > 0 && missingKinds.length > 0 && (
+          <div className="mt-7 pt-5 border-t border-border/60">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-body font-medium text-foreground">아직 없는 서류</span>
+              <span className="text-chip text-muted-foreground tabular-nums">{missingKinds.length}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {missingKinds.map((k) => (
+                <button
+                  key={k}
+                  onClick={() => inputRef.current?.click()}
+                  title={`${k} 업로드`}
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-lg px-3 py-1.5 transition-colors"
+                >
+                  <Plus className="w-3 h-3 shrink-0" /> {k}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <UploadKindModal
