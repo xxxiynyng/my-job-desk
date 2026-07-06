@@ -463,7 +463,7 @@ export default function Onboarding() {
 
           {s.step === "me" && (
             <>
-              <StepHead q="먼저, 어떻게 불러드릴까요?" sub="1분이면 끝나요. 꼭 필요한 것만 받을게요." />
+              <StepHead q="먼저, 어떻게 불러드릴까요?" sub="꼭 필요한 것만 물어볼게요." />
               <div className="mt-4 space-y-4">
                 <div>
                   <Label>닉네임</Label>
@@ -517,8 +517,8 @@ export default function Onboarding() {
                 </div>
                 {needsGrad && (
                   <div>
-                    <Label>졸업(예정) 시기</Label>
-                    <div className="grid grid-cols-[3fr_2fr] gap-2.5">
+                    <Label>졸업 시기</Label>
+                    <div className="grid grid-cols-2 gap-2.5">
                       <select className={inputCls} value={s.gradY} onChange={e => up({ gradY: e.target.value })}>
                         <option value="">년도</option>
                         {gradYears().map(y => <option key={y}>{y}</option>)}
@@ -606,7 +606,7 @@ export default function Onboarding() {
                   </div>
                 </div>
                 <div>
-                  <Label>지원 예정 시기</Label>
+                  <Label>지원 시기</Label>
                   <div className="flex flex-wrap gap-2">
                     {TIMINGS.map(t => <Chip key={t} on={s.timing === t} onClick={() => up({ timing: t })}>{t}</Chip>)}
                   </div>
@@ -770,7 +770,7 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-5 py-6">
+      <div className="mx-auto max-w-4xl px-5 py-6">
         <div className="mb-6 flex items-center gap-2 text-lg font-bold tracking-tight">
           <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
           Pickd
