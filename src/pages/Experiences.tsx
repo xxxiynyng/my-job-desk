@@ -1136,7 +1136,6 @@ export default function Experiences() {
                 className="border rounded-lg mb-3"
                 actions={[
                   { label: "삭제", onClick: () => confirmDelete([...selected]), tone: "danger" },
-                  { label: "유형 변경" },
                   { label: "내보내기", onClick: () => exportItems(items.filter((i) => selected.has(i.id))) },
                 ]}
                 onClear={() => setSelected(new Set())}
