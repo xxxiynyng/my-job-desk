@@ -97,7 +97,7 @@ const jobDetails: Record<string, any> = {
         charLimit: 700,
         status: "작성중",
         updated: "2시간 전",
-        preview: "저는 대학 시절 스마트홈 플랫폼 프로젝트를 진행하면서 삼성전자의 SmartThings 생태계에...",
+        preview: "저는 대학 시절 스마트홈 플랫폼 프로젝트를 진행하면서 삼성전자의 SmartThings 생태계에 깊은 관심을 갖게 되었습니다. 여러 제조사의 기기를 하나의 앱에서 제어하는 경험을 설계하며, 사용자가 기술의 복잡함을 느끼지 않도록 만드는 일이 얼마나 큰 가치를 만드는지 배웠습니다.\n\n입사 후에는 전 세계 사용자가 매일 사용하는 제품의 SW 플랫폼을 개선하는 일에 기여하고 싶습니다. 특히 이기종 기기 간 연결 경험을 단순화하고, AI 기반 기능을 자연스럽게 녹여 사용자가 '설정'이 아니라 '경험'을 하도록 만드는 것이 목표입니다. 대학에서 쌓은 플랫폼 설계 경험과 문제를 끝까지 파고드는 태도로, 삼성전자의 제품이 더 많은 사용자에게 가깝게 다가가는 데 힘을 보태겠습니다.",
         docId: "samsung-essay-1",
       },
       {
@@ -106,7 +106,7 @@ const jobDetails: Record<string, any> = {
         charLimit: 1000,
         status: "초안",
         updated: "어제",
-        preview: "대학원 재학 중 실시간 데이터 처리 파이프라인을 구축하는 프로젝트를 맡았습니다...",
+        preview: "대학원 재학 중 실시간 데이터 처리 파이프라인을 구축하는 프로젝트를 맡았습니다. 초당 수만 건의 이벤트가 들어오는 환경에서 지연 없이 데이터를 집계해야 했고, 초기 설계로는 트래픽이 몰릴 때마다 처리가 밀리는 문제가 반복됐습니다.\n\n저는 병목의 원인을 추측이 아니라 수치로 확인하기 위해 각 단계의 처리량과 지연을 계측하는 지표부터 세웠습니다. 그 결과 직렬화 구간과 단일 컨슈머 구조가 병목임을 확인했고, 메시지 파티셔닝과 배치 처리를 도입해 처리량을 약 4배로 끌어올렸습니다. 장애 상황에서도 데이터가 유실되지 않도록 재처리 로직과 체크포인트를 추가했습니다.\n\n이 경험에서 가장 크게 배운 것은, 어려운 문제일수록 '느낌'이 아니라 '측정'에서 출발해야 한다는 점이었습니다. 팀원들과 같은 지표를 공유하며 논의하니 의사결정이 빨라졌고, 결국 목표한 SLA를 안정적으로 만족시킬 수 있었습니다.",
         docId: "samsung-essay-2",
       },
       {
@@ -348,6 +348,13 @@ export default function JobDetail() {
 
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
+  const highlightsKey = `pickd.jobs.${slug ?? "samsung"}.highlights.v1`;
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(highlightsKey);
+      setHighlights(raw ? new Set(JSON.parse(raw)) : new Set());
+    } catch {}
+  }, [highlightsKey]);
 
   // 제출 서류 확인 체크 상태 (localStorage 지속)
   const submitDocs: string[] = job.eligibility["제출 서류"] ?? [];
@@ -427,6 +434,7 @@ export default function JobDetail() {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
+      try { localStorage.setItem(highlightsKey, JSON.stringify([...next])); } catch {}
       return next;
     });
   };
@@ -578,7 +586,7 @@ export default function JobDetail() {
               <div className="flex items-center gap-2">
                 {highlights.size > 0 && (
                   <button
-                    onClick={() => setHighlights(new Set())}
+                    onClick={() => { setHighlights(new Set()); try { localStorage.setItem(highlightsKey, JSON.stringify([])); } catch {} }}
                     className="text-chip text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   >
                     <X className="w-3 h-3" />
@@ -760,7 +768,7 @@ export default function JobDetail() {
                         </div>
                         <p className="text-sm font-semibold text-foreground leading-relaxed select-text">{e.question}</p>
                         {e.preview ? (
-                          <p className="mt-1.5 text-body text-muted-foreground leading-relaxed line-clamp-2 select-text">{e.preview}</p>
+                          <p className="mt-1.5 text-body text-muted-foreground leading-relaxed whitespace-pre-wrap select-text">{e.preview}</p>
                         ) : e.status === "미작성" ? (
                           <p className="mt-1 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
                         ) : null}
