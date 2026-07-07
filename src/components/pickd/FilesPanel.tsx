@@ -48,8 +48,9 @@ type FileItem = {
 
 type Preview = { kind: "image" | "pdf"; file: FileItem } | null;
 
-const SAMPLE_PHOTO_A = "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=240&h=320&fit=crop";
-const SAMPLE_PHOTO_B = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=240&h=320&fit=crop";
+// 서비스 이용 대상(한국 취준생)에 맞춘 증명사진 스타일 헤드샷 (Unsplash, 무료·상업이용 가능)
+const SAMPLE_PHOTO_A = "https://images.unsplash.com/photo-1543132220-4bf3de6e10ae?w=240&h=320&fit=crop&crop=faces";
+const SAMPLE_PHOTO_B = "https://images.unsplash.com/photo-1771591742030-e22976e38aea?w=240&h=320&fit=crop&crop=faces";
 
 const INITIAL_FILES: FileItem[] = [
   { id: "f0", kind: "증명사진", name: "profile_photo.jpg", fileKind: "image", url: SAMPLE_PHOTO_A },
@@ -237,7 +238,18 @@ function FileGrid({
   return (
     <div className="relative">
       <input ref={inputRef} type="file" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-      <div className="absolute top-0 right-0">
+      <div className="absolute top-0 right-0 flex items-center gap-2">
+        {files.length > 0 && (
+          <div className="relative w-56">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="파일 이름·종류 검색"
+              className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
+            />
+          </div>
+        )}
         <button
           onClick={() => inputRef.current?.click()}
           className="text-xs text-foreground inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors shrink-0"
@@ -248,18 +260,6 @@ function FileGrid({
 
       {/* ── 콘텐츠 ───────────────────────────────── */}
       <div className="pt-6">
-        {/* 검색 — 파일이 많아질 때 빠른 탐색 */}
-        {files.length > 0 && (
-          <div className="mb-4 relative max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="파일 이름·종류 검색"
-              className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
-            />
-          </div>
-        )}
         {/* 드래그 존 */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
