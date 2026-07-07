@@ -10,6 +10,8 @@ import {
   Download,
   Trash2,
   Copy,
+  ChevronDown,
+  Search,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -186,12 +188,24 @@ function FileGrid({
     null,
   );
   const [dragOver, setDragOver] = useState(false);
+  const [query, setQuery] = useState("");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggleCollapse = (k: string) =>
+    setCollapsed((prev) => {
+      const n = new Set(prev);
+      n.has(k) ? n.delete(k) : n.add(k);
+      return n;
+    });
 
+  const q = query.trim().toLowerCase();
   const byKind = useMemo(() => {
     const map: Record<string, FileItem[]> = {};
-    for (const f of files) (map[f.kind] ||= []).push(f);
+    for (const f of files) {
+      if (q && !f.name.toLowerCase().includes(q) && !f.kind.toLowerCase().includes(q)) continue;
+      (map[f.kind] ||= []).push(f);
+    }
     return map;
-  }, [files]);
+  }, [files, q]);
 
   // 프리셋 순서 우선 + 목록 밖 사용자 지정 종류는 뒤에 가나다순(탭2 유형 탭과 같은 원칙)
   const activeKinds = [
@@ -220,6 +234,18 @@ function FileGrid({
 
       {/* ── 콘텐츠 ───────────────────────────────── */}
       <div className="pt-6">
+        {/* 검색 — 파일이 많아질 때 빠른 탐색 */}
+        {files.length > 0 && (
+          <div className="mb-4 relative max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="파일 이름·종류 검색"
+              className="w-full h-8 pl-8 pr-2.5 text-xs rounded-md border border-border bg-background outline-none focus:border-primary/50 transition-colors"
+            />
+          </div>
+        )}
         {/* 드래그 존 */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -228,66 +254,77 @@ function FileGrid({
           className={cn("rounded-xl transition-colors", dragOver && "ring-2 ring-primary/40 bg-primary/5 p-2")}
         >
           {activeKinds.length === 0 ? (
-            <div className="py-16 text-center text-muted-foreground rounded-xl border border-dashed border-border">
-              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
-                <Folder className="w-6 h-6 text-muted-foreground/50" />
+            q ? (
+              <div className="py-16 text-center text-muted-foreground">
+                <p className="text-sm">‘{query}’ 검색 결과가 없어요.</p>
               </div>
-              <p className="text-sm">저장된 파일이 없어요.</p>
-              <p className="text-chip mt-1 opacity-60">
-                파일을 끌어다 놓거나 "파일 업로드"를 눌러 추가하세요.
-              </p>
-            </div>
+            ) : (
+              <div className="py-16 text-center text-muted-foreground rounded-xl border border-dashed border-border">
+                <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+                  <Folder className="w-6 h-6 text-muted-foreground/50" />
+                </div>
+                <p className="text-sm">저장된 파일이 없어요.</p>
+                <p className="text-chip mt-1 opacity-60">
+                  파일을 끌어다 놓거나 "파일 업로드"를 눌러 추가하세요.
+                </p>
+              </div>
+            )
           ) : (
-            <div className="space-y-7">
+            <div className="space-y-6">
               {activeKinds.map((kind) => {
                 const kindItems = byKind[kind] || [];
+                const isCollapsed = !q && collapsed.has(kind);
                 return (
                   <div key={kind}>
-                    {/* 폴더 헤더 — 소프트 타일 아이콘 */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* 폴더 헤더 — 클릭하면 접기/펼치기 (파일 많을 때 정리) */}
+                    <button
+                      type="button"
+                      onClick={() => toggleCollapse(kind)}
+                      className="w-full flex items-center gap-2 mb-3"
+                    >
+                      <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform", isCollapsed && "-rotate-90")} />
                       <span className="w-6 h-6 rounded-md bg-muted flex items-center justify-center shrink-0">
                         <Folder className="w-3.5 h-3.5 text-muted-foreground" />
                       </span>
                       <span className="text-body font-medium text-foreground">{kind}</span>
                       <span className="text-chip text-muted-foreground tabular-nums">{kindItems.length}</span>
-                    </div>
+                    </button>
                     {/* 카드 그리드 */}
-                    <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
-                      {kindItems.map((f) => {
-                        const rep = isBasicPhoto?.(f.id) && f.kind === "증명사진";
-                        return (
-                          <button
-                            key={f.id}
-                            onClick={() => onPreview(f)}
-                            title={f.name}
-                            className="group text-left bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-sm transition-all"
-                          >
-                            <div className="h-[104px] bg-muted/30 flex items-center justify-center overflow-hidden">
-                              {f.fileKind === "image" && f.url ? (
-                                <img src={f.url} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                              ) : (
-                                <div className={cn(
-                                  "w-11 h-11 rounded-xl flex items-center justify-center",
-                                  f.fileKind === "image" ? "bg-sky-50" : "bg-red-50",
-                                )}>
-                                  {f.fileKind === "image"
-                                    ? <ImageIcon className="w-5 h-5 text-sky-400" />
-                                    : <FileText className="w-5 h-5 text-red-400" />}
-                                </div>
-                              )}
-                            </div>
-                            <div className="px-2.5 py-2 min-w-0 border-t border-border/60">
-                              <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
-                              {rep ? (
-                                <p className="text-chip text-primary inline-flex items-center gap-0.5 mt-0.5"><Check className="w-3 h-3" /> 대표 사진</p>
-                              ) : (
-                                <p className="text-chip text-muted-foreground truncate mt-0.5">{f.kind}</p>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {!isCollapsed && (
+                      <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+                        {kindItems.map((f) => {
+                          const rep = isBasicPhoto?.(f.id) && f.kind === "증명사진";
+                          return (
+                            <button
+                              key={f.id}
+                              onClick={() => onPreview(f)}
+                              title={f.name}
+                              className="group text-left bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-sm transition-all"
+                            >
+                              <div className="h-[104px] bg-muted/30 flex items-center justify-center overflow-hidden">
+                                {f.fileKind === "image" && f.url ? (
+                                  <img src={f.url} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                                ) : (
+                                  <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+                                    {f.fileKind === "image"
+                                      ? <ImageIcon className="w-5 h-5 text-muted-foreground/60" />
+                                      : <FileText className="w-5 h-5 text-muted-foreground/60" />}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="px-2.5 py-2 min-w-0 border-t border-border/60">
+                                <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
+                                {rep ? (
+                                  <p className="text-chip text-primary inline-flex items-center gap-0.5 mt-0.5"><Check className="w-3 h-3" /> 대표 사진</p>
+                                ) : (
+                                  <p className="text-chip text-muted-foreground truncate mt-0.5">{f.kind}</p>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -356,13 +393,10 @@ function UploadKindModal({
         <div className="space-y-3">
           {/* 미리보기 타일 + 이름 */}
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-              pending?.fileKind === "image" ? "bg-sky-50" : "bg-red-50",
-            )}>
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
               {pending?.fileKind === "image"
-                ? <ImageIcon className="w-5 h-5 text-sky-400" />
-                : <FileText className="w-5 h-5 text-red-400" />}
+                ? <ImageIcon className="w-5 h-5 text-muted-foreground/60" />
+                : <FileText className="w-5 h-5 text-muted-foreground/60" />}
             </div>
             <div className="flex-1 min-w-0">
               <label className="text-chip text-muted-foreground">파일 이름</label>
@@ -478,16 +512,16 @@ function PreviewModal({
               <img src={f.url} alt={f.name} className="max-h-[60vh] object-contain" />
             ) : (
               <div className="flex flex-col items-center text-muted-foreground py-12">
-                <div className="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-3">
-                  <ImageIcon className="w-7 h-7 text-sky-400" />
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-3">
+                  <ImageIcon className="w-7 h-7 text-muted-foreground/60" />
                 </div>
                 <p className="text-xs">이미지 미리보기</p>
               </div>
             )
           ) : (
             <div className="flex flex-col items-center text-muted-foreground py-12">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-3">
-                <FileText className="w-7 h-7 text-red-400" />
+              <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-3">
+                <FileText className="w-7 h-7 text-muted-foreground/60" />
               </div>
               <p className="text-xs">PDF 미리보기</p>
             </div>
