@@ -55,7 +55,6 @@ function RepExperienceCard({
   onCopy,
   onOpenItem,
   onTogglePin,
-  readMeta,
 }: {
   item: Item;
   onCopy: (t: string) => void;
@@ -63,7 +62,6 @@ function RepExperienceCard({
   onTogglePin: (id: string) => void;
   readMeta: (i: Item) => { org: string; period: string };
 }) {
-  const { org, period } = readMeta(item);
   const isNarrative = NARRATIVE_TYPES.includes(item.type);
 
   // 값이 있는 필드 (keywords, importance 제외)
@@ -75,16 +73,13 @@ function RepExperienceCard({
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden group/card hover:border-border/80 transition-colors">
-      {/* 헤더 */}
-      <div className="px-3 pt-3 pb-2.5 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <span className="text-mini text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">{item.type}</span>
-          <p className="text-body font-semibold text-foreground mt-1.5 leading-snug">{item.name}</p>
-          {(org || period) && (
-            <p className="text-chip text-muted-foreground mt-1">{[org, period].filter(Boolean).join(" · ")}</p>
-          )}
+      {/* 헤더 — 제목(크게) + 유형 뱃지 한 줄, 부제 제거로 중복·세로높이 축소 */}
+      <div className="px-3.5 pt-3 pb-3 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex items-center gap-2 flex-wrap">
+          <p className="text-title font-semibold text-foreground leading-snug">{item.name}</p>
+          <span className="text-mini text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded shrink-0">{item.type}</span>
         </div>
-        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover/card:opacity-100 focus-within:opacity-100 transition-opacity">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -127,7 +122,10 @@ function RepExperienceCard({
 
         {/* 세부 필드 */}
         {filledFields.length > 0 && (
-          <RepSection label="세부 필드">
+          <RepSection
+            label="세부 필드"
+            onCopyAll={() => onCopy(filledFields.map((f) => `${f.label}: ${f.value}`).join("\n"))}
+          >
             {filledFields.map((f) => (
               <div key={f.key} className="flex items-center gap-2 group/row">
                 <span className="text-chip text-muted-foreground w-[80px] shrink-0">{f.label}</span>
@@ -163,7 +161,7 @@ function RepSection({
         {onCopyAll && (
           <button
             onClick={onCopyAll}
-            className="text-mini text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5 transition-colors"
+            className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-0.5 px-1.5 py-0.5 -mr-1 rounded hover:bg-muted transition-colors"
           >
             <Copy className="w-3 h-3" /> 전체 복사
           </button>
