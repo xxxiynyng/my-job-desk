@@ -41,6 +41,7 @@
 | 상태 | localStorage (서버/DB 없음) |
 | 날짜 | date-fns |
 | 드래그 | @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities |
+| 문서 내보내기 | xlsx (Excel), docx (Word). PDF는 브라우저 인쇄(라이브러리 없음) |
 
 ## 라우트 구조 (App.tsx)
 
@@ -86,6 +87,8 @@ src/
 │   ├── DocumentStatusList.tsx           대시보드 서류 현황 (⚠️ 목 dday 고정값)
 │   ├── CalendarMini.tsx                 대시보드 미니 캘린더
 │   ├── MoodRefresh.tsx                  대시보드 기분전환 카드
+│   ├── TrashPanel.tsx                   전역 통합 휴지통 뷰 (설정>데이터 관리에서 렌더, 경험·파일 복원/영구삭제)
+│   ├── ExportModal.tsx                  내보내기 2스텝 모달 (탭2, 값→형식 Excel/Word/PDF)
 │   ├── calendar/                        캘린더 페이지 모듈 — MonthlyCalendar·ListHeader·ContextPanel·CreateModal·DetailModal·ProgressRing
 │   └── ds/                              디자인시스템 프리미티브 — 사용 중: StatusBadge·DdayChip / 나머지 11종(Button·Card 등)은 미사용 예비
 ├── components/table/
@@ -97,9 +100,12 @@ src/
 │   ├── BatchActionBar.tsx               배치 액션 바 셸 (탭1·탭2 공용, 액션 항목은 탭별 주입)
 │   ├── HeaderFilter.tsx                 컬럼 필터 본문 — 컬럼 메뉴의 필터 서브메뉴에 주입 (탭1·탭2 공용)
 │   └── useTableDividers.ts              컬럼 경계 실측 훅 — 세로선 위치는 th 실측값 사용 (탭1·탭2 공용)
-└── hooks/
-    ├── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
-    └── use-mobile.tsx                   shadcn 기본 훅
+├── hooks/
+│   ├── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
+│   └── use-mobile.tsx                   shadcn 기본 훅
+└── lib/
+    ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1, 소프트삭제·복원·14일 purge)
+    └── exportExperiences.ts             내보내기 생성기 (Excel=xlsx·Word=docx·PDF=브라우저 인쇄)
 ```
 
 ## 데이터 지속성 (localStorage 키)
@@ -110,7 +116,7 @@ specs.info.values.v2         기본정보 필드 값 (Record<string, string>)
 specs.info.hiddenValueKeys.v1 값 마스킹된 필드 목록
 specs.basicPhoto.shown       증명사진 표시 여부
 specs.basicPhoto.id          대표 증명사진 ID
-specs.files.v1               제출파일함 파일 목록
+specs.files.v2               제출파일함 파일 목록 (구 specs.files.v1 → v2 상향)
 specs.info.langExams.v1      공인외국어시험 목록 (LangExam[])
 specs.rep.ids                대표 스펙 ID 목록
 specs.rep.cardFields.v1      대표 스펙 카드별 표시 필드
@@ -125,7 +131,12 @@ pickd.experiences.visibleCols.v2  탭2 표시 컬럼
 pickd.experiences.colWidths.v2  탭2 컬럼 너비
 pickd.experiences.colOrder   탭2 tail 컬럼 순서(드래그로 변경, 유형·항목명 고정)
 pickd.experiences.sortMode   탭2 정렬 모드("custom" | 없음)
+pickd.trash.v1               전역 통합 휴지통 스냅샷(경험·파일 소프트삭제, 14일 보관 후 자동 purge)
+pickd.experiences.export.fields.v1  내보내기 마지막 선택 필드
+pickd.experiences.export.format.v1  내보내기 마지막 선택 형식(excel|word|pdf)
 ```
+
+> 소프트삭제: Item·FileItem에 `deletedAt?: number`(epoch ms) 추가 — 없으면 활성, 있으면 휴지통. 모든 활성 뷰는 `deletedAt == null`만 노출. 공고(Job)는 목데이터(미저장)라 현재 휴지통 제외(저장 이전 후 편입 예정).
 
 ## BasicInfoPanel 구조 (경험·스펙 DB > 기본정보 탭)
 
