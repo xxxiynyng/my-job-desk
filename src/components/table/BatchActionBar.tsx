@@ -26,16 +26,16 @@ export function BatchActionBar({
 }) {
   if (count <= 0) return null;
   return (
-    <div className={cn("bg-blue-50 border-blue-200 px-3 py-2 flex items-center gap-1.5", className)}>
-      <span className="text-xs font-medium text-blue-700 shrink-0">{count}개 선택됨</span>
-      <span className="w-px h-3.5 bg-blue-200 mx-1 shrink-0" />
+    <div className={cn("bg-slate-50 border-slate-200 px-3 py-2 flex items-center gap-1.5", className)}>
+      <span className="text-xs font-medium text-slate-700 shrink-0">{count}개 선택됨</span>
+      <span className="w-px h-3.5 bg-slate-200 mx-1 shrink-0" />
       {actions.map((a) => (
         <button
           key={a.label}
           onClick={a.onClick}
           className={cn(
             "text-xs px-2.5 py-1 rounded-md transition-colors font-medium",
-            a.tone === "danger" ? "text-red-600 hover:bg-red-50" : "text-blue-700 hover:bg-blue-100",
+            a.tone === "danger" ? "text-red-600 hover:bg-red-50" : "text-slate-700 hover:bg-slate-200",
           )}
         >
           {a.label}
@@ -43,7 +43,7 @@ export function BatchActionBar({
       ))}
       <button
         onClick={onClear}
-        className="ml-auto text-blue-400 hover:text-blue-600 p-1 rounded-md hover:bg-blue-100 transition-colors"
+        className="ml-auto text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-200 transition-colors"
         aria-label="선택 해제"
       >
         <X className="w-3.5 h-3.5" />
