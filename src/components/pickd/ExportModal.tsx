@@ -113,8 +113,8 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
       <DialogContent className="max-w-[520px]">
         <DialogHeader>
           <DialogTitle className="text-base">내보내기</DialogTitle>
-          <DialogDescription className="text-chip">
-            {step === 1 ? "포함할 값을 선택하세요." : "형식을 선택하세요."}
+          <DialogDescription className={cn("text-chip", step === 1 && "sr-only")}>
+            {step === 1 ? "내보낼 필드를 선택하세요." : "형식을 선택하세요."}
           </DialogDescription>
         </DialogHeader>
 
