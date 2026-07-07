@@ -1128,7 +1128,11 @@ export default function Experiences() {
                   {typeTabs.map((f) => (
                     <button
                       key={f}
-                      onClick={() => { setActiveFilter(f); if (view === "paste") setView("list"); }}
+                      onClick={() => {
+                        if (f !== activeFilter) setSelected(new Set()); // 필터 이동 시 선택 초기화 → 배치 바 사라짐
+                        setActiveFilter(f);
+                        if (view === "paste") setView("list");
+                      }}
                       className={cn(
                         "px-3 py-2 text-xs flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
                         activeFilter === f && view !== "paste"
