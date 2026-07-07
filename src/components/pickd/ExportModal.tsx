@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileSpreadsheet, FileText, Printer, ArrowLeft, Check } from "lucide-react";
+import { FileSpreadsheet, FileText, Printer, Check } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Item } from "@/pages/experiences/presets";
@@ -77,14 +77,6 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
   const hasFields = orderedKeys.length > 0;
   const canExport = scopeItems.length > 0 && hasFields;
 
-  const applyPreset = (preset: "visible" | "all") => {
-    const next = new Set<ExportFieldKey>(
-      preset === "all" ? CATALOG_KEYS : visibleKeys.filter((k) => CATALOG_KEYS.includes(k)),
-    );
-    next.add("name");
-    setFields(next);
-  };
-
   const toggleField = (k: ExportFieldKey) => {
     if (k === "name") return;
     setFields((p) => {
@@ -129,69 +121,44 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
         {step === 1 ? (
           <>
             {/* ① 필드 선택 */}
-            <div className="mt-1">
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-chip text-muted-foreground">포함할 필드</p>
-                <div className="flex gap-1.5">
-                  <button className="text-chip text-muted-foreground hover:text-foreground" onClick={() => applyPreset("visible")}>
-                    표시 중인 컬럼
-                  </button>
-                  <span className="text-border">·</span>
-                  <button className="text-chip text-muted-foreground hover:text-foreground" onClick={() => applyPreset("all")}>
-                    전체 필드
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-y-1.5 gap-x-2">
-                {EXPORT_FIELDS.map((f) => {
-                  const on = fields.has(f.key);
-                  return (
-                    <button
-                      key={f.key}
-                      onClick={() => toggleField(f.key)}
-                      disabled={f.required}
+            <div className="grid grid-cols-3 gap-y-1.5 gap-x-2 mt-1">
+              {EXPORT_FIELDS.map((f) => {
+                const on = fields.has(f.key);
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => toggleField(f.key)}
+                    disabled={f.required}
+                    className={cn(
+                      "flex items-center gap-1.5 text-xs py-1 rounded text-left",
+                      f.required ? "cursor-default" : "hover:text-foreground",
+                      on ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    <span
                       className={cn(
-                        "flex items-center gap-1.5 text-xs py-1 rounded text-left",
-                        f.required ? "cursor-default" : "hover:text-foreground",
-                        on ? "text-foreground" : "text-muted-foreground",
+                        "w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0",
+                        on ? "bg-primary border-primary" : "border-border",
                       )}
                     >
-                      <span
-                        className={cn(
-                          "w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0",
-                          on ? "bg-primary border-primary" : "border-border",
-                        )}
-                      >
-                        {on && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
-                      </span>
-                      {f.label}
-                      {f.required && <span className="text-mini text-muted-foreground/60">(필수)</span>}
-                    </button>
-                  );
-                })}
-              </div>
+                      {on && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                    </span>
+                    {f.label}
+                    {f.required && <span className="text-mini text-muted-foreground/60">(필수)</span>}
+                  </button>
+                );
+              })}
             </div>
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
               <span className="text-chip text-muted-foreground">{scopeItems.length}개 항목</span>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onClose}>
-                  취소
-                </Button>
-                <Button size="sm" className="h-8 text-xs px-4" disabled={!hasFields} onClick={() => setStep(2)}>
-                  다음
-                </Button>
-              </div>
+              <Button size="sm" className="h-8 text-xs px-4" disabled={!hasFields} onClick={() => setStep(2)}>
+                다음
+              </Button>
             </div>
           </>
         ) : (
           <>
             {/* ② 형식 선택 (컴팩트) */}
-            <button
-              onClick={() => setStep(1)}
-              className="inline-flex items-center gap-1 text-chip text-muted-foreground hover:text-foreground w-fit"
-            >
-              <ArrowLeft className="w-3 h-3" /> 이전
-            </button>
             <div className="grid grid-cols-3 gap-2.5 mt-1">
               {FORMAT_CARDS.map((f) => {
                 const Icon = f.icon;
@@ -215,8 +182,8 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
             <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
               <span className="text-chip text-muted-foreground shrink-0">파일명</span>
               <Input value={filename} onChange={(e) => setFilename(e.target.value)} className="h-8 text-xs flex-1" />
-              <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={onClose}>
-                취소
+              <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setStep(1)}>
+                이전
               </Button>
               <Button size="sm" className="h-8 text-xs px-4" disabled={!canExport || busy} onClick={doExport}>
                 내보내기
