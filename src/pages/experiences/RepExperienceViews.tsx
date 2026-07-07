@@ -22,8 +22,10 @@ export function RepExperienceGrid({
 }) {
   if (items.length === 0) {
     return (
-      <div className="bg-card border border-dashed border-border rounded-xl px-6 py-12 text-center">
-        <Clipboard className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
+      <div className="bg-card border border-dashed border-border rounded-2xl px-6 py-16 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+          <Clipboard className="w-6 h-6 text-muted-foreground/50" />
+        </div>
         <p className="text-sm text-foreground">복붙용으로 고정된 항목이 없어요.</p>
         <p className="text-xs text-muted-foreground mt-1.5">
           목록에서 항목에 마우스를 올리면 핀 아이콘이 나타나요.
@@ -35,7 +37,7 @@ export function RepExperienceGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
       {items.map((item) => (
         <RepExperienceCard
           key={item.id}
@@ -72,9 +74,9 @@ function RepExperienceCard({
   const docText = item.document?.trim() ?? "";
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden group/card hover:border-border/80 transition-colors">
-      {/* 헤더 — 제목(크게) + 유형 뱃지 한 줄, 부제 제거로 중복·세로높이 축소 */}
-      <div className="px-3.5 pt-3 pb-3 flex items-start justify-between gap-2">
+    <div className="group/card bg-card border border-border rounded-2xl px-5 py-4 flex flex-col gap-3.5 hover:border-border/80 hover:shadow-sm transition-all">
+      {/* 헤더 — 제목 + 유형 뱃지, 관리 액션(핀·상세) hover */}
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex items-center gap-2 flex-wrap">
           <p className="text-title font-semibold text-foreground leading-snug">{item.name}</p>
           <span className="text-mini text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded shrink-0">{item.type}</span>
@@ -107,67 +109,56 @@ function RepExperienceCard({
         </div>
       </div>
 
-      <div className="border-t border-border/60 divide-y divide-border/60">
-        {/* 자소서용 요약 — narrative 타입 + document 있을 때만 */}
-        {isNarrative && docText && (
-          <RepSection label="자소서용 요약" onCopyAll={() => onCopy(docText)}>
+      {/* 자소서용 요약 — 복붙 히어로 블록 (narrative + document) */}
+      {isNarrative && docText && (
+        <div className="rounded-xl bg-muted/40 p-3.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-chip font-medium text-muted-foreground">자소서용 요약</span>
             <button
               onClick={() => onCopy(docText)}
-              className="text-xs leading-loose text-foreground whitespace-pre-line text-left hover:text-primary transition-colors w-full"
+              className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-1.5 py-0.5 -mr-1 rounded hover:bg-background transition-colors"
             >
-              {docText}
+              <Copy className="w-3 h-3" /> 복사
             </button>
-          </RepSection>
-        )}
-
-        {/* 세부 필드 */}
-        {filledFields.length > 0 && (
-          <RepSection
-            label="세부 필드"
-            onCopyAll={() => onCopy(filledFields.map((f) => `${f.label}: ${f.value}`).join("\n"))}
+          </div>
+          <button
+            onClick={() => onCopy(docText)}
+            title="클릭하면 복사돼요"
+            className="text-body leading-relaxed text-foreground whitespace-pre-line text-left w-full"
           >
+            {docText}
+          </button>
+        </div>
+      )}
+
+      {/* 세부 필드 */}
+      {filledFields.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-chip font-medium text-muted-foreground">세부 필드</span>
+            <button
+              onClick={() => onCopy(filledFields.map((f) => `${f.label}: ${f.value}`).join("\n"))}
+              className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-1.5 py-0.5 -mr-1 rounded hover:bg-muted transition-colors"
+            >
+              <Copy className="w-3 h-3" /> 전체 복사
+            </button>
+          </div>
+          <div className="space-y-1.5">
             {filledFields.map((f) => (
-              <div key={f.key} className="flex items-center gap-2 group/row">
-                <span className="text-chip text-muted-foreground w-[80px] shrink-0">{f.label}</span>
+              <div key={f.key} className="flex items-start gap-3 group/row">
+                <span className="text-chip text-muted-foreground w-[92px] shrink-0 pt-0.5">{f.label}</span>
                 <button
                   onClick={() => onCopy(f.value)}
-                  className="group/val inline-flex items-center gap-1 text-xs text-foreground hover:text-primary flex-1 min-w-0 text-left transition-colors"
+                  className="group/val inline-flex items-start gap-1 text-body text-foreground text-left flex-1 min-w-0 rounded px-1 -mx-1 hover:bg-muted transition-colors"
                 >
-                  <span className="truncate">{f.value}</span>
-                  <Copy className="w-3 h-3 opacity-0 group-hover/val:opacity-100 shrink-0 transition-opacity text-muted-foreground" />
+                  <span className="break-words min-w-0">{f.value}</span>
+                  <Copy className="w-3 h-3 mt-0.5 opacity-0 group-hover/val:opacity-100 shrink-0 transition-opacity text-muted-foreground" />
                 </button>
               </div>
             ))}
-          </RepSection>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function RepSection({
-  label,
-  onCopyAll,
-  children,
-}: {
-  label: string;
-  onCopyAll?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="px-3 pt-3 pb-3">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        {onCopyAll && (
-          <button
-            onClick={onCopyAll}
-            className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-0.5 px-1.5 py-0.5 -mr-1 rounded hover:bg-muted transition-colors"
-          >
-            <Copy className="w-3 h-3" /> 전체 복사
-          </button>
-        )}
-      </div>
-      <div className="space-y-1">{children}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
