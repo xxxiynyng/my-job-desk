@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Check, X, Pencil } from "lucide-react";
+import { Check, X, Pencil, Trash2, ChevronRight } from "lucide-react";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TrashPanel } from "@/components/pickd/TrashPanel";
+import { trashCount } from "@/lib/trash";
 
 const LS_JOB_PREFS = "specs.settings.jobPrefs.v1";
 
@@ -41,8 +43,11 @@ export default function Settings() {
   const [prefs, setPrefs]     = useState<JobPrefs>(() => ({ ...PREFS_DEFAULTS, ...lsGet<Partial<JobPrefs>>(LS_JOB_PREFS, {}) }));
   const [editMode, setEditMode] = useState(false);
   const [draft, setDraft]     = useState<JobPrefs>(prefs);
+  const [trashOpen, setTrashOpen] = useState(false);
+  const [trashN, setTrashN] = useState(0);
 
   useEffect(() => lsSet(LS_JOB_PREFS, prefs), [prefs]);
+  useEffect(() => { setTrashN(trashCount()); }, [trashOpen]);
 
   const enterEdit = () => { setDraft({ ...prefs }); setEditMode(true); };
   const save      = () => { setPrefs(draft); setEditMode(false); toast("저장됐어요", { duration: 1500 }); };
@@ -117,9 +122,30 @@ export default function Settings() {
                 </div>
               )}
             </section>
+
+            {/* 데이터 관리 — 통합 휴지통 진입점 */}
+            <section className="space-y-3 mt-10">
+              <h3 className="text-chip font-medium text-muted-foreground uppercase tracking-wide">데이터 관리</h3>
+              <button
+                onClick={() => setTrashOpen(true)}
+                className="w-full flex items-center gap-3 py-3 px-1 border-t border-border text-left hover:bg-muted/40 transition-colors rounded"
+              >
+                <Trash2 className="w-5 h-5 text-muted-foreground shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground">휴지통</p>
+                  <p className="text-chip text-muted-foreground/70">삭제한 경험·파일을 14일간 보관해요.</p>
+                </div>
+                <span className="text-chip text-muted-foreground shrink-0">
+                  {trashN > 0 ? `보관 중 ${trashN}개` : "비어 있음"}
+                </span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            </section>
           </div>
         </main>
       </div>
+
+      <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />
     </TooltipProvider>
   );
 }

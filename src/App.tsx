@@ -11,6 +11,10 @@ import Settings from "./pages/Settings.tsx";
 import Calendar from "./pages/Calendar.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
+import { purgeExpired } from "@/lib/trash";
+
+// 앱 부팅 시 1회 — 휴지통 만료(14일 경과) 항목 자동 영구 삭제 스윕.
+purgeExpired();
 
 const queryClient = new QueryClient();
 

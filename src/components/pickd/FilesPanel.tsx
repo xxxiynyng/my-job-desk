@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { pushTrash, removeTrash } from "@/lib/trash";
 
 // ── Types & constants ──────────────────────────────────────────
 
@@ -101,9 +102,22 @@ export function FilesPanel() {
   };
 
   const deleteFile = (id: string) => {
+    const removed = files.find((f) => f.id === id);
     setFiles((p) => p.filter((f) => f.id !== id));
     setPreview(null);
-    toast("삭제했어요", { duration: 1200 });
+    if (!removed) return;
+    // 소프트 삭제 — 통합 휴지통으로 이동 + 즉시 실행취소
+    const [entry] = pushTrash([{ kind: "file", name: removed.name, sub: removed.kind, payload: removed }]);
+    toast("휴지통으로 옮겼어요", {
+      duration: 7000,
+      action: {
+        label: "실행취소",
+        onClick: () => {
+          removeTrash([entry.trashId]);
+          setFiles((p) => [removed, ...p]);
+        },
+      },
+    });
   };
 
   const copy = (text: string) => {
@@ -141,11 +155,11 @@ export function FilesPanel() {
       <Dialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
         <DialogContent className="max-w-[380px]">
           <DialogHeader>
-            <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
+            <DialogTitle className="text-base">휴지통으로 옮길까요?</DialogTitle>
             <DialogDescription className="text-sm">
               {files.find((f) => f.id === deleteConfirmId)?.name
-                ? `'${files.find((f) => f.id === deleteConfirmId)?.name}' 파일을 삭제하면 되돌릴 수 없어요.`
-                : "이 파일을 삭제하면 되돌릴 수 없어요."}
+                ? `'${files.find((f) => f.id === deleteConfirmId)?.name}' 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`
+                : "이 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-2">

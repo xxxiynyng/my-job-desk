@@ -53,6 +53,7 @@ import { useResizableCols } from "@/hooks/useResizableCols";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
+import { pushTrash, removeTrash } from "@/lib/trash";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
 import { FilesPanel } from "@/components/pickd/FilesPanel";
@@ -724,9 +725,24 @@ export default function Experiences() {
     toast(`${list.length}개를 CSV로 내보냈어요`, { duration: 1500 });
   };
   const deleteItems = (ids: string[]) => {
+    const removed = items.filter((i) => ids.includes(i.id));
     setItems((p) => p.filter((i) => !ids.includes(i.id)));
     setSelected(new Set());
-    toast.success(`${ids.length}개 항목을 삭제했어요`);
+    // 소프트 삭제 — 통합 휴지통으로 이동 + 즉시 실행취소
+    const entries = pushTrash(
+      removed.map((i) => ({ kind: "experience" as const, name: i.name || "제목 없음", sub: i.type, payload: i })),
+    );
+    const trashIds = entries.map((e) => e.trashId);
+    toast(ids.length === 1 ? "휴지통으로 옮겼어요" : `${ids.length}개를 휴지통으로 옮겼어요`, {
+      duration: 7000,
+      action: {
+        label: "실행취소",
+        onClick: () => {
+          removeTrash(trashIds);
+          setItems((p) => [...removed, ...p]);
+        },
+      },
+    });
   };
   const confirmDelete = (ids: string[]) => {
     setPendingDeleteIds(ids);
@@ -1539,11 +1555,11 @@ export default function Experiences() {
         <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
           <DialogContent className="max-w-[380px]">
             <DialogHeader>
-              <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
+              <DialogTitle className="text-base">휴지통으로 옮길까요?</DialogTitle>
               <DialogDescription className="text-sm">
                 {pendingDeleteIds.length === 1
-                  ? "이 경험을 삭제하면 되돌릴 수 없어요."
-                  : `${pendingDeleteIds.length}개의 경험을 삭제하면 되돌릴 수 없어요.`}
+                  ? "이 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."
+                  : `${pendingDeleteIds.length}개의 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`}
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-2 mt-2">
