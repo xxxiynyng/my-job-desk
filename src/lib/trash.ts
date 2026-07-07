@@ -21,7 +21,7 @@ const RETENTION_MS = TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 // 복원 시 스냅샷을 되돌릴 소스 localStorage 키. null이면 현재 복원 불가(job).
 const SOURCE_KEY: Record<TrashKind, string | null> = {
   experience: "pickd.experiences.items",
-  file: "specs.files.v1",
+  file: "specs.files.v2",
   job: null,
 };
 

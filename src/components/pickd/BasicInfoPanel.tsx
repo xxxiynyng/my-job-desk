@@ -44,7 +44,7 @@ type FileItem = { id: string; kind: string; name: string; fileKind: "pdf" | "ima
 
 const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
 const LS_PHOTO_ID     = "specs.basicPhoto.id";
-const LS_FILES        = "specs.files.v1";
+const LS_FILES        = "specs.files.v2";
 const LS_LANG_EXAMS   = "specs.info.langExams.v1";
 
 function lsGet<T>(k: string, fallback: T): T {

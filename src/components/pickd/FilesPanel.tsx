@@ -59,7 +59,7 @@ const INITIAL_FILES: FileItem[] = [
   { id: "f4", kind: "어학 성적표", name: "toeic_945.png", fileKind: "image" },
 ];
 
-const LS_FILES = "specs.files.v1";
+const LS_FILES = "specs.files.v2";
 const LS_PHOTO_ID = "specs.basicPhoto.id";
 const LS_PHOTO_SHOWN = "specs.basicPhoto.shown";
 
