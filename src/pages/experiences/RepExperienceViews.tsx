@@ -116,7 +116,7 @@ function RepExperienceCard({
             <span className="text-chip font-medium text-muted-foreground">자소서용 요약</span>
             <button
               onClick={() => onCopy(docText)}
-              className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-1.5 py-0.5 -mr-1 rounded hover:bg-background transition-colors"
+              className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-1.5 py-0.5 -mr-1 rounded hover:bg-background transition-all opacity-0 group-hover/card:opacity-100 focus:opacity-100"
             >
               <Copy className="w-3 h-3" /> 복사
             </button>
@@ -131,32 +131,21 @@ function RepExperienceCard({
         </div>
       )}
 
-      {/* 세부 필드 */}
+      {/* 세부 필드 — 값 하나하나 hover 복사 (제목·전체복사 제거) */}
       {filledFields.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-chip font-medium text-muted-foreground">세부 필드</span>
-            <button
-              onClick={() => onCopy(filledFields.map((f) => `${f.label}: ${f.value}`).join("\n"))}
-              className="text-mini text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-1.5 py-0.5 -mr-1 rounded hover:bg-muted transition-colors"
-            >
-              <Copy className="w-3 h-3" /> 전체 복사
-            </button>
-          </div>
-          <div className="space-y-1.5">
-            {filledFields.map((f) => (
-              <div key={f.key} className="flex items-start gap-3 group/row">
-                <span className="text-chip text-muted-foreground w-[92px] shrink-0 pt-0.5">{f.label}</span>
-                <button
-                  onClick={() => onCopy(f.value)}
-                  className="group/val inline-flex items-start gap-1 text-body text-foreground text-left flex-1 min-w-0 rounded px-1 -mx-1 hover:bg-muted transition-colors"
-                >
-                  <span className="break-words min-w-0">{f.value}</span>
-                  <Copy className="w-3 h-3 mt-0.5 opacity-0 group-hover/val:opacity-100 shrink-0 transition-opacity text-muted-foreground" />
-                </button>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-1.5">
+          {filledFields.map((f) => (
+            <div key={f.key} className="flex items-start gap-3 group/row">
+              <span className="text-chip text-muted-foreground w-[92px] shrink-0 pt-0.5">{f.label}</span>
+              <button
+                onClick={() => onCopy(f.value)}
+                className="group/val inline-flex items-start gap-1 text-body text-foreground text-left flex-1 min-w-0 rounded px-1 -mx-1 hover:bg-muted transition-colors"
+              >
+                <span className="break-words min-w-0">{f.value}</span>
+                <Copy className="w-3 h-3 mt-0.5 opacity-0 group-hover/val:opacity-100 shrink-0 transition-opacity text-muted-foreground" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
