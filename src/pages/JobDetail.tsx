@@ -283,9 +283,10 @@ function HighlightableLine({ lineKey, text, highlighted, onToggle }: Highlightab
         title={highlighted ? "강조 해제" : "중요 표시"}
         className={cn(
           "shrink-0 mt-0.5 w-4 h-4 flex items-center justify-center rounded transition-all",
+          "opacity-0 group-hover/line:opacity-100",
           highlighted
-            ? "opacity-100 text-[var(--warning)]"
-            : "opacity-0 group-hover/line:opacity-100 text-muted-foreground hover:text-[var(--warning)]"
+            ? "text-[var(--warning)]"
+            : "text-muted-foreground hover:text-[var(--warning)]"
         )}
       >
         <Highlighter className="w-3 h-3" />
@@ -435,7 +436,6 @@ export default function JobDetail() {
     navigate(`/ai-cover?from=job&slug=${slug ?? "samsung"}&essay=${essayNo}`);
   };
 
-  const essayDone = job.essays.filter((e: any) => e.status === "완료").length;
   const urgent = !job.expired && job.dday !== null && job.dday <= 3;
   // 지원 상태 라벨 → 탭1 StatusBadge 상태 키 매핑(같은 배지로 통일)
   const statusKey = Object.entries(STATUS_MAP).find(([, v]) => v.label === job.status)?.[0] as
@@ -532,7 +532,7 @@ export default function JobDetail() {
           <Section
             n={1}
             title="기본 정보"
-            right={<CopyButton always label="복사" text={basicCopy} />}
+            right={<CopyButton label="복사" text={basicCopy} />}
           >
             <dl className="divide-y divide-border/40">
               {Object.entries(job.basic).map(([k, v]) => (
@@ -550,7 +550,7 @@ export default function JobDetail() {
           </Section>
 
           {/* 2 · 직무 설명 · 요구 역량 */}
-          <Section n={2} title="직무 설명 · 요구 역량" right={<CopyButton always label="복사" text={jdCopy} />}>
+          <Section n={2} title="직무 설명 · 요구 역량" right={<CopyButton label="복사" text={jdCopy} />}>
             <div className="space-y-5">
               <div>
                 <h3 className="text-xs font-semibold text-muted-foreground mb-1">직무 설명</h3>
@@ -585,7 +585,7 @@ export default function JobDetail() {
                     강조 {highlights.size}개 초기화
                   </button>
                 )}
-                <CopyButton always label="복사" text={eligibilityCopy} />
+                <CopyButton label="복사" text={eligibilityCopy} />
               </div>
             }
           >
@@ -645,8 +645,7 @@ export default function JobDetail() {
             title="제출 서류"
             right={
               <div className="flex items-center gap-2">
-                <span className="text-chip text-muted-foreground tabular-nums">{checkedDocs.size}/{allDocs.length} 확인</span>
-                {allDocs.length > 0 && <CopyButton always label="복사" text={docsCopy} />}
+                {allDocs.length > 0 && <CopyButton label="복사" text={docsCopy} />}
                 <button
                   type="button"
                   onClick={() => setAddingDoc(true)}
@@ -739,9 +738,6 @@ export default function JobDetail() {
             n={6}
             title="자기소개서"
             subtitle={`${job.essays.length}문항`}
-            right={job.essays.length > 0 && (
-              <span className="text-chip text-muted-foreground tabular-nums">{essayDone}/{job.essays.length} 완료</span>
-            )}
           >
             {job.essays.length === 0 ? (
               <p className="text-body text-muted-foreground px-2 py-3">이 공고는 별도 문항이 없어요</p>
