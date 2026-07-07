@@ -54,6 +54,8 @@ import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
 import { pushTrash, removeTrash } from "@/lib/trash";
+import { ExportModal } from "@/components/pickd/ExportModal";
+import type { ExportFieldKey } from "@/lib/exportExperiences";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/components/pickd/BasicInfoPanel";
 import { FilesPanel } from "@/components/pickd/FilesPanel";
@@ -605,7 +607,8 @@ export default function Experiences() {
     new Set(["ec1", "ec2", "ec3"]),
   );
   const [mergeOpen, setMergeOpen] = useState(false);
-  const [excelOpen, setExcelOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportDefaultScope, setExportDefaultScope] = useState<"selected" | "all">("all");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
@@ -711,18 +714,33 @@ export default function Experiences() {
   const toggleImportant = (id: string) =>
     setItems((p) => p.map((i) => (i.id === id ? { ...i, importance: i.importance === "높음" ? undefined : "높음" } : i)));
 
-  // CSV 내보내기 — 유형/항목명/기관/기간/키워드 (SSOT 9-2)
-  const exportItems = (list: Item[]) => {
-    if (!list.length) return;
-    exportCsv(
-      `경험스펙_${new Date().toISOString().slice(0, 10)}`,
-      ["유형", "항목명", "기관/소속", "기간", "주요 키워드", "중요도"],
-      list.map((i) => {
-        const { org, period } = readMeta(i);
-        return [i.type, i.name, org, period, i.keywords.join(" · "), i.importance === "높음" ? "★" : ""];
-      }),
-    );
-    toast(`${list.length}개를 CSV로 내보냈어요`, { duration: 1500 });
+  // 내보내기 필드 해석 — ExportModal이 형식(Excel/Word/PDF)·필드 선택을 담당
+  const resolveExportField = (i: Item, key: ExportFieldKey): string => {
+    const { org, period } = readMeta(i);
+    switch (key) {
+      case "type":
+        return i.type;
+      case "name":
+        return i.name;
+      case "org":
+        return org;
+      case "period":
+        return period;
+      case "keywords":
+        return i.keywords.join(" · ");
+      case "importance":
+        return i.importance ?? "";
+      case "updated":
+        return i.updatedAt ?? "";
+      case "detail":
+        return i.document ?? "";
+      default:
+        return "";
+    }
+  };
+  const openExport = (defaultScope: "selected" | "all") => {
+    setExportDefaultScope(defaultScope);
+    setExportOpen(true);
   };
   const deleteItems = (ids: string[]) => {
     const removed = items.filter((i) => ids.includes(i.id));
@@ -897,8 +915,8 @@ export default function Experiences() {
                   <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => setImportOpen(true)}>
                     <Sparkles className="w-3 h-3" /> 자소서에서 추출
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => setExcelOpen(true)}>
-                    <Download className="w-3 h-3" /> Excel 내보내기
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => openExport("all")}>
+                    <Download className="w-3 h-3" /> 내보내기
                   </Button>
                 </div>
               )}
@@ -1152,7 +1170,7 @@ export default function Experiences() {
                 className="border rounded-lg mb-3"
                 actions={[
                   { label: "삭제", onClick: () => confirmDelete([...selected]), tone: "danger" },
-                  { label: "내보내기", onClick: () => exportItems(items.filter((i) => selected.has(i.id))) },
+                  { label: "내보내기", onClick: () => openExport("selected") },
                 ]}
                 onClear={() => setSelected(new Set())}
               />
@@ -1526,31 +1544,15 @@ export default function Experiences() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={excelOpen} onOpenChange={setExcelOpen}>
-          <DialogContent className="max-w-[380px]">
-            <DialogHeader>
-              <DialogTitle className="text-base">Excel로 내보낼까요?</DialogTitle>
-              <DialogDescription className="text-sm">
-                현재 보고 있는 항목 {filtered.length}개를 내보냅니다.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setExcelOpen(false)}>
-                취소
-              </Button>
-              <Button
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  setExcelOpen(false);
-                  exportItems(filtered);
-                }}
-              >
-                내보내기
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ExportModal
+          open={exportOpen}
+          onClose={() => setExportOpen(false)}
+          selectedItems={items.filter((i) => selected.has(i.id))}
+          allItems={filtered}
+          visibleKeys={displayCols.filter((k) => k !== "manage") as ExportFieldKey[]}
+          resolveField={resolveExportField}
+          defaultScope={exportDefaultScope}
+        />
 
         <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
           <DialogContent className="max-w-[380px]">
@@ -1598,5 +1600,4 @@ import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { type ColumnFilterProps } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
 import { StarToggle } from "@/components/table/StarToggle";
-import { exportCsv } from "@/lib/csv";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/pickd/RowContextMenu";
