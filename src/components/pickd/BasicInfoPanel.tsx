@@ -18,7 +18,7 @@ import {
 // ── Types & constants ──────────────────────────────────────────
 // InfoKey / INFO_FIELDS / INFO_DEFAULTS / LS_INFO_VALUES 는 SSOT(@/data/basicInfoFields)로 이관.
 
-// 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 어학 / IT활용능력 / 병역·면허
+// 뷰 모드 정보구조: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 어학 / 병역·면허
 const FIELD_GROUPS: { title: string; keys: InfoKey[] }[] = [
   { title: "인적사항",      keys: ["name", "hanjaName", "engName", "birth", "gender", "nationality"] },
   { title: "연락처",        keys: ["email", "phone", "address"] },
