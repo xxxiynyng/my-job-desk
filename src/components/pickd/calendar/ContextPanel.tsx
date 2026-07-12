@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProgressRing } from "./ProgressRing";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import {
   CalTask, CalApplication, CalSchedule, PostingFilterValue, ApplicationStatus,
 } from "@/data/calendarData";
 import { Clock, Sparkles, Star, ChevronDown, CalendarPlus, ListPlus, ChevronLeft } from "lucide-react";
-import { TONES } from "@/components/pickd/ds";
+import { stageStyle } from "@/components/pickd/ds";
 import { CreateScheduleModal, CreateTaskModal } from "./CreateModal";
 import { PostingDetailModal, ScheduleDetailModal, TaskDetailModal } from "./DetailModal";
 
@@ -37,18 +37,6 @@ const priorityStyles: Record<string, string> = {
   low: "bg-muted text-muted-foreground border-border",
 };
 const priorityLabels: Record<string, string> = { high: "긴급", medium: "보통", low: "낮음" };
-
-const stageStyles: Record<string, string> = {
-  "지원완료":   "bg-emerald-50 text-emerald-700",
-  "서류전형":   "bg-sky-50 text-sky-700",
-  "필기전형":   "bg-amber-100 text-amber-700",
-  "면접전형":   "bg-pickd-orange-light text-pickd-orange",
-  "전형완료":   "bg-muted text-muted-foreground",
-};
-// 작성중=brand는 raw 파랑 대신 §5-3-1 StatusBadge TONES.brand 인라인 재사용(§0-11 raw 금지).
-const stageTone: Record<string, CSSProperties | undefined> = {
-  "작성중": { background: TONES.brand.bg, color: TONES.brand.fg },
-};
 
 export function ContextPanel({
   selectedDate, tasks, carriedOverTasks, applications, schedules,
@@ -165,7 +153,7 @@ export function ContextPanel({
                             <span className="font-medium text-sm truncate block">{app.position}</span>
                             <div className="flex items-center gap-1.5">
                               <span className="text-chip text-muted-foreground">{app.company}</span>
-                              <Badge className={cn("text-mini h-4 px-1 border-0", stageStyles[app.stage] || (!stageTone[app.stage] && "bg-muted text-muted-foreground"))} style={stageTone[app.stage]}>{app.stage}</Badge>
+                              <Badge className="text-mini h-4 px-1 border-0" style={stageStyle(app.stage)}>{app.stage}</Badge>
                             </div>
                           </div>
                         </div>

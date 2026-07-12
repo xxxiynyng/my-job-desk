@@ -58,7 +58,7 @@ import { StatusManagementModal, type AppStage, type FinalResult } from "./Status
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DocumentStatusList } from "./DocumentStatusList";
-import { StatusBadge, DdayChip, calcDday, TONES } from "@/components/pickd/ds";
+import { StatusBadge, DdayChip, calcDday, stageStyle } from "@/components/pickd/ds";
 import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";
 import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
@@ -441,21 +441,7 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
 }
 
 // ── 칸반 뷰 (드래그앤드롭) ─────────────────────────────────────────
-// 색은 클래스(bg/text/dot) 또는 §5-3-1 tone 인라인 스타일(headerStyle/textStyle/dotStyle) 중 하나로.
-// 작성중=brand는 raw 파랑 대신 StatusBadge TONES.brand 재사용(§0-11 raw 금지).
-type ColTheme = {
-  bg: string; text: string; dot: string; border: string;
-  headerStyle?: React.CSSProperties; textStyle?: React.CSSProperties; dotStyle?: React.CSSProperties;
-};
-const COL_THEME: Record<StatusType, ColTheme> = {
-  "작성중":   { bg: "", text: "", dot: "", border: "",
-                headerStyle: { background: TONES.brand.bg }, textStyle: { color: TONES.brand.fg }, dotStyle: { background: TONES.brand.dot } },
-  "지원완료": { bg: "bg-emerald-50",          text: "text-emerald-700",   dot: "bg-emerald-500",         border: "border-l-emerald-400" },
-  "서류전형": { bg: "bg-sky-50",              text: "text-sky-700",       dot: "bg-sky-500",             border: "border-l-sky-400" },
-  "필기전형": { bg: "bg-amber-50",            text: "text-amber-700",     dot: "bg-amber-500",           border: "border-l-amber-400" },
-  "면접전형": { bg: "bg-pickd-orange-light",  text: "text-pickd-orange",  dot: "bg-pickd-orange",        border: "border-l-pickd-orange" },
-  "전형완료": { bg: "bg-muted/60",            text: "text-foreground/70", dot: "bg-muted-foreground/40", border: "border-l-muted-foreground/30" },
-};
+// 상태색은 StatusBadge의 stageStyle(라벨) 정본에서 파생 — 여기서 별도 색 정의를 두지 않는다(§0-11 raw 금지).
 
 const KANBAN_COL_CAP = 8;
 
@@ -506,7 +492,7 @@ function KanbanView({
     <>
       <div ref={scrollRef} onDragOver={handleContainerDragOver} className="flex gap-4 p-5 overflow-x-auto min-h-[320px]">
         {STATUS_OPTIONS.map((col) => {
-          const theme = COL_THEME[col];
+          const theme = stageStyle(col);
           const colJobs = byStatus[col];
           const isExpanded = expandedCols.has(col);
           const visibleColJobs = isExpanded ? colJobs : colJobs.slice(0, KANBAN_COL_CAP);
@@ -531,10 +517,10 @@ function KanbanView({
                 onMove(id, col);
               }}
             >
-              <div className={cn("flex items-center gap-2 px-2.5 py-2 mb-2 rounded-lg", theme.bg)} style={theme.headerStyle}>
-                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", theme.dot)} style={theme.dotStyle} />
-                <span className={cn("text-[12.5px] font-semibold flex-1 truncate", theme.text)} style={theme.textStyle}>{col}</span>
-                <span className={cn("text-mini font-bold tabular-nums px-1.5 py-0.5 rounded-full bg-card/70 shrink-0", theme.text)} style={theme.textStyle}>
+              <div className="flex items-center gap-2 px-2.5 py-2 mb-2 rounded-lg" style={{ backgroundColor: theme.backgroundColor }}>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: theme.borderColor }} />
+                <span className="text-[12.5px] font-semibold flex-1 truncate" style={{ color: theme.color }}>{col}</span>
+                <span className="text-mini font-bold tabular-nums px-1.5 py-0.5 rounded-full bg-card/70 shrink-0" style={{ color: theme.color }}>
                   {colJobs.length}
                 </span>
               </div>
@@ -556,8 +542,8 @@ function KanbanView({
                       "bg-card border border-border rounded-lg cursor-grab active:cursor-grabbing hover:shadow-sm hover:border-primary/20 transition-all group overflow-hidden",
                     )}
                   >
-                    {/* 상단 컬러 바 */}
-                    <div className={cn("h-0.5 w-full", theme.dot.replace("bg-", "bg-"))} />
+                    {/* 상단 컬러 바 — 상태 dot 색 재사용 */}
+                    <div className="h-0.5 w-full" style={{ backgroundColor: theme.borderColor }} />
                     <div className="p-3">
                       {/* 기업명 + 별표 */}
                       <div className="flex items-center justify-between gap-1 mb-1">

@@ -39,6 +39,19 @@ export const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
   caution: { bg: "var(--violet-50)", fg: "var(--violet-600)", dot: "var(--violet-500)" },
 };
 
+// 상태 라벨(예: "작성중") → tone 역인덱스. STATUS_MAP 정본에서 파생 — 라벨↔색 매핑을 이중 관리하지 않는다.
+const TONE_BY_LABEL: Record<string, Tone> = Object.fromEntries(
+  Object.values(STATUS_MAP).map((s) => [s.label, s.tone]),
+);
+
+/** 상태 라벨에 대응하는 §5-3-1 tone 인라인 스타일(칸반 헤더·캘린더 배지 공용).
+ *  backgroundColor·color와 함께 borderColor(=dot 색, 점·border-left 재사용)를 돌려준다.
+ *  색 정의는 STATUS_MAP+TONES 한 곳뿐 — 손으로 칠하지 말 것(§0-11 raw 금지). */
+export function stageStyle(label: string): { backgroundColor: string; color: string; borderColor: string } {
+  const t = TONES[TONE_BY_LABEL[label] ?? "neutral"];
+  return { backgroundColor: t.bg, color: t.fg, borderColor: t.dot };
+}
+
 export function StatusBadge({ status = "applied", label, tone, size = "md", style, ...rest }: StatusBadgeProps) {
   const def = STATUS_MAP[status] ?? STATUS_MAP.applied;
   const t = TONES[tone ?? def.tone] ?? TONES.neutral;
