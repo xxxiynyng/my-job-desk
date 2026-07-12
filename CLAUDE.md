@@ -22,9 +22,9 @@
 ## 1. 🚫 절대 금지
 
 - **백엔드 없음** — API 호출·fetch·서버 사이드 로직 금지. (예정된 예외: 파일함 저장소로 Notion API 프록시 도입 확정 — 기획 SSOT §4-6, 2026-07-12. 구현 착수 전에 이 규칙과 시크릿 취급 규칙을 먼저 개정할 것)
-- **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-heading`(26). 정의 위치: `tailwind.config.ts`의 `theme.extend.fontSize`. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다).
+- **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-h2`(22) · `text-heading`(26) · `text-display`(30). **정의 위치: `src/lib/designTokens.ts`의 `FONT_SIZE`(단일 출처) — `tailwind.config.ts`와 `src/lib/utils.ts`가 여기서 파생**(2026-07-13 통합). `text-xs`(12)·`text-sm`(14)은 Tailwind 기본이라 FONT_SIZE에 없음. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다). eslint 룰이 `text-[Npx]`·raw hex를 warn으로 감지.
 - **색 하드코딩 금지** — 임의 `bg-[#hex]`·`text-[#hex]` 금지. 색 값은 디자인 SSOT 2장이 정본. 파랑은 raw `blue-500`/`blue-600` 클래스 직접 사용 금지 — 역할 토큰(`action`=채움 버튼 / `brand`=표시)만 사용(디자인 SSOT §0 원칙 11, 2026-07-12).
-- **⚠️ 커스텀 fontSize 토큰을 추가하면 반드시 `src/lib/utils.ts`의 tailwind-merge(`extendTailwindMerge`의 `font-size` classGroup)에도 등록** — 안 하면 `cn()`이 같은 호출의 색 클래스와 충돌로 보고 크기 토큰을 런타임 삭제한다(2026-07-05 사고, 부록 참조).
+- **⚠️ 폰트 토큰은 `src/lib/designTokens.ts`의 `FONT_SIZE` 한 곳에만 추가** — `tailwind.config.ts`(유틸 생성)와 `src/lib/utils.ts`(tailwind-merge `font-size` classGroup)가 이 객체를 `import`해 파생하므로 자동 동기화된다. 안 하면 `cn()`이 같은 호출의 색 클래스와 충돌로 보고 크기 토큰을 런타임 삭제한다(2026-07-05 사고, 부록 참조). 두 곳에 손으로 맞춰 적던 옛 구조가 그 뿌리였고, 단일 출처화로 원인 제거(2026-07-13). 파생 테스트 `src/test/design-tokens.test.ts`가 `FONT_SIZE`를 순회하며 회귀를 자동 차단.
 - **토큰에 line-height 금지**(크기만). 줄간격 토큰화는 SSOT에 먼저 정의 후 별도로.
 - **임의 새 디자인 값(색/굵기/간격) 발명 금지** — 어색하면 ① SSOT의 기존 토큰·규칙 확인 → ② 기존 컴포넌트 재사용 → ③ 그래도 필요하면 토큰을 먼저 정의(SSOT + `tailwind.config.ts`)하고 그 이름을 쓴다. "통일"은 한쪽을 **기존 잘 된 쪽**에 맞추는 것이지 양쪽을 새 값으로 바꾸는 게 아니다.
 - **SSOT 문서 취향 수정 금지** — 실제 확정·구현된 값만 기록하고, 최신 상태값만 유지한다(구기록·이력 누적 금지).
@@ -44,7 +44,7 @@
 
 - "기준에 맞춰라"는 요청은 **기준값을 먼저 실측**(예: 상태 배지 실제 px). 목표값 없이 추측 조정 금지. 정렬·간격도 좌표/수치로 검증.
 - 자가검증 명령: `npx tsc -p tsconfig.app.json --noEmit`(신규 에러 0) + `npm run build` + `npm test`(vitest).
-- 사전 탐지(권장): cn() sanity 테스트 — `cn("text-mini bg-gray-100 text-gray-400")` 결과에 `text-mini`가 남는지 상시 감시. 위험 신호: ① config에 토큰 추가했는데 `utils.ts` 미변경 ② `cn(크기토큰, 색클래스)` 패턴 ③ 소스엔 있는데 렌더 className엔 없는 클래스.
+- 사전 탐지: cn() sanity 테스트 구현됨 — `src/test/design-tokens.test.ts`가 `FONT_SIZE` 순회로 `cn("text-<token> text-gray-400")`에 토큰이 남는지 검증(`npm test`). 단일 출처화로 "① config에 토큰 추가했는데 `utils.ts` 미변경" 위험은 구조적으로 소멸. 남은 위험 신호: 소스엔 있는데 렌더 className엔 없는 클래스.
 
 ## 3. 작업 프로토콜
 
@@ -147,11 +147,12 @@ src/
 │   ├── useResizableCols.tsx             컬럼 리사이즈 훅
 │   └── use-mobile.tsx                   shadcn 기본 훅
 ├── lib/
-│   ├── utils.ts                         cn() + tailwind-merge 커스텀 토큰 등록 (§1 참조)
+│   ├── designTokens.ts                  ★ 폰트 크기 토큰 FONT_SIZE 단일 출처 — config·utils가 파생 (§1)
+│   ├── utils.ts                         cn() + tailwind-merge (FONT_SIZE에서 파생 등록, §1 참조)
 │   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1, 소프트삭제·복원·14일 purge)
 │   ├── exportExperiences.ts             내보내기 생성기 (Excel=xlsx·Word=docx·PDF=브라우저 인쇄)
 │   └── csv.ts                           CSV 내보내기 (탭1 JobPostingTable 사용)
-└── test/                                vitest (현재 example.test.ts 1개 — cn() sanity 테스트 추가 권장, §2)
+└── test/                                vitest — example.test.ts + design-tokens.test.ts(cn 폰트 토큰 보존, §2)
 ```
 
 ### 데이터 지속성 (localStorage 키)
@@ -207,4 +208,5 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 - **2026-07-05 Vercel 도메인 충돌**: 한 레포에 프로젝트 3개(pickd/pickd-seven/my-job-desk)가 붙어 낡은 프로젝트가 정상 URL을 서빙 — "push해도 안 반영"으로 하루 소모. 잉여 2개 삭제로 해소. → §6, §2 사다리 4번.
 - **2026-07-05 토큰화**: 손으로 박은 `text-[13px]` 300여 곳 → 토큰화. 계획서는 `git show 847d4da:docs/tasks/토큰_마이그레이션_계획.md`. 잔여 하드코딩 ~30곳은 기획 SSOT 기술 백로그에서 추적.
 - **2026-07-06 text-micro 제거**: 9px 폐기, 최소 10px(`text-mini`)로 통일(커밋 `1b20fd6`·`da43c30`).
+- **2026-07-13 폰트 토큰 단일 출처화**: `designTokens.ts`(FONT_SIZE)로 통합해 config·utils 손동기화 제거(2026-07-05 사고 원인 소멸), 하드코딩 `text-[Npx]` 30곳 토큰화(반픽셀 18곳 반올림·값동일 9곳·헤딩 3곳), `h2`(22)·`display`(30) 신설, 죽은 헤딩 CSS 변수 제거, 파생 테스트 + eslint 금지룰(warn) 추가. 커밋 `1271a0b`→`a3a6a73`(6개).
 - **2025-06**: 미연결 dead code `Specs.tsx` 삭제.
