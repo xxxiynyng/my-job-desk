@@ -252,7 +252,7 @@ export default function Onboarding() {
           <Sparkles className="h-3.5 w-3.5 text-primary" /> 내 픽 카드
         </h3>
         {done && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
+          <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-chip font-bold text-primary">
             <Check className="h-3 w-3" /> 완성
           </span>
         )}
@@ -265,17 +265,17 @@ export default function Onboarding() {
         ) : (
           <>
             {pickChips.slice(0, CHIP_CAP).map((ch, i) => (
-              <span key={i} className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/60 px-2 py-1 text-[11px] text-muted-foreground">
+              <span key={i} className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/60 px-2 py-1 text-chip text-muted-foreground">
                 {ch.icon && <ch.icon className="h-3 w-3" />}{ch.text}
               </span>
             ))}
             {pickChips.length > CHIP_CAP && (
-              <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-bold text-muted-foreground">+{pickChips.length - CHIP_CAP}</span>
+              <span className="rounded-md bg-muted px-2 py-1 text-chip font-bold text-muted-foreground">+{pickChips.length - CHIP_CAP}</span>
             )}
           </>
         )}
       </div>
-      <div className="mt-4 border-t border-border pt-3 text-[11px] leading-relaxed text-muted-foreground">
+      <div className="mt-4 border-t border-border pt-3 text-chip leading-relaxed text-muted-foreground">
         여기 담긴 정보는 전부 내 자산이 돼요.<br />언제든 마이페이지에서 수정할 수 있어요.
       </div>
     </aside>
@@ -312,7 +312,7 @@ export default function Onboarding() {
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+        "rounded-full border px-3 py-1.5 text-body transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
         on ? "border-primary bg-primary/10 font-semibold text-primary" : "border-border bg-background hover:border-primary/50"
       )}
     >
@@ -334,7 +334,7 @@ export default function Onboarding() {
         <button
           key={o} type="button" onClick={() => onChange(o)}
           className={cn(
-            "flex-1 rounded-md py-1.5 text-[13px] transition-colors",
+            "flex-1 rounded-md py-1.5 text-body transition-colors",
             value === o ? "bg-background font-semibold text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -360,10 +360,10 @@ export default function Onboarding() {
         <div className="mb-7 flex h-[72px] w-[72px] items-center justify-center rounded-2xl bg-primary/10">
           <img src="/logo-mark.svg" alt="Pickd" className="h-10 w-auto" />
         </div>
-        <h1 className="text-[30px] font-bold leading-[1.3] tracking-tight">
+        <h1 className="text-display font-bold leading-[1.3] tracking-tight">
           흩어진 취업 준비,<br />여기서 <span className="text-primary">픽</span>.
         </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-title leading-relaxed text-muted-foreground">
           공고·일정·경험·자소서를 한 곳에서.<br className="sm:hidden" /> 1분이면 시작해요.
         </p>
 
@@ -389,7 +389,7 @@ export default function Onboarding() {
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <Icon className="h-[18px] w-[18px] text-primary" />
               </span>
-              <div className="text-[13px] font-bold text-foreground">{title}</div>
+              <div className="text-body font-bold text-foreground">{title}</div>
               <div className="text-xs leading-relaxed text-muted-foreground">{desc}</div>
             </div>
           ))}
@@ -412,7 +412,7 @@ export default function Onboarding() {
       <Shell>
         <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-8">
           <p className="mb-2 text-xs font-bold text-primary">시작하기 전에</p>
-          <h1 className="text-[26px] font-bold leading-snug tracking-tight">서비스 이용을 위해<br />약관에 동의해 주세요</h1>
+          <h1 className="text-heading font-bold leading-snug tracking-tight">서비스 이용을 위해<br />약관에 동의해 주세요</h1>
           <div className="mt-6 space-y-1">
             <button
               type="button"
@@ -440,7 +440,7 @@ export default function Onboarding() {
   if (s.step === "complete") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-10">
-        <h1 className="text-[22px] font-bold tracking-tight">픽 카드가 완성됐어요</h1>
+        <h1 className="text-h2 font-bold tracking-tight">픽 카드가 완성됐어요</h1>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           이 정보로 맞는 공고를 찾아드릴게요.<br />나머지는 쓰면서 채워도 충분해요.
         </p>
@@ -787,7 +787,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function StepHead({ q, sub }: { q: React.ReactNode; sub?: string }) {
   return (
     <>
-      <h1 className="text-[22px] font-bold leading-snug tracking-tight">{q}</h1>
+      <h1 className="text-h2 font-bold leading-snug tracking-tight">{q}</h1>
       {sub && <p className="mt-1.5 text-sm text-muted-foreground">{sub}</p>}
     </>
   );
