@@ -110,11 +110,8 @@
     --font-sans: "Inter", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
-    --text-display: 34px;
-    --text-heading: 26px;
-    --text-h2: 21px;
-    --text-h3: 18px;
-    --text-h4: 16px;
+    /* 헤딩 크기 토큰은 designTokens.ts(FONT_SIZE) 정본에서 Tailwind 유틸(text-h2/heading/display)로 파생.
+       구 --text-display/heading/h2/h3/h4 CSS 변수는 소비처 0·토큰과 값 충돌(34/21 등)이라 제거(2026-07-13). */
     --text-title: 15px;
     --text-sm: 14px;
     --text-body: 13px;
