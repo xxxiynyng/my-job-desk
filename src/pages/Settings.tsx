@@ -111,7 +111,7 @@ export default function Settings() {
                   {PREFS_FIELDS.filter(({ key }) => prefs[key]).map(({ key, label }) => (
                     <div key={key} className="flex items-center gap-3 py-1.5 border-b border-border/30">
                       <span className="text-chip text-muted-foreground w-[96px] shrink-0">{label}</span>
-                      <span className="text-[12.5px] text-foreground truncate">{prefs[key]}</span>
+                      <span className="text-xs text-foreground truncate">{prefs[key]}</span>
                     </div>
                   ))}
                 </div>

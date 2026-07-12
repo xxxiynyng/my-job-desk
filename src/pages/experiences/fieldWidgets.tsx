@@ -85,7 +85,7 @@ export function FieldRow({
               value={value}
               onChange={(e) => onChangeValue(e.target.value)}
               placeholder={field.placeholder ?? "내용을 입력하세요"}
-              className="min-h-[32px] text-[13.5px] bg-transparent border-0 px-0 py-0 focus-visible:ring-0 resize-none shadow-none placeholder:text-muted-foreground/50"
+              className="min-h-[32px] text-body bg-transparent border-0 px-0 py-0 focus-visible:ring-0 resize-none shadow-none placeholder:text-muted-foreground/50"
             />
           ) : field.type === "file" ? (
             <button className="text-body text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
@@ -96,7 +96,7 @@ export function FieldRow({
               value={value}
               onChange={(e) => onChangeValue(e.target.value)}
               placeholder={field.placeholder ?? "—"}
-              className="bg-transparent w-full text-[13.5px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+              className="bg-transparent w-full text-body text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
             />
           )}
         </div>
@@ -376,12 +376,12 @@ export function tagSentence(s: string): string | null {
 export function AnnotatedView({ text }: { text: string }) {
   const sentences = text.split(/(?<=[.!?。])\s+|\n+/).filter((s) => s.trim().length);
   return (
-    <div className="space-y-3 text-[13.5px] leading-7 text-foreground">
+    <div className="space-y-3 text-body leading-7 text-foreground">
       {sentences.map((s, i) => {
         const tag = tagSentence(s);
         return (
           <div key={i}>
-            {tag && <p className="text-[10.5px] text-muted-foreground/80 mb-0.5">{tag}</p>}
+            {tag && <p className="text-mini text-muted-foreground/80 mb-0.5">{tag}</p>}
             <p>{s.trim()}</p>
           </div>
         );
@@ -411,13 +411,13 @@ export function SentenceCardView({
       className="border border-border rounded-md bg-muted/20 px-3 py-2.5 cursor-grab active:cursor-grabbing"
     >
       <p className="text-mini text-muted-foreground mb-1">{card.question}</p>
-      <p className="text-[12.5px] text-foreground leading-snug">{card.sentence}</p>
+      <p className="text-xs text-foreground leading-snug">{card.sentence}</p>
       <div className="mt-2 flex items-center gap-1">
-        <Button size="sm" className="h-6 text-[10.5px] px-2" onClick={onApply}>
+        <Button size="sm" className="h-6 text-mini px-2" onClick={onApply}>
           반영
         </Button>
         <span className="text-mini text-muted-foreground px-1">드래그해서 넣기</span>
-        <Button size="sm" variant="ghost" className="h-6 text-[10.5px] px-2 ml-auto" onClick={onRewrite}>
+        <Button size="sm" variant="ghost" className="h-6 text-mini px-2 ml-auto" onClick={onRewrite}>
           다시 쓰기
         </Button>
         <button onClick={onDelete} className="text-muted-foreground hover:text-destructive p-0.5" aria-label="삭제">

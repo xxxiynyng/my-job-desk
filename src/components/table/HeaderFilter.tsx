@@ -96,7 +96,7 @@ export function HeaderFilterContent({
                 }}
                 className="h-3.5 w-3.5"
               />
-              <span className="text-[11.5px] truncate">{o}</span>
+              <span className="text-chip truncate">{o}</span>
             </label>
           );
         })}

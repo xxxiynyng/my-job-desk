@@ -519,7 +519,7 @@ function KanbanView({
             >
               <div className="flex items-center gap-2 px-2.5 py-2 mb-2 rounded-lg" style={{ backgroundColor: theme.backgroundColor }}>
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: theme.borderColor }} />
-                <span className="text-[12.5px] font-semibold flex-1 truncate" style={{ color: theme.color }}>{col}</span>
+                <span className="text-xs font-semibold flex-1 truncate" style={{ color: theme.color }}>{col}</span>
                 <span className="text-mini font-bold tabular-nums px-1.5 py-0.5 rounded-full bg-card/70 shrink-0" style={{ color: theme.color }}>
                   {colJobs.length}
                 </span>
@@ -571,7 +571,7 @@ function KanbanView({
                 {colJobs.length > KANBAN_COL_CAP && (
                   <button
                     onClick={() => toggleColExpand(col)}
-                    className="w-full text-[10.5px] font-medium text-muted-foreground hover:text-foreground py-1.5 text-center"
+                    className="w-full text-mini font-medium text-muted-foreground hover:text-foreground py-1.5 text-center"
                   >
                     {isExpanded ? "접기" : `더보기 +${colJobs.length - KANBAN_COL_CAP}`}
                   </button>
