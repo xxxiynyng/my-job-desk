@@ -1,8 +1,8 @@
 /**
- * Onboarding.tsx — Pickd 온보딩 v2.2 (하이브리드: 필수 3단계 + 점진 수집)
+ * Onboarding.tsx — Pickd 온보딩 (필수 정보등록 2단계 + 점진 수집)
  *
- * v2.1 → v2.2 (기획 트랙 확정 반영)
- * - 정보등록 2단계 → 3단계: [1/3] 나 · [2/3] 픽 · [3/3] 추천 맞춤 설정(선택·건너뛰기)
+ * 화면 흐름(실제 구현 기준): login → terms → me[1/2] → pick[2/2] → complete
+ * - 정보등록 2단계: [1/2] 나(me) · [2/2] 픽(pick). '추천 맞춤 설정' 독립 화면은 미구현(추후 도입 시 [3/3]로 확장)
  * - 졸업(예정) 시기 = 년 + 월(2/8월) 함께 수집, 재학생 "아직 미정" 옵션(pending 이관)
  * - 전공 "해당 없음" 옵션 / 예상 매칭 공고 수 표시 삭제
  * - 완료 화면은 픽 카드 + 시작 버튼만
@@ -458,7 +458,7 @@ export default function Onboarding() {
     );
   }
 
-  /* ── 정보등록 3단계 (공통 2단 레이아웃: 폼 + 픽 카드) ── */
+  /* ── 정보등록 2단계 (me·pick, 공통 2단 레이아웃: 폼 + 픽 카드) ── */
   return (
     <Shell>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-8">
