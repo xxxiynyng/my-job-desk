@@ -1,35 +1,77 @@
 # My Job Desk (Pickd) — Claude 컨텍스트
 
-취업 준비용 개인 지원 관리 앱. 백엔드 없이 localStorage만 사용하는 순수 클라이언트 앱.
+취업 준비용 개인 지원 관리 앱. 현재는 백엔드 없이 localStorage만 쓰는 순수 클라이언트 앱(React + Vite).
 
-> 📌 단일 출처: 코드/작업 규칙은 **이 파일(CLAUDE.md) 하나**가 기준(예전엔 별도 대화창 지침 md와 나뉘어 있었으나 통합함).
-> 디자인 값(색·토큰·칩·상태·테이블 규칙)은 Notion「Pickd 디자인 시스템」(SSOT, 아래 링크)이 기준. 자동화는 `pickd-design-update.sh`.
->
-> 이 파일이 **유일한 코드·작업 규칙 정본**이다. 위치는 코드 레포 루트 `/Users/xxxiynyng/Downloads/My_Job_Desk 19.25.06/CLAUDE.md` **하나뿐** — Claude Code(레포를 직접 엶)와 Cowork(레포를 작업 폴더로 지정)가 **같은 이 파일**을 읽는다. **사본을 만들지 않는다** — 예전 이중 사본(레포 + 별도 Cowork 폴더)이 손동기화·갈라짐의 원인이었고, 그래서 Cowork도 레포에서 작업하도록 통합했다(2026-07-05). 디자인·기획·온보딩 값은 노션 SSOT가 정본이며 여기선 링크로만 가리킨다(아래 지침 지도).
+> 📌 이 파일이 코드·작업 규칙의 **유일한 정본**이다(마스터 = 레포 루트의 이 파일). Claude Code(레포를 직접 엶)와 Cowork(레포를 작업 폴더로 지정) 모두 **같은 이 파일**을 읽는다.
+> 디자인 작업공간 `~/Claude/Projects/Pickd Design/`의 CLAUDE.md는 이 파일의 **읽기 전용 미러** — 일일 헬스체크가 레포본 기준으로 단방향 동기화한다(`docs/tasks/DAILY_HEALTH_CHECK.md` §D). **미러 쪽을 직접 수정하지 않는다** — 고칠 것은 항상 레포본. 그 외 사본·수동 동기화는 만들지 않는다(2026-07-05 통합).
+> 디자인·기획·온보딩 값은 Notion SSOT가 정본이며, 여기서는 링크로만 가리킨다.
 
-## 📍 지침 지도 (어디를 보나 — 단일 진입점)
-
-작업 전 항상 여기서 출발한다. **표준 지침은 아래 4곳에만** 있고, 그 외 md는 임시 산출물이다.
+## 0. 지침 지도 — 작업 전 항상 여기서 출발
 
 | 구분 | 위치 | 관장 범위 |
 |------|------|-----------|
-| 작업·코드 규칙 (이 파일) | `CLAUDE.md` (레포 루트 단일 정본) | 스택·라우트·파일구조·컨벤션·디자인 토큰 규칙·작업 흐름·검수/롤백 |
+| 작업·코드 규칙 (이 파일) | `CLAUDE.md` (레포 루트 단일 정본) | 금지사항·검증·워크플로·코드 규칙·저장소 사실 |
 | 제품 기획 SSOT | Notion「PICKD MVP 기획 정리본」`38b01b3f87138145a89ec4d1fa3706be` | 비전·탭1/2/3 기획·데이터모델·플로우·로드맵·미결정 |
 | 디자인 SSOT | Notion「Pickd 디자인 시스템」`38e01b3f871381daac4dc686a06c3d54` | 색·타이포 토큰·컴포넌트·테이블·탭별 규칙 |
-| 온보딩 SSOT | Notion「Pickd 온보딩 v2」`39301b3f871381478e31d3ea22b63b7b` | 온보딩 플로우(필수 2단계 + 점진 수집) |
+| 온보딩 SSOT | Notion「Pickd 온보딩」`39301b3f871381478e31d3ea22b63b7b` | 온보딩 플로우 v2.2 (필수 2단계 + 선택 1단계 + 점진 수집) |
+| 일일 헬스체크 | `docs/tasks/DAILY_HEALTH_CHECK.md` → 리포트 `docs/HEALTH.md` | 코드·배포·문서 정합 자동 점검 (상시 운영 문서) |
 
-- **중복 금지(가장 중요)**: 같은 규칙을 두 곳에 적지 않는다. 코드·작업=이 파일 / 디자인 값=디자인 시스템 / 제품 결정=기획 정리본 / 온보딩=온보딩 v2. 각 규칙은 **한 곳에서만 최신값** 유지.
-- **임시 산출물(지침 아님)**: `PICKD_자율주행_프롬프트.md`·`터미널_지시_*.md`·`토큰_마이그레이션_계획.md` 등은 특정 작업용. 완료되면 폐기하고, 표준으로 굳은 내용만 위 4곳에 옮긴다.
-- **정본은 하나**: 이 CLAUDE.md는 코드 레포 루트에만 둔다. Cowork도 레포를 작업 폴더로 열어 같은 파일을 읽으므로 **사본·수동 동기화가 없다**. 디자인 작업 문서는 레포 `docs/`에 두고, 세션 임시 산출물은 완료 후 폐기한다.
+- **중복 금지(가장 중요)**: 같은 규칙을 두 곳에 적지 않는다. 코드·작업=이 파일 / 디자인 값=디자인 시스템 / 제품 결정=기획 정리본 / 온보딩=온보딩 SSOT. 각 규칙은 **한 곳에서만 최신값** 유지.
+- 그 외 md는 임시 산출물: `docs/tasks/`에 모으고, 실행 완료되면 삭제한다(git 히스토리로 복원 가능). 표준으로 굳은 내용만 위 정본에 승격.
 
-## 🧹 문서 위생 (일회용 md 남발 금지)
+## 1. 🚫 절대 금지
 
-- **같은 선상의 작업이면 새 md를 만들지 말고 기존 문서를 업데이트**한다. 새 파일이 토큰을 아끼는 게 아니다 — 쓰는 비용은 비슷하고, 파일이 쌓일수록 이후 세션이 스캔·중복·낡음 비용을 계속 치른다. 통합할수록 지속 비용이 준다.
-- **임시 산출물은 `docs/tasks/`에 모은다.** 터미널 지시·자율주행 프롬프트·마이그레이션 계획 등 1회성 문서 전용. 표준으로 굳은 내용만 CLAUDE.md/노션 SSOT로 승격.
-- **실행 완료된 일회용 문서는 주기적으로 삭제**해 폴더를 깔끔히 유지한다. 레포 안이라 git 히스토리에 남으므로 삭제해도 내역은 보존됨(`git log`·`git show`로 복원).
-- 확정된 규칙·결정은 문서 수를 늘리지 말고 **해당 SSOT의 최신값만** 갱신(구기록 누적 금지).
+- **백엔드 없음** — API 호출·fetch·서버 사이드 로직 금지. (예정된 예외: 파일함 저장소로 Notion API 프록시 도입 확정 — 기획 SSOT §4-6, 2026-07-12. 구현 착수 전에 이 규칙과 시크릿 취급 규칙을 먼저 개정할 것)
+- **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-heading`(26). 정의 위치: `tailwind.config.ts`의 `theme.extend.fontSize`. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다).
+- **색 하드코딩 금지** — 임의 `bg-[#hex]`·`text-[#hex]` 금지. 색 값은 디자인 SSOT 2장이 정본. 파랑은 raw `blue-500`/`blue-600` 클래스 직접 사용 금지 — 역할 토큰(`action`=채움 버튼 / `brand`=표시)만 사용(디자인 SSOT §0 원칙 11, 2026-07-12).
+- **⚠️ 커스텀 fontSize 토큰을 추가하면 반드시 `src/lib/utils.ts`의 tailwind-merge(`extendTailwindMerge`의 `font-size` classGroup)에도 등록** — 안 하면 `cn()`이 같은 호출의 색 클래스와 충돌로 보고 크기 토큰을 런타임 삭제한다(2026-07-05 사고, 부록 참조).
+- **토큰에 line-height 금지**(크기만). 줄간격 토큰화는 SSOT에 먼저 정의 후 별도로.
+- **임의 새 디자인 값(색/굵기/간격) 발명 금지** — 어색하면 ① SSOT의 기존 토큰·규칙 확인 → ② 기존 컴포넌트 재사용 → ③ 그래도 필요하면 토큰을 먼저 정의(SSOT + `tailwind.config.ts`)하고 그 이름을 쓴다. "통일"은 한쪽을 **기존 잘 된 쪽**에 맞추는 것이지 양쪽을 새 값으로 바꾸는 게 아니다.
+- **SSOT 문서 취향 수정 금지** — 실제 확정·구현된 값만 기록하고, 최신 상태값만 유지한다(구기록·이력 누적 금지).
+- **추측 수정 반복 금지** — 원인은 코드에서 확인하고 짚는다. 코드 diff·tsc 결과 없이 "고쳤다"고 보고하지 않는다.
+- **같은 선상의 작업에 새 md 만들기 금지** — 기존 문서를 업데이트한다. 파일이 쌓일수록 이후 세션이 스캔·중복·낡음 비용을 치른다.
 
-## 스택
+## 2. 🔎 검증 사다리 — "안 바뀐다" / "고쳤다" 판정 순서
+
+스타일·클래스 변경이 화면에 안 보이면 **이 순서대로만** 의심한다. 캐시·배포 탓 먼저 단정 금지:
+
+1. DevTools에서 **렌더된 실제 `className`**에 그 클래스가 있는가 — 없으면 `cn()`/tailwind-merge가 삭제한 것(§1 등록 규칙 참조).
+2. **Computed 값이 목표 수치인가** — 1~2px은 눈으로 판별 불가. `getComputedStyle(el).fontSize` 등 수치로 확인, 스크린샷 눈대중 금지.
+3. `git rev-parse origin/main` 해시 = Vercel에 배포된 커밋 해시인가.
+4. **Vercel Projects 목록**에서 이 레포에 연결된 프로젝트가 **하나뿐**인가 — 둘 이상이면 도메인 충돌 1순위(2026-07-05 사고, 부록). Deployments 탭이 아니라 Projects 목록을 볼 것.
+5. 도메인 `pickd-seven.vercel.app`이 그 프로젝트에 물려 있고 최신 Production이 Ready인가. 반영 확인은 **항상 이 프로덕션 도메인**으로 — `pickd-<해시>-….vercel.app`류 배포별 URL은 스냅샷이라 안 바뀌는 게 정상.
+6. **그다음에야** 브라우저 캐시(시크릿/하드리프레시).
+
+- "기준에 맞춰라"는 요청은 **기준값을 먼저 실측**(예: 상태 배지 실제 px). 목표값 없이 추측 조정 금지. 정렬·간격도 좌표/수치로 검증.
+- 자가검증 명령: `npx tsc -p tsconfig.app.json --noEmit`(신규 에러 0) + `npm run build` + `npm test`(vitest).
+- 사전 탐지(권장): cn() sanity 테스트 — `cn("text-mini bg-gray-100 text-gray-400")` 결과에 `text-mini`가 남는지 상시 감시. 위험 신호: ① config에 토큰 추가했는데 `utils.ts` 미변경 ② `cn(크기토큰, 색클래스)` 패턴 ③ 소스엔 있는데 렌더 className엔 없는 클래스.
+
+## 3. 작업 프로토콜
+
+1. 요청 → 전문가 관점에서 검토하고, **결정이 필요한 부분만 질문으로 확정**한다(임의 확정 금지).
+2. 확정되면 코드를 직접 읽고(추측 금지, grep으로 정확한 위치 확인) 수정한다. 코드 접근 가능한 세션에서는 직접 읽고·수정하고·검증하고·커밋까지 처리하는 게 기본.
+3. §2의 자가검증 후 커밋한다.
+4. 변경 후 보고: diff 요약 + tsc 결과를 함께. 마일스톤마다 캡처로 검수.
+5. 확정/변경된 규칙은 해당 SSOT에 **최신 상태값만** 기록한다.
+
+- **커밋**: `type(scope): 한국어 설명` (prefix: feat/fix/style/refactor/chore + 범위). **항목별 개별 커밋**(되돌림 단위).
+- **기준점**: 세션 시작 시 `git tag pre-<날짜>`(또는 작업 브랜치). 롤백: 특정 항목만 `git revert <hash>`, 세션 전체는 `git reset --hard pre-<날짜>`.
+- **터미널 프롬프트 위임은 예외 2경우만** — 자리 비우고 도는 대량/자율주행 작업, 또는 코드 폴더 접근이 끊긴 세션. 프롬프트 형식: ① 원인/목표 한 줄 → ② 정확한 위치(파일·컴포넌트·클래스)와 변경 전→후 → ③ 자가검증(tsc 신규 에러 0 + diff 요약) → ④ 커밋 메시지.
+- push, git lock 정리 등 삭제 권한이 필요한 마무리만 사람이 터미널에서 한 줄 명령으로 처리.
+
+## 4. 코드 규칙
+
+- 컴포넌트는 named export(`export function Foo`) / 페이지 컴포넌트는 default export.
+- `cn()` 유틸로 조건부 클래스 병합(`import { cn } from "@/lib/utils"`). shadcn/ui 컴포넌트는 `@/components/ui/`에서 import.
+- 토스트는 sonner, **"~어요" 체 통일**(예: "저장됐어요", "복사했어요").
+- **데스크톱 전용(min-width: 1280px)** — `sm:`/`md:`/`lg:` prefix가 거의 없는 것은 의도적 결정. **예외: 온보딩 화면 파일만 반응형 허용**(온보딩 SSOT §8-A, 2026-07-06 확정 — 모바일 유입 대응).
+- localStorage 키는 breaking change 시 버전 suffix(`.vN`) 상향.
+- 같은 스타일은 **공용 컴포넌트**로 묶어 한 곳에서 관리(`components/table/`의 ColumnDivider·DragHandle·HeaderCell 등이 탭1·탭2 공용 사례).
+- 테이블 헤더 행 배경 = `bg-slate-50`(surface-header-row). 그 외 디자인 값·컴포넌트 규칙은 디자인 SSOT 참조.
+
+## 5. 저장소 사실 (코드가 정본 — 이 절이 코드와 어긋나면 코드가 맞고, 이 절을 갱신한다)
+
+### 스택
 
 | 역할 | 라이브러리 |
 |------|-----------|
@@ -42,12 +84,16 @@
 | 날짜 | date-fns |
 | 드래그 | @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities |
 | 문서 내보내기 | xlsx (Excel), docx (Word). PDF는 브라우저 인쇄(라이브러리 없음) |
+| 테스트 | vitest (`npm test`) |
 
-## 라우트 구조 (App.tsx)
+- 명령: `npm run dev` / `npm run build` / `npm test` / `npm run lint` / `npx tsc -p tsconfig.app.json --noEmit`
+- 패키지 매니저: **npm**(package-lock.json). ⚠️ `bun.lock`·`bun.lockb`는 잔재 — 사용 금지(삭제 여부 미확정).
+
+### 라우트 구조 (App.tsx)
 
 ```
 /onboarding     → Onboarding.tsx      온보딩 (미완료 시 / 진입이 리다이렉트)
-/               → Index.tsx          지원 대시보드 (RequireOnboarded)
+/               → Index.tsx           지원 대시보드 (RequireOnboarded)
 /jobs/:slug     → JobDetail.tsx       공고 상세
 /experiences    → Experiences.tsx     경험·스펙 DB (탭: db / basic-info / files)
 /basic-info     → redirect → /experiences?tab=basic-info
@@ -57,22 +103,25 @@
 /calendar       → Calendar.tsx
 ```
 
-## 주요 파일
+### 주요 파일
 
 ```
 src/
 ├── App.tsx                              라우터 루트
 ├── pages/
 │   ├── Index.tsx                        대시보드 (지원 현황, 오늘 할 일)
-│   ├── Experiences.tsx                  경험·스펙 DB — 가장 큰 파일(~3100줄)
+│   ├── Experiences.tsx                  경험·스펙 DB (~1600줄)
 │   │   └── tabs: db | basic-info | files
-│   ├── experiences/                     탭2 분리 모듈 — DetailEditor(상세 편집)·CopyGenerator(복사 생성)·RepExperienceViews(대표 스펙 뷰)·fieldWidgets·tableWidgets·presets·mockData
+│   ├── experiences/                     탭2 분리 모듈 — DetailEditor·CopyGenerator·RepExperienceViews·fieldWidgets·tableWidgets·presets·mockData
 │   ├── JobDetail.tsx                    공고 상세 + 자소서 작성
 │   ├── AICover.tsx                      AI 자소서 생성
 │   ├── Calendar.tsx                     일정 캘린더
 │   ├── Settings.tsx                     설정
-│   ├── Onboarding.tsx                   온보딩 (+ onboardingData.ts)
+│   ├── Onboarding.tsx                   온보딩 (+ onboardingData.ts, ProfileCompletionCard 포함)
 │   └── NotFound.tsx                     404
+├── data/
+│   ├── basicInfoFields.ts               ★ InfoKey(34종)·INFO_FIELDS·기본정보 LS 키 상수의 정본
+│   └── calendarData.ts                  캘린더 데이터 소스
 ├── components/pickd/
 │   ├── PickdSidebar.tsx                 좌측 60px 아이콘 사이드바
 │   ├── BasicInfoPanel.tsx               기본정보 탭 (Experiences에서 렌더)
@@ -84,193 +133,78 @@ src/
 │   ├── StatusManagementModal.tsx        상태 관리 모달 (일정·할일 포함)
 │   ├── RowContextMenu.tsx               행 그립·컨텍스트 메뉴 (탭1·탭2 공용)
 │   ├── TodayPanel.tsx                   대시보드 오늘 패널
-│   ├── DocumentStatusList.tsx           대시보드 서류 현황 (⚠️ 목 dday 고정값)
+│   ├── DocumentStatusList.tsx           대시보드 서류 현황 (목데이터, dday는 calcDday 실계산)
 │   ├── CalendarMini.tsx                 대시보드 미니 캘린더
 │   ├── MoodRefresh.tsx                  대시보드 기분전환 카드
-│   ├── TrashPanel.tsx                   전역 통합 휴지통 뷰 (설정>데이터 관리에서 렌더, 경험·파일 복원/영구삭제)
+│   ├── TrashPanel.tsx                   전역 통합 휴지통 뷰 (설정>데이터 관리에서 렌더)
 │   ├── ExportModal.tsx                  내보내기 2스텝 모달 (탭2, 값→형식 Excel/Word/PDF)
 │   ├── calendar/                        캘린더 페이지 모듈 — MonthlyCalendar·ListHeader·ContextPanel·CreateModal·DetailModal·ProgressRing
-│   └── ds/                              디자인시스템 프리미티브 — 사용 중: StatusBadge·DdayChip / 나머지 11종(Button·Card 등)은 미사용 예비
-├── components/table/
-│   ├── StarToggle.tsx                   중요도 별 토글 (탭1 즐겨찾기·탭2 중요도 공용)
-│   ├── ColumnDivider.tsx                컬럼 리사이즈 세로 구분선 (탭1·탭2 공용, hover 전용, 색=행 구분선과 동일)
-│   ├── DragHandle.tsx                   dnd-kit 드래그 핸들 뼈대 (탭1·탭2 공용)
-│   ├── HeaderCell.tsx                   헤더 셀·정렬 버튼·컬럼 메뉴(정렬/필터/숨기기) (탭1·탭2 공용)
-│   ├── SortableColumnHeader.tsx         드래그 가능한 컬럼 헤더 (탭1·탭2 공용, 그립=드래그 / ∨=컬럼 메뉴)
-│   ├── BatchActionBar.tsx               배치 액션 바 셸 (탭1·탭2 공용, 액션 항목은 탭별 주입)
-│   ├── HeaderFilter.tsx                 컬럼 필터 본문 — 컬럼 메뉴의 필터 서브메뉴에 주입 (탭1·탭2 공용)
-│   └── useTableDividers.ts              컬럼 경계 실측 훅 — 세로선 위치는 th 실측값 사용 (탭1·탭2 공용)
+│   └── ds/                              디자인시스템 프리미티브 — 사용 중: StatusBadge·DdayChip / 나머지 11종은 미사용 예비
+├── components/table/                    탭1·탭2 공용 테이블 부품
+│   ├── StarToggle / ColumnDivider / DragHandle / HeaderCell / SortableColumnHeader
+│   ├── BatchActionBar / HeaderFilter / useTableDividers
 ├── hooks/
-│   ├── useResizableCols.tsx             컬럼 리사이즈 훅 (min/maxWidths clamp 지원)
+│   ├── useResizableCols.tsx             컬럼 리사이즈 훅
 │   └── use-mobile.tsx                   shadcn 기본 훅
-└── lib/
-    ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1, 소프트삭제·복원·14일 purge)
-    └── exportExperiences.ts             내보내기 생성기 (Excel=xlsx·Word=docx·PDF=브라우저 인쇄)
+├── lib/
+│   ├── utils.ts                         cn() + tailwind-merge 커스텀 토큰 등록 (§1 참조)
+│   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1, 소프트삭제·복원·14일 purge)
+│   ├── exportExperiences.ts             내보내기 생성기 (Excel=xlsx·Word=docx·PDF=브라우저 인쇄)
+│   └── csv.ts                           CSV 내보내기 (탭1 JobPostingTable 사용)
+└── test/                                vitest (현재 example.test.ts 1개 — cn() sanity 테스트 추가 권장, §2)
 ```
 
-## 데이터 지속성 (localStorage 키)
+### 데이터 지속성 (localStorage 키)
 
 ```
-specs.info.visibleKeys.v4    표시할 기본정보 필드 목록 (InfoKey[])
-specs.info.values.v2         기본정보 필드 값 (Record<string, string>)
-specs.info.hiddenValueKeys.v1 값 마스킹된 필드 목록
-specs.basicPhoto.shown       증명사진 표시 여부
-specs.basicPhoto.id          대표 증명사진 ID
-specs.files.v2               제출파일함 파일 목록 (구 specs.files.v1 → v2 상향)
-specs.info.langExams.v1      공인외국어시험 목록 (LangExam[])
-specs.rep.ids                대표 스펙 ID 목록
-specs.rep.cardFields.v1      대표 스펙 카드별 표시 필드
-specs.rep.view.v1            대표 스펙 뷰 모드 (card | list)
-pickd.jobs.colWidths         탭1 컬럼 너비
-pickd.jobs.visibleCols       탭1 표시 컬럼
-pickd.jobs.colOrder          탭1 컬럼 순서(드래그로 변경)
-pickd.jobs.rowOrder          탭1 행 커스텀 순서(행 그립 드래그)
-pickd.jobs.sortMode          탭1 정렬 모드("custom" | 없음)
-pickd.experiences.items      탭2 경험 목록(Item[], 공유 키)
-pickd.experiences.visibleCols.v2  탭2 표시 컬럼
-pickd.experiences.colWidths.v2  탭2 컬럼 너비
-pickd.experiences.colOrder   탭2 tail 컬럼 순서(드래그로 변경, 유형·항목명 고정)
-pickd.experiences.sortMode   탭2 정렬 모드("custom" | 없음)
-pickd.trash.v1               전역 통합 휴지통 스냅샷(경험·파일 소프트삭제, 14일 보관 후 자동 purge)
-pickd.experiences.export.fields.v1  내보내기 마지막 선택 필드
-pickd.experiences.export.format.v1  내보내기 마지막 선택 형식(excel|word|pdf)
+specs.info.visibleKeys.v4          표시할 기본정보 필드 목록 (InfoKey[])
+specs.info.values.v2               기본정보 필드 값
+specs.info.langExams.v1            공인외국어시험 목록 (LangExam[])
+specs.basicPhoto.shown / .id       증명사진 표시 여부 / 대표 증명사진 ID
+specs.files.v2                     제출파일함 파일 목록
+specs.settings.jobPrefs.v1         설정 > 직무 선호 (Settings.tsx)
+pickd.jobs.colWidths / visibleCols / colOrder / colPinned / rowOrder / sortMode
+                                   탭1 테이블 뷰 상태 (너비·표시·순서·고정·행순서·정렬모드)
+pickd.experiences.items            탭2 경험 목록 (Item[])
+pickd.experiences.visibleCols.v2 / colWidths.v2 / colOrder / colPinned / sortMode
+                                   탭2 테이블 뷰 상태
+pickd.experiences.export.fields.v1 / format.v1   내보내기 마지막 선택 (필드/형식)
+pickd.trash.v1                     전역 통합 휴지통 스냅샷 (14일 보관 후 자동 purge)
+pickd.onboarding.state.v1 / done.v1   온보딩 진행 상태(재개용) / 완료 플래그
+pickd.profile.v1                   온보딩 프로필 (PickdProfileV1 — 온보딩 SSOT §4 데이터 계약)
+cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.tsx)
 ```
 
-> 소프트삭제: Item·FileItem에 `deletedAt?: number`(epoch ms) 추가 — 없으면 활성, 있으면 휴지통. 모든 활성 뷰는 `deletedAt == null`만 노출. 공고(Job)는 목데이터(미저장)라 현재 휴지통 제외(저장 이전 후 편입 예정).
+> 이 목록의 정본은 코드다. 전수 확인: `grep -rhoE '"(specs|pickd|cal)\.[A-Za-z.0-9]+"' src | sort -u`
+> 소프트삭제: Item·FileItem에 `deletedAt?: number`(epoch ms) — 없으면 활성, 있으면 휴지통. 활성 뷰는 `deletedAt == null`만 노출. 공고(Job)는 목데이터(미저장)라 휴지통 제외(저장 이전 후 편입 예정).
 
-## BasicInfoPanel 구조 (경험·스펙 DB > 기본정보 탭)
+### 기본정보 (경험·스펙 DB > 기본정보 탭)
 
-- **렌더 경로**: `/experiences?tab=basic-info` → Experiences.tsx → `<BasicInfoPanel />`
-- **InfoKey 타입**: name, hanjaName, engName, birth, email, phone, address, school, major, grade, military, veteran, disability, national, driverLicense, portfolioUrl, github, linkedin, blog, enrollYear, gradYear, gpa, minor, transfer, gender, nationality, hsSchool, hsLocation, hsEnroll, hsGrad, hsGradStatus (총 30개)
-- **공인외국어시험**: InfoKey 방식 아님 — `LangExam[]` 별도 리스트 (`specs.info.langExams.v1`). 필드: id, lang, examName, score, date, expiry
-- **FIELD_GROUPS (뷰 모드)**: 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 병역·면허 (+ 공인외국어시험 별도 렌더)
-- **편집**: 뷰 모드에서 필드별 인라인 편집(hover 연필) + 전체 편집 모달(편집 버튼)
+- 렌더 경로: `/experiences?tab=basic-info` → Experiences.tsx → `<BasicInfoPanel />`
+- **InfoKey 34종·필드 정의의 정본 = `src/data/basicInfoFields.ts`** (문서에 목록을 중복 기재하지 않는다)
+- 공인외국어시험은 InfoKey 방식 아님 — `LangExam[]` 별도 리스트(`specs.info.langExams.v1`). 필드: id, lang, examName, score, date, expiry
+- FIELD_GROUPS(뷰 모드): 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 병역·면허 (+ 공인외국어시험 별도 렌더)
+- 편집: 뷰 모드 인라인 편집(hover 연필) + 전체 편집 모달
 
-## 코딩 컨벤션
+### 도메인 용어 (처음 읽는 세션용)
 
-- 컴포넌트는 named export (`export function Foo`)
-- 페이지 컴포넌트는 default export
-- cn() 유틸로 조건부 클래스 병합 (`import { cn } from "@/lib/utils"`)
-- shadcn/ui 컴포넌트는 `@/components/ui/`에서 import
-- 커밋 메시지: `type(scope): 한국어 설명` (prefix: feat/fix/style/refactor/chore + 범위). **항목별 개별 커밋**(되돌림 단위).
+탭1 = 지원 대시보드(공고 관리, Index.tsx) · 탭2 = 경험·스펙 DB(Experiences.tsx) · 탭3 = AI 자소서(기획 단계, 미구현) · 공고 = Job · 경험 = Item · 대표 스펙 = 탭2에서 카드로 뽑아 쓰는 대표 경험 · 픽 카드 = 온보딩에서 만드는 프로필 카드 · 전형 6단계 = 작성중/지원완료/서류전형/필기전형/면접전형/전형완료(+finalResult 배지)
 
-## 반응형 범위
+## 6. 🚀 배포 (Vercel)
 
-**데스크톱 전용 (min-width: 1280px).** 모바일·태블릿 대응은 현재 스코프 외.
-Tailwind `sm:`/`md:`/`lg:` prefix가 거의 없는 것은 의도적 결정. 모바일 대응이 필요하다면 별도 작업으로 처리.
+- **한 레포 = Vercel 프로젝트 하나.** 정본은 프로젝트 **"pickd"** 하나 · 도메인 **`pickd-seven.vercel.app`** · Production Branch = `main`. 실험도 새 프로젝트 말고 브랜치/프리뷰로.
+- "배포가 안 반영" 진단은 §2 검증 사다리의 3~6번 순서로.
 
-## 토스트 톤 컨벤션
+## 7. 문서 위생·자동화
 
-**`어요` 체 통일** — `"저장됐어요"`, `"복사했어요"`, `"삭제했어요"` 형식 사용.
-예외 없음 — 전 파일 sonner 통일 완료.
+- 임시 산출물은 `docs/tasks/`에 모으고, 실행 완료되면 주기적으로 삭제(git 히스토리 보존, `git log`·`git show`로 복원).
+- 확정된 규칙·결정은 문서 수를 늘리지 말고 해당 SSOT의 최신값만 갱신.
+- 동기화 스크립트: `pickd-design-update.sh` — 코드 수정 + Notion SSOT 업데이트 자동화(구 pickd-notion-update.sh 통합). 위치는 레포 밖 `/Users/xxxiynyng/Claude/Projects/Pickd Design/`(디자인 SSOT §9-4). ⚠️ 통합 여부·경로가 디자인 SSOT §9-4의 2스크립트 서술과 어긋남 — 확인 후 한쪽으로 정리 필요.
 
-## 주의사항
+## 부록 — 사고 아카이브 (배경은 여기 한 줄씩만)
 
-- 백엔드 없음 — API 호출, fetch, 서버 사이드 로직 없음
-- `Specs.tsx`는 삭제됨 (미연결 dead code였음, 2025-06 제거)
-- localStorage 키 버전 suffix(`.v2`, `.v4`)는 breaking change 시 올릴 것
-
-## 🚀 배포 (Vercel) — "안 반영" 재발 방지 (2026-07-05)
-
-**정본 토폴로지: 한 레포 = Vercel 프로젝트 하나.** 현재 정본은 프로젝트 **"pickd"** 하나 · 도메인 **`pickd-seven.vercel.app`** · Production Branch = `main`. 같은 GitHub 레포에 **Vercel 프로젝트를 두 개 이상 만들지 않는다**(실험도 새 프로젝트 말고 브랜치/프리뷰로).
-
-**왜 이 규칙이 생겼나(2026-07-05 사고):** 한 레포에 프로젝트가 3개(pickd / pickd-seven / my-job-desk) 붙어 있었다. Vercel은 프로젝트마다 `<프로젝트명>.vercel.app`을 자동 배정하므로, 이름이 같은 "pickd-seven" 프로젝트(프로덕션 배포 없음)와 실제 배포가 도는 "pickd" 프로젝트가 `pickd-seven.vercel.app` 도메인을 두고 충돌했다. 그 결과 **정상 URL을 하드리프레시·시크릿으로 열어도 낡은(빈) 프로젝트가 서빙**되어 "push해도 안 반영"으로 보였다(하루 소모). 잉여 프로젝트 2개 삭제 후 즉시 정상화.
-
-**"배포가 안 반영" 진단 순서 (캐시는 맨 마지막에):**
-1. `git rev-parse origin/main` 해시 = Vercel에 배포된 커밋 해시인가.
-2. **Vercel Projects 목록에서 이 레포에 연결된 프로젝트가 하나뿐인가** — 둘 이상이면 도메인 충돌 1순위 의심(오늘의 원인). Deployments 탭이 아니라 **Projects** 목록을 볼 것.
-3. 도메인 `pickd-seven.vercel.app`이 그 하나의 프로젝트에 물려 있고 최신 Production이 Ready인가.
-4. **그다음에야** 브라우저 캐시(시크릿/하드리프레시) 의심.
-
-**확인용 URL 규칙:** 반영 확인은 항상 프로덕션 도메인 `pickd-seven.vercel.app`으로. `pickd-<해시>-….vercel.app`류 배포별 URL은 스냅샷이라 안 바뀌는 게 정상.
-
-**시각 변화 확인:** 1~2px 폰트 변경은 눈으로 판별 불가 → 스크린샷 눈대중 금지, DevTools **Computed `font-size` 수치**로 확인.
-
----
-
-## 작업 방식 — 이 채팅 vs 터미널
-
-- **코드 폴더에 접근 가능하면 이 채팅(또는 터미널 세션)에서 직접 읽고·수정하고·tsc/build로 검증하고·커밋까지 처리하는 게 기본.**
-  터미널에 프롬프트만 던지고 결과를 전해 듣는 왕복 방식은 실제 코드를 못 본 채 스크린샷·설명만으로 프롬프트를 짐작해서 쓰게 되어 원인 오진단·설계 의도 유실이 반복된다 — 지양한다.
-- 코드 폴더 접근이 없는 세션에서는 파일 **삭제**가 안 되는 경우가 있다(권한 제한). git lock 정리, push 등 삭제 권한이 필요한 마무리만 사람이 터미널에서 한 줄 명령으로 처리.
-- 터미널에 프롬프트를 따로 만들어 넘기는 방식은 다음 경우에만 예외적으로 쓴다: 자리 비우고 도는 대량/자율주행 작업, 또는 코드 폴더 접근이 끊긴 세션.
-  이때 프롬프트 형식: ① 원인/목표 한 줄 → ② 정확한 위치(파일·컴포넌트·클래스)와 변경 전→후 → ③ 자가검증(`npx tsc -p tsconfig.app.json --noEmit` 신규 에러 0 + diff 요약) → ④ 커밋 메시지.
-- 코드 diff·tsc 결과 없이 "고쳤다"고 보고하지 않는다 — 직접 검증 가능하면 반드시 검증하고 결과를 함께 보고한다.
-
-## 한눈에 — 무엇을 어디서
-
-| 상황 | 어디서 | 방법 |
-|------|--------|------|
-| 색·간격·글자·클래스 수정, 버그 픽스, 판단 필요한 UI 작업 | **코드 접근 가능한 세션에서 직접** | 코드 읽고 원인 확인 → 수정 → tsc/build 검증 → 커밋까지 한 번에 |
-| 감사·마이그레이션·구조 변경 | 직접 | 기획·결정 → 코드까지 직접 반영 |
-| 규칙/토큰 확정·변경 | 직접 | 결정 후 SSOT에 최신값만 기록 |
-| 커밋 push, git lock 등 삭제 권한 필요한 정리 | 터미널(한 줄) | 안내받은 명령어만 붙여넣기 |
-| 자리 비우고 대량 작업 | 터미널(자율주행) | 권한 승인 → 끝나면 보고 |
-
-## 작업 흐름
-
-1. 요청 → 전문가 관점에서 검토하고, 결정이 필요한 부분만 질문으로 확정한다.
-2. 확정되면 코드를 직접 읽고(추측 금지, grep으로 정확한 위치 확인) 수정한다.
-3. `npx tsc -p tsconfig.app.json --noEmit` + build로 자가검증 후 커밋한다.
-4. push나 삭제 권한이 필요한 정리가 남으면 터미널에 붙여넣을 한 줄 명령을 안내한다.
-5. 적용 결과를 캡처로 공유하면 검수한다.
-6. 확정/변경된 규칙은 SSOT에 **최신 상태값만** 기록한다(구기록·이력 누적하지 않음).
-
-## ⭐ 디자인 일관성 원칙 (가장 중요)
-
-- **기존 디자인 시스템을 유지·활용한다. 임의로 새 값(색/굵기/간격)을 만들지 않는다.**
-- 어색하면: ① SSOT의 기존 토큰·규칙 확인 → ② 기존 컴포넌트(예: 탭1 공고명)를 재사용해 맞춤 → ③ 새 스타일 발명 금지.
-- "통일"은 한쪽을 **기존 잘 된 쪽**에 맞추는 것이지, 양쪽 다 새 값으로 바꾸는 게 아니다.
-- SSOT 문서도 취향대로 고치지 않는다 — 실제 확정·구현된 값만 기록한다.
-- 가능하면 **공용 컴포넌트**로 묶어 같은 스타일이 한 곳에서 관리되게 한다(예: `components/table/ColumnDivider.tsx`, `DragHandle.tsx`는 탭1·탭2 공용).
-
-## 디자인 토큰 규칙 (하드코딩 금지 — 재발 방지)
-
-- **폰트 크기는 토큰만 쓴다. 임의 `text-[Npx]` 금지.** 스케일: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-heading`(26). 정의 위치: `tailwind.config.ts`의 `theme.extend.fontSize`.
-  - **`text-micro`(9px)는 제거됨(2026-07-06).** 9px→10px 통일: 사용처(배지 카운트·미니 캘린더·작은 배지 등)를 전부 `text-mini`로 치환 후 토큰 정의(`tailwind.config.ts`)와 `src/lib/utils.ts` tailwind-merge 등록을 함께 삭제(커밋 `1b20fd6`·`da43c30`). **최소 크기는 이제 `text-mini`(10px)** — 9px를 새로 만들지 말 것. 새 `text-micro`가 코드에 들어오면 대응 토큰이 없어 CSS가 안 붙고 상속 크기로 깨진다.
-- **⚠️ 커스텀 fontSize 토큰을 추가하면 반드시 `src/lib/utils.ts`의 tailwind-merge(`extendTailwindMerge`의 `font-size` classGroup)에도 등록한다.** 안 하면 `cn()`의 tailwind-merge가 `text-mini` 등을 색 클래스로 오인해, **같은 `cn()`에 색 클래스(예: `text-gray-400`)가 있으면 크기 토큰을 런타임에 삭제**한다 → 배지·D-day 크기 변경이 화면에 전혀 반영 안 됨. **이게 2026-07-05 하루를 소모한 실제 근본 원인**이었다(배포·캐시·URL 전부 무죄). 커밋 `1ca1684`에서 등록해 해소.
-- **색도 토큰만. 임의 `bg-[#hex]`·`text-[#hex]` 금지** — Notion 디자인 시스템 2장 색 토큰 또는 Tailwind 명명 색 사용. 테이블 헤더 행 배경은 `bg-slate-50`(surface-header-row).
-- **토큰에 line-height를 싣지 않는다(크기만).** 튜플로 lineHeight를 지정하면 배지·D-day·카운트처럼 고정 높이 안에서 상속 줄간격에 의존하던 요소가 부풀어 보이는 회귀 발생(2026-07-05 실측). 줄간격 토큰화는 SSOT에 먼저 정의 후 별도로.
-- **새 크기·색이 필요하면**: 먼저 토큰을 정의(SSOT 3장/2장 + `tailwind.config.ts`)하고 그 이름을 쓴다. 컴포넌트에 값을 직접 박지 않는다.
-- 근거: 손으로 박은 `text-[13px]` 300여 곳이 흩어져 "한 곳 바꾸려면 300곳 수정" 문제를 낳았음(2026-07-05 토큰화). 재발 방지가 이 규칙의 목적.
-- 상세 매핑·마이그레이션 계획은 git 히스토리 참조(`git show 847d4da:docs/tasks/토큰_마이그레이션_계획.md`) — 일회용 문서라 워킹트리에선 정리됨.
-
-## 진단 규칙 (반복 삽질 방지)
-
-- **추측으로 수정 반복 금지.** 원인은 코드에서 확인하고 짚는다.
-- 정렬·간격은 **눈대중 금지 → 좌표/수치로 검증**(예: 컬럼별 좌측 x를 표로 확인).
-- 안 고쳐지면 새 시도 전에 "언제/어느 요소에서" 나타나는지부터 좁힌다.
-- **클래스 변경이 화면에 안 나타나면 배포·캐시·URL을 의심하기 전에 먼저 DevTools에서 렌더된 실제 `className`을 확인**한다. 넣은 클래스가 빠져 있으면 `cn()`의 tailwind-merge가 삭제한 것(→ 디자인 토큰 규칙의 tailwind-merge 등록 참조). 라이브 검증은 브라우저 콘솔에서 `getComputedStyle(el).fontSize`로 수치 확인(스크린샷 눈대중·1~2px 판별 금지).
-
-## 검수·롤백 규칙
-
-- **항목별 개별 커밋**(되돌림 단위). 커밋 prefix: feat/fix/style/refactor/chore + 범위.
-- **세션 시작 시 기준점**: 작업 전 `git tag pre-<날짜>`(또는 작업 브랜치) → 통째 롤백 쉽게.
-- **변경 후 보고**: diff 요약 + tsc 결과를 함께. 마일스톤마다 캡처로 검수.
-- **롤백**: 특정 항목만 `git revert <hash>`, 세션 전체는 `git reset --hard pre-<날짜>`.
-
-## 동기화 스크립트
-
-- **`bash 'pickd-design-update.sh' "변경 내용"`** — 코드 수정 + Notion SSOT 업데이트를 한 번에 실행하는 자동화 스크립트(구 pickd-notion-update.sh 통합됨). 첫 실행 시 코드 폴더 경로를 두 번째 인자로 등록.
-
-## SSOT 위치
-
-- Notion「Pickd 디자인 시스템」 — 38e01b3f871381daac4dc686a06c3d54 (단일 출처)
-- 대상: 탭1(공고 관리)·탭2(경험·스펙 DB). 핵심 가치 = "경험의 데이터 자산화".
-
-## 🔎 검증·조기탐지 방법론 (silent 실패 방지 — 2026-07-05)
-
-**배경**: 2026-07-05 하루를 소모한 배지·필터 크기 문제는 배포·캐시·URL이 아니라 `cn()`의 tailwind-merge가 커스텀 토큰을 런타임에 삭제한 "silent 실패"였다(소스는 맞는데 화면엔 안 나오는 부류).
-
-**반드시(MUST)**
-- 스타일·className·토큰을 바꾸면 **렌더된 결과**로 확인 — 소스가 아니라 DevTools **Computed 값** 또는 `element.className`. 소스에 클래스가 있다고 적용됐다 가정하지 않는다(cn()/tailwind-merge가 삭제 가능).
-- 시각 변화는 **수치로** 확인. 1~2px은 눈으로 판별 불가 — 스크린샷 눈대중 금지.
-- "기준에 맞춰라"는 요청은 **기준값을 먼저 실측**(예: 상태 배지 실제 px). 목표값 없이 추측 조정 금지.
-
-**절대 금지(NEVER)**
-- "안 바뀐다"를 캐시·URL·배포 탓으로 **먼저 단정** 금지. 순서: ① 렌더 className에 그 클래스가 있나 → ② Computed 값이 목표값인가 → ③ 배포 커밋 = origin/main인가 → ④ 그다음에야 캐시.
-- 코드 diff·tsc만 보고 "고쳤다" 단정 금지 — cn() 같은 런타임 변형은 빌드 산출물·렌더에서만 드러난다.
-
-**사전 탐지 체계(권장)**
-- 커스텀 토큰 sanity 단위 테스트: `cn("text-mini bg-gray-100 text-gray-400")` 결과에 `text-mini`가 남는지 상시 감시.
-- 위험 신호(하나라도 보이면 tailwind-merge 삭제 의심): ① tailwind.config에 토큰 추가했는데 `utils.ts` 미변경 ② 컴포넌트가 `cn(사이즈토큰, 색클래스)` 패턴 ③ 소스엔 있는데 렌더 className엔 없는 클래스.
+- **2026-07-05 tailwind-merge**: 커스텀 폰트 토큰 미등록으로 `cn()`이 크기 토큰을 런타임 삭제 — "소스는 맞는데 화면엔 안 나옴"으로 하루 소모. 배포·캐시·URL 전부 무죄였다. 해소 커밋 `1ca1684`. → §1 등록 규칙, §2 사다리 1번.
+- **2026-07-05 Vercel 도메인 충돌**: 한 레포에 프로젝트 3개(pickd/pickd-seven/my-job-desk)가 붙어 낡은 프로젝트가 정상 URL을 서빙 — "push해도 안 반영"으로 하루 소모. 잉여 2개 삭제로 해소. → §6, §2 사다리 4번.
+- **2026-07-05 토큰화**: 손으로 박은 `text-[13px]` 300여 곳 → 토큰화. 계획서는 `git show 847d4da:docs/tasks/토큰_마이그레이션_계획.md`. 잔여 하드코딩 ~30곳은 기획 SSOT 기술 백로그에서 추적.
+- **2026-07-06 text-micro 제거**: 9px 폐기, 최소 10px(`text-mini`)로 통일(커밋 `1b20fd6`·`da43c30`).
+- **2025-06**: 미연결 dead code `Specs.tsx` 삭제.
