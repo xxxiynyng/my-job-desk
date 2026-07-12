@@ -31,3 +31,4 @@ vitest.config.ts.timestamp-*.mjs
 *.sw?
 .vercel
 .env*
+docs/HEALTH.md
