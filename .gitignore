@@ -32,3 +32,4 @@ vitest.config.ts.timestamp-*.mjs
 .vercel
 .env*
 docs/HEALTH.md
+outputs/
