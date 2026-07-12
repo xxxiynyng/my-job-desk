@@ -4,7 +4,7 @@ type StatusKey =
   | "draft" | "applied" | "document" | "test" | "interview"
   | "finished" | "passed" | "rejected" | "hold";
 
-export type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
+export type Tone = "neutral" | "brand" | "info" | "active" | "success" | "warning" | "danger" | "caution";
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status?: StatusKey;
@@ -19,7 +19,7 @@ export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
   draft:     { label: "작성중",   tone: "brand" },
   applied:   { label: "지원완료", tone: "neutral" },
   document:  { label: "서류전형", tone: "info" },
-  test:      { label: "필기전형", tone: "info" },
+  test:      { label: "필기전형", tone: "active" },
   interview: { label: "면접전형", tone: "warning" },
   finished:  { label: "전형완료", tone: "neutral" },
   // 세부 결과 배지 (전형완료 옆에 표시)
@@ -33,6 +33,7 @@ export const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
   neutral: { bg: "var(--bg-muted)", fg: "var(--text-body-color)", dot: "var(--slate-400)" },
   brand:   { bg: "var(--brand-subtle)", fg: "var(--brand-hover)", dot: "var(--blue-500)" },
   info:    { bg: "var(--indigo-50)", fg: "var(--indigo-600)", dot: "var(--indigo-500)" },
+  active:  { bg: "var(--teal-50)", fg: "var(--teal-600)", dot: "var(--teal-500)" },
   success: { bg: "var(--success-subtle)", fg: "var(--green-700)", dot: "var(--green-500)" },
   warning: { bg: "var(--warning-subtle)", fg: "var(--amber-700)", dot: "var(--amber-500)" },
   danger:  { bg: "var(--danger-subtle)", fg: "var(--red-700)", dot: "var(--red-500)" },

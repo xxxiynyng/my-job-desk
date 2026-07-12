@@ -61,6 +61,10 @@
     --indigo-500: #5B5BD6;
     --indigo-600: #4848B3;
 
+    --teal-50: #E6F5F3;
+    --teal-500: #2A9D99;
+    --teal-600: #1F7A77;
+
     /* ── Pickd semantic tokens ─────────────────────────────────── */
     --brand: var(--blue-500);
     --brand-hover: var(--blue-600);
