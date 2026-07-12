@@ -7,7 +7,7 @@ export { DdayChip, calcDday } from "./DdayChip";
 export { IconButton } from "./IconButton";
 export { Input } from "./Input";
 export { Select } from "./Select";
-export { StatusBadge, STATUS_MAP } from "./StatusBadge";
+export { StatusBadge, STATUS_MAP, TONES } from "./StatusBadge";
 export { Stepper } from "./Stepper";
 export { Tabs } from "./Tabs";
 export { Tag } from "./Tag";

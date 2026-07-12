@@ -4,7 +4,7 @@ type StatusKey =
   | "draft" | "applied" | "document" | "test" | "interview"
   | "finished" | "passed" | "rejected" | "hold";
 
-type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
+export type Tone = "neutral" | "brand" | "info" | "success" | "warning" | "danger" | "caution";
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status?: StatusKey;
@@ -16,8 +16,8 @@ interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 // 전형 단계 6개 (2026-07-02 재편: 지원예정·서류합격 삭제, 최종합격/불합격/보류는
 // "전형완료" 단일 단계로 통합 — 세부 결과는 passed/rejected/hold 배지로 구분)
 export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
-  draft:     { label: "작성중",   tone: "neutral" },
-  applied:   { label: "지원완료", tone: "brand" },
+  draft:     { label: "작성중",   tone: "brand" },
+  applied:   { label: "지원완료", tone: "neutral" },
   document:  { label: "서류전형", tone: "info" },
   test:      { label: "필기전형", tone: "info" },
   interview: { label: "면접전형", tone: "warning" },
@@ -28,7 +28,8 @@ export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
   hold:      { label: "보류",     tone: "caution" },
 };
 
-const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
+// §5-3-1 tone 팔레트 — 정본. 상태칩을 손으로 칠하지 말고 이 값을 재사용할 것(§0-11 raw 금지).
+export const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
   neutral: { bg: "var(--bg-muted)", fg: "var(--text-body-color)", dot: "var(--slate-400)" },
   brand:   { bg: "var(--brand-subtle)", fg: "var(--brand-hover)", dot: "var(--blue-500)" },
   info:    { bg: "var(--indigo-50)", fg: "var(--indigo-600)", dot: "var(--indigo-500)" },
