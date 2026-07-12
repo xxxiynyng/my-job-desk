@@ -69,6 +69,10 @@
     --brand-subtle-2: var(--blue-100);
     --brand-ring: color-mix(in srgb, var(--blue-500) 28%, transparent);
 
+    /* Action — 채움 버튼 전용 (누르면 실행). §0 원칙 11 · §2-1 (2026-07-12 신설) */
+    --action: var(--blue-400);        /* #3B82F6 */
+    --action-hover: var(--blue-500);  /* #2563EB */
+
     --success: var(--green-500);
     --success-subtle: var(--green-50);
     --warning: var(--amber-500);

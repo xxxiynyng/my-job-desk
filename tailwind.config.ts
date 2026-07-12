@@ -33,6 +33,11 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
+        // 파랑 역할 분리 (§0 원칙 11 · §2-1): action = 채움 버튼 전용
+        action: {
+          DEFAULT: "var(--action)",
+          hover: "var(--action-hover)",
+        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
