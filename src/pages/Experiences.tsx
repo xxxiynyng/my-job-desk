@@ -936,7 +936,7 @@ export default function Experiences() {
             <section>
               {/* Toolbar */}
               <div className="flex items-center gap-2 flex-wrap mb-3">
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium gap-1.5" onClick={() => setEntryOpen(true)}>
+                <Button className="bg-action hover:bg-action-hover text-white rounded-lg px-4 py-2 text-sm font-medium gap-1.5" onClick={() => setEntryOpen(true)}>
                   <Plus className="w-3.5 h-3.5" /> 경험 추가
                 </Button>
 
@@ -1136,7 +1136,7 @@ export default function Experiences() {
                       className={cn(
                         "px-3 py-2 text-xs flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
                         activeFilter === f && view !== "paste"
-                          ? "text-blue-600 font-semibold border-blue-500"
+                          ? "text-blue-600 font-semibold border-primary"
                           : "border-transparent text-muted-foreground hover:text-foreground",
                       )}
                     >

@@ -19,7 +19,7 @@ export function QuickJobRegistration() {
           className="border-0 shadow-none bg-transparent h-7 text-sm placeholder:text-muted-foreground/60 focus-visible:ring-0 px-0"
         />
         <Button
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium gap-1.5 shrink-0"
+          className="bg-action hover:bg-action-hover text-white rounded-lg px-4 py-2 text-sm font-medium gap-1.5 shrink-0"
           onClick={() => setModalOpen(true)}
         >
           <Plus className="w-3.5 h-3.5" />

@@ -187,7 +187,7 @@ function hlKey(section: string, group: string, idx: number) {
 // blue=작성중(진행) · amber=초안 · green=완료 · gray=미작성. 오프브랜드 indigo 폐기.
 const ESSAY_STATE: Record<string, { chip: string; dot: string }> = {
   완료: { chip: "bg-pickd-green-light text-pickd-green", dot: "bg-pickd-green" },
-  작성중: { chip: "bg-pickd-blue-light text-pickd-blue", dot: "bg-pickd-blue" },
+  작성중: { chip: "bg-blue-50 text-blue-700", dot: "bg-primary" },
   초안: { chip: "bg-pickd-orange-light text-pickd-orange", dot: "bg-pickd-orange" },
   미작성: { chip: "text-muted-foreground", dot: "bg-muted-foreground/40" },
 };

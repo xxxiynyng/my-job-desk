@@ -195,8 +195,7 @@
     --radius: 0.5rem;    /* 8px — maps to --radius-sm (buttons/inputs) */
 
     /* Pickd color aliases for Tailwind (hex-bridged) */
-    --pickd-blue: #3A67E6;
-    --pickd-blue-light: #EFF4FE;
+    /* --pickd-blue 폐기(2026-07-12, §2-1) — 파랑은 action/brand 역할 토큰으로. 로고 SVG의 #3A67E6은 브랜드 자산으로 별개 유지 */
     --pickd-green: #15926A;
     --pickd-green-light: #E7F6EF;
     --pickd-orange: #F5B800;

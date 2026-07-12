@@ -29,7 +29,7 @@ export function ManageIndicator({ item, onMerge }: { item: Item; onMerge: () => 
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex items-center justify-center w-5 h-5 text-blue-500 align-middle">
+          <span className="inline-flex items-center justify-center w-5 h-5 text-primary align-middle">
             <Sparkles className="w-3.5 h-3.5" />
           </span>
         </TooltipTrigger>

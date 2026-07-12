@@ -297,7 +297,7 @@ export default function Onboarding() {
           onClick={() => go(next)}
           className={cn(
             "flex-1 rounded-lg px-5 py-3 text-sm font-semibold transition-colors",
-            ok ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
+            ok ? "bg-action text-primary-foreground hover:bg-action-hover" : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
           다음
@@ -450,7 +450,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={finish}
-          className="mt-7 inline-flex w-full max-w-[360px] items-center justify-center gap-1.5 rounded-lg bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-7 inline-flex w-full max-w-[360px] items-center justify-center gap-1.5 rounded-lg bg-action px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-action-hover"
         >
           Pickd 시작하기 <ArrowRight className="h-4 w-4" />
         </button>
@@ -753,7 +753,7 @@ export function ProfileCompletionCard({ className }: { className?: string }) {
       <div className="mt-3 flex gap-2">
         <button
           type="button" onClick={save}
-          className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="flex-1 rounded-lg bg-action px-4 py-2.5 text-xs font-bold text-primary-foreground transition-colors hover:bg-action-hover"
         >
           저장할게요
         </button>

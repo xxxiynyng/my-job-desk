@@ -73,8 +73,6 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         pickd: {
-          blue: "var(--pickd-blue)",
-          "blue-light": "var(--pickd-blue-light)",
           green: "var(--pickd-green)",
           "green-light": "var(--pickd-green-light)",
           orange: "var(--pickd-orange)",
