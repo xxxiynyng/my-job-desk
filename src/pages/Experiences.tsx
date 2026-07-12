@@ -1136,7 +1136,7 @@ export default function Experiences() {
                       className={cn(
                         "px-3 py-2 text-xs flex items-center gap-1 border-b-2 whitespace-nowrap transition-colors shrink-0",
                         activeFilter === f && view !== "paste"
-                          ? "text-blue-600 font-semibold border-primary"
+                          ? "text-primary font-semibold border-primary"
                           : "border-transparent text-muted-foreground hover:text-foreground",
                       )}
                     >
