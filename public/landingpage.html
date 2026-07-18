@@ -654,7 +654,8 @@ const COPY = {
   survey: {
     successTitle: '🎉 신청 완료! 베타 소식, 가장 먼저 전해드릴게요.\n1분만 더 — 아래에 답해주시면 딱 맞는 서비스로 준비할게요. (선택)',
     questions: [
-      { id: 'target', q: '지금 어디를 준비하고 있나요?', options: ['공공기관','공기업','지역 기업','아직 탐색 중'] },
+      { id: 'region', q: '취업을 희망하는 지역은 어디인가요?', options: ['부산·울산·경남','수도권','그 외 지역','상관없어요'] },
+      { id: 'company', q: '어떤 기업을 준비하나요? (복수 선택)', multi: true, options: ['공공기관·공기업','대기업','중견기업','중소·스타트업','지역 기업','아직 탐색 중'] },
       { id: 'pain', q: '자소서에서 가장 막히는 건 무엇인가요?', options: ['어떤 경험을 쓸지','기업에 맞추기','문장 표현','절대적 시간 부족'] },
       { id: 'price', q: '이런 서비스라면 얼마까지 내볼 수 있나요?', options: ['무료면 써볼래요','월 5천~1만원','월 1만~3만원','도움 되면 더 낼 수 있어요'] },
     ],
@@ -1094,12 +1095,12 @@ function openSignup() {
 /* 2단계: 신청 완료 + 미니 설문 (선택) */
 function renderSurvey() {
   answers.wish = '';
-  COPY.survey.questions.forEach(q => answers[q.id] = null);
+  COPY.survey.questions.forEach(q => answers[q.id] = q.multi ? [] : null);
   panel.innerHTML = `
     <button type="button" class="survey-close" aria-label="닫기">✕</button>
     <p class="survey-title">${esc(COPY.survey.successTitle)}</p>
     ${COPY.survey.questions.map(q => `
-      <div class="survey-q" data-q="${q.id}">
+      <div class="survey-q" data-q="${q.id}" data-multi="${q.multi ? '1' : ''}">
         <p class="q">${esc(q.q)}</p>
         <div class="chip-opts">${q.options.map(o=>`<button type="button" class="chip-opt" data-val="${esc(o)}">${esc(o)}</button>`).join('')}</div>
       </div>`).join('')}
@@ -1111,11 +1112,20 @@ function renderSurvey() {
 
   panel.querySelector('.survey-close').addEventListener('click', closeModal);
   panel.querySelectorAll('.survey-q[data-q]').forEach(qEl => {
+    const id = qEl.dataset.q;
+    const isMulti = qEl.dataset.multi === '1';
     qEl.querySelectorAll('.chip-opt').forEach(btn => {
       btn.addEventListener('click', () => {
-        qEl.querySelectorAll('.chip-opt').forEach(b => b.classList.remove('on'));
-        btn.classList.add('on');
-        answers[qEl.dataset.q] = btn.dataset.val;
+        if (isMulti) {
+          btn.classList.toggle('on');
+          const arr = answers[id];
+          const i = arr.indexOf(btn.dataset.val);
+          if (i === -1) arr.push(btn.dataset.val); else arr.splice(i, 1);
+        } else {
+          qEl.querySelectorAll('.chip-opt').forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+          answers[id] = btn.dataset.val;
+        }
       });
     });
   });
