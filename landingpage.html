@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════
+  Pickd 베타 랜딩페이지
+  ✏️ 문구 수정   → <script> 최상단 COPY 객체에서 문자열만 바꾸세요
+  🎨 디자인 수정 → <style> 최상단 :root CSS 변수만 바꾸세요
+  🔀 켜고 끄기   → CONFIG 객체 (설문 표시, 모바일 CTA 바, 폼 전송 주소 등)
+  ═══════════════════════════════════════════════════════════════
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pickd — 지원할수록 가벼워지는 취업 준비</title>
+<meta name="description" content="부울경 취준생을 위한 AI 취업 매니지먼트. 내 경험은 그대로, 강조할 내용은 기관에 맞게. 무료 베타 사전 신청.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+/* ═══════════════ 디자인 토큰 — 여기서만 수정 ═══════════════ */
+:root{
+  /* Base */
+  --bg-white:#FFFFFF;
+  --bg-tint:#F4F8FE;
+  /* 1) 라이트 미스틱 블루 */
+  --blue-100:#DCE9FF;
+  --blue-300:#A9C9FF;
+  --blue-500:#7DA7F4;
+  --blue-600:#5B8DEF; /* 텍스트용 진한 블루(대비 확보) */
+  /* 2) 민트 → 그린 */
+  --mint-200:#CFF5EA;
+  --mint-400:#A8EBD9;
+  --green-500:#34C48E;
+  /* 3) 레몬 — 포인트 (전체의 5% 이하) */
+  --lemon-400:#FFE27A;
+  --lemon-500:#FFD84D;
+  /* Text */
+  --ink-900:#1E2A3B;
+  --ink-600:#5B6B80;
+  --ink-400:#93A1B5;
+  /* Gradients */
+  --grad-sky:linear-gradient(160deg,#DCE9FF 0%,#A9C9FF 45%,#A8EBD9 100%);
+  --grad-sky-soft:linear-gradient(180deg,#E9F1FF 0%,#F4F8FE 60%,#EAF9F3 100%);
+  --grad-solution:linear-gradient(160deg,#EAF9F3 0%,#E4EEFF 100%);
+  --grad-text:linear-gradient(90deg,#5B8DEF,#34C48E);
+  /* Spacing (8px 베이스) */
+  --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px; --space-6:24px;
+  --space-8:32px; --space-12:48px; --space-16:64px; --space-20:80px;
+  --section-y:128px; --container:1120px;
+  /* Radius */
+  --r-sm:12px; --r-md:20px; --r-lg:28px; --r-pill:999px;
+  /* Shadow */
+  --shadow-sm:0 4px 16px rgba(90,141,239,.10);
+  --shadow-md:0 12px 40px rgba(90,141,239,.14);
+  --shadow-lg:0 24px 60px rgba(90,141,239,.18);
+  /* Glass blur */
+  --blur-chip:12px; --blur-card:24px; --blur-panel:30px;
+  /* Type scale */
+  --font-h1:56px; --font-h2:40px; --font-h3:22px; --font-body:17px;
+  --font-caption:13px;
+  /* Form */
+  --input-border:#E2E9F4;
+  --cta-h:52px;
+}
+@media (max-width:767px){
+  :root{
+    --font-h1:34px; --font-h2:28px; --font-h3:20px; --font-body:16px;
+    --section-y:72px;
+  }
+}
+
+/* ═══════════════ 베이스 ═══════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Pretendard',-apple-system,sans-serif;
+  color:var(--ink-900);
+  background:var(--bg-white);
+  font-size:var(--font-body);
+  line-height:1.7;
+  letter-spacing:-0.01em;
+  word-break:keep-all; /* 한국어 단어 중간 줄바꿈 방지 */
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+input{font-family:inherit;}
+:focus-visible{outline:3px solid rgba(91,141,239,.6);outline-offset:2px;border-radius:4px;}
+
+.container{max-width:var(--container);margin:0 auto;padding:0 clamp(20px,5vw,24px);}
+section{position:relative;padding:var(--section-y) 0;}
+
+h1{font-size:var(--font-h1);font-weight:800;line-height:1.15;letter-spacing:-0.03em;}
+h2{font-size:var(--font-h2);font-weight:700;line-height:1.2;letter-spacing:-0.02em;}
+h3{font-size:var(--font-h3);font-weight:700;line-height:1.3;letter-spacing:-0.02em;}
+.sub{color:var(--ink-600);max-width:42em;}
+.caption{font-size:var(--font-caption);font-weight:500;line-height:1.5;letter-spacing:0;color:var(--ink-400);}
+.eyebrow{font-size:13px;font-weight:600;line-height:1;letter-spacing:0.06em;color:var(--blue-600);display:inline-block;margin-bottom:var(--space-4);}
+.grad-text{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.em-text{color:var(--blue-600);}
+.center{text-align:center;}
+.center .sub{margin-left:auto;margin-right:auto;}
+
+/* ═══════════════ 글래스 ═══════════════ */
+.glass{
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(var(--blur-card)) saturate(1.4);
+  -webkit-backdrop-filter:blur(var(--blur-card)) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.7);
+  border-radius:var(--r-md);
+  box-shadow:var(--shadow-md),inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.glass-chip{
+  background:rgba(255,255,255,0.5);
+  backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  -webkit-backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  border:1px solid rgba(255,255,255,0.7);
+  border-radius:var(--r-pill);
+  box-shadow:var(--shadow-sm);
+}
+.glass-panel{
+  background:rgba(255,255,255,0.62);
+  backdrop-filter:blur(var(--blur-panel)) saturate(1.4);
+  -webkit-backdrop-filter:blur(var(--blur-panel)) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.75);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-lg),inset 0 1px 0 rgba(255,255,255,0.6);
+}
+@supports not (backdrop-filter:blur(1px)){
+  .glass,.glass-chip,.glass-panel{background:rgba(255,255,255,0.85);}
+}
+.card-hover{transition:transform .3s ease,box-shadow .3s ease;}
+.card-hover:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg),inset 0 1px 0 rgba(255,255,255,0.6);}
+
+/* ═══════════════ 구름 & 오브 ═══════════════ */
+.sky-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.cloud{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(255,255,255,0.95),rgba(255,255,255,0) 70%);
+  filter:blur(12px);
+  animation:cloudFloat 30s ease-in-out infinite alternate;
+}
+.cloud::before,.cloud::after{
+  content:'';position:absolute;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(255,255,255,0.9),rgba(255,255,255,0) 70%);
+}
+.cloud::before{width:70%;height:70%;left:-25%;top:22%;}
+.cloud::after{width:60%;height:60%;right:-20%;top:30%;}
+.cloud.faint{opacity:.3;filter:blur(16px);}
+@keyframes cloudFloat{from{transform:translateX(0);}to{transform:translateX(18px);}}
+.orb{position:absolute;border-radius:50%;filter:blur(50px);opacity:.5;animation:cloudFloat 38s ease-in-out infinite alternate-reverse;}
+
+/* ═══════════════ 버튼 · 입력칸 · 칩 ═══════════════ */
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--blue-500);color:#fff;
+  font-size:16px;font-weight:700;letter-spacing:-0.01em;
+  border-radius:var(--r-pill);padding:16px 28px;min-height:var(--cta-h);
+  box-shadow:var(--shadow-md);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+  white-space:nowrap;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);background:var(--blue-600);}
+.btn-primary:active{transform:translateY(0);box-shadow:var(--shadow-sm);}
+.btn-primary.hero-cta{font-size:17px;padding:18px 40px;min-height:58px;}
+.link-plain{color:var(--blue-600);font-weight:600;font-size:15px;border-bottom:1px solid transparent;transition:border-color .2s;}
+.link-plain:hover{border-bottom-color:var(--blue-600);}
+
+.email-form{display:flex;gap:var(--space-3);width:100%;max-width:520px;}
+.email-form input[type="email"]{
+  flex:1;min-width:0;height:var(--cta-h);
+  background:#fff;border:1px solid var(--input-border);border-radius:var(--r-pill);
+  padding:0 20px;font-size:16px;color:var(--ink-900);
+  transition:border-color .2s,box-shadow .2s;
+}
+.email-form input[type="email"]::placeholder{color:var(--ink-400);}
+.email-form input[type="email"]:focus{
+  outline:none;border-color:var(--blue-500);
+  box-shadow:0 0 0 3px rgba(125,167,244,.25);
+}
+.form-error{display:none;color:#D9534F;font-size:13px;font-weight:500;margin-top:var(--space-2);}
+.form-wrap.invalid .form-error{display:block;}
+.micro{font-size:var(--font-caption);color:var(--ink-400);margin-top:var(--space-3);line-height:1.5;}
+@media (max-width:767px){
+  .email-form{flex-direction:column;}
+  .email-form .btn-primary{width:100%;}
+}
+
+/* ═══════════════ 내비게이션 ═══════════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;height:64px;
+  transition:background .3s,box-shadow .3s,border-color .3s;
+  border-bottom:1px solid transparent;
+}
+.nav.scrolled{
+  background:rgba(255,255,255,0.7);
+  backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  -webkit-backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  border-bottom-color:rgba(125,167,244,.18);
+}
+.nav-inner{max-width:var(--container);margin:0 auto;height:64px;padding:0 clamp(20px,5vw,24px);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);}
+.nav-menu{display:flex;gap:var(--space-8);align-items:center;}
+.nav-menu a{font-size:15px;font-weight:500;color:var(--ink-600);transition:color .2s;}
+.nav-menu a:hover{color:var(--ink-900);}
+.nav .btn-primary{padding:10px 20px;min-height:40px;font-size:14px;}
+@media (max-width:767px){.nav-menu{display:none;}}
+
+.logo{display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:700;color:var(--ink-900);letter-spacing:-0.02em;}
+.logo svg{width:22px;height:22px;}
+
+/* ═══════════════ Hero ═══════════════ */
+.hero{
+  background:var(--grad-sky);
+  padding-top:calc(64px + var(--space-16));
+  padding-bottom:0;overflow:hidden;
+}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink-900);border:1px solid rgba(255,216,77,.55);margin-bottom:var(--space-6);}
+.hero h1{margin-bottom:var(--space-6);white-space:pre-line;}
+.hero .sub{margin-bottom:var(--space-8);white-space:pre-line;}
+.hero-slogan{font-size:14px;font-weight:600;color:var(--blue-600);margin-bottom:var(--space-3);letter-spacing:0.02em;}
+.hero-form-wrap{width:100%;display:flex;flex-direction:column;align-items:center;}
+.hero .browse{margin-top:var(--space-6);}
+.hero-mockup{position:relative;z-index:2;margin:var(--space-16) auto calc(-1 * var(--space-8));max-width:760px;width:100%;}
+@media (max-width:767px){.hero-mockup{margin-top:var(--space-12);}}
+
+/* ═══════════════ 목업 공통 (CSS 스켈레톤 UI) ═══════════════ */
+.mock-frame{border-radius:var(--r-lg);padding:var(--space-3);}
+.mock-bar{display:flex;gap:6px;padding:6px 6px 12px;}
+.mock-bar i{width:10px;height:10px;border-radius:50%;display:block;}
+.mock-bar i:nth-child(1){background:#FF8A80;}
+.mock-bar i:nth-child(2){background:var(--lemon-500);}
+.mock-bar i:nth-child(3){background:var(--green-500);}
+.mock-body{background:#fff;border-radius:var(--r-sm);padding:var(--space-4);text-align:left;box-shadow:inset 0 0 0 1px rgba(226,233,244,.8);}
+.sk{background:#EDF2FA;border-radius:6px;height:10px;}
+.sk.w40{width:40%;}.sk.w60{width:60%;}.sk.w80{width:80%;}
+.mock-row{display:flex;align-items:center;gap:var(--space-3);padding:10px 12px;border-radius:10px;}
+.mock-row + .mock-row{margin-top:6px;}
+.mock-row.hot{background:rgba(255,226,122,.28);box-shadow:inset 0 0 0 1px rgba(255,216,77,.5);}
+.mock-label{font-size:12.5px;font-weight:600;color:var(--ink-900);white-space:nowrap;}
+.mock-sub{font-size:11.5px;color:var(--ink-400);white-space:nowrap;}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:var(--r-pill);padding:3px 10px;white-space:nowrap;}
+.chip.blue{background:var(--blue-100);color:#3B66C4;}
+.chip.mint{background:var(--mint-200);color:#177A58;}
+.chip.lemon{background:var(--lemon-400);color:#7A6410;}
+.chip.gray{background:#EDF2FA;color:var(--ink-600);}
+.dday{flex:none;white-space:nowrap;font-size:11px;font-weight:700;border-radius:var(--r-pill);padding:3px 9px;background:var(--blue-100);color:#3B66C4;}
+.dday.urgent{background:var(--lemon-400);color:#7A6410;}
+
+/* ═══════════════ Section 2 · 공감 ═══════════════ */
+.sec-problem{background:var(--bg-white);}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-top:var(--space-12);}
+.problem-card{padding:var(--space-8);}
+.problem-card h3{margin-bottom:var(--space-3);}
+.problem-card p{color:var(--ink-600);font-size:15.5px;}
+.problem-closing{margin-top:var(--space-16);text-align:center;font-size:clamp(19px,2.4vw,24px);font-weight:700;line-height:1.5;white-space:pre-line;color:var(--ink-900);}
+@media (max-width:767px){.problem-grid{grid-template-columns:1fr;}}
+
+/* ═══════════════ Section 3 · 솔루션 ═══════════════ */
+.sec-solution{background:var(--grad-solution);overflow:hidden;}
+.demo-flow{margin-top:var(--space-12);position:relative;z-index:2;}
+.demo-exp-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--ink-900);}
+/* Before 카드 — 업로드한 경험 메모 파일 느낌 */
+.demo-before{max-width:620px;margin:0 auto;padding:var(--space-3);text-align:left;background:rgba(255,255,255,0.42);border-style:dashed;border-color:rgba(147,161,181,.55);}
+/* BEFORE / AFTER 라벨 — 동일한 알약 버튼 모양 (중앙 정렬) */
+.demo-label-row{text-align:center;margin-bottom:var(--space-4);}
+.demo-pill{display:inline-flex;align-items:center;font-size:13px;font-weight:800;letter-spacing:.04em;border-radius:var(--r-pill);padding:8px 20px;}
+.demo-pill.before{background:rgba(255,255,255,0.72);border:1px solid rgba(147,161,181,.28);color:var(--ink-400);}
+.demo-pill.after{background:var(--blue-500);color:#fff;box-shadow:var(--shadow-sm);}
+.memo{background:#fff;border:1px solid var(--input-border);border-radius:var(--r-sm);padding:var(--space-4) var(--space-6);box-shadow:var(--shadow-sm);}
+.memo-head{display:flex;align-items:center;gap:8px;margin-bottom:var(--space-4);}
+.memo-ic{flex:none;width:22px;height:22px;}
+.memo-ic svg{width:22px;height:22px;}
+.memo-name{font-size:13.5px;font-weight:700;color:var(--ink-600);}
+.memo-uploaded{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:#157150;background:var(--mint-200);border-radius:var(--r-pill);padding:4px 11px;white-space:nowrap;}
+.memo-uploaded svg{width:13px;height:13px;}
+.memo-title{font-size:14.5px;font-weight:700;color:var(--ink-900);margin-bottom:6px;}
+.memo-body{color:var(--ink-600);font-size:15px;line-height:1.75;}
+/* Before → After 화살표 구분자 */
+.demo-divider{display:flex;flex-direction:column;align-items:center;gap:8px;margin:var(--space-6) 0;}
+.demo-arrow{font-size:24px;font-weight:800;line-height:1;color:var(--blue-500);animation:arrowBob 2.2s ease-in-out infinite;}
+@keyframes arrowBob{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);}
+.demo-card{padding:var(--space-8);text-align:left;background:rgba(255,255,255,0.82);}
+.demo-card .org{display:inline-block;font-size:13px;font-weight:700;color:var(--blue-600);background:var(--blue-100);border-radius:var(--r-pill);padding:5px 14px;margin-bottom:var(--space-4);}
+.demo-card.alt .org{color:#177A58;background:var(--mint-200);}
+.demo-card p{color:var(--ink-900);font-size:15.5px;line-height:1.9;}
+/* 강조 — 배경 없이 글자 굵기·색만 (기관 색상) */
+.demo-card mark{background:none;color:#2E5AB8;font-weight:700;}
+.demo-card.alt mark{background:none;color:#157150;}
+.demo-caption{text-align:center;margin-top:var(--space-6);}
+/* 프로세스 — 독립 섹션 (기존 흰 배경 사용) */
+.sec-process{background:var(--bg-white);}
+.process-head{margin-bottom:var(--space-12);}
+.process-title{margin-top:var(--space-3);white-space:pre-line;}
+.steps{display:flex;align-items:stretch;justify-content:center;gap:var(--space-3);}
+.step{flex:1;padding:var(--space-6);text-align:left;}
+.step .num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--blue-500);color:#fff;font-size:15px;font-weight:700;margin-bottom:var(--space-4);box-shadow:var(--shadow-sm);}
+.step h4{font-size:18px;font-weight:700;margin-bottom:var(--space-2);color:var(--ink-900);}
+.step p{color:var(--ink-600);font-size:14.5px;}
+.step-arrow{flex:none;align-self:center;font-size:24px;font-weight:800;color:var(--blue-300);}
+.mid-cta{margin-top:var(--space-16);text-align:center;position:relative;z-index:2;}
+@media (max-width:767px){
+  .demo-grid{grid-template-columns:1fr;}
+  .steps{flex-direction:column;gap:var(--space-2);}
+  .step-arrow{transform:rotate(90deg);align-self:center;}
+}
+
+/* ═══════════════ Section 4 · 기능 ═══════════════ */
+.sec-features{background:var(--bg-tint);}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-6);margin-top:var(--space-12);}
+.feature-card{position:relative;padding:var(--space-8) var(--space-6);display:flex;flex-direction:column;gap:var(--space-3);}
+.feature-card .flabel{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--blue-600);}
+.feature-card .flabel svg{width:16px;height:16px;flex:none;}
+.feature-card h3{white-space:pre-line;margin-bottom:2px;}
+.feature-card > p{color:var(--ink-600);font-size:15px;margin-bottom:var(--space-2);}
+/* 목업 — 윈도우 프레임(3점 바) */
+.feature-screen{margin-top:auto;background:#fff;border:1px solid var(--input-border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden;}
+.mock-topbar{display:flex;gap:5px;padding:9px 13px;background:#FAFCFF;border-bottom:1px solid #EFF3FA;}
+.mock-topbar i{width:8px;height:8px;border-radius:50%;}
+.mock-topbar i:nth-child(1){background:#FFB4AC;}
+.mock-topbar i:nth-child(2){background:#FFE0A3;}
+.mock-topbar i:nth-child(3){background:#A8E6CC;}
+.feature-mock{padding:var(--space-4);}
+.fm-btn{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--blue-500);border-radius:var(--r-pill);padding:5px 12px;}
+.fm-title{font-size:12px;font-weight:700;color:var(--ink-900);margin-bottom:8px;}
+.fm-panel{background:var(--bg-tint);border-radius:8px;padding:8px;}
+.match{font-size:10.5px;font-weight:700;color:#177A58;background:var(--mint-200);border-radius:var(--r-pill);padding:2px 8px;}
+.mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px;}
+.mini-cal i{display:block;aspect-ratio:1;border-radius:4px;background:#EDF2FA;}
+.mini-cal i.mark{background:var(--blue-300);}
+.mini-cal i.hot{background:var(--lemon-400);}
+@media (max-width:1023px){.feature-grid{grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto;}}
+
+/* ═══════════════ Section 5 · 커버리지 ═══════════════ */
+.sec-coverage{background:var(--bg-white);overflow:hidden;}
+.coverage-checks{max-width:620px;margin:var(--space-12) auto 0;padding:var(--space-8);text-align:left;}
+.coverage-checks ul{list-style:none;display:flex;flex-direction:column;gap:var(--space-5);}
+.coverage-checks li{display:flex;align-items:center;gap:var(--space-4);font-size:16px;font-weight:600;color:var(--ink-900);}
+.check-ic{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blue-100);color:var(--blue-600);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+.marquee-zone{margin-top:var(--space-16);display:flex;flex-direction:column;gap:var(--space-4);}
+.marquee{overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+.marquee-track{display:flex;gap:var(--space-3);width:max-content;animation:marquee 42s linear infinite;}
+.marquee.reverse .marquee-track{animation-direction:reverse;animation-duration:48s;}
+.marquee:hover .marquee-track{animation-play-state:paused;}
+@keyframes marquee{to{transform:translateX(-50%);}}
+.org-chip{flex:none;font-size:13px;font-weight:600;color:var(--ink-600);padding:10px 18px;border-radius:var(--r-pill);}
+.coverage-micro{text-align:center;margin-top:var(--space-6);}
+
+/* ═══════════════ Section 7 · FAQ ═══════════════ */
+.sec-faq{background:var(--bg-white);} /* 다른 콘텐츠 섹션과 동일한 흰 배경 */
+.faq-list{max-width:720px;margin:var(--space-8) auto 0;display:flex;flex-direction:column;}
+.faq-item{border-bottom:1px solid rgba(147,161,181,.22);}
+.faq-item:first-child{border-top:1px solid rgba(147,161,181,.22);}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-5) var(--space-2);text-align:left;font-size:16px;font-weight:600;color:var(--ink-900);line-height:1.4;transition:color .2s;}
+.faq-q:hover,.faq-item.open .faq-q{color:var(--blue-600);}
+.faq-chevron{flex:none;width:22px;height:22px;color:var(--ink-400);transition:transform .3s ease,color .2s;}
+.faq-chevron svg{width:22px;height:22px;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);color:var(--blue-500);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.faq-a p{padding:0 var(--space-2) var(--space-5);color:var(--ink-600);font-size:15px;line-height:1.8;white-space:pre-line;}
+@media (max-width:767px){.faq-q{font-size:15px;}}
+
+/* ═══════════════ Section 6 · Final CTA ═══════════════ */
+.sec-final{background:var(--grad-sky);overflow:hidden;}
+.final-panel{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:var(--space-16) clamp(24px,6vw,64px);text-align:center;}
+.final-urgency{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-900);padding:7px 16px;margin-bottom:var(--space-6);border:1px solid rgba(255,216,77,.55);}
+.final-panel h2{white-space:pre-line;margin-bottom:var(--space-4);}
+.final-panel .sub{white-space:pre-line;margin:0 auto var(--space-8);}
+.final-panel .email-form{margin:0 auto;}
+.final-sun{position:absolute;left:50%;bottom:-180px;transform:translateX(-50%);width:520px;height:320px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,226,122,.5),rgba(255,226,122,0) 70%);filter:blur(40px);pointer-events:none;}
+
+/* ═══════════════ 성공 모달 · 미니 설문 ═══════════════ */
+.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:var(--space-4);background:rgba(30,42,59,.32);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.overlay.open{display:flex;}
+.survey-panel{position:relative;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;background:rgba(255,255,255,.94);padding:var(--space-8);text-align:left;}
+.survey-close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;font-size:18px;color:var(--ink-400);display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.survey-close:hover{background:#EDF2FA;color:var(--ink-900);}
+.survey-title{font-size:19px;font-weight:700;line-height:1.5;white-space:pre-line;margin-bottom:var(--space-6);}
+/* 신청 모달 1단계 — 이메일 입력 (친근한 디자인) */
+.signup-icon{width:60px;height:60px;border-radius:50%;background:var(--blue-500);display:flex;align-items:center;justify-content:center;margin:var(--space-2) auto var(--space-4);box-shadow:0 8px 22px rgba(90,141,239,.35);}
+.signup-icon svg{width:30px;height:30px;}
+.signup-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;text-align:center;margin-bottom:8px;}
+.signup-desc{font-size:14.5px;color:var(--ink-600);text-align:center;white-space:pre-line;line-height:1.6;margin-bottom:var(--space-6);}
+.signup-form{display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-3);}
+.signup-input{position:relative;}
+.signup-input .in-ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--ink-400);pointer-events:none;}
+.signup-form input{width:100%;height:56px;background:#fff;border:1.5px solid var(--input-border);border-radius:var(--r-pill);padding:0 18px 0 46px;font-size:16px;color:var(--ink-900);transition:border-color .2s,box-shadow .2s;}
+.signup-form input::placeholder{color:var(--ink-400);}
+.signup-form input:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 4px rgba(125,167,244,.22);}
+.signup-input:focus-within .in-ic{color:var(--blue-500);}
+.signup-form .form-error{margin:-2px 0 0 18px;}
+.signup-form .btn-primary{width:100%;height:56px;font-size:16.5px;}
+.survey-q{margin-bottom:var(--space-6);}
+.survey-q .q{font-size:14.5px;font-weight:700;margin-bottom:var(--space-3);}
+.chip-opts{display:flex;flex-wrap:wrap;gap:var(--space-2);}
+.chip-opt{font-size:13.5px;font-weight:500;color:var(--ink-600);background:#F4F8FE;border:1px solid var(--input-border);border-radius:var(--r-pill);padding:9px 16px;transition:all .15s;min-height:38px;}
+.chip-opt:hover{border-color:var(--blue-300);}
+.chip-opt.on{background:var(--blue-500);border-color:var(--blue-500);color:#fff;font-weight:600;}
+.survey-q input[type="text"]{width:100%;height:46px;background:#fff;border:1px solid var(--input-border);border-radius:var(--r-sm);padding:0 14px;font-size:14px;}
+.survey-q input[type="text"]:focus{outline:none;border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(125,167,244,.25);}
+.survey-panel .btn-primary{width:100%;}
+.survey-thanks{text-align:center;font-size:18px;font-weight:700;padding:var(--space-12) 0;}
+/* 최종 확인 화면 */
+.signup-done{text-align:center;padding:var(--space-8) var(--space-2);}
+.done-ic{width:66px;height:66px;border-radius:50%;background:var(--mint-200);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-4);}
+.done-ic svg{width:34px;height:34px;}
+.done-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;}
+.done-desc{font-size:14.5px;color:var(--ink-600);line-height:1.6;white-space:pre-line;}
+
+/* ═══════════════ 푸터 ═══════════════ */
+.footer{padding:var(--space-12) 0 calc(var(--space-12) + 72px);background:var(--bg-tint);}
+.footer-inner{display:flex;flex-direction:column;gap:var(--space-3);align-items:flex-start;}
+.footer p{font-size:14px;color:var(--ink-600);}
+.footer-contact{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
+.footer-dot{color:var(--ink-400);}
+.ig-link{display:inline-flex;align-items:center;gap:6px;color:#E1306C;font-weight:600;}
+.ig-link svg{width:16px;height:16px;}
+.ig-link:hover{border-bottom-color:#E1306C;}
+.footer .caption{margin-top:var(--space-2);}
+@media (min-width:768px){.footer{padding-bottom:var(--space-12);}}
+
+/* ═══════════════ 모바일 하단 고정 CTA 바 ═══════════════ */
+.mobile-cta{
+  position:fixed;left:0;right:0;bottom:0;z-index:90;display:none;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  -webkit-backdrop-filter:blur(var(--blur-chip)) saturate(1.3);
+  border-top:1px solid rgba(125,167,244,.2);
+}
+.mobile-cta .btn-primary{width:100%;}
+@media (max-width:767px){.mobile-cta.enabled{display:block;}}
+
+/* ═══════════════ 스크롤 진입 모션 ═══════════════ */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease-out,transform .6s ease-out;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1;transform:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- 내비게이션 -->
+<nav class="nav" id="nav" aria-label="주 메뉴"><div class="nav-inner" id="navInner"></div></nav>
+
+<main>
+  <!-- Section 1: Hero -->
+  <section class="hero" id="hero">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud" style="width:340px;height:150px;top:6%;left:-4%;"></div>
+      <div class="cloud" style="width:260px;height:120px;bottom:12%;right:-3%;animation-duration:38s;"></div>
+      <div class="cloud faint" style="width:420px;height:170px;top:26%;left:50%;transform:translateX(-50%);"></div>
+      <div class="orb" style="width:320px;height:320px;top:8%;right:6%;background:radial-gradient(closest-side,rgba(169,201,255,.85),rgba(169,201,255,0));"></div>
+      <div class="orb" style="width:260px;height:260px;bottom:4%;left:4%;background:radial-gradient(closest-side,rgba(168,235,217,.8),rgba(168,235,217,0));animation-duration:44s;"></div>
+      <div class="orb" style="width:110px;height:110px;top:52%;left:14%;background:radial-gradient(closest-side,rgba(255,226,122,.55),rgba(255,226,122,0));opacity:.6;"></div>
+    </div>
+    <div class="container hero-inner" id="heroContent"></div>
+    <div class="container"><div class="hero-mockup" id="heroMockup"></div></div>
+  </section>
+
+  <!-- Section 2: 공감 -->
+  <section class="sec-problem" id="problem">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud faint" style="width:260px;height:110px;top:4%;right:-4%;"></div>
+    </div>
+    <div class="container" id="problemContent" style="position:relative;z-index:2;"></div>
+  </section>
+
+  <!-- Section 3: 솔루션 -->
+  <section class="sec-solution" id="solution">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud faint" style="width:300px;height:130px;top:6%;left:-5%;"></div>
+      <div class="cloud faint" style="width:240px;height:100px;bottom:8%;right:-4%;animation-duration:36s;"></div>
+    </div>
+    <div class="container" id="solutionContent" style="position:relative;z-index:2;"></div>
+  </section>
+
+  <!-- Section 3.5: 사용 흐름(프로세스) -->
+  <section class="sec-process" id="process">
+    <div class="container" id="processContent" style="position:relative;z-index:2;"></div>
+  </section>
+
+  <!-- Section 4: 받게 되는 것 -->
+  <section class="sec-features" id="features">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud faint" style="width:280px;height:120px;bottom:4%;left:-5%;"></div>
+    </div>
+    <div class="container" id="featuresContent" style="position:relative;z-index:2;"></div>
+  </section>
+
+  <!-- Section 5: 부울경 기관 정보 -->
+  <section class="sec-coverage" id="coverage">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud faint" style="width:260px;height:110px;top:6%;right:-4%;"></div>
+    </div>
+    <div class="container" id="coverageContent" style="position:relative;z-index:2;"></div>
+    <div class="marquee-zone" id="marqueeZone"></div>
+    <div class="container"><p class="caption coverage-micro" id="coverageMicro"></p></div>
+  </section>
+
+  <!-- Section 6: Final CTA -->
+  <section class="sec-final" id="apply">
+    <div class="sky-layer" aria-hidden="true">
+      <div class="cloud" style="width:380px;height:160px;bottom:-6%;left:8%;"></div>
+      <div class="cloud" style="width:300px;height:130px;bottom:-4%;right:6%;animation-duration:36s;"></div>
+      <div class="cloud faint" style="width:300px;height:120px;top:8%;right:16%;"></div>
+      <div class="final-sun"></div>
+    </div>
+    <div class="container"><div class="glass-panel final-panel" id="finalContent"></div></div>
+  </section>
+
+  <!-- Section 7: FAQ -->
+  <section class="sec-faq" id="faq">
+    <div class="container" id="faqContent"></div>
+  </section>
+</main>
+
+<footer class="footer"><div class="container footer-inner" id="footerContent"></div></footer>
+
+<!-- 모바일 하단 고정 CTA 바 -->
+<div class="mobile-cta" id="mobileCta"></div>
+
+<!-- 신청 성공 + 미니 설문 모달 -->
+<div class="overlay" id="surveyOverlay" role="dialog" aria-modal="true" aria-label="신청 완료">
+  <div class="glass-panel survey-panel" id="surveyPanel"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   🔀 CONFIG — 켜고 끄기 스위치
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  showSurvey: true,        // 신청 후 미니 설문 표시
+  showMobileCtaBar: true,  // 모바일 하단 고정 CTA 바
+  showUrgency: true,       // Final CTA 긴박감 라인
+  betaSlots: 100,          // 정직한 희소성 문구에 쓰는 숫자
+  // 신청 데이터를 보낼 곳 (Formspree/Google Apps Script 등의 POST URL).
+  // 비워두면 브라우저 콘솔에만 기록됩니다. 배포 전 반드시 연결하세요!
+  formEndpoint: '',
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   ✏️ COPY — 모든 문구는 여기서만 수정
+   · {{...}} 로 감싼 구절은 그라디언트 강조로 렌더링됩니다 (섹션당 1회)
+   · \n 은 줄바꿈
+   ═══════════════════════════════════════════════════════════════ */
+const COPY = {
+  brand: {
+    name: 'Pickd',
+    slogan: '지원할수록 가벼워지는 취업 준비',
+  },
+  nav: {
+    menu: [
+      { label: '문제', href: '#problem' },
+      { label: '솔루션', href: '#solution' },
+      { label: '기능', href: '#features' },
+      { label: '기관 정보', href: '#coverage' },
+    ],
+    cta: '베타 신청',
+  },
+  hero: {
+    badge: '🍋 부울경 취준생 무료 베타 모집',
+    h1: '내 경험으로,\n{{기업에 맞는 자소서}}까지',
+    sub: '지원할 공고만 등록하면, 그 기업이 중요하게 보는 기준에 맞춰\n내 경험을 어떻게 쓸지 정리해드려요.',
+    formPlaceholder: '이메일 주소를 입력해 주세요',
+    /* A/B 테스트 후보: '무료로 미리 신청하기' / '베타 알림 받기' / '내 경험으로 베타 써보기' */
+    ctaPrimary: '무료 베타 신청하기',
+    micro: '',
+    browse: '먼저 둘러볼래요 →',
+    mockupCaption: '지원할수록 가벼워지는 취업 준비',
+  },
+  problem: {
+    label: '자소서를 쓸 때마다',
+    h2: '{{기업마다}}\n중요하게 보는 경험은 다릅니다',
+    sub: '공고와 인재상을 읽어도\n어떤 경험을 골라 무엇을 강조해야 할지는 알기 어려워요.',
+    cards: [
+      { title: '정보는 많은데, 기준은 없어요', desc: '홈페이지와 채용 공고, 취업 커뮤니티, 최신 기사까지 찾아보지만 자소서에 무엇을 반영할지는 결국 직접 판단해야 해요.' },
+      { title: '문항이 바뀔 때마다 다시 고민해요', desc: '지원동기, 직무역량, 협업 경험처럼 질문이 달라질 때마다 맞는 경험을 다시 찾아야 해요.' },
+      { title: '조언을 들을수록 더 헷갈려요', desc: '합격 자소서와 선배의 조언, AI의 답변을 참고해도 무엇을 적용해야 할지는 여전히 알기 어려워요.' },
+      { title: '기업에 맞추다 보면 내 이야기가 흐려져요', desc: '좋아 보이는 문장을 따라가다 보면 내가 실제로 한 일과 말투에서 조금씩 멀어져요.' },
+    ],
+    closing: '필요한 것은 새로운 경험이나 합격 자소서가 아니라,\n==내 경험을 기업의 기준에 맞게 작성==하는 방법입니다.',
+  },
+  solution: {
+    h2: '내 경험은 그대로,\n{{강조할 내용은 기업에 맞게}}',
+    sub: 'Pickd가 공고와 기업 정보를 분석해\n문항에 맞는 경험과 강조할 내용을 먼저 정리해드려요.',
+    /* Before: 사용자가 올린 원본 경험 메모 (정제되지 않은 상태) */
+    demoBeforeLabel: 'BEFORE · 내가 올린 경험 그대로',
+    demoBeforeFile: '김수빈_경험정리.txt',
+    demoBeforeUploaded: '업로드됨',
+    demoBeforeTitle: '부산 로컬 브랜드 팝업 기획 · 대외활동',
+    demoBeforeText: '부산 로컬 브랜드 팝업을 기획해 2주간 운영했다. 위치를 정하고 소상공인들과 함께 준비했고, 방문객을 보며 부스 배치도 바꿨다.',
+    /* After: 기관에 맞게 정렬한 자소서 — ==...== 로 감싼 부분이 강조 하이라이트됩니다 */
+    demoAfterLabel: 'AFTER · 기업에 맞게 정렬',
+    demoCards: [
+      { org: '부산창조경제혁신센터 지원 시', text: '비어가는 원도심 상권을 보며 사람을 다시 모으는 일에 도전하고 싶었습니다. ==유동인구와 임대 시세를 직접 조사==해 팝업 위치를 정했고, ==지역 소상공인들을 설득==해 2주 만에 매장을 열었습니다. 기획이 아이디어에서 끝나지 않고 ==지역 경제 안에서 실제로 작동==하게 만드는 과정을 경험했습니다.' },
+      { org: '부산디자인진흥원 지원 시', text: '좋은 기획은 ==사용자를 관찰==하는 데서 시작한다고 믿습니다. ==방문객의 동선을 지켜보며 부스 배치를 두 차례 조정==했고, ==안내물의 크기와 문구까지 다듬==었습니다. ==작은 반응 하나까지 설계에 반영==하며 디테일이 경험의 완성도를 결정한다는 것을 배웠습니다.' },
+    ],
+    demoCaption: '같은 경험도, 기업에 따라 강조하는 부분이 달라집니다.',
+    stepsEyebrow: '이렇게 사용해요',
+    stepsHeading: '3단계면,\n기업에 적합한 자소서가 완성돼요',
+    steps: [
+      { title: '내 경험을 올려요', desc: '메모, 기존 자소서, 활동 기록을 그대로 불러와요.' },
+      { title: '지원 공고를 등록해요', desc: '기업과 직무, 문항에서 중요하게 보는 기준을 확인해요.' },
+      { title: '맞는 경험을 연결해요', desc: '문항별로 적합한 경험과 강조점을 추천받고 초안을 완성해요.' },
+    ],
+    midCta: '내 경험으로 베타 써보기',
+  },
+  features: {
+    keyBadge: '핵심 기능',
+    h2: '흩어진 채용 준비가\n{{하나의 흐름}}으로',
+    sub: '공고를 확인하는 순간부터 자소서를 완성할 때까지,\n따로 놀던 준비를 한곳에서 이어가세요.',
+    cards: [
+      { label: '지원 일정 관리', headline: '지원할 공고와 마감을\n==한눈에 관리==할 수 있어요', desc: '공고, D-day, 전형 상태를 한 화면에서 확인해요.' },
+      { label: '경험 정리', headline: '한 번 정리한 경험을\n==자산처럼 계속 활용==할 수 있어요', desc: '활동과 성과를 경험별로 저장하고 필요한 순간 다시 꺼내 써요.' },
+      { label: '기업 맞춤 작성', headline: '기업 기준에 맞는 경험부터\n==자소서 초안까지 완성==할 수 있어요', desc: '기업 인재상과 문항에 맞춰 경험과 강조점을 연결하고 초안을 만들어요.' },
+    ],
+  },
+  coverage: {
+    h2: '{{부울경 공기업, 공공 기관}}은\n더 구체적으로 준비해요',
+    sub: '채용 공고 요약이 아니라, 기업을 깊게 이해할 수 있는\n데이터를 직접 구축해 자소서와 연결해드려요.',
+    checks: [
+      '기업의 미션·인재상·조직문화',
+      '지금 집중하는 주요 사업과 최신 동향',
+      '모집 직무에서 실제로 맡게 될 업무',
+      '자소서 문항별로 강조하면 좋은 경험',
+    ],
+    orgsRow1: ['부산교통공사','한국거래소(KRX)','부산테크노파크','한국자산관리공사(캠코)','부산디자인진흥원','영화의전당','한국주택금융공사(HF)','부산창조경제혁신센터','부산정보산업진흥원'],
+    orgsRow2: ['주택도시보증공사(HUG)','부산경제진흥원','한국해양진흥공사','부산문화재단','한국예탁결제원','영화진흥위원회(KOFIC)','부산연구원(BDI)','한국장학재단 부산센터','부산관광공사'],
+    micro: '부산 주요 공공기관부터 순차적으로 확대하고 있어요.',
+  },
+  finalCta: {
+    urgency: '🍋 부산 주요 공공기관부터 우선 오픈',
+    h2: '다음 자소서는,\n처음부터 다시 헤매지 않도록',
+    sub: '베타에 신청하면 기업 분석부터 자소서 초안까지\n가장 먼저 무료로 써볼 수 있어요.',
+    formPlaceholder: '이메일 주소를 입력해 주세요',
+    ctaPrimary: '무료 베타 우선 신청하기',
+    micro: '',
+  },
+  signup: {
+    title: '무료 베타 우선 신청',
+    desc: '이메일이나 전화번호를 남겨주시면\n서비스가 열릴 때 가장 먼저 알려드릴게요.',
+    placeholder: '이메일 또는 전화번호',
+    submit: '무료 베타 신청하기',
+    micro: '입력하신 연락처는 서비스 출시 알림 용도로만 사용돼요.',
+    doneTitle: '신청되었습니다. 감사합니다!',
+    doneDesc: '서비스가 열리면 입력하신 연락처로\n가장 먼저 알려드릴게요.',
+  },
+  survey: {
+    successTitle: '🎉 신청 완료! 베타 소식, 가장 먼저 전해드릴게요.\n1분만 더 — 아래에 답해주시면 딱 맞는 서비스로 준비할게요. (선택)',
+    questions: [
+      { id: 'target', q: '지금 어디를 준비하고 있나요?', options: ['공공기관','공기업','지역 기업','아직 탐색 중'] },
+      { id: 'pain', q: '자소서에서 가장 막히는 건 무엇인가요?', options: ['어떤 경험을 쓸지','기업에 맞추기','문장 표현','절대적 시간 부족'] },
+      { id: 'price', q: '이런 서비스라면 얼마까지 내볼 수 있나요?', options: ['무료면 써볼래요','월 5천~1만원','월 1만~3만원','도움 되면 더 낼 수 있어요'] },
+    ],
+    freeQ: { id: 'wish', q: '가장 갖고 싶은 기능이 있다면?', placeholder: '예: 부산 공공기관 합격 자소서 예시' },
+    submit: '답변 보내기',
+    thanks: '보내주셔서 고마워요 🙌',
+    invalidEmail: '이메일 또는 전화번호를 다시 확인해 주세요.',
+  },
+  mobileCta: '무료 베타 신청하기',
+  faq: {
+    eyebrow: '자주 묻는 질문',
+    h2: '궁금한 점을 모았어요',
+    items: [
+      { q: '정말 무료인가요?', a: '네, 베타 기간에는 무료로 사용하실 수 있어요.\n신청도 이메일이나 전화번호만 남기면 끝이고, 참여 비용은 없습니다.' },
+      { q: '자소서를 대신 써주는 서비스인가요?', a: '내 경험을 그대로 살려, 기업에 맞게 정리해주는 서비스예요.\n없던 이야기를 만드는 게 아니라 이미 가진 경험 중 무엇을 어떻게 보여줄지 찾아드리고, 초안은 직접 다듬을 수 있어요.' },
+      { q: '어떤 기업·기관을 준비할 수 있나요?', a: '부산·울산·경남의 공공기관과 공기업부터 시작해요.\n기업별 인재상과 주요 사업, 자소서 문항 데이터를 직접 구축하고 있고, 다루는 곳을 순차적으로 넓혀가고 있어요.' },
+      { q: 'AI가 쓴 티가 나진 않을까요?', a: '내 문체와 실제 경험을 기준으로 정리하기 때문에 내가 쓴 글에서 크게 벗어나지 않아요.\n추천받은 초안을 바탕으로 직접 고쳐 쓰면서 내 이야기를 그대로 유지할 수 있어요.' },
+    ],
+  },
+  footer: {
+    tagline: '부울경 취준생을 위한 AI 취업 매니지먼트, Pickd',
+    email: 'pickd.ai.kr@gmail.com',
+    instagram: '@pickd.ai.kr',
+    instagramUrl: 'https://instagram.com/pickd.ai.kr',
+    copyright: '© 2026 Pickd',
+  },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   렌더링 — 아래 코드는 COPY/CONFIG 값을 화면에 그리는 로직입니다.
+   문구·디자인 수정 시 이 아래는 건드릴 필요 없습니다.
+   ═══════════════════════════════════════════════════════════════ */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// {{...}} → 그라디언트 강조, \n → <br>
+// {{...}} = 그라디언트 강조, ==...== = 브랜드 컬러 강조, \n = 줄바꿈
+const rich = s => esc(s)
+  .replace(/\{\{(.+?)\}\}/g,'<span class="grad-text">$1</span>')
+  .replace(/==(.+?)==/g,'<span class="em-text">$1</span>')
+  .replace(/\n/g,'<br>');
+// ==...== → 강조 하이라이트 (Before/After 데모 자소서용)
+const hl = s => esc(s).replace(/==(.+?)==/g,'<mark>$1</mark>');
+
+const logoSvg = `<svg viewBox="0 0 24 24" aria-hidden="true">
+  <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7DA7F4"/><stop offset="1" stop-color="#A9C9FF"/>
+  </linearGradient></defs>
+  <path d="M17.5 4.5c.9-.9 2.4-1.1 2.4-1.1s-.2 1.5-1.1 2.4" fill="none" stroke="#34C48E" stroke-width="1.8" stroke-linecap="round"/>
+  <ellipse cx="11.5" cy="13.5" rx="8.2" ry="7" transform="rotate(-18 11.5 13.5)" fill="url(#lg)"/>
+  <ellipse cx="9.2" cy="11.4" rx="2.6" ry="1.6" transform="rotate(-18 9.2 11.4)" fill="rgba(255,255,255,.45)"/>
+</svg>`;
+const logoHtml = `<a class="logo" href="#hero" aria-label="Pickd 홈">${logoSvg}<span>${esc(COPY.brand.name)}</span></a>`;
+
+// 업로드 메모 아이콘 (이모지 대신 인라인 SVG — 렌더링 안정)
+const docSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="3" width="15" height="18" rx="2.5" fill="#F4F8FE" stroke="#A9C9FF" stroke-width="1.5"/><line x1="8" y1="8.5" x2="16" y2="8.5" stroke="#7DA7F4" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12.5" x2="16" y2="12.5" stroke="#CBD8EC" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="16.5" x2="13" y2="16.5" stroke="#CBD8EC" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const checkSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4 4 10-10" stroke="#34C48E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// 인스타그램 아이콘 (계정임을 드러내는 글리프)
+const igSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor"/></svg>`;
+
+/* 내비게이션 */
+document.getElementById('navInner').innerHTML = `
+  ${logoHtml}
+  <div class="nav-menu">${COPY.nav.menu.map(m=>`<a href="${m.href}">${esc(m.label)}</a>`).join('')}</div>
+  <a class="btn-primary" href="#apply" data-open-signup>${esc(COPY.nav.cta)}</a>`;
+
+/* 이메일 폼 (히어로/최하단 공용) */
+const emailForm = (idPrefix, placeholder, cta, micro) => `
+  <div class="form-wrap hero-form-wrap" id="${idPrefix}Wrap" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <form class="email-form" data-signup novalidate>
+      <input type="email" id="${idPrefix}Email" name="email" placeholder="${esc(placeholder)}" autocomplete="email" aria-label="이메일 주소" required>
+      <button type="submit" class="btn-primary">${esc(cta)}</button>
+    </form>
+    <p class="form-error" role="alert">${esc(COPY.survey.invalidEmail)}</p>
+    <p class="micro">${esc(micro)}</p>
+  </div>`;
+
+/* Section 1: Hero */
+document.getElementById('heroContent').innerHTML = `
+  <span class="glass-chip hero-badge reveal">${esc(COPY.hero.badge)}</span>
+  <h1 class="reveal">${rich(COPY.hero.h1)}</h1>
+  <p class="sub reveal">${rich(COPY.hero.sub)}</p>
+  <div class="reveal" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <button type="button" class="btn-primary hero-cta" data-open-signup>${esc(COPY.hero.ctaPrimary)}</button>
+    ${COPY.hero.micro ? `<p class="micro">${esc(COPY.hero.micro)}</p>` : ''}
+    <p class="browse"><a class="link-plain" href="#features">${esc(COPY.hero.browse)}</a></p>
+  </div>`;
+
+/* 히어로 목업: 지원 대시보드 (CSS 스켈레톤) */
+document.getElementById('heroMockup').innerHTML = `
+  <div class="glass-panel mock-frame reveal">
+    <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="mock-body" role="img" aria-label="Pickd 지원 대시보드 미리보기">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span class="fm-title" style="margin:0;">이번 주 지원 현황</span>
+        <span class="chip mint">4곳 진행 중</span>
+      </div>
+      <div class="mock-row hot">
+        <span class="mock-label">부산디자인진흥원</span><span class="mock-sub">전시기획</span>
+        <span class="chip blue">작성 중</span><span style="flex:1"></span><span class="dday urgent">D-2</span>
+      </div>
+      <div class="mock-row">
+        <span class="mock-label">부산테크노파크</span><span class="mock-sub">사업기획</span>
+        <span class="chip gray">서류 준비</span><span style="flex:1"></span><span class="dday">D-6</span>
+      </div>
+      <div class="mock-row">
+        <span class="mock-label">영화의전당</span><span class="mock-sub">공연운영</span>
+        <span class="chip blue">제출 완료</span><span style="flex:1"></span><span class="dday">D-9</span>
+      </div>
+    </div>
+    <p class="caption" style="text-align:center;padding:10px 0 2px;">${esc(COPY.hero.mockupCaption)}</p>
+  </div>`;
+
+/* Section 2: 공감 */
+document.getElementById('problemContent').innerHTML = `
+  <div class="center">
+    <span class="eyebrow reveal">${esc(COPY.problem.label)}</span>
+    <h2 class="reveal" style="white-space:pre-line;">${rich(COPY.problem.h2)}</h2>
+    <p class="sub reveal" style="white-space:pre-line;margin-top:var(--space-4);">${rich(COPY.problem.sub)}</p>
+  </div>
+  <div class="problem-grid">
+    ${COPY.problem.cards.map(c=>`
+      <div class="glass problem-card card-hover reveal">
+        <h3>${esc(c.title)}</h3><p>${esc(c.desc)}</p>
+      </div>`).join('')}
+  </div>
+  <p class="problem-closing reveal">${rich(COPY.problem.closing)}</p>`;
+
+/* Section 3: 솔루션 */
+document.getElementById('solutionContent').innerHTML = `
+  <div class="center">
+    <h2 class="reveal" style="white-space:pre-line;">${rich(COPY.solution.h2)}</h2>
+    <p class="sub reveal" style="white-space:pre-line;margin-top:var(--space-4);">${rich(COPY.solution.sub)}</p>
+  </div>
+  <div class="demo-flow">
+    <div class="demo-label-row reveal"><span class="demo-pill before">${esc(COPY.solution.demoBeforeLabel)}</span></div>
+    <div class="glass demo-before reveal">
+      <div class="memo">
+        <div class="memo-head">
+          <span class="memo-ic">${docSvg}</span>
+          <span class="memo-name">${esc(COPY.solution.demoBeforeFile)}</span>
+          <span class="memo-uploaded">${checkSvg}${esc(COPY.solution.demoBeforeUploaded)}</span>
+        </div>
+        <p class="memo-title">${esc(COPY.solution.demoBeforeTitle)}</p>
+        <p class="memo-body">${esc(COPY.solution.demoBeforeText)}</p>
+      </div>
+    </div>
+    <div class="demo-divider reveal">
+      <span class="demo-arrow" aria-hidden="true">↓</span>
+      <span class="demo-pill after">${esc(COPY.solution.demoAfterLabel)}</span>
+    </div>
+    <div class="demo-grid">
+      ${COPY.solution.demoCards.map((c,i)=>`
+        <div class="glass demo-card card-hover reveal ${i===1?'alt':''}">
+          <span class="org">${esc(c.org)}</span><p>${hl(c.text)}</p>
+        </div>`).join('')}
+    </div>
+  </div>
+  <p class="caption demo-caption reveal">${esc(COPY.solution.demoCaption)}</p>`;
+
+/* Section 3.5: 사용 흐름(프로세스) — 별도 섹션 */
+document.getElementById('processContent').innerHTML = `
+  <div class="process-head center reveal">
+    <span class="eyebrow">${esc(COPY.solution.stepsEyebrow)}</span>
+    <h2 class="process-title">${rich(COPY.solution.stepsHeading)}</h2>
+  </div>
+  <div class="steps">
+    ${COPY.solution.steps.map((s,i)=>`
+      ${i>0?'<span class="step-arrow reveal" aria-hidden="true">→</span>':''}
+      <div class="glass step card-hover reveal">
+        <span class="num">${i+1}</span><h4>${esc(s.title)}</h4><p>${esc(s.desc)}</p>
+      </div>`).join('')}
+  </div>
+  <div class="mid-cta reveal"><a class="btn-primary" href="#apply" data-open-signup>${esc(COPY.solution.midCta)} →</a></div>`;
+
+/* Section 4: 기능 — 미니 목업 3종 */
+const featureMocks = [
+  /* 기능1: 지원 일정 보드 + 미니 캘린더 */
+  `<div class="feature-mock" role="img" aria-label="지원 일정 대시보드 미리보기">
+    <div class="mock-row hot" style="padding:8px 10px;">
+      <span class="mock-label">부산디자인진흥원</span>
+      <span class="chip blue">작성 중</span><span style="flex:1"></span><span class="dday urgent">D-2</span>
+    </div>
+    <div class="mock-row" style="padding:8px 10px;">
+      <span class="mock-label">부산테크노파크</span>
+      <span class="chip gray">서류 준비</span><span style="flex:1"></span><span class="dday">D-6</span>
+    </div>
+    <div class="mock-row" style="padding:8px 10px;">
+      <span class="mock-label">영화의전당</span>
+      <span class="chip blue">제출 완료</span><span style="flex:1"></span><span class="dday">D-9</span>
+    </div>
+    <div class="fm-panel" style="margin-top:8px;">
+      <div class="fm-title" style="font-size:11px;margin-bottom:6px;">7월 마감 캘린더</div>
+      <div class="mini-cal" style="margin-top:0;">
+        <i></i><i></i><i class="hot"></i><i></i><i></i><i class="mark"></i><i></i>
+        <i></i><i class="mark"></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+  </div>`,
+  /* 기능2: 경험 리스트 + STAR 카드 */
+  `<div class="feature-mock" role="img" aria-label="경험 정리 화면 미리보기">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span class="fm-title" style="margin:0;">내 경험 12개</span>
+      <span class="fm-btn">자소서로 바로 쓰기</span>
+    </div>
+    <div class="mock-row" style="padding:8px 10px;flex-wrap:wrap;">
+      <span class="mock-label">로컬 브랜드 팝업 기획</span>
+      <span class="chip blue">기획력</span><span class="chip mint">협업</span>
+    </div>
+    <div class="fm-panel" style="margin-top:6px;">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;gap:8px;align-items:center;"><span class="chip gray">상황</span><span class="sk w80" style="flex:1"></span></div>
+        <div style="display:flex;gap:8px;align-items:center;"><span class="chip gray">행동</span><span class="sk w60" style="flex:1"></span></div>
+        <div style="display:flex;gap:8px;align-items:center;"><span class="chip mint">결과</span><span class="sk w40" style="flex:1"></span></div>
+      </div>
+    </div>
+    <div class="mock-row" style="padding:8px 10px;flex-wrap:wrap;margin-top:6px;">
+      <span class="mock-label">교내 데이터 공모전</span>
+      <span class="chip blue">데이터 분석</span>
+    </div>
+  </div>`,
+  /* 기능3: 에디터 + 인재상 사이드패널 (핵심) */
+  `<div class="feature-mock" role="img" aria-label="기관 맞춤 자소서 작성 화면 미리보기">
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1.1;display:flex;flex-direction:column;gap:6px;">
+        <div class="fm-title" style="margin-bottom:2px;">자소서 초안</div>
+        <span class="sk w80"></span><span class="sk w60"></span><span class="sk w80"></span><span class="sk w40"></span>
+        <span class="fm-btn" style="margin-top:6px;align-self:flex-start;">AI 초안 생성</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+        <div class="fm-panel">
+          <div class="fm-title" style="font-size:11px;margin-bottom:6px;">이 기업의 인재상</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            <span class="chip blue">도전</span><span class="chip blue">지역 이해</span><span class="chip blue">협업</span>
+          </div>
+        </div>
+        <div class="fm-panel">
+          <div class="fm-title" style="font-size:11px;margin-bottom:6px;">추천 경험</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;margin-bottom:5px;">
+            <span class="mock-sub" style="color:var(--ink-600);">☑ 팝업 기획</span><span class="match">적합 92%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+            <span class="mock-sub">☐ 공모전</span><span class="match" style="background:#EDF2FA;color:var(--ink-400);">적합 78%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`,
+];
+// 기능 라벨 아이콘 (인라인 SVG · currentColor 상속)
+const featIcons = [
+  `<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5h17" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 12.5h8M8 16h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.5 5.5l4 4L9 19l-4.6.6.6-4.6 9.5-9.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
+];
+document.getElementById('featuresContent').innerHTML = `
+  <div class="center">
+    <h2 class="reveal" style="white-space:pre-line;">${rich(COPY.features.h2)}</h2>
+    <p class="sub reveal" style="white-space:pre-line;margin-top:var(--space-4);">${rich(COPY.features.sub)}</p>
+  </div>
+  <div class="feature-grid">
+    ${COPY.features.cards.map((c,i)=>`
+      <div class="glass feature-card card-hover reveal ${i===2?'key':''}">
+        <span class="flabel">${featIcons[i]}${esc(c.label)}</span>
+        <h3>${rich(c.headline)}</h3>
+        <p>${esc(c.desc)}</p>
+        <div class="feature-screen">
+          <div class="mock-topbar" aria-hidden="true"><i></i><i></i><i></i></div>
+          ${featureMocks[i]}
+        </div>
+      </div>`).join('')}
+  </div>`;
+
+/* Section 5: 커버리지 */
+document.getElementById('coverageContent').innerHTML = `
+  <div class="center">
+    <h2 class="reveal" style="white-space:pre-line;">${rich(COPY.coverage.h2)}</h2>
+    <p class="sub reveal" style="white-space:pre-line;margin-top:var(--space-4);">${rich(COPY.coverage.sub)}</p>
+  </div>
+  <div class="glass coverage-checks reveal">
+    <ul>${COPY.coverage.checks.map(c=>`<li><span class="check-ic" aria-hidden="true">✓</span>${esc(c)}</li>`).join('')}</ul>
+  </div>`;
+const chipRow = list => list.concat(list).map(o=>`<span class="glass-chip org-chip">${esc(o)}</span>`).join('');
+document.getElementById('marqueeZone').innerHTML = `
+  <div class="marquee" aria-hidden="true"><div class="marquee-track">${chipRow(COPY.coverage.orgsRow1)}</div></div>
+  <div class="marquee reverse" aria-hidden="true"><div class="marquee-track">${chipRow(COPY.coverage.orgsRow2)}</div></div>`;
+document.getElementById('coverageMicro').textContent = COPY.coverage.micro;
+
+/* Section 6: Final CTA */
+document.getElementById('finalContent').innerHTML = `
+  ${CONFIG.showUrgency ? `<span class="glass-chip final-urgency reveal">${esc(COPY.finalCta.urgency)}</span>` : ''}
+  <h2 class="reveal">${rich(COPY.finalCta.h2)}</h2>
+  <p class="sub reveal">${rich(COPY.finalCta.sub)}</p>
+  <div class="reveal" style="display:flex;flex-direction:column;align-items:center;">
+    <button type="button" class="btn-primary hero-cta" data-open-signup>${esc(COPY.finalCta.ctaPrimary)}</button>
+    ${COPY.finalCta.micro ? `<p class="micro">${esc(COPY.finalCta.micro)}</p>` : ''}
+  </div>`;
+
+/* 푸터 */
+document.getElementById('footerContent').innerHTML = `
+  ${logoHtml}
+  <p>${esc(COPY.footer.tagline)}</p>
+  <p class="footer-contact">
+    <a class="link-plain" href="mailto:${COPY.footer.email}">${esc(COPY.footer.email)}</a>
+    <span class="footer-dot">·</span>
+    <a class="link-plain ig-link" href="${COPY.footer.instagramUrl}" target="_blank" rel="noopener" aria-label="인스타그램 ${esc(COPY.footer.instagram)}">${igSvg}${esc(COPY.footer.instagram)}</a>
+  </p>
+  <p class="caption">${esc(COPY.footer.copyright)}</p>`;
+
+/* Section 7: FAQ (아코디언) */
+document.getElementById('faqContent').innerHTML = `
+  <div class="center">
+    <span class="eyebrow reveal">${esc(COPY.faq.eyebrow)}</span>
+    <h2 class="reveal" style="white-space:pre-line;">${rich(COPY.faq.h2)}</h2>
+  </div>
+  <div class="faq-list">
+    ${COPY.faq.items.map(it=>`
+      <div class="faq-item reveal">
+        <button type="button" class="faq-q" aria-expanded="false">
+          <span>${esc(it.q)}</span><span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+        <div class="faq-a"><p>${esc(it.a)}</p></div>
+      </div>`).join('')}
+  </div>`;
+document.querySelectorAll('.faq-item').forEach(item => {
+  const btn = item.querySelector('.faq-q');
+  const ans = item.querySelector('.faq-a');
+  btn.addEventListener('click', () => {
+    const willOpen = !item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(o => {
+      o.classList.remove('open');
+      o.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      o.querySelector('.faq-a').style.maxHeight = null;
+    });
+    if (willOpen) {
+      item.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      ans.style.maxHeight = ans.scrollHeight + 'px';
+    }
+  });
+});
+
+/* 모바일 하단 고정 CTA 바 */
+const mobileCta = document.getElementById('mobileCta');
+if (CONFIG.showMobileCtaBar) {
+  mobileCta.classList.add('enabled');
+  mobileCta.innerHTML = `<button type="button" class="btn-primary" data-open-signup>${esc(COPY.mobileCta)}</button>`;
+}
+
+/* ─────────── 동작: 내비 스크롤 글래스 ─────────── */
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 60);
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* ─────────── 데이터 기록 ─────────── */
+const leads = []; // 메모리 기록 (개발 확인용)
+const validEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+// 전화번호: 숫자 9~11자리 (하이픈·공백 허용). 예) 010-1234-5678
+const validPhone = v => /^\d{9,11}$/.test(v.replace(/[\s-]/g,''));
+// 이메일 또는 전화번호 허용
+const validContact = v => validEmail(v) || validPhone(v);
+
+async function submitLead(payload) {
+  leads.push(payload);
+  console.log('[Pickd] 신청/설문 데이터:', payload);
+  if (CONFIG.formEndpoint) {
+    try {
+      await fetch(CONFIG.formEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) { console.warn('[Pickd] 전송 실패(로컬에는 기록됨):', err); }
+  }
+}
+
+/* ─────────── 모달: 신청 버튼 → 이메일 입력 → 미니 설문 ─────────── */
+const overlay = document.getElementById('surveyOverlay');
+const panel = document.getElementById('surveyPanel');
+const answers = {};
+let currentEmail = '';
+
+function openModal() { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+/* 최종 확인 화면: 신청되었습니다 · 감사합니다 */
+function showDone() {
+  panel.innerHTML = `
+    <div class="signup-done">
+      <div class="done-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="#22A574" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <p class="done-title">${esc(COPY.signup.doneTitle)}</p>
+      <p class="done-desc">${esc(COPY.signup.doneDesc)}</p>
+    </div>`;
+  setTimeout(closeModal, 2400);
+}
+
+/* 모든 CTA 버튼 → 이메일 입력 모달 열기 */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-open-signup]');
+  if (!t) return;
+  e.preventDefault();
+  openSignup();
+});
+
+/* 1단계: 이메일 입력 */
+function openSignup() {
+  panel.innerHTML = `
+    <button type="button" class="survey-close" aria-label="닫기">✕</button>
+    <div class="signup-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9.5a6 6 0 0112 0c0 4.5 2 5.5 2 5.5H4s2-1 2-5.5z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <p class="signup-title">${esc(COPY.signup.title)}</p>
+    <p class="signup-desc">${esc(COPY.signup.desc)}</p>
+    <form class="signup-form form-wrap" data-signup novalidate>
+      <div class="signup-input">
+        <span class="in-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9.5a6 6 0 0112 0c0 4.5 2 5.5 2 5.5H4s2-1 2-5.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <input type="text" id="modalEmail" name="contact" placeholder="${esc(COPY.signup.placeholder)}" autocomplete="email" aria-label="이메일 또는 전화번호" required>
+      </div>
+      <p class="form-error" role="alert">${esc(COPY.survey.invalidEmail)}</p>
+      <button type="submit" class="btn-primary">${esc(COPY.signup.submit)}</button>
+    </form>
+    ${COPY.signup.micro ? `<p class="micro" style="text-align:center;">${esc(COPY.signup.micro)}</p>` : ''}`;
+  openModal();
+  panel.querySelector('.survey-close').addEventListener('click', closeModal);
+  const form = panel.querySelector('[data-signup]');
+  form.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const input = form.querySelector('input[name="contact"]');
+    if (!validContact(input.value)) { form.classList.add('invalid'); input.focus(); return; }
+    form.classList.remove('invalid');
+    currentEmail = input.value.trim();
+    const contactType = validEmail(currentEmail) ? 'email' : 'phone';
+    submitLead({ type: 'signup', contact: currentEmail, contactType, at: new Date().toISOString() });
+    if (CONFIG.showSurvey) renderSurvey();
+    else showDone();
+  });
+  setTimeout(() => panel.querySelector('#modalEmail')?.focus(), 120);
+}
+
+/* 2단계: 신청 완료 + 미니 설문 (선택) */
+function renderSurvey() {
+  answers.wish = '';
+  COPY.survey.questions.forEach(q => answers[q.id] = null);
+  panel.innerHTML = `
+    <button type="button" class="survey-close" aria-label="닫기">✕</button>
+    <p class="survey-title">${esc(COPY.survey.successTitle)}</p>
+    ${COPY.survey.questions.map(q => `
+      <div class="survey-q" data-q="${q.id}">
+        <p class="q">${esc(q.q)}</p>
+        <div class="chip-opts">${q.options.map(o=>`<button type="button" class="chip-opt" data-val="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      </div>`).join('')}
+    <div class="survey-q">
+      <p class="q">${esc(COPY.survey.freeQ.q)}</p>
+      <input type="text" id="surveyWish" placeholder="${esc(COPY.survey.freeQ.placeholder)}" maxlength="120">
+    </div>
+    <button type="button" class="btn-primary" id="surveySubmit">${esc(COPY.survey.submit)}</button>`;
+
+  panel.querySelector('.survey-close').addEventListener('click', closeModal);
+  panel.querySelectorAll('.survey-q[data-q]').forEach(qEl => {
+    qEl.querySelectorAll('.chip-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        qEl.querySelectorAll('.chip-opt').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        answers[qEl.dataset.q] = btn.dataset.val;
+      });
+    });
+  });
+  panel.querySelector('#surveySubmit').addEventListener('click', () => {
+    const wishEl = panel.querySelector('#surveyWish');
+    answers.wish = wishEl ? wishEl.value.trim() : '';
+    submitLead({ type: 'survey', contact: currentEmail, ...answers, at: new Date().toISOString() });
+    showDone();
+  });
+}
+const closeSurvey = closeModal; // 하위 호환
+overlay.addEventListener('click', e => { if (e.target === overlay) closeSurvey(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeSurvey(); });
+
+/* ─────────── 스크롤 진입 모션 (IntersectionObserver + 80ms 스태거) ─────────── */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduceMotion) {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+} else {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const siblings = [...en.target.parentElement.querySelectorAll(':scope > .reveal:not(.in)')];
+      const idx = Math.max(0, siblings.indexOf(en.target));
+      setTimeout(() => en.target.classList.add('in'), Math.min(idx, 5) * 80);
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+</script>
+</body>
+</html>
