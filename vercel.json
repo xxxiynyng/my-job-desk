@@ -1,4 +1,7 @@
 {
   "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/", "destination": "/landingpage.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
