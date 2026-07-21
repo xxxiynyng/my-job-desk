@@ -539,9 +539,9 @@ const CONFIG = {
   showMobileCtaBar: true,  // 모바일 하단 고정 CTA 바
   showUrgency: true,       // Final CTA 긴박감 라인
   betaSlots: 100,          // 정직한 희소성 문구에 쓰는 숫자
-  // 신청 데이터를 보낼 곳 (Formspree/Google Apps Script 등의 POST URL).
-  // 비워두면 브라우저 콘솔에만 기록됩니다. 배포 전 반드시 연결하세요!
-  formEndpoint: '',
+  // 신청 데이터를 보낼 곳 (Google Apps Script 웹 앱 → 구글 시트, 2026-07-22 연결).
+  // 스크립트 수정 시 "배포 관리 > 새 버전"으로 재배포해야 반영됩니다.
+  formEndpoint: 'https://script.google.com/macros/s/AKfycbyDtGl5ZLtmrgXUz_zHYqMcApVbjdgrr74a1wOtPwPn2bVH7Otgqk507_K8tQyrJnIh/exec',
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1022,9 +1022,10 @@ async function submitLead(payload) {
   console.log('[Pickd] 신청/설문 데이터:', payload);
   if (CONFIG.formEndpoint) {
     try {
+      // Apps Script는 preflight(OPTIONS) 미지원 → text/plain 단순 요청으로 전송(CORS 회피). 수신부는 JSON.parse로 동일 파싱.
       await fetch(CONFIG.formEndpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
       });
     } catch (err) { console.warn('[Pickd] 전송 실패(로컬에는 기록됨):', err); }
