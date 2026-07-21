@@ -194,6 +194,7 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 ## 6. 🚀 배포 (Vercel)
 
 - **한 레포 = Vercel 프로젝트 하나.** 정본은 프로젝트 **"pickd"** 하나 · 도메인 **`pickd-seven.vercel.app`** · Production Branch = `main`. 실험도 새 프로젝트 말고 브랜치/프리뷰로.
+- **랜딩페이지**: `public/landingpage.html`(마케팅·베타 설문, 앱과 별개 정적 페이지 — 디자인은 별도 "랜딩페이지 디자인 시스템" 문서). `vercel.json`에 `/` → `/landingpage.html` rewrite가 있으나 **현재 미작동**(정적 index.html 파일시스템 매치가 우선 — HEALTH.md B-1, 해소 시 이 문구 갱신). 설문 제출은 `CONFIG.formEndpoint`로 POST — 외부 폼 수신 서비스 사용은 §1 "백엔드 없음" 규칙의 예외(서버 사이드 로직 아님).
 - "배포가 안 반영" 진단은 §2 검증 사다리의 3~6번 순서로.
 
 ## 7. 문서 위생·자동화
