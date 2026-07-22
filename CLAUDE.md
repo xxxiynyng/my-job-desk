@@ -202,7 +202,7 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 
 - 임시 산출물은 `docs/tasks/`에 모으고, 실행 완료되면 주기적으로 삭제(git 히스토리 보존, `git log`·`git show`로 복원).
 - 확정된 규칙·결정은 문서 수를 늘리지 말고 해당 SSOT의 최신값만 갱신.
-- 동기화 스크립트: `pickd-design-update.sh` — 코드 수정 + Notion SSOT 업데이트 자동화(구 pickd-notion-update.sh 통합). 위치는 레포 밖 `/Users/xxxiynyng/Claude/Projects/Pickd Design/`(디자인 SSOT §9-4). ⚠️ 통합 여부·경로가 디자인 SSOT §9-4의 2스크립트 서술과 어긋남 — 확인 후 한쪽으로 정리 필요.
+- 동기화 스크립트: `pickd-design-update.sh` — 코드 수정 + Notion SSOT 업데이트 자동화(구 pickd-notion-update.sh 통합). 위치는 레포 밖 `/Users/xxxiynyng/Claude/Projects/Pickd Design/`(디자인 SSOT §9-4와 일치 — 2026-07-22 실폴더 확인 후 SSOT 정정 완료).
 
 ## 부록 — 사고 아카이브 (배경은 여기 한 줄씩만)
 
