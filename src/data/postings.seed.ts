@@ -221,7 +221,7 @@ export const POSTINGS: Posting[] = [
       { category: "자립준비청년", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
     ],
     attachments: [
-      { docType: "공고문", fileName: "[공고문] 2026년 하반기 공무직 및 청년인턴.pdf", fileFormat: "pdf", url: "#" },
+      { docType: "공고문", fileName: "[공고문] 2026년 하반기 공무직 및 청년인턴.pdf", fileFormat: "pdf", url: "/postings/kgs-2026-h2-notice.pdf" },
       { docType: "입사지원서", fileName: "[입사지원서] 2026년 하반기 공무직 및 청년인턴.pdf", fileFormat: "pdf", url: "#" },
       { docType: "직무기술서", fileName: "[직무기술서] 2026년 하반기 공무직 및 청년인턴.zip", fileFormat: "zip", url: "#" },
     ],
@@ -308,7 +308,7 @@ export const POSTINGS: Posting[] = [
       { category: "한국사능력검정시험(1·2급)", bonusRate: "2~3%", appliedStages: ["서류"], duplicable: true },
     ],
     attachments: [
-      { docType: "공고문", fileName: "채용공고문(26년 제3차 정규직).pdf", fileFormat: "pdf", url: "#" },
+      { docType: "공고문", fileName: "채용공고문(26년 제3차 정규직).pdf", fileFormat: "pdf", url: "/postings/komsa-2026-3rd-notice.pdf" },
       { docType: "직무기술서", fileName: "직무기술서.zip", fileFormat: "zip", url: "#" },
       { docType: "기타", fileName: "장애유형별 편의지원 내용 및 신청서.hwp", fileFormat: "hwp", url: "#" },
     ],

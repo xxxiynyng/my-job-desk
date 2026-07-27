@@ -476,6 +476,10 @@ export default function JobDetail() {
     return () => window.removeEventListener(REGISTRATIONS_EVENT, f);
   }, []);
   const detailUnlocked = !seedPosting || !!getRegistration(seedPosting.id);
+  // 검수된 공고문 PDF가 있으면 우측 패널에서 인라인으로 보여준다
+  const noticePdfUrl = seedPosting?.attachments.find(
+    (a) => a.docType === "공고문" && a.fileFormat === "pdf" && a.url !== "#",
+  )?.url;
 
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
@@ -702,10 +706,16 @@ export default function JobDetail() {
                 직무를 선택해 담으면 일정·자격·문항이 정리된 상세 화면이 열려요
               </p>
               <div className="mt-4 flex items-center justify-center gap-2">
+                {noticePdfUrl && (
+                  <Button size="sm" className="h-8 text-xs gap-1.5" onClick={() => setRawOpen(true)}>
+                    <ScrollText className="w-3.5 h-3.5" />
+                    원문 PDF 여기서 보기
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
                   <a href={seedPosting.sourceUrl} target="_blank" rel="noreferrer">
                     <ExternalLink className="w-3.5 h-3.5" />
-                    잡알리오 원문 보기
+                    잡알리오 원문
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
@@ -1033,11 +1043,19 @@ export default function JobDetail() {
                 </button>
               </div>
 
+              {noticePdfUrl ? (
+                <iframe
+                  src={noticePdfUrl}
+                  title="공고 원문 PDF"
+                  className="flex-1 w-full border-0 bg-white"
+                />
+              ) : (
               <div className="flex-1 overflow-y-auto p-4 bg-muted/10">
                 <pre className="text-xs leading-[1.85] text-foreground/80 whitespace-pre-wrap font-mono select-text">
                   {job.rawSource}
                 </pre>
               </div>
+              )}
 
               <div className="px-5 py-3 border-t border-border bg-muted/20 shrink-0 flex items-center justify-between gap-2">
                 <CopyButton always label="전체 복사" text={job.rawSource} />
