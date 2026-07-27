@@ -177,3 +177,79 @@ export const APPLICATION_STATUSES: ApplicationStatus[] = [
   "작성중", "지원완료", "서류전형",
   "필기전형", "면접전형", "전형완료",
 ];
+
+// ── 담은 공고 → 캘린더 파생 (jobStore 등록 참조 기반) ──────────────
+// 담기 시 "캘린더에 등록됐어요"를 실제로 지키는 셀렉터. Calendar·TodayPanel이 소비한다.
+import { getRegistrations, getRegisteredPosition } from "./jobStore";
+import type { StageType } from "./postings.seed";
+
+const STAGE_TO_SCHEDULE_TYPE: Partial<Record<StageType, string>> = {
+  APPLY: "마감",
+  DOC_RESULT: "발표",
+  WRITTEN_EXAM: "시험",
+  WRITTEN_RESULT: "발표",
+  PERSONALITY_TEST: "검사",
+  EVIDENCE_SUBMIT: "서류",
+  INTERVIEW: "면접",
+  FINAL_RESULT: "발표",
+  JOIN: "입사",
+  PHYSICAL_TEST: "시험",
+  PRACTICAL_TEST: "시험",
+  APTITUDE_TEST: "시험",
+};
+
+/** 담은 공고 → 캘린더 지원현황 카드 */
+export function registeredCalApplications(): CalApplication[] {
+  return getRegistrations().flatMap((reg) => {
+    const rp = getRegisteredPosition(reg);
+    if (!rp) return [];
+    const { posting, position } = rp;
+    const events = posting.scheduleEvents.filter((e) => e.stageType !== "ANNOUNCE");
+    return [{
+      id: `reg-${posting.id}`,
+      company: posting.orgName,
+      position: position.jobTitle,
+      status: "작성중" as ApplicationStatus,
+      deadline: posting.applyEnd.slice(0, 10),
+      stage: "작성중",
+      recruitmentStart: posting.applyStart.slice(0, 10),
+      recruitmentEnd: posting.applyEnd.slice(0, 10),
+      keyDates: events
+        .filter((e) => e.confirmed && e.stageType !== "APPLY")
+        .map((e) => ({ date: e.startDate, label: e.label })),
+    }];
+  });
+}
+
+/** 담은 공고 → 캘린더 일정 (접수 시작·마감은 각각의 날짜에, 나머지 단계는 시작일에) */
+export function registeredCalSchedules(): CalSchedule[] {
+  const out: CalSchedule[] = [];
+  getRegistrations().forEach((reg) => {
+    const rp = getRegisteredPosition(reg);
+    if (!rp) return;
+    const { posting } = rp;
+    const linkedPostingId = `reg-${posting.id}`;
+    posting.scheduleEvents.forEach((e, i) => {
+      if (e.stageType === "ANNOUNCE" || !e.confirmed) return;
+      if (e.stageType === "APPLY") {
+        out.push({
+          id: `${linkedPostingId}-ev${i}-start`, title: "지원서 접수 시작", date: e.startDate,
+          time: e.startTime, scheduleType: "posting", linkedPosting: posting.orgName, linkedPostingId, type: "접수",
+        });
+        out.push({
+          id: `${linkedPostingId}-ev${i}-end`, title: "지원서 접수 마감", date: e.endDate,
+          time: e.endTime, scheduleType: "posting", linkedPosting: posting.orgName, linkedPostingId, type: "마감",
+        });
+        return;
+      }
+      out.push({
+        id: `${linkedPostingId}-ev${i}`, title: e.label, date: e.startDate,
+        time: e.startTime ?? e.endTime, scheduleType: "posting",
+        linkedPosting: posting.orgName, linkedPostingId,
+        type: STAGE_TO_SCHEDULE_TYPE[e.stageType] ?? "기타",
+      });
+    });
+  });
+  return out;
+}
+

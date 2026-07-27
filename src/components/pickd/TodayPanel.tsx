@@ -4,15 +4,30 @@ import { Plus, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CalendarMini } from "./CalendarMini";
 import { toast } from "sonner";
+import { getRegistrations, getRegisteredPosition } from "@/data/jobStore";
+import { calcPostingDday } from "@/data/postings.seed";
+import { registeredCalSchedules } from "@/data/calendarData";
 
 // ── 마감 임박 공고 ────────────────────────────────────────────────
 type DeadlineItem = { id: string; title: string; company: string; dday: number };
 
-const deadlineItems: DeadlineItem[] = [
-  { id: "1", title: "Product Designer", company: "토스",   dday: 2 },
-  { id: "2", title: "자소서 제출",         company: "카카오", dday: 3 },
-  { id: "3", title: "포트폴리오 제출",     company: "네이버", dday: 6 },
-];
+// 담은 공고의 접수 마감(파생) + 목데이터
+function buildDeadlineItems(): DeadlineItem[] {
+  const derived: DeadlineItem[] = getRegistrations().flatMap((reg) => {
+    const rp = getRegisteredPosition(reg);
+    if (!rp) return [];
+    const d = calcPostingDday(rp.posting.applyEnd);
+    if (d < 0) return [];
+    return [{ id: `reg-${rp.posting.id}`, title: `${rp.position.jobTitle} 접수 마감`, company: rp.posting.orgName, dday: d }];
+  });
+  const mocks: DeadlineItem[] = [
+    { id: "1", title: "Product Designer", company: "토스",   dday: 2 },
+    { id: "2", title: "자소서 제출",         company: "카카오", dday: 3 },
+    { id: "3", title: "포트폴리오 제출",     company: "네이버", dday: 6 },
+  ];
+  return [...derived, ...mocks].sort((a, b) => a.dday - b.dday).slice(0, 5);
+}
+const deadlineItems: DeadlineItem[] = buildDeadlineItems();
 
 function ddayLabel(d: number) {
   if (d === 0) return "오늘";
@@ -28,10 +43,19 @@ function ddayColor(d: number) {
 // ── 오늘의 일정 ──────────────────────────────────────────────────
 type ScheduleItem = { id: string; title: string; time: string; company?: string };
 
-const scheduleItems: ScheduleItem[] = [
-  { id: "s1", title: "토스 1차 면접",  time: "14:00", company: "토스" },
-  { id: "s2", title: "삼성 인적성",     time: "종일",  company: "삼성전자" },
-];
+// 오늘 날짜의 담은 공고 일정(파생) + 목데이터
+function buildScheduleItems(): ScheduleItem[] {
+  const today = new Date().toISOString().slice(0, 10);
+  const derived: ScheduleItem[] = registeredCalSchedules()
+    .filter((sc) => sc.date === today)
+    .map((sc) => ({ id: sc.id, title: `${sc.linkedPosting} ${sc.title}`, time: sc.time ?? "종일", company: sc.linkedPosting }));
+  const mocks: ScheduleItem[] = [
+    { id: "s1", title: "토스 1차 면접",  time: "14:00", company: "토스" },
+    { id: "s2", title: "삼성 인적성",     time: "종일",  company: "삼성전자" },
+  ];
+  return [...derived, ...mocks];
+}
+const scheduleItems: ScheduleItem[] = buildScheduleItems();
 
 // ── 오늘의 할일 ──────────────────────────────────────────────────
 type TodoItem = { id: string; text: string; done: boolean };

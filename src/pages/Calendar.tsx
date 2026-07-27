@@ -6,8 +6,10 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import {
   mockCalTasks, mockCalCarriedOverTasks, mockCalEvents,
   mockCalApplications, mockCalSchedules,
+  registeredCalApplications, registeredCalSchedules,
   CalTask, PostingFilterValue, CalApplication, ApplicationStatus, CalSchedule,
 } from "@/data/calendarData";
+import { REGISTRATIONS_EVENT } from "@/data/jobStore";
 import { toast } from "sonner";
 
 export default function Calendar() {
@@ -29,8 +31,31 @@ export default function Calendar() {
       return saved ? JSON.parse(saved) : mockCalCarriedOverTasks;
     } catch { return mockCalCarriedOverTasks; }
   });
-  const [applications, setApplications] = useState<CalApplication[]>(mockCalApplications);
-  const [scheduleList, setScheduleList] = useState<CalSchedule[]>(mockCalSchedules);
+  // 담은 공고(등록 스토어)에서 파생한 지원현황·일정 + 목데이터 병합
+  const [applications, setApplications] = useState<CalApplication[]>(() => [
+    ...registeredCalApplications(),
+    ...mockCalApplications,
+  ]);
+  const [scheduleList, setScheduleList] = useState<CalSchedule[]>(() => [
+    ...registeredCalSchedules(),
+    ...mockCalSchedules,
+  ]);
+
+  // 담기/빼기 변경 시 파생분만 갱신 (사용자가 추가한 개인 일정은 유지)
+  useEffect(() => {
+    const sync = () => {
+      setApplications((prev) => [
+        ...registeredCalApplications(),
+        ...prev.filter((a) => !a.id.startsWith("reg-")),
+      ]);
+      setScheduleList((prev) => [
+        ...registeredCalSchedules(),
+        ...prev.filter((sc) => !sc.id.startsWith("reg-")),
+      ]);
+    };
+    window.addEventListener(REGISTRATIONS_EVENT, sync);
+    return () => window.removeEventListener(REGISTRATIONS_EVENT, sync);
+  }, []);
 
   const allTasks = [...carriedOver, ...tasks];
   const totalTasks = allTasks.length;
