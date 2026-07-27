@@ -562,7 +562,8 @@ export default function JobDetail() {
             </dl>
           </Section>
 
-          {/* 2 · 직무 설명 · 요구 역량 */}
+          {/* 2 · 직무 설명 · 요구 역량 — 내용 없는 공고(시드·파싱 미확보)는 섹션 자체를 숨긴다 */}
+          {(job.jobDescription || job.competencies.length > 0) && (
           <Section n={2} title="직무 설명 · 요구 역량" right={<CopyButton label="복사" text={jdCopy} />}>
             <div className="space-y-5">
               <div>
@@ -582,6 +583,7 @@ export default function JobDetail() {
               </div>
             </div>
           </Section>
+          )}
 
           {/* 3 · 지원 자격 · 우대 · 가산점 */}
           <Section

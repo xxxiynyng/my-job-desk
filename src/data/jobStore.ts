@@ -153,9 +153,9 @@ export function postingToJobDetail(posting: Posting): Record<string, unknown> {
     sourceUrl: posting.sourceUrl,
     applyUrl: posting.applyUrl,
     reviewedAt: posting.reviewedAt,
+    // basic 키는 목데이터(jobDetails)와 동일하게 유지 — 상세 화면 디자인 일관성 (검수 기준일은 등록일로 표기)
     basic: {
-      기관명: posting.orgName,
-      기관유형: posting.orgCategory,
+      기업명: `${posting.orgName} (${posting.orgCategory})`,
       공고명: posting.title,
       "모집 직무": position.jobTitle,
       근무지: position.workLocation.join(", "),
@@ -163,7 +163,8 @@ export function postingToJobDetail(posting: Posting): Record<string, unknown> {
       "접수 시작일": posting.applyStart.slice(0, 10),
       "접수 마감일": formatApplyEnd(posting),
       "D-day": dday >= 0 ? `D-${dday}` : "마감",
-      "검수 기준일": posting.reviewedAt,
+      등록일: posting.reviewedAt,
+      "최근 수정일": posting.reviewedAt,
     },
     eligibility: {
       "지원 자격": [
@@ -194,8 +195,8 @@ export function postingToJobDetail(posting: Posting): Record<string, unknown> {
       })),
     essays,
     essaySource: posting.essaySource,
-    jobDescription: "",
-    competencies: [],
+    jobDescription: position.duties ?? "",
+    competencies: position.competencies ?? [],
     rawSource: "",
   };
 }

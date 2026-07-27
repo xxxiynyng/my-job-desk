@@ -59,6 +59,8 @@ export interface Position {
   writtenExam: boolean;
   writtenExamNote?: string;              // v4 신규 — 필기 과목 구성
   conversionNote?: string;               // v4 신규 — 인턴·수습·전환 정보
+  duties?: string;                       // 담당업무 요약 (공고문 모집표 기준)
+  competencies?: string[];               // 요구 역량 (직무기술서 필요지식·기술 요약)
   essayWeightNote?: string;              // 자소서 배점 비중
   salaryNote?: string;
 }
@@ -137,7 +139,9 @@ export const POSTINGS: Posting[] = [
     reviewedAt: "2026-07-26",
     positions: [
       {
-        id: "kgs-p1", jobGroup: "공무직", jobTitle: "시설관리(기계)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        id: "kgs-p1", jobGroup: "공무직", jobTitle: "시설관리(기계)",
+        duties: "청사·기숙사 기계설비(냉난방·공조·보일러) 작동점검, 유지보수, 자재 재고관리",
+        competencies: ["기계설비(FCU·EHP·공조기) 운영·점검 능력", "냉난방 배관·펌프 유지보수 기술", "기계 관련 기능사 이상 자격 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 2, workLocation: ["가스안전교육원(충남 천안)", "수소제품시험평가센터(충북 음성)"],
         ncsCategory: "기계·설비", qualification: "학력·연령 제한 없음(만 60세 미만), 교대·주간 근로형태 동의자",
         screeningMethod: "혼합", writtenExam: false,
@@ -145,7 +149,9 @@ export const POSTINGS: Posting[] = [
         essayWeightNote: "서류 100점 중 자소서(정성) 40점", salaryNote: "월 약 225~243만원(수습)",
       },
       {
-        id: "kgs-p2", jobGroup: "공무직", jobTitle: "시설관리(전기)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        id: "kgs-p2", jobGroup: "공무직", jobTitle: "시설관리(전기)",
+        duties: "청사 전기/통신설비 유지보수 및 안전관리 — 수변전·발전기·태양광 시스템 운영, UPS·누설전류 점검",
+        competencies: ["수변전·발전설비 기술 지식", "전기설비 도면 해석·배선작업 기술", "전기 관련 기능사 이상 자격 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 2, workLocation: ["산업가스안전기술센터(충북 진천)", "가스안전교육원(충남 천안)"],
         ncsCategory: "전기·전자", qualification: "학력·연령 제한 없음(만 60세 미만), 3교대 가능자",
         screeningMethod: "혼합", writtenExam: false,
@@ -153,7 +159,9 @@ export const POSTINGS: Posting[] = [
         essayWeightNote: "자소서(정성) 40점 + 자격 정량 60점", salaryNote: "월 약 243~310만원",
       },
       {
-        id: "kgs-p3", jobGroup: "공무직", jobTitle: "미화", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        id: "kgs-p3", jobGroup: "공무직", jobTitle: "미화",
+        duties: "청사·교육원·생활관 전 구역 환경미화, 폐기물 처리·분리수거, 위험요소 사전진단",
+        competencies: ["청소 장비·약품 운용 능력", "산업안전보건법에 따른 약품 관리 이해"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 4, workLocation: ["본사(충북 음성)", "가스안전교육원(충남 천안)"],
         ncsCategory: "현장·기타", qualification: "학력 제한 없음, 만 65세 미만(고령자 친화 직종)",
         screeningMethod: "혼합", writtenExam: false,
@@ -161,14 +169,18 @@ export const POSTINGS: Posting[] = [
         salaryNote: "월 약 225만원(수습)",
       },
       {
-        id: "kgs-p4", jobGroup: "공무직", jobTitle: "운전(대형운전)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        id: "kgs-p4", jobGroup: "공무직", jobTitle: "운전(대형운전)",
+        duties: "교육생 수송 버스 운행, 운행 전후 차량 점검, 운행일지 등 차량관리 행정",
+        competencies: ["1종 대형면허·버스운전자격증", "안전운전·비상상황 대처 능력", "최근 5년 무사고 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 1, workLocation: ["가스안전교육원(충남 천안)"],
         ncsCategory: "현장·기타", qualification: "45인승 대형버스 운행 가능자(1종 대형면허)",
         screeningMethod: "혼합", writtenExam: false,
         conversionNote: "수습 3개월 → 무기계약 전환", essayWeightNote: "자소서+경력기술서(정성) 60점",
       },
       {
-        id: "kgs-p5", jobGroup: "청년인턴", jobTitle: "LPG용기 사용가구 시설개선 점검/검수", employmentType: "청년인턴(체험형·기간제 3개월)",
+        id: "kgs-p5", jobGroup: "청년인턴", jobTitle: "LPG용기 사용가구 시설개선 점검/검수",
+        duties: "LPG용기 사용가구 시설개선사업 현장 검수 지원, 수혜자 데이터 관리·전산 입력, 행정 사무보조",
+        competencies: ["가스 법령(액화석유가스법·KGS Code) 기초 이해", "체크리스트 기반 현장 검수·기록 능력", "엑셀·한글 등 문서작성 활용 능력"], employmentType: "청년인턴(체험형·기간제 3개월)",
         recruitType: "신입", headcount: 7, workLocation: ["경기 수원·광주", "충남 천안", "경북 포항", "강원 강릉"],
         ncsCategory: "건설·안전", qualification: "만 15~34세(입사예정일 기준), 공사 체험형 인턴 무경험자",
         ageLimit: "만 15~34세", screeningMethod: "혼합", writtenExam: false,
