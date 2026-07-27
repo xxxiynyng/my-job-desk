@@ -384,7 +384,7 @@ function PositionPickerSection({ posting, preselect }: { posting: Posting; prese
           <h2 className="text-title font-semibold text-foreground">모집 직무 선택</h2>
           <p className="text-chip text-muted-foreground mt-0.5">
             {reg
-              ? "이 공고를 담았어요 — 같은 공고에는 한 직무만 지원할 수 있어요"
+              ? "이 직무로 담은 공고예요 — 직무를 바꾸려면 공고를 뺀 뒤 다시 담아 주세요"
               : "공고 내용을 확인한 뒤, 지원할 직무 1개를 선택해 담아 주세요"}
           </p>
         </div>
@@ -399,7 +399,7 @@ function PositionPickerSection({ posting, preselect }: { posting: Posting; prese
         )}
       </div>
       <div className="divide-y divide-border/60 border-t border-border/60">
-        {posting.positions.map((p) => {
+        {(reg ? posting.positions.filter((p) => p.id === reg.positionId) : posting.positions).map((p) => {
           const active = p.id === selectedId;
           const isRegistered = reg?.positionId === p.id;
           return (
@@ -435,18 +435,22 @@ function PositionPickerSection({ posting, preselect }: { posting: Posting; prese
                 </div>
                 <span className="text-chip text-muted-foreground shrink-0">{p.employmentType}</span>
               </div>
-              <div className="flex items-center gap-3 mt-1 pl-6 text-chip text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  {p.headcount}명
-                </span>
-                <span className="inline-flex items-center gap-1 truncate">
-                  <MapPin className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{p.workLocation.join(", ")}</span>
-                </span>
-                {p.writtenExam && <span className="shrink-0">필기 있음</span>}
-              </div>
-              <p className="mt-0.5 pl-6 text-chip text-muted-foreground/80 line-clamp-2">{p.qualification}</p>
+              {!reg && (
+                <>
+                  <div className="flex items-center gap-3 mt-1 pl-6 text-chip text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {p.headcount}명
+                    </span>
+                    <span className="inline-flex items-center gap-1 truncate">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{p.workLocation.join(", ")}</span>
+                    </span>
+                    {p.writtenExam && <span className="shrink-0">필기 있음</span>}
+                  </div>
+                  <p className="mt-0.5 pl-6 text-chip text-muted-foreground/80 line-clamp-2">{p.qualification}</p>
+                </>
+              )}
             </button>
           );
         })}
@@ -464,6 +468,14 @@ export default function JobDetail() {
   // 시드 공고면 직무 선택·담기 섹션을 노출 (검색 → 상세 확인 → 담기 플로우)
   const seedPosting = slug ? getPostingBySlug(slug) : undefined;
   const preselectPosition = new URLSearchParams(location.search).get("position");
+  // 담기 전에는 원문 확인·직무 선택만 노출, 담으면 상세 전체 공개 (2026-07-27 플로우 결정)
+  const [, regTick] = useState(0);
+  useEffect(() => {
+    const f = () => regTick((v) => v + 1);
+    window.addEventListener(REGISTRATIONS_EVENT, f);
+    return () => window.removeEventListener(REGISTRATIONS_EVENT, f);
+  }, []);
+  const detailUnlocked = !seedPosting || !!getRegistration(seedPosting.id);
 
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
@@ -659,6 +671,30 @@ export default function JobDetail() {
             <PositionPickerSection posting={seedPosting} preselect={preselectPosition} />
           )}
 
+          {!detailUnlocked && seedPosting && (
+            <div className="border border-dashed border-border rounded-2xl bg-card px-6 py-8 text-center">
+              <p className="text-sm font-medium text-foreground">공고 내용은 원문에서 먼저 확인해 주세요</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                직무를 선택해 담으면 일정·자격·문항이 정리된 상세 화면이 열려요
+              </p>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
+                  <a href={seedPosting.sourceUrl} target="_blank" rel="noreferrer">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    잡알리오 원문 보기
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" asChild>
+                  <a href={seedPosting.applyUrl} target="_blank" rel="noreferrer">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    접수처 열기
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {detailUnlocked && (<>
           {/* 1 · 기본 정보 — 복사하기 쉬운 정보 목록 */}
           <Section
             n={1}
@@ -918,6 +954,7 @@ export default function JobDetail() {
               </ol>
             )}
           </Section>
+          </>)}
         </div>
         </div>
 
