@@ -12,28 +12,153 @@ import { DdayChip } from "@/components/pickd/ds/DdayChip";
 import { TONES, type Tone } from "@/components/pickd/ds/StatusBadge";
 
 /**
- * 탭3 — AI 자기소개서 작성 화면 (프론트 목업 통합판, 2026-07-15)
+ * 탭3 — AI 자기소개서 (프론트 목업 통합판 v2, 2026-07-27)
  * ─────────────────────────────────────────────────────────────
- * · 목업 데이터 기반(부산창조경제혁신센터 예시) — 공고·문항·경험·기관 DB 연동은 후속.
- *   문항 2·3은 기획 확정 전 플레이스홀더. AI 제안·맞춤법은 규칙 기반 목업(실서비스: LangGraph/검사 API).
- * · 원칙: 비파괴 반영(끝에 이어붙임) · 진행 바 없음(N/M 텍스트) · solid CTA 화면당 1개('이 문장 반영'만)
- *   · 색은 의미 신호에만 · Q번호 중립 텍스트(JobDetail 색 가이드 §3) · 부담 카피 금지.
+ * 구조: ① 공고 선택 메인 화면 → ② 문항 에디터 (스텝 플로우의 '공고 선택'이 실제 첫 화면)
+ * · 목업 데이터 기반 — 공고 3건·문항·인재상·현직자 voice는 예시 값(기관 DB·탭1/탭2 연동은 후속).
+ *   문항·인재상 placeholder는 기획 확정 전 예시. AI 제안·맞춤법은 규칙 기반 목업.
+ * · 작성 상태는 공고별로 세션 캐시(essayCache)에 유지 — 실서비스: localStorage `pickd.essay.<slug>.vN`.
+ * · 원칙: 비파괴 반영 · 진행 바 없음(N/M 텍스트) · solid CTA 화면당 1개('이 문장 반영'만)
+ *   · 색은 의미 신호에만 · Q번호 중립 텍스트 · 부담 카피 금지.
  * · 상세 결정 기록: 디자인 작업공간 docs/tasks/탭3-AI자소서_목업_가이드.md
- * · EssayStatus는 JobDetail의 ESSAY_STATE와 동일 — 공용(ds) 승격 후보(중복 정의 상태).
  */
 
-/* ───────── 목업 예시 데이터 (기획 §7 — 부산 공공기관) ───────── */
+/* ───────── 타입 · 목업 예시 데이터 ───────── */
 
-const JOB = { org: "부산창조경제혁신센터", role: "창업지원 코디네이터(청년인턴)", dday: 6 };
-
-// ★ 차별점: 기관 인재상·현직자 정보는 Pickd 기관 DB에서 (멘토링 §9). voice·수치는 예시 값.
-const TALENT = {
-  line: "지역과 함께 성장하는 실행가",
-  tags: ["지역애착", "실행우선", "개방·협업"],
-  voice: "완벽한 스펙보다, 지역에서 실제로 움직여 본 사람이 서류에서 눈에 띄어요.",
-  voiceFrom: "현직자 인터뷰 중",
-  source: "현직자 인터뷰 3명 · 합격 자소서 5건 분석 기반",
+type Question = {
+  no: number; limit: number; text: string; intent: string; keywords: string[];
+  initial: string; closings: [string, string];
 };
+type Talent = { line: string; tags: string[]; voice: string; voiceFrom: string; source: string };
+type Job = { id: string; org: string; role: string; dday: number; questions: Question[]; talent: Talent };
+
+// ⚠️ 공고·문항·인재상·voice·수치 전부 목업 예시 (멘토링 §8에서 언급된 부산 공공기관들로 구성)
+const JOBS: Job[] = [
+  {
+    id: "busan-ccei",
+    org: "부산창조경제혁신센터",
+    role: "창업지원 코디네이터(청년인턴)",
+    dday: 6,
+    talent: {
+      line: "지역과 함께 성장하는 실행가",
+      tags: ["지역애착", "실행우선", "개방·협업"],
+      voice: "완벽한 스펙보다, 지역에서 실제로 움직여 본 사람이 서류에서 눈에 띄어요.",
+      voiceFrom: "현직자 인터뷰 중",
+      source: "현직자 인터뷰 3명 · 합격 자소서 5건 분석 기반",
+    },
+    questions: [
+      {
+        no: 1, limit: 800,
+        text: "우리 기관에 지원한 동기와 입사 후 이루고 싶은 목표를, 본인의 경험과 연결하여 서술하시오.",
+        intent:
+          "기관과 지역에 대한 이해, 그리고 경험에 근거한 동기와 목표가 한 흐름으로 이어지는지를 봐요. 문항 속 핵심 단어(동기·목표·경험)를 본문에서 그대로 짚어 주면 읽는 사람이 흐름을 따라가기 쉬워요.",
+        keywords: ["지원동기", "입사 후 목표", "경험 연결", "지역 이해"],
+        initial:
+          "저는 부산에서 나고 자라며 동네의 작은 가게와 브랜드가 생기고 사라지는 과정을 가까이에서 지켜봤습니다. 로컬 브랜드 팝업을 기획하면서는, 좋은 아이디어가 자리를 잡으려면 곁에서 함께 뛰는 사람이 필요하다는 것을 배웠습니다.",
+        closings: [
+          "이런 경험을 바탕으로, 창업가의 시도가 실행으로 이어지도록 곁에서 지원하며 지역과 함께 성장하는 코디네이터가 되고 싶습니다.",
+          "입사 후에는 이 경험을 바탕으로, 부산의 창업가가 첫 고객을 만나기까지의 과정을 가장 가까이에서 지원하고 싶습니다.",
+        ],
+      },
+      {
+        no: 2, limit: 600,
+        text: "창업지원 코디네이터 직무에 필요한 본인의 강점과, 그 강점을 발휘했던 경험을 서술하시오.",
+        intent: "직무와 맞닿은 강점을 실제 경험으로 증명하는지를 봐요.",
+        keywords: ["직무 강점", "근거 경험", "실행력"],
+        initial: "",
+        closings: [
+          "이 강점이 창업지원 현장에서 창업가에게 실질적인 도움이 되도록 계속 다듬어 가겠습니다.",
+          "이 강점을 바탕으로, 창업지원 현장에서 바로 움직이는 코디네이터가 되겠습니다.",
+        ],
+      },
+      {
+        no: 3, limit: 500,
+        text: "여럿이 함께 일하는 과정에서 어려움을 겪고, 이를 조율했던 경험을 서술하시오.",
+        intent: "협업에서의 태도와 조율 과정을 구체적으로 봐요.",
+        keywords: ["협업", "조율", "태도"],
+        initial: "",
+        closings: [
+          "이 경험처럼, 서로 다른 입장을 잇는 조율자의 역할을 창업지원 현장에서도 이어가고 싶습니다.",
+          "이때 배운 조율의 감각을, 창업가와 기관 사이를 잇는 일에서도 발휘하고 싶습니다.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "btp",
+    org: "부산테크노파크",
+    role: "지역산업 육성 지원(청년인턴)",
+    dday: 12,
+    talent: {
+      line: "현장에서 답을 찾는 협력가",
+      tags: ["현장중심", "협력", "문제해결"],
+      voice: "보고서 문장보다, 현장에서 부딪혀 본 이야기를 담아 온 지원자가 기억에 남아요.",
+      voiceFrom: "현직자 인터뷰 중",
+      source: "현직자 인터뷰 2명 · 합격 자소서 3건 분석 기반",
+    },
+    questions: [
+      {
+        no: 1, limit: 600,
+        text: "우리 원에 지원한 동기와 관심 있는 지역산업 분야를 서술하시오.",
+        intent: "지역산업에 대한 관심이 실제 경험·관찰에서 나온 것인지를 봐요.",
+        keywords: ["지원동기", "지역산업", "관심 분야"],
+        initial: "",
+        closings: [
+          "이 관심을 바탕으로, 지역 기업의 성장을 현장에서 지원하는 일을 하고 싶습니다.",
+          "관심에서 멈추지 않고, 현장에서 지역 기업과 함께 답을 찾는 사람이 되겠습니다.",
+        ],
+      },
+      {
+        no: 2, limit: 500,
+        text: "여러 이해관계자와 협력해 일을 진행했던 경험을 서술하시오.",
+        intent: "서로 다른 입장 사이에서 협력을 만들어 낸 과정을 봐요.",
+        keywords: ["협력", "이해관계자", "조율"],
+        initial: "",
+        closings: [
+          "이 경험처럼, 기관과 기업 사이를 잇는 협력의 접점 역할을 하고 싶습니다.",
+          "이때 배운 협력의 감각을 지역산업 현장에서 이어가고 싶습니다.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "bdc",
+    org: "부산디자인진흥원",
+    role: "디자인산업 지원 코디네이터(청년인턴)",
+    dday: 3,
+    talent: {
+      line: "디자인으로 지역의 일상을 바꾸는 사람",
+      tags: ["지역감각", "창의", "실행"],
+      voice: "화려한 포트폴리오보다, 지역을 관찰해 온 시선이 담긴 글이 눈에 들어와요.",
+      voiceFrom: "현직자 인터뷰 중",
+      source: "현직자 인터뷰 2명 · 합격 자소서 2건 분석 기반",
+    },
+    questions: [
+      {
+        no: 1, limit: 600,
+        text: "우리 원에 지원한 동기와, 디자인이 지역에 기여할 수 있다고 생각하는 지점을 서술하시오.",
+        intent: "디자인과 지역을 연결해 본 자기만의 관점이 있는지를 봐요.",
+        keywords: ["지원동기", "지역", "디자인 관점"],
+        initial: "",
+        closings: [
+          "이 관점을 바탕으로, 지역 소상공인과 디자인을 잇는 지원 업무를 하고 싶습니다.",
+          "디자인이 지역의 일상을 바꾸는 과정을 가장 가까이에서 돕고 싶습니다.",
+        ],
+      },
+      {
+        no: 2, limit: 500,
+        text: "직접 기획하거나 만들어 본 경험 중 가장 기억에 남는 것을 서술하시오.",
+        intent: "기획부터 실행까지의 과정을 스스로 끌고 간 경험인지를 봐요.",
+        keywords: ["기획", "실행", "경험"],
+        initial: "",
+        closings: [
+          "이 경험처럼, 기획을 실행으로 옮기는 힘을 지원 현장에서 발휘하고 싶습니다.",
+          "만들어 본 사람의 감각으로, 만드는 사람들을 돕고 싶습니다.",
+        ],
+      },
+    ],
+  },
+];
 
 const SWOT_META: Record<string, { label: string; tone: Tone }> = {
   SO: { label: "핵심 강점", tone: "success" },
@@ -47,6 +172,7 @@ type Exp = {
   swot: keyof typeof SWOT_META; score: number; reason: string; line: string; lineAlt: string;
 };
 
+// 탭2 경험 목업 (실서비스: pickd.experiences.items 연동 + 공고별 SWOT 재산출)
 const EXPERIENCES: Exp[] = [
   {
     id: "popup", name: "부산 로컬 브랜드 팝업 기획", type: "대외활동", swot: "SO", score: 92,
@@ -65,50 +191,6 @@ const EXPERIENCES: Exp[] = [
     reason: "'실행 우선' 태도로 넓혀 쓸 수 있는 경험이에요.",
     line: "카페 매니저로 일하며 매일의 현장을 안정적으로 지키는 책임감을 익혔습니다.",
     lineAlt: "카페 매니저로 현장을 운영하며, 작은 문제를 그날그날 해결해 나가는 습관을 들였습니다.",
-  },
-];
-
-type Question = {
-  no: number; limit: number; text: string; intent: string; keywords: string[];
-  initial: string; closings: [string, string];
-};
-
-// ⚠️ 문항 2·3은 기획 확정 전 플레이스홀더 (기획 §2-2에는 문항 1만 정의)
-const QUESTIONS: Question[] = [
-  {
-    no: 1, limit: 800,
-    text: "우리 기관에 지원한 동기와 입사 후 이루고 싶은 목표를, 본인의 경험과 연결하여 서술하시오.",
-    intent:
-      "기관과 지역에 대한 이해, 그리고 경험에 근거한 동기와 목표가 한 흐름으로 이어지는지를 봐요. 문항 속 핵심 단어(동기·목표·경험)를 본문에서 그대로 짚어 주면 읽는 사람이 흐름을 따라가기 쉬워요.",
-    keywords: ["지원동기", "입사 후 목표", "경험 연결", "지역 이해"],
-    initial:
-      "저는 부산에서 나고 자라며 동네의 작은 가게와 브랜드가 생기고 사라지는 과정을 가까이에서 지켜봤습니다. 로컬 브랜드 팝업을 기획하면서는, 좋은 아이디어가 자리를 잡으려면 곁에서 함께 뛰는 사람이 필요하다는 것을 배웠습니다.",
-    closings: [
-      "이런 경험을 바탕으로, 창업가의 시도가 실행으로 이어지도록 곁에서 지원하며 지역과 함께 성장하는 코디네이터가 되고 싶습니다.",
-      "입사 후에는 이 경험을 바탕으로, 부산의 창업가가 첫 고객을 만나기까지의 과정을 가장 가까이에서 지원하고 싶습니다.",
-    ],
-  },
-  {
-    no: 2, limit: 600,
-    text: "창업지원 코디네이터 직무에 필요한 본인의 강점과, 그 강점을 발휘했던 경험을 서술하시오.",
-    intent: "직무와 맞닿은 강점을 실제 경험으로 증명하는지를 봐요.",
-    keywords: ["직무 강점", "근거 경험", "실행력"],
-    initial: "",
-    closings: [
-      "이 강점이 창업지원 현장에서 창업가에게 실질적인 도움이 되도록 계속 다듬어 가겠습니다.",
-      "이 강점을 바탕으로, 창업지원 현장에서 바로 움직이는 코디네이터가 되겠습니다.",
-    ],
-  },
-  {
-    no: 3, limit: 500,
-    text: "여럿이 함께 일하는 과정에서 어려움을 겪고, 이를 조율했던 경험을 서술하시오.",
-    intent: "협업에서의 태도와 조율 과정을 구체적으로 봐요.",
-    keywords: ["협업", "조율", "태도"],
-    initial: "",
-    closings: [
-      "이 경험처럼, 서로 다른 입장을 잇는 조율자의 역할을 창업지원 현장에서도 이어가고 싶습니다.",
-      "이때 배운 조율의 감각을, 창업가와 기관 사이를 잇는 일에서도 발휘하고 싶습니다.",
-    ],
   },
 ];
 
@@ -134,6 +216,13 @@ function findSpellIssues(text: string): SpellIssue[] {
 
 const PIPELINE_NODES = ["문항 분석", "경험 매칭", "초안 생성", "검토"];
 const STEPS = ["공고 선택", "문항", "경험 매칭", "초안", "완성"];
+
+// 공고별 작성 상태 세션 캐시 — 화면 전환에도 유지 (실서비스: localStorage `pickd.essay.<slug>.vN`)
+type EssayCache = {
+  qIdx: number; texts: string[]; variants: number[]; suggestionOpen: boolean[];
+  selected: string[]; finished: boolean;
+};
+const essayCache: Record<string, EssayCache> = {};
 
 /* ───────── 소품 컴포넌트 ───────── */
 
@@ -395,27 +484,99 @@ function SuggestionBlock({
   );
 }
 
-/* ───────── 메인 화면 ───────── */
+/* ───────── ① 공고 선택 메인 화면 ───────── */
 
-export default function AICover() {
-  const [qIdx, setQIdx] = useState(0);
-  const [texts, setTexts] = useState<string[]>(QUESTIONS.map((q) => q.initial));
-  const [selected, setSelected] = useState<Set<string>>(new Set(["popup", "intern"]));
-  const [variants, setVariants] = useState<number[]>(QUESTIONS.map(() => 0));
-  const [suggestionOpen, setSuggestionOpen] = useState<boolean[]>(QUESTIONS.map(() => false));
+function JobCard({ job, onSelect }: { job: Job; onSelect: () => void }) {
+  const cached = essayCache[job.id];
+  const texts = cached?.texts ?? job.questions.map((q) => q.initial);
+  const written = texts.filter((t) => t.trim().length > 0).length;
+  const finished = cached?.finished ?? false;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="w-full text-left bg-card border border-border rounded-2xl px-6 py-5 transition-colors hover:bg-muted/20 hover:border-border group"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <span className="text-title font-semibold text-foreground tracking-tight truncate">{job.org}</span>
+          <KeywordChip>공공기관</KeywordChip>
+          <DdayChip days={job.dday} size="sm" />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {finished ? (
+            <EssayStatus status="완료" />
+          ) : written > 0 ? (
+            <span className="text-xs text-muted-foreground tabular-nums">{written}/{job.questions.length} 작성</span>
+          ) : (
+            <span className="text-xs text-muted-foreground tabular-nums">문항 {job.questions.length}개</span>
+          )}
+          <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+        </div>
+      </div>
+      <p className="mt-1.5 text-body text-muted-foreground">{job.role}</p>
+      <p className="mt-2.5 text-xs text-muted-foreground/80 leading-relaxed">
+        인재상 “{job.talent.line}” · {job.talent.source}
+      </p>
+    </button>
+  );
+}
+
+function JobSelect({ onSelect }: { onSelect: (id: string) => void }) {
+  return (
+    <div className="flex h-screen bg-background overflow-hidden">
+      <PickdSidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-10 py-8">
+          <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            공고를 고르면, 그 기관의 인재상에 맞춰 내 경험으로 자소서를 함께 써요.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3">
+            {JOBS.map((job) => (
+              <JobCard key={job.id} job={job} onSelect={() => onSelect(job.id)} />
+            ))}
+          </div>
+
+          <p className="mt-6 text-xs text-muted-foreground">
+            새 공고는{" "}
+            <Link to="/" className="text-primary hover:underline">지원 대시보드</Link>
+            에서 등록해요. 공고를 등록하면 여기에 자동으로 나타나요.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ───────── ② 문항 에디터 화면 ───────── */
+
+function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
+  const cached = essayCache[job.id];
+  const [qIdx, setQIdx] = useState(cached?.qIdx ?? 0);
+  const [texts, setTexts] = useState<string[]>(cached?.texts ?? job.questions.map((q) => q.initial));
+  const [variants, setVariants] = useState<number[]>(cached?.variants ?? job.questions.map(() => 0));
+  const [suggestionOpen, setSuggestionOpen] = useState<boolean[]>(cached?.suggestionOpen ?? job.questions.map(() => false));
+  const [selected, setSelected] = useState<Set<string>>(new Set(cached?.selected ?? ["popup", "intern"]));
+  const [finished, setFinished] = useState(cached?.finished ?? false);
   const [genNode, setGenNode] = useState(-1); // -1 = 대기, 0~3 = 진행 중 노드
-  const [finished, setFinished] = useState(false);
   const [spellIssues, setSpellIssues] = useState<SpellIssue[] | null>(null); // null = 닫힘
   const taRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const q = QUESTIONS[qIdx];
+  const q = job.questions[qIdx];
   const text = texts[qIdx];
   const running = genNode >= 0;
   const selCount = selected.size;
   const over = text.length > q.limit;
   const stepIdx = finished ? 4 : suggestionOpen[qIdx] ? 3 : selCount > 0 ? 2 : 1;
   const essayStatus = finished ? "완료" : text.length > 0 ? "작성중" : "미작성";
+
+  // 공고별 작성 상태를 세션 캐시에 유지 (선택 화면 왕복에도 보존)
+  useEffect(() => {
+    essayCache[job.id] = { qIdx, texts, variants, suggestionOpen, selected: [...selected], finished };
+  }, [job.id, qIdx, texts, variants, suggestionOpen, selected, finished]);
 
   useEffect(() => {
     const el = taRef.current;
@@ -430,7 +591,7 @@ export default function AICover() {
 
   function buildSuggestion(idx: number, variant: number): string {
     const lines = EXPERIENCES.filter((e) => selected.has(e.id)).map((e) => (variant === 0 ? e.line : e.lineAlt));
-    return [...lines, QUESTIONS[idx].closings[(variant % 2) as 0 | 1]].join(" ");
+    return [...lines, job.questions[idx].closings[(variant % 2) as 0 | 1]].join(" ");
   }
 
   // 초안 생성 — 노드 순차 점등 후 '제안'만 (자동 반영 없음)
@@ -497,15 +658,17 @@ export default function AICover() {
       <div className="flex-1 flex overflow-hidden">
         {/* ── 가운데: 작성 캔버스 (JobDetail과 동일한 bg-white 컬럼) ── */}
         <div className="flex-1 overflow-y-auto bg-white">
-          {/* Sticky top bar — JobDetail 패턴 */}
+          {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
             <div className="mx-auto max-w-[760px] px-8 py-3 flex items-center justify-between gap-4">
               <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                 <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
                 <ChevronRight className="w-3 h-3 shrink-0" />
-                <span className="shrink-0">{JOB.org}</span>
+                <button type="button" onClick={onBack} className="hover:text-foreground transition-colors shrink-0">
+                  AI 자소서
+                </button>
                 <ChevronRight className="w-3 h-3 shrink-0" />
-                <span className="text-foreground font-medium truncate">AI 자소서</span>
+                <span className="text-foreground font-medium truncate">{job.org}</span>
               </nav>
               <StepFlow currentIdx={stepIdx} />
             </div>
@@ -513,14 +676,14 @@ export default function AICover() {
 
           {/* Centered content column */}
           <div className="mx-auto max-w-[760px] px-8 pt-9 pb-24">
-            {/* 얇은 문서 헤더 — 태그 무채색, 컬러는 D-day 하나만 (공고 상태 배지는 Q행 자소서 상태와 중복이라 없음) */}
+            {/* 얇은 문서 헤더 — 태그 무채색, 컬러는 D-day 하나만 */}
             <header className="mb-7">
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                <span className="text-sm font-semibold text-foreground">{JOB.org}</span>
+                <span className="text-sm font-semibold text-foreground">{job.org}</span>
                 <span className="text-border">·</span>
-                <span>{JOB.role}</span>
+                <span>{job.role}</span>
                 <KeywordChip>공공기관</KeywordChip>
-                <DdayChip days={JOB.dday} size="sm" />
+                <DdayChip days={job.dday} size="sm" />
               </div>
             </header>
 
@@ -532,7 +695,7 @@ export default function AICover() {
                 <span className="text-chip text-muted-foreground">{q.limit.toLocaleString()}자</span>
               </div>
               <QuestionPager
-                count={QUESTIONS.length}
+                count={job.questions.length}
                 currentIdx={qIdx}
                 hasContent={texts.map((t) => t.trim().length > 0)}
                 onSelect={setQIdx}
@@ -634,7 +797,7 @@ export default function AICover() {
         <aside className="w-[380px] border-l border-border bg-white flex flex-col shrink-0" aria-label="문항 보조 패널">
           <div className="px-5 py-3 border-b border-border flex items-baseline justify-between gap-3 shrink-0">
             <p className="text-body font-semibold text-foreground leading-tight">작성 도우미</p>
-            <p className="text-chip text-muted-foreground truncate">문항 {q.no} / {QUESTIONS.length}</p>
+            <p className="text-chip text-muted-foreground truncate">문항 {q.no} / {job.questions.length}</p>
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-border/60">
@@ -657,14 +820,14 @@ export default function AICover() {
                 </span>
               }
             >
-              <p className="text-sm font-semibold text-foreground leading-relaxed select-text">“{TALENT.line}”</p>
-              <p className="mt-1.5 text-xs text-muted-foreground">{TALENT.tags.map((t) => `#${t}`).join(" · ")}</p>
+              <p className="text-sm font-semibold text-foreground leading-relaxed select-text">“{job.talent.line}”</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">{job.talent.tags.map((t) => `#${t}`).join(" · ")}</p>
               <blockquote className="mt-2.5 border-l-2 border-border pl-2.5">
-                <TruncText text={`“${TALENT.voice}”`} className="text-xs text-foreground leading-relaxed select-text" />
-                <p className="mt-0.5 text-mini text-muted-foreground">— {TALENT.voiceFrom}</p>
+                <TruncText text={`“${job.talent.voice}”`} className="text-xs text-foreground leading-relaxed select-text" />
+                <p className="mt-0.5 text-mini text-muted-foreground">— {job.talent.voiceFrom}</p>
               </blockquote>
               <div className="mt-2.5 flex items-center justify-between gap-2">
-                <span className="text-mini text-muted-foreground">{TALENT.source}</span>
+                <span className="text-mini text-muted-foreground">{job.talent.source}</span>
                 <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline whitespace-nowrap">
                   기관 DB 더 보기
                   <ArrowRight className="w-3 h-3" />
@@ -724,5 +887,17 @@ export default function AICover() {
         </aside>
       </div>
     </div>
+  );
+}
+
+/* ───────── 라우트 루트: 공고 선택 ↔ 에디터 ───────── */
+
+export default function AICover() {
+  const [jobId, setJobId] = useState<string | null>(null);
+  const job = JOBS.find((j) => j.id === jobId);
+  return job ? (
+    <EssayEditor key={job.id} job={job} onBack={() => setJobId(null)} />
+  ) : (
+    <JobSelect onSelect={setJobId} />
   );
 }
