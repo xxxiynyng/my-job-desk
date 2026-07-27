@@ -166,6 +166,7 @@ specs.files.v2                     제출파일함 파일 목록
 specs.settings.jobPrefs.v1         설정 > 직무 선호 (Settings.tsx)
 pickd.jobs.colWidths / visibleCols / colOrder / colPinned / rowOrder / sortMode
                                    탭1 테이블 뷰 상태 (너비·표시·순서·고정·행순서·정렬모드)
+pickd.jobs.registrations.v1        탭1 담은 공고 (JobRegistration[] — postingId·positionId 참조, 표시값은 postings.seed에서 파생)
 pickd.experiences.items            탭2 경험 목록 (Item[])
 pickd.experiences.visibleCols.v2 / colWidths.v2 / colOrder / colPinned / sortMode
                                    탭2 테이블 뷰 상태
@@ -177,7 +178,7 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 ```
 
 > 이 목록의 정본은 코드다. 전수 확인: `grep -rhoE '"(specs|pickd|cal)\.[A-Za-z.0-9]+"' src | sort -u`
-> 소프트삭제: Item·FileItem에 `deletedAt?: number`(epoch ms) — 없으면 활성, 있으면 휴지통. 활성 뷰는 `deletedAt == null`만 노출. 공고(Job)는 목데이터(미저장)라 휴지통 제외(저장 이전 후 편입 예정).
+> 소프트삭제: Item·FileItem에 `deletedAt?: number`(epoch ms) — 없으면 활성, 있으면 휴지통. 활성 뷰는 `deletedAt == null`만 노출. 공고(Job) 중 검색으로 담은 것은 `pickd.jobs.registrations.v1` 참조로 저장(2026-07-27 도입), 목데이터 행은 여전히 미저장 — 휴지통 제외 유지.
 
 ### 기본정보 (경험·스펙 DB > 기본정보 탭)
 
