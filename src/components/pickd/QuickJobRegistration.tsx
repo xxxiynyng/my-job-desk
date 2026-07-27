@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Building2, FileText, Search, Upload, Briefcase, Check, CornerDownLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { JobRegistrationModal } from "./JobRegistrationModal";
 import { FallbackUploadModal } from "./FallbackUploadModal";
 import {
   POSTINGS,
@@ -29,9 +28,6 @@ export function QuickJobRegistration() {
   const [q, setQ] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
-  const [modalPosting, setModalPosting] = useState<Posting | null>(null);
-  const [modalPositionId, setModalPositionId] = useState<string | undefined>(undefined);
-  const [modalOpen, setModalOpen] = useState(false);
   const [fallbackOpen, setFallbackOpen] = useState(false);
   const blurTimer = useRef<number | null>(null);
 
@@ -78,14 +74,9 @@ export function QuickJobRegistration() {
     const posting =
       opt.kind === "org" ? POSTINGS.find((p) => p.orgName === opt.org) : opt.posting;
     if (!posting) return;
-    // 이미 담은 공고 → 막다른 안내 대신 상세로 바로 이동
-    if (isRegistered(posting.id)) {
-      navigate(`/jobs/${posting.slug}`);
-      return;
-    }
-    setModalPosting(posting);
-    setModalPositionId(opt.kind === "position" ? opt.positionId : undefined);
-    setModalOpen(true);
+    // 공고 내용·원문을 먼저 확인하고 상세 페이지에서 직무를 골라 담는 플로우
+    const positionQuery = opt.kind === "position" ? `?position=${opt.positionId}` : "";
+    navigate(`/jobs/${posting.slug}${positionQuery}`);
     setFocused(false);
     setQ("");
   };
@@ -209,12 +200,6 @@ export function QuickJobRegistration() {
         )}
       </div>
 
-      <JobRegistrationModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        posting={modalPosting}
-        initialPositionId={modalPositionId}
-      />
       <FallbackUploadModal open={fallbackOpen} onOpenChange={setFallbackOpen} />
     </>
   );

@@ -20,8 +20,15 @@ import { StatusBadge, STATUS_MAP } from "@/components/pickd/ds/StatusBadge";
 import { DdayChip } from "@/components/pickd/ds/DdayChip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { getPostingBySlug } from "@/data/postings.seed";
-import { postingToJobDetail } from "@/data/jobStore";
+import { getPostingBySlug, type Posting } from "@/data/postings.seed";
+import {
+  postingToJobDetail,
+  addRegistration,
+  removeRegistration,
+  getRegistration,
+  REGISTRATIONS_EVENT,
+} from "@/data/jobStore";
+import { Users, MapPin, CheckCircle2 } from "lucide-react";
 
 // TODO: MOCK_DATA - 실제 API 연결 시 제거. API: GET /job-postings/:id
 const jobDetails: Record<string, any> = {
@@ -344,12 +351,119 @@ function ReqGroup({
   );
 }
 
+
+// ---------- 직무 선택·담기 (시드 공고 전용) ----------
+// 공고 내용을 먼저 확인한 뒤, 이 페이지에서 직무를 선택해 담는다.
+function PositionPickerSection({ posting, preselect }: { posting: Posting; preselect?: string | null }) {
+  const [, force] = useState(0);
+  useEffect(() => {
+    const re = () => force((v) => v + 1);
+    window.addEventListener(REGISTRATIONS_EVENT, re);
+    return () => window.removeEventListener(REGISTRATIONS_EVENT, re);
+  }, []);
+
+  const reg = getRegistration(posting.id);
+  const [sel, setSel] = useState<string | null>(preselect ?? null);
+  const selectedId = reg?.positionId ?? sel;
+
+  const handleAdd = () => {
+    if (!selectedId) return;
+    if (addRegistration(posting.id, selectedId)) {
+      toast(`공고를 담았어요 — 일정 ${posting.scheduleEvents.length}개가 캘린더에 등록됐어요`, { duration: 2500 });
+    }
+  };
+  const handleRemove = () => {
+    removeRegistration(posting.id);
+    toast("공고를 뺐어요 — 연결된 일정도 함께 정리돼요", { duration: 2000 });
+  };
+
+  return (
+    <section className="mb-8 border border-border rounded-2xl bg-card pickd-shadow overflow-hidden">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div>
+          <h2 className="text-title font-semibold text-foreground">모집 직무 선택</h2>
+          <p className="text-chip text-muted-foreground mt-0.5">
+            {reg
+              ? "이 공고를 담았어요 — 같은 공고에는 한 직무만 지원할 수 있어요"
+              : "공고 내용을 확인한 뒤, 지원할 직무 1개를 선택해 담아 주세요"}
+          </p>
+        </div>
+        {reg ? (
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleRemove}>
+            공고 빼기
+          </Button>
+        ) : (
+          <Button size="sm" className="h-8 text-xs" disabled={!selectedId} onClick={handleAdd}>
+            이 직무로 담기
+          </Button>
+        )}
+      </div>
+      <div className="divide-y divide-border/60 border-t border-border/60">
+        {posting.positions.map((p) => {
+          const active = p.id === selectedId;
+          const isRegistered = reg?.positionId === p.id;
+          return (
+            <button
+              key={p.id}
+              disabled={!!reg && !isRegistered}
+              onClick={() => !reg && setSel(p.id)}
+              className={cn(
+                "w-full text-left px-5 py-3 transition-colors",
+                active ? "bg-accent" : "hover:bg-muted/40",
+                !!reg && !isRegistered && "opacity-45 cursor-default hover:bg-transparent",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {isRegistered ? (
+                    <CheckCircle2 className="w-4 h-4 text-pickd-green shrink-0" />
+                  ) : (
+                    <span
+                      className={cn(
+                        "w-4 h-4 rounded-full border flex items-center justify-center shrink-0",
+                        active ? "border-primary bg-primary" : "border-muted-foreground/40",
+                      )}
+                    >
+                      {active && <Check className="w-3 h-3 text-white" />}
+                    </span>
+                  )}
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {p.jobGroup ? `${p.jobGroup} · ` : ""}
+                    {p.jobTitle}
+                  </span>
+                  {isRegistered && <span className="text-chip text-pickd-green shrink-0">담은 직무</span>}
+                </div>
+                <span className="text-chip text-muted-foreground shrink-0">{p.employmentType}</span>
+              </div>
+              <div className="flex items-center gap-3 mt-1 pl-6 text-chip text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {p.headcount}명
+                </span>
+                <span className="inline-flex items-center gap-1 truncate">
+                  <MapPin className="w-3 h-3 shrink-0" />
+                  <span className="truncate">{p.workLocation.join(", ")}</span>
+                </span>
+                {p.writtenExam && <span className="shrink-0">필기 있음</span>}
+              </div>
+              <p className="mt-0.5 pl-6 text-chip text-muted-foreground/80 line-clamp-2">{p.qualification}</p>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ---------- Main component ----------
 export default function JobDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const job = getJob(slug);
+  // 시드 공고면 직무 선택·담기 섹션을 노출 (검색 → 상세 확인 → 담기 플로우)
+  const seedPosting = slug ? getPostingBySlug(slug) : undefined;
+  const preselectPosition = new URLSearchParams(location.search).get("position");
 
   const [rawOpen, setRawOpen] = useState(false);
   const [highlights, setHighlights] = useState<Set<string>>(new Set());
@@ -540,6 +654,10 @@ export default function JobDetail() {
               </div>
             )}
           </header>
+
+          {seedPosting && (
+            <PositionPickerSection posting={seedPosting} preselect={preselectPosition} />
+          )}
 
           {/* 1 · 기본 정보 — 복사하기 쉬운 정보 목록 */}
           <Section
