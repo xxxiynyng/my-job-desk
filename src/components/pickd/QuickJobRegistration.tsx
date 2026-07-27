@@ -159,7 +159,7 @@ export function QuickJobRegistration() {
                 return (
                   <div key={idx}>
                     {label && (
-                      <p className="px-4 pt-1.5 pb-0.5 text-mini font-semibold text-muted-foreground/60 uppercase tracking-wide">
+                      <p className="px-4 pt-2 pb-0.5 text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">
                         {label}
                       </p>
                     )}
@@ -170,7 +170,7 @@ export function QuickJobRegistration() {
                         onClick={() => pick(opt)}
                         className={cn(
                           "w-full flex items-center gap-2 px-4 py-2 text-left border-t border-border mt-1",
-                          "text-chip text-muted-foreground hover:text-foreground",
+                          "text-xs text-muted-foreground hover:text-foreground",
                           idx === activeIdx && "bg-muted/60",
                         )}
                       >
@@ -246,22 +246,22 @@ function OptionRow({
       onMouseEnter={onHover}
       onClick={onPick}
       className={cn(
-        "w-full flex items-center gap-2.5 px-4 py-1.5 text-left transition-colors",
+        "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
         active && "bg-muted/60",
       )}
     >
       <span className="text-muted-foreground shrink-0">{icon}</span>
       <span className="min-w-0 flex-1 flex items-baseline gap-2">
-        <span className="text-sm text-foreground truncate">{title}</span>
-        {sub && <span className="text-chip text-muted-foreground truncate shrink-0 max-w-[40%]">{sub}</span>}
+        <span className="text-title text-foreground truncate">{title}</span>
+        {sub && <span className="text-xs text-muted-foreground truncate shrink-0 max-w-[40%]">{sub}</span>}
       </span>
       {registered && (
-        <span className="inline-flex items-center gap-0.5 text-chip text-pickd-green shrink-0">
+        <span className="inline-flex items-center gap-0.5 text-xs text-pickd-green shrink-0">
           <Check className="w-3 h-3" />
           담음 · 상세 보기
         </span>
       )}
-      {meta && <span className="text-chip tabular-nums text-muted-foreground shrink-0">{meta}</span>}
+      {meta && <span className="text-xs tabular-nums text-muted-foreground shrink-0">{meta}</span>}
     </button>
   );
 }
