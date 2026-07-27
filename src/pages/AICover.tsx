@@ -506,92 +506,55 @@ function getProgress(job: Job): JobProgress {
   };
 }
 
-// 섹션 카드 — JobDetail Section의 카드 언어(bg-card rounded-2xl) 그대로
-function ListSection({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
-  return (
-    <section className="bg-card border border-border rounded-2xl px-6 py-5">
-      <div className="flex items-baseline gap-2 mb-1">
-        <h2 className="text-title font-semibold text-foreground tracking-tight">{title}</h2>
-        {sub && <span className="text-chip text-muted-foreground">{sub}</span>}
-      </div>
-      <ol className="divide-y divide-border">{children}</ol>
-    </section>
-  );
-}
-
-// 쓰던 자소서 행 — 내가 쓴 문장이 보이는 게 핵심 (JobDetail 문항 행 패턴)
-function ResumeRow({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
+// 공고 행 — 구분은 섹션이 아니라 버튼 라벨로만(작성하기 / 이어서 작성하기 / 수정).
+// 쓰던 글은 내가 쓴 문장 미리보기가 이어져 "글 쓰는 곳" 감각 유지. 행 전체 클릭 = 바로 작성 진입.
+function JobRow({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
+  const writing = p.written > 0 || p.finished;
   return (
     <li
-      className="py-4 first:pt-3 last:pb-1 flex items-start justify-between gap-4 cursor-pointer group"
+      className="py-4 first:pt-2 flex items-start justify-between gap-4 cursor-pointer group"
       onClick={onSelect}
       role="button"
-      aria-label={`${job.org} 자소서 이어서 작성`}
+      aria-label={`${job.org} 자소서 작성`}
     >
       <div className="min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-semibold text-foreground">{job.org}</span>
           <span className="text-xs text-muted-foreground">{job.role}</span>
           <DdayChip days={job.dday} size="sm" />
+          {writing ? (
+            <>
+              <EssayStatus status={p.finished ? "완료" : "작성중"} />
+              <span className="text-chip text-muted-foreground tabular-nums">문항 {p.written}/{p.total} 작성</span>
+            </>
+          ) : (
+            <span className="text-chip text-muted-foreground tabular-nums">문항 {job.questions.length}개</span>
+          )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap mb-1.5">
-          <EssayStatus status={p.finished ? "완료" : "작성중"} />
-          <span className="text-chip text-muted-foreground tabular-nums">
-            Q{p.curNo} · {p.curLen.toLocaleString()}/{p.curLimit.toLocaleString()}자 · 문항 {p.written}/{p.total} 작성
-          </span>
-        </div>
-        {p.preview && (
-          <p className="text-body text-muted-foreground leading-relaxed truncate">{p.preview}</p>
+        {writing && p.preview ? (
+          <p className="mt-1.5 text-body text-muted-foreground leading-relaxed truncate">{p.preview}</p>
+        ) : (
+          <p className="mt-1 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
         )}
       </div>
       <Button
         variant="outline"
         size="sm"
-        className={cn("shrink-0 h-8 text-xs gap-1 whitespace-nowrap rounded-md border-border", !p.finished && "text-primary hover:text-primary")}
+        className={cn(
+          "shrink-0 h-8 text-xs gap-1 whitespace-nowrap rounded-md border-border",
+          writing && !p.finished ? "text-primary hover:text-primary" : "text-muted-foreground",
+        )}
         onClick={(e) => { e.stopPropagation(); onSelect(); }}
       >
-        {p.finished ? "수정" : "이어서 작성하기"}
-      </Button>
-    </li>
-  );
-}
-
-// 새로 시작 행 — 인재상 한 줄(기관 DB)로 "이 기관에 맞춰 쓴다"는 감각만 조용히
-function StartRow({ job, onSelect }: { job: Job; onSelect: () => void }) {
-  return (
-    <li
-      className="py-4 first:pt-3 last:pb-1 flex items-start justify-between gap-4 cursor-pointer group"
-      onClick={onSelect}
-      role="button"
-      aria-label={`${job.org} 자소서 작성 시작`}
-    >
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-1.5">
-          <span className="text-sm font-semibold text-foreground">{job.org}</span>
-          <span className="text-xs text-muted-foreground">{job.role}</span>
-          <DdayChip days={job.dday} size="sm" />
-          <span className="text-chip text-muted-foreground tabular-nums">문항 {job.questions.length}개</span>
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed truncate">
-          인재상 “{job.talent.line}” <span className="text-muted-foreground/60">· Pickd 기관 DB</span>
-        </p>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="shrink-0 h-8 text-xs gap-1 whitespace-nowrap rounded-md border-border text-muted-foreground"
-        onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      >
-        작성하기
+        {p.finished ? "수정" : writing ? "이어서 작성하기" : "작성하기"}
       </Button>
     </li>
   );
 }
 
 function JobSelect({ onSelect }: { onSelect: (id: string) => void }) {
-  const withProgress = JOBS.map((job) => ({ job, p: getProgress(job) }));
-  const writing = withProgress.filter(({ p }) => p.written > 0 || p.finished).sort((a, b) => a.job.dday - b.job.dday);
-  const fresh = withProgress.filter(({ p }) => p.written === 0 && !p.finished).sort((a, b) => a.job.dday - b.job.dday);
+  // 한 리스트, 공고 기준 — 마감 임박 순 (섹션 구분 없음, 2026-07-27 확정)
+  const rows = JOBS.map((job) => ({ job, p: getProgress(job) })).sort((a, b) => a.job.dday - b.job.dday);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -599,25 +562,14 @@ function JobSelect({ onSelect }: { onSelect: (id: string) => void }) {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-10 py-8">
           <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            쓰던 글은 이어서, 새 공고는 문항부터 — 기관 인재상에 맞춰 내 경험으로 함께 써요.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1.5">공고를 누르면 바로 문항 작성으로 들어가요.</p>
 
-          <div className="mt-8 flex flex-col gap-4">
-            {writing.length > 0 && (
-              <ListSection title="쓰던 자소서" sub={`${writing.length}건`}>
-                {writing.map(({ job, p }) => (
-                  <ResumeRow key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
-                ))}
-              </ListSection>
-            )}
-            {fresh.length > 0 && (
-              <ListSection title="새로 시작할 공고" sub={`${fresh.length}건`}>
-                {fresh.map(({ job }) => (
-                  <StartRow key={job.id} job={job} onSelect={() => onSelect(job.id)} />
-                ))}
-              </ListSection>
-            )}
+          <div className="mt-6 bg-card border border-border rounded-2xl px-6 py-4">
+            <ol className="divide-y divide-border">
+              {rows.map(({ job, p }) => (
+                <JobRow key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
+              ))}
+            </ol>
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground">
