@@ -62,6 +62,7 @@ import { StatusBadge, DdayChip, calcDday, stageStyle } from "@/components/pickd/
 import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";
 import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/pickd/RowContextMenu";
+import { getRegistrations, registrationRowSeed, removeRegistration, REGISTRATIONS_EVENT } from "@/data/jobStore";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
@@ -679,6 +680,47 @@ function JobRowGutterCell({
 // ── Main Component ─────────────────────────────────────────────────
 export function JobPostingTable() {
   const [jobs, setJobs] = useState<Job[]>(initialJobData);
+
+  // 검색으로 담은 공고(jobStore 등록)를 테이블 행으로 파생·병합.
+  // 공고 데이터는 참조(postingId)만 저장되고, 표시값은 시드에서 파생된다.
+  useEffect(() => {
+    const sync = () =>
+      setJobs((prev) => {
+        const regs = getRegistrations();
+        const regIds = new Set(regs.map((r) => `reg-${r.postingId}`));
+        // 해제된 등록 행 제거
+        let next = prev.filter((j) => !j.id.startsWith("reg-") || regIds.has(j.id));
+        // 새 등록 행 추가 (파생값으로 Job 행 구성)
+        const have = new Set(next.map((j) => j.id));
+        const added = regs
+          .filter((r) => !have.has(`reg-${r.postingId}`))
+          .map((r) => registrationRowSeed(r))
+          .filter((s): s is NonNullable<ReturnType<typeof registrationRowSeed>> => s !== null)
+          .map<Job>((s) => ({
+            id: s.id,
+            slug: s.slug,
+            company: s.company,
+            title: s.title,
+            role: s.role,
+            employType: s.employType,
+            industry: s.industry,
+            deadline: s.deadline,
+            dday: s.dday,
+            status: "작성중",
+            finalResult: null,
+            linked: { schedules: s.linkedSchedules, todos: 0 },
+            starred: false,
+            updatedAt: "방금",
+            registeredAt: s.registeredAt,
+            stage: "작성중",
+            url: s.url,
+          }));
+        return added.length || next.length !== prev.length ? [...added, ...next] : prev;
+      });
+    sync();
+    window.addEventListener(REGISTRATIONS_EVENT, sync);
+    return () => window.removeEventListener(REGISTRATIONS_EVENT, sync);
+  }, []);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("전체");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -1001,6 +1043,8 @@ export function JobPostingTable() {
 
   // 실제 삭제 수행 — 확인 다이얼로그 승인 후에만 호출
   const performDelete = (ids: string[]) => {
+    // 검색으로 담은 공고면 등록 스토어에서도 해제 (안 하면 다음 동기화 때 되살아난다)
+    ids.filter((id) => id.startsWith("reg-")).forEach((id) => removeRegistration(id.slice(4)));
     setJobs((p) => p.filter((j) => !ids.includes(j.id)));
     setSelected(new Set());
     toast(ids.length === 1 ? "공고를 삭제했어요" : `공고 ${ids.length}개를 삭제했어요`, { duration: 1500 });

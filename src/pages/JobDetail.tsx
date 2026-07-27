@@ -20,6 +20,8 @@ import { StatusBadge, STATUS_MAP } from "@/components/pickd/ds/StatusBadge";
 import { DdayChip } from "@/components/pickd/ds/DdayChip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getPostingBySlug } from "@/data/postings.seed";
+import { postingToJobDetail } from "@/data/jobStore";
 
 // TODO: MOCK_DATA - 실제 API 연결 시 제거. API: GET /job-postings/:id
 const jobDetails: Record<string, any> = {
@@ -174,6 +176,9 @@ const jobDetails: Record<string, any> = {
 
 function getJob(slug: string | undefined) {
   if (slug && jobDetails[slug]) return jobDetails[slug];
+  // 검색으로 담은 공고(시드 DB) — 참조 데이터를 상세 화면 형태로 파생
+  const posting = slug ? getPostingBySlug(slug) : undefined;
+  if (posting) return postingToJobDetail(posting);
   return jobDetails.samsung;
 }
 
