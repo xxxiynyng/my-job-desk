@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Check, ChevronDown, ChevronRight, RefreshCw, SpellCheck as SpellCheckIcon, Sparkles, X,
+  ArrowRight, Check, ChevronDown, ChevronRight, Maximize2, RefreshCw, SpellCheck as SpellCheckIcon, Sparkles, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PickdSidebar } from "@/components/pickd/PickdSidebar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DdayChip } from "@/components/pickd/ds/DdayChip";
 import { TONES, type Tone } from "@/components/pickd/ds/StatusBadge";
 
@@ -346,6 +347,21 @@ function PanelSection({
   );
 }
 
+// 긴 콘텐츠 크게 보기 — 실데이터에선 분석·인재상이 훨씬 길고 복잡해질 것에 대비한 확대 뷰(모달)
+function ZoomView({ title, trigger, children }: { title: string; trigger: ReactNode; children: ReactNode }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-w-xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-title font-semibold text-foreground">{title}</DialogTitle>
+        </DialogHeader>
+        <div className="mt-1 space-y-3">{children}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // 길어질 수 있는 텍스트 — 2줄 넘으면 접고 '더 보기'로 펼침
 function TruncText({ text, className = "" }: { text: string; className?: string }) {
   const [expanded, setExpanded] = useState(false);
@@ -527,63 +543,41 @@ function deadlineOf(dday: number): string {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-function JobCard({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: (qIdx?: number) => void }) {
+function JobCard({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
   const writing = p.written > 0 || p.finished;
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect()}
-      onKeyDown={(e) => { if (e.key === "Enter") onSelect(); }}
+    <button
+      type="button"
+      onClick={onSelect}
       aria-label={`${job.org} 자소서 작성`}
-      className="bg-card border border-border rounded-lg px-4 py-3.5 hover:bg-muted/20 hover:border-primary/40 transition-colors flex flex-col text-left cursor-pointer"
+      className="bg-card border border-border rounded-lg px-5 py-4 hover:bg-muted/20 hover:border-primary/40 transition-colors flex flex-col text-left"
     >
       {/* 제목 행 */}
       <p className="text-sm font-semibold text-foreground leading-snug">
         {job.org} <span className="font-normal text-muted-foreground">{job.role}</span>
       </p>
 
-      {/* 서브라인: 자소서 · D-day · N/M (대시보드 카드의 '지원서 · D-N' 문법) */}
-      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-        <span className="text-chip text-muted-foreground">자소서</span>
-        <span className="text-muted-foreground/40 text-mini">·</span>
-        <span className={cn("text-chip tabular-nums", ddayCls(job.dday))}>{ddayLabel(job.dday)}</span>
-        {writing && (
-          <>
-            <span className="text-muted-foreground/40 text-mini">·</span>
-            <span className="text-chip text-muted-foreground tabular-nums">{p.written}/{p.total} 작성</span>
-          </>
-        )}
+      {/* 서브라인: 자소서 · D-day (대시보드 카드의 '지원서 · D-N' 문법) */}
+      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        <span className="text-xs text-muted-foreground">자소서</span>
+        <span className="text-muted-foreground/40 text-xs">·</span>
+        <span className={cn("text-xs tabular-nums", ddayCls(job.dday))}>{ddayLabel(job.dday)}</span>
       </div>
 
-      {/* 문항별 바로 진입 — 카드 안에서 원하는 문항으로 곧장 (생산성: 클릭 1번 = 그 문항 에디터) */}
-      <div className="mt-2.5 flex flex-col divide-y divide-border/50 border-t border-b border-border/50">
-        {job.questions.map((qq, i) => {
-          const t = (p.texts[i] ?? "").trim();
-          const st = p.finished ? "완료" : t ? "작성중" : "미작성";
-          return (
-            <button
-              key={qq.no}
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onSelect(i); }}
-              className="flex items-center justify-between gap-2 py-1.5 px-1 -mx-1 text-left hover:bg-muted/40 rounded-sm transition-colors"
-              aria-label={`문항 ${qq.no} 작성`}
-            >
-              <span className="text-xs text-muted-foreground tabular-nums shrink-0">Q{qq.no} · {qq.limit}자</span>
-              <EssayStatus status={st} />
-            </button>
-          );
-        })}
-      </div>
+      {/* 문항 수 — 선 없이 크고 직관적으로 (2026-07-27: 가로선·작은 글자 피드백) */}
+      <p className="mt-3 text-title font-semibold text-foreground tabular-nums">
+        문항 {p.total}개
+        {writing && <span className="text-muted-foreground font-normal"> · {p.written}개 작성</span>}
+      </p>
 
       {/* 마감일 · CTA */}
-      <div className="mt-2.5 flex items-center justify-between text-mini tabular-nums">
+      <div className="mt-3 flex items-center justify-between gap-2 text-xs tabular-nums w-full">
         <span className="text-muted-foreground">마감 {deadlineOf(job.dday)}</span>
         <span className={cn("font-medium", writing && !p.finished ? "text-primary" : "text-muted-foreground")}>
           {p.finished ? "수정" : writing ? "이어서 작성하기" : "작성하기"}
         </span>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -610,7 +604,7 @@ function JobSelect({ onSelect }: { onSelect: (id: string, qIdx?: number) => void
 
           <div className="mt-5 grid grid-cols-2 xl:grid-cols-3 gap-3.5">
             {rows.map(({ job, p }) => (
-              <JobCard key={job.id} job={job} p={p} onSelect={(qIdx) => onSelect(job.id, qIdx)} />
+              <JobCard key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
             ))}
           </div>
         </div>
@@ -900,8 +894,26 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
             {/* 1. 문항 분석 */}
             <PanelSection n={1} title="문항 분석">
               <TruncText text={q.intent} className="text-sm text-foreground leading-relaxed" />
-              <div className="mt-2.5 flex flex-wrap gap-1">
-                {q.keywords.map((k) => <KeywordChip key={k}>{k}</KeywordChip>)}
+              <div className="mt-2.5 flex items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-1 min-w-0">
+                  {q.keywords.map((k) => <KeywordChip key={k}>{k}</KeywordChip>)}
+                </div>
+                {/* 실데이터에선 분석이 훨씬 길어짐 — 모달로 크게 보기 */}
+                <ZoomView
+                  title={`문항 분석 · Q${q.no}`}
+                  trigger={
+                    <button type="button" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                      <Maximize2 className="w-3 h-3" />
+                      크게 보기
+                    </button>
+                  }
+                >
+                  <p className="text-title font-semibold text-foreground leading-relaxed">{q.text}</p>
+                  <p className="text-title text-foreground leading-[1.8]">{q.intent}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {q.keywords.map((k) => <KeywordChip key={k}>{k}</KeywordChip>)}
+                  </div>
+                </ZoomView>
               </div>
             </PanelSection>
 
@@ -924,10 +936,24 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
               </blockquote>
               <div className="mt-2.5 flex items-center justify-between gap-2">
                 <span className="text-mini text-muted-foreground">{job.talent.source}</span>
-                <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline whitespace-nowrap">
-                  기관 DB 더 보기
-                  <ArrowRight className="w-3 h-3" />
-                </button>
+                {/* 기관 DB 상세 — 실데이터(인터뷰 전문·합격 포인트)가 길어져도 모달에서 크게 */}
+                <ZoomView
+                  title="이 기관의 인재상 — Pickd 기관 DB"
+                  trigger={
+                    <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline whitespace-nowrap">
+                      기관 DB 더 보기
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  }
+                >
+                  <p className="text-h2 font-semibold text-foreground leading-snug">“{job.talent.line}”</p>
+                  <p className="text-sm text-muted-foreground">{job.talent.tags.map((t) => `#${t}`).join(" · ")}</p>
+                  <blockquote className="border-l-2 border-border pl-3">
+                    <p className="text-title text-foreground leading-[1.8] select-text">“{job.talent.voice}”</p>
+                    <p className="mt-1 text-xs text-muted-foreground">— {job.talent.voiceFrom}</p>
+                  </blockquote>
+                  <p className="text-xs text-muted-foreground">{job.talent.source}</p>
+                </ZoomView>
               </div>
             </PanelSection>
 
