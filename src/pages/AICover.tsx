@@ -330,7 +330,7 @@ function PanelSection({
         <span className="w-5 h-5 rounded-md bg-muted text-muted-foreground text-mini font-bold flex items-center justify-center tabular-nums shrink-0">
           {n}
         </span>
-        <span className="text-body font-semibold text-foreground tracking-tight">{title}</span>
+        <span className="text-sm font-semibold text-foreground tracking-tight">{title}</span>
         <span className="ml-auto flex items-center gap-2 min-w-0">
           {sub}
           <ChevronDown
@@ -400,7 +400,7 @@ function ExpCard({ exp, checked, onToggle }: { exp: Exp; checked: boolean; onTog
         </span>
         <span className="text-mini text-muted-foreground tabular-nums shrink-0">적합도 {exp.score}</span>
       </span>
-      <span className="mt-1.5 block text-xs text-muted-foreground leading-snug">{exp.reason}</span>
+      <span className="mt-1.5 block text-body text-muted-foreground leading-snug">{exp.reason}</span>
     </button>
   );
 }
@@ -490,7 +490,7 @@ function SuggestionBlock({
    (상태 dot·내가 쓴 문장 미리보기·'이어서 작성하기'/'작성하기' CTA 위계). 마감 임박 순 정렬. */
 
 type JobProgress = {
-  written: number; total: number; finished: boolean;
+  written: number; total: number; finished: boolean; texts: string[];
   preview: string; curNo: number; curLen: number; curLimit: number;
 };
 function getProgress(job: Job): JobProgress {
@@ -501,7 +501,7 @@ function getProgress(job: Job): JobProgress {
   const curIdx = cached?.qIdx ?? (firstIdx >= 0 ? firstIdx : 0);
   const preview = (texts[curIdx]?.trim() || (firstIdx >= 0 ? texts[firstIdx].trim() : "")).replace(/\s+/g, " ");
   return {
-    written, total: job.questions.length, finished: cached?.finished ?? false,
+    written, total: job.questions.length, finished: cached?.finished ?? false, texts,
     preview, curNo: job.questions[curIdx].no, curLen: (texts[curIdx] ?? "").length, curLimit: job.questions[curIdx].limit,
   };
 }
@@ -527,67 +527,92 @@ function deadlineOf(dday: number): string {
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
-function JobCard({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
+function JobCard({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: (qIdx?: number) => void }) {
   const writing = p.written > 0 || p.finished;
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect()}
+      onKeyDown={(e) => { if (e.key === "Enter") onSelect(); }}
       aria-label={`${job.org} 자소서 작성`}
-      className="bg-card border border-border rounded-lg px-4 py-3.5 hover:bg-muted/20 hover:border-primary/40 transition-colors flex flex-col text-left"
+      className="bg-card border border-border rounded-lg px-4 py-3.5 hover:bg-muted/20 hover:border-primary/40 transition-colors flex flex-col text-left cursor-pointer"
     >
       {/* 제목 행 */}
-      <p className="text-body font-semibold text-foreground leading-tight">
-        {job.org} {job.role}
+      <p className="text-sm font-semibold text-foreground leading-snug">
+        {job.org} <span className="font-normal text-muted-foreground">{job.role}</span>
       </p>
 
-      {/* 서브라인: 자소서 · D-day (대시보드 카드의 '지원서 · D-N'과 동일 문법) */}
+      {/* 서브라인: 자소서 · D-day · N/M (대시보드 카드의 '지원서 · D-N' 문법) */}
       <div className="flex items-center gap-1.5 mt-1 flex-wrap">
         <span className="text-chip text-muted-foreground">자소서</span>
         <span className="text-muted-foreground/40 text-mini">·</span>
         <span className={cn("text-chip tabular-nums", ddayCls(job.dday))}>{ddayLabel(job.dday)}</span>
+        {writing && (
+          <>
+            <span className="text-muted-foreground/40 text-mini">·</span>
+            <span className="text-chip text-muted-foreground tabular-nums">{p.written}/{p.total} 작성</span>
+          </>
+        )}
       </div>
 
-      {/* 문항 작성 현황 — 진행 바 대신 N/M 텍스트 (§0-10) */}
-      <div className="mt-2.5 flex items-center justify-between text-mini text-muted-foreground tabular-nums">
-        <span>문항</span>
-        <span>{writing ? `${p.written}/${p.total} 작성` : `${job.questions.length}개`}</span>
+      {/* 문항별 바로 진입 — 카드 안에서 원하는 문항으로 곧장 (생산성: 클릭 1번 = 그 문항 에디터) */}
+      <div className="mt-2.5 flex flex-col divide-y divide-border/50 border-t border-b border-border/50">
+        {job.questions.map((qq, i) => {
+          const t = (p.texts[i] ?? "").trim();
+          const st = p.finished ? "완료" : t ? "작성중" : "미작성";
+          return (
+            <button
+              key={qq.no}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSelect(i); }}
+              className="flex items-center justify-between gap-2 py-1.5 px-1 -mx-1 text-left hover:bg-muted/40 rounded-sm transition-colors"
+              aria-label={`문항 ${qq.no} 작성`}
+            >
+              <span className="text-xs text-muted-foreground tabular-nums shrink-0">Q{qq.no} · {qq.limit}자</span>
+              <EssayStatus status={st} />
+            </button>
+          );
+        })}
       </div>
 
       {/* 마감일 · CTA */}
-      <div className="mt-2 flex items-center justify-between text-mini tabular-nums">
+      <div className="mt-2.5 flex items-center justify-between text-mini tabular-nums">
         <span className="text-muted-foreground">마감 {deadlineOf(job.dday)}</span>
         <span className={cn("font-medium", writing && !p.finished ? "text-primary" : "text-muted-foreground")}>
           {p.finished ? "수정" : writing ? "이어서 작성하기" : "작성하기"}
         </span>
       </div>
-    </button>
+    </div>
   );
 }
 
-function JobSelect({ onSelect }: { onSelect: (id: string) => void }) {
-  // 공고 기준 카드 그리드 — 마감 임박 순 (탭1 대시보드 카드형과 동일 구조, 2026-07-27 확정)
+function JobSelect({ onSelect }: { onSelect: (id: string, qIdx?: number) => void }) {
+  // 공고 기준 카드 그리드 — 마감 임박 순, 전폭 사용(탭1과 동일한 컨테이너 감각, 좌우 빈공간 최소화)
   const rows = JOBS.map((job) => ({ job, p: getProgress(job) })).sort((a, b) => a.job.dday - b.job.dday);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-10 py-8">
-          <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
-          <p className="text-sm text-muted-foreground mt-1.5">공고를 누르면 바로 문항 작성으로 들어가요.</p>
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {rows.map(({ job, p }) => (
-              <JobCard key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
-            ))}
+        <div className="max-w-[1320px] mx-auto px-8 py-7">
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <div>
+              <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
+              <p className="text-sm text-muted-foreground mt-1.5">공고나 문항을 누르면 바로 작성으로 들어가요.</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              새 공고는{" "}
+              <Link to="/" className="text-primary hover:underline">지원 대시보드</Link>
+              에서 등록해요.
+            </p>
           </div>
 
-          <p className="mt-6 text-xs text-muted-foreground">
-            새 공고는{" "}
-            <Link to="/" className="text-primary hover:underline">지원 대시보드</Link>
-            에서 등록해요. 공고를 등록하면 여기에 자동으로 나타나요.
-          </p>
+          <div className="mt-5 grid grid-cols-2 xl:grid-cols-3 gap-3.5">
+            {rows.map(({ job, p }) => (
+              <JobCard key={job.id} job={job} p={p} onSelect={(qIdx) => onSelect(job.id, qIdx)} />
+            ))}
+          </div>
         </div>
       </main>
     </div>
@@ -606,8 +631,22 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
   const [finished, setFinished] = useState(cached?.finished ?? false);
   const [genNode, setGenNode] = useState(-1); // -1 = 대기, 0~3 = 진행 중 노드
   const [spellIssues, setSpellIssues] = useState<SpellIssue[] | null>(null); // null = 닫힘
+  // 우측 패널 폭 — 왼쪽 가장자리 드래그로 조절(내용이 많을 때 크게 보기, 2026-07-27 요청)
+  const [panelW, setPanelW] = useState(430);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  function startPanelResize(e: React.PointerEvent) {
+    e.preventDefault();
+    const onMove = (ev: PointerEvent) =>
+      setPanelW(Math.min(640, Math.max(340, window.innerWidth - ev.clientX)));
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
 
   const q = job.questions[qIdx];
   const text = texts[qIdx];
@@ -704,7 +743,7 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
         <div className="flex-1 overflow-y-auto bg-white">
           {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
-            <div className="mx-auto max-w-[760px] px-8 py-3 flex items-center justify-between gap-4">
+            <div className="mx-auto max-w-[820px] px-8 py-3 flex items-center justify-between gap-4">
               <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                 <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
                 <ChevronRight className="w-3 h-3 shrink-0" />
@@ -719,7 +758,7 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           </div>
 
           {/* Centered content column */}
-          <div className="mx-auto max-w-[760px] px-8 pt-9 pb-24">
+          <div className="mx-auto max-w-[820px] px-8 pt-9 pb-24">
             {/* 얇은 문서 헤더 — 태그 무채색, 컬러는 D-day 하나만 */}
             <header className="mb-7">
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
@@ -837,17 +876,30 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           </div>
         </div>
 
-        {/* ── 우측 380px 패널 — 플랫 섹션(divide-y) + 하단 고정 컨트롤 ── */}
-        <aside className="w-[380px] border-l border-border bg-white flex flex-col shrink-0" aria-label="문항 보조 패널">
+        {/* ── 우측 패널 — 플랫 섹션(divide-y) + 하단 고정 컨트롤. 왼쪽 가장자리 드래그로 폭 조절 ── */}
+        <aside
+          className="relative border-l border-border bg-white flex flex-col shrink-0"
+          style={{ width: panelW }}
+          aria-label="문항 보조 패널"
+        >
+          {/* 리사이즈 핸들 */}
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="패널 너비 조절"
+            title="드래그해서 패널 크기 조절"
+            onPointerDown={startPanelResize}
+            className="absolute left-0 top-0 bottom-0 w-1.5 -ml-0.5 cursor-col-resize z-10 hover:bg-primary/25 active:bg-primary/40 transition-colors"
+          />
           <div className="px-5 py-3 border-b border-border flex items-baseline justify-between gap-3 shrink-0">
-            <p className="text-body font-semibold text-foreground leading-tight">작성 도우미</p>
+            <p className="text-sm font-semibold text-foreground leading-tight">작성 도우미</p>
             <p className="text-chip text-muted-foreground truncate">문항 {q.no} / {job.questions.length}</p>
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-border/60">
             {/* 1. 문항 분석 */}
             <PanelSection n={1} title="문항 분석">
-              <TruncText text={q.intent} className="text-body text-foreground leading-relaxed" />
+              <TruncText text={q.intent} className="text-sm text-foreground leading-relaxed" />
               <div className="mt-2.5 flex flex-wrap gap-1">
                 {q.keywords.map((k) => <KeywordChip key={k}>{k}</KeywordChip>)}
               </div>
@@ -864,10 +916,10 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
                 </span>
               }
             >
-              <p className="text-sm font-semibold text-foreground leading-relaxed select-text">“{job.talent.line}”</p>
+              <p className="text-title font-semibold text-foreground leading-relaxed select-text">“{job.talent.line}”</p>
               <p className="mt-1.5 text-xs text-muted-foreground">{job.talent.tags.map((t) => `#${t}`).join(" · ")}</p>
               <blockquote className="mt-2.5 border-l-2 border-border pl-2.5">
-                <TruncText text={`“${job.talent.voice}”`} className="text-xs text-foreground leading-relaxed select-text" />
+                <TruncText text={`“${job.talent.voice}”`} className="text-body text-foreground leading-relaxed select-text" />
                 <p className="mt-0.5 text-mini text-muted-foreground">— {job.talent.voiceFrom}</p>
               </blockquote>
               <div className="mt-2.5 flex items-center justify-between gap-2">
@@ -939,9 +991,31 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
 export default function AICover() {
   const [jobId, setJobId] = useState<string | null>(null);
   const job = JOBS.find((j) => j.id === jobId);
+
+  // 메인 카드의 문항 행에서 특정 문항으로 바로 진입 — 캐시의 qIdx만 미리 지정
+  function openJob(id: string, qIdx?: number) {
+    if (qIdx != null) {
+      const target = JOBS.find((j) => j.id === id);
+      if (target) {
+        const c = essayCache[id];
+        essayCache[id] = c
+          ? { ...c, qIdx }
+          : {
+              qIdx,
+              texts: target.questions.map((q) => q.initial),
+              variants: target.questions.map(() => 0),
+              suggestionOpen: target.questions.map(() => false),
+              selected: ["popup", "intern"],
+              finished: false,
+            };
+      }
+    }
+    setJobId(id);
+  }
+
   return job ? (
     <EssayEditor key={job.id} job={job} onBack={() => setJobId(null)} />
   ) : (
-    <JobSelect onSelect={setJobId} />
+    <JobSelect onSelect={openJob} />
   );
 }
