@@ -313,6 +313,59 @@ export const POSTINGS: Posting[] = [
       { docType: "기타", fileName: "장애유형별 편의지원 내용 및 신청서.hwp", fileFormat: "hwp", url: "#" },
     ],
   },
+// ── 시드 3: 근로복지공단 울산병원 — 수시·경력·무필기·일정 일부 미정 트랙 ──
+  // 근거: 잡알리오 상세 페이지 원문 확인 (2026-07-26). 서류·면접·발표 날짜는 공고 미명시("합격자 개별 통보") → confirmed:false
+  {
+    id: "kcomwel-ulsan-2026",
+    slug: "kcomwel-ulsan-2026-pharmacist",
+    orgName: "근로복지공단",
+    orgCategory: "준정부기관",
+    title: "[울산병원] 의료직 2, 3급(약사) 채용 공고",
+    applyStart: "2026-07-24T00:00:00+09:00",
+    applyEnd: "2026-08-03T00:00:00+09:00",
+    applyUrl: "https://www.comwel.or.kr/recruit/hp/main.do",
+    sourceUrl: "https://job.alio.go.kr/recruit.do",
+    sourceType: "jobalio",
+    regions: ["울산"],
+    blindHiring: true,
+    reviewedAt: "2026-07-26",
+    positions: [
+      {
+        id: "kcomwel-p1",
+        jobGroup: "의료직",
+        jobTitle: "약무직(약사) 2·3급",
+        employmentType: "정규직",
+        recruitType: "경력",
+        headcount: 3,
+        workLocation: ["근로복지공단 울산병원(울산)"],
+        ncsCategory: "보건·의료",
+        qualification:
+          "2급: 약사 면허 취득 후 7년 이상 해당 업무 경력 / 3급: 약사 면허 취득 후 3년 이상 해당 업무 경력 (마감일 기준)",
+        screeningMethod: "적격심사",
+        writtenExam: false,
+        duties: "울산병원 약제 업무 (조제·복약지도·의약품 관리)",
+        conversionNote: "임용일 기준 60세 미만(정년), 채용 즉시 근무 가능자",
+      },
+    ],
+    scheduleEvents: [
+      { stageType: "ANNOUNCE", label: "공고기간", startDate: "2026-07-24", endDate: "2026-08-03", confirmed: true, sortOrder: 1 },
+      { stageType: "APPLY", label: "지원서 접수", startDate: "2026-07-24", endDate: "2026-08-03", confirmed: true, sortOrder: 2 },
+      { stageType: "DOC_SCREENING", label: "1차 서류전형(자격기준 해당자 전원 합격)", startDate: "2026-08-04", endDate: "2026-08-04", confirmed: false, sortOrder: 3 },
+      { stageType: "INTERVIEW", label: "2차 면접전형(개별 면접)", startDate: "2026-08-10", endDate: "2026-08-10", confirmed: false, sortOrder: 4 },
+      { stageType: "FINAL_RESULT", label: "최종 합격자 발표", startDate: "2026-08-14", endDate: "2026-08-14", confirmed: false, sortOrder: 5 },
+    ],
+    essayQuestions: [],
+    essaySource: "apply_site",
+    preferences: [
+      { category: "취업지원대상자(국가보훈)", bonusRate: "가점(선발예정 4명 이상 시)", appliedStages: ["서류", "면접"], duplicable: false,
+        note: "4명 미만 모집단위는 동점자 발생 시 우선순위 부여" },
+    ],
+    attachments: [
+      { docType: "공고문", fileName: "260724 [울산병원] 의료직(약사) 채용 공고문.pdf", fileFormat: "pdf", url: "#" },
+      { docType: "입사지원서", fileName: "260724 [울산병원] 의료직(약사) 입사지원서.hwp", fileFormat: "hwp", url: "#" },
+      { docType: "직무기술서", fileName: "260724 [울산병원] 의료직(약사) 직무기술서.pdf", fileFormat: "pdf", url: "#" },
+    ],
+  },
 ];
 
 // ── 검색·조회 셀렉터 (QuickJobRegistration 자동완성이 사용) ──────
