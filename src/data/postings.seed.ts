@@ -1,0 +1,328 @@
+// ─────────────────────────────────────────────────────────────
+// Pickd 공고 시드 데이터 (신 스키마 v4)
+// 위치 제안: src/data/postings.seed.ts
+//
+// ① 탭1 검색·등록·상세의 데이터 소스 (백엔드 도입 전: 정적 시드 → 이후 JSON fetch)
+// ② 백엔드 API 응답 계약(contract): GET /postings 의 응답 형태가 이 타입과 동일해야 함
+// ③ 실공고 원문 검증 2건 수록 — 한국가스안전공사(무필기·공무직 트랙), KOMSA(필기·정규직 트랙)
+//    두 건이 스키마의 양극단을 커버하므로 UI 전 케이스 테스트 픽스처로 사용 가능
+// ─────────────────────────────────────────────────────────────
+
+// ── 타입 (탭1_기획개발 문서 2부·4부 스키마와 1:1) ──────────────
+
+export type StageType =
+  | "ANNOUNCE" | "APPLY" | "DOC_SCREENING" | "DOC_RESULT"
+  | "WRITTEN_EXAM" | "WRITTEN_RESULT" | "PERSONALITY_TEST"
+  | "EVIDENCE_SUBMIT" | "INTERVIEW" | "FINAL_RESULT" | "JOIN"
+  | "PHYSICAL_TEST" | "PRACTICAL_TEST" | "APTITUDE_TEST" | "ETC";
+
+/** NCS 직업기초능력 10개 영역 — 자소서 문항 평가항목 표준 어휘 */
+export type NcsCompetency =
+  | "의사소통" | "수리" | "문제해결" | "자기개발" | "자원관리"
+  | "대인관계" | "정보" | "기술" | "조직이해" | "직업윤리";
+
+/** NCS 대분류 → Pickd 8개 축약 카테고리 (필터 축) */
+export type NcsCategory8 =
+  | "사무·행정" | "전산·IT" | "전기·전자" | "기계·설비"
+  | "건설·안전" | "보건·의료" | "연구" | "현장·기타";
+
+export type OrgCategory = "공기업" | "준정부기관" | "기타공공기관" | "지방공기업" | "지방출자출연" | "기타";
+export type ScreeningMethod = "적격심사" | "정량평가" | "정성평가" | "혼합";
+
+export interface ScheduleEvent {
+  stageType: StageType;
+  /** 원문 표기 그대로 — 화면 노출은 항상 label 사용 */
+  label: string;
+  startDate: string;           // YYYY-MM-DD
+  endDate: string;
+  startTime?: string;          // HH:mm — 마감 시각이 있으면 반드시 기록
+  endTime?: string;
+  /** false = 공고문에 "추후 공지" — 화면에 '미정' 표기 + 확정 시 알림 대상 */
+  confirmed: boolean;
+  sortOrder: number;
+}
+
+export interface Position {
+  id: string;
+  jobGroup?: string;           // 직렬 (행정직 / 공무직 …)
+  jobTitle: string;            // 채용분야 (일반행정 / 시설관리(전기) …)
+  grade?: string;              // 6급 등
+  employmentType: string;      // 정규직 / 공무직(무기전환) / 청년인턴(기간제)
+  recruitType: "신입" | "경력" | "신입+경력";
+  headcount: number;
+  workLocation: string[];
+  ncsCategory: NcsCategory8;
+  qualification: string;       // 응시자격 요약 (원문 축약)
+  ageLimit?: string;
+  screeningMethod: ScreeningMethod;      // v4 신규 — 서류전형 방식
+  residencyRequirement?: string;         // v4 신규 — 거주요건 (없으면 undefined)
+  writtenExam: boolean;
+  writtenExamNote?: string;              // v4 신규 — 필기 과목 구성
+  conversionNote?: string;               // v4 신규 — 인턴·수습·전환 정보
+  essayWeightNote?: string;              // 자소서 배점 비중
+  salaryNote?: string;
+}
+
+export interface EssayQuestion {
+  docType: "자기소개서" | "경력기술서";
+  questionNo: number;
+  questionText: string;
+  charLimit: number;
+  /** null = 전 직무 공통 / 배열 = 해당 positionId만 */
+  targetPositionIds: string[] | null;
+  evalCriteria?: NcsCompetency;          // v4: 직업기초능력 enum으로 표준화
+}
+
+export interface Preference {
+  category: string;
+  bonusRate: string;
+  appliedStages: ("서류" | "필기" | "면접")[];
+  duplicable: boolean;
+  /** v4 보강 — 지역인재 항목만: 대상 지역 + 적용 방식 */
+  region?: string;
+  regionScheme?: "30%목표제" | "비수도권35%" | "광역자체목표" | "별도전형";
+  note?: string;
+}
+
+export interface Attachment {
+  docType: "공고문" | "입사지원서" | "직무기술서" | "기타";
+  fileName: string;
+  fileFormat: "pdf" | "hwp" | "zip" | "etc";
+  url: string;
+}
+
+export interface Posting {
+  id: string;
+  slug: string;                          // 라우팅 키: /jobs/:slug
+  orgName: string;
+  orgCategory: OrgCategory;
+  title: string;
+  announceNo?: string;
+  applyStart: string;                    // ISO datetime — 시각 포함
+  applyEnd: string;
+  applyUrl: string;
+  sourceUrl: string;                     // 잡알리오 등 원문
+  sourceType: "jobalio" | "busan_unified" | "gyeongnam_unified" | "user_pdf" | "manual";
+  regions: string[];
+  blindHiring: boolean;
+  /** 통합채용 회차 — 같은 recruitRound 공고끼리는 1인 1기관 1분야 (등록 시 경고) */
+  recruitRound?: string;
+  reviewedAt: string;                    // 검수 기준일 — 상세 화면에 노출
+  positions: Position[];
+  scheduleEvents: ScheduleEvent[];
+  essayQuestions: EssayQuestion[];       // 빈 배열 = 문항 미확보(정상 케이스)
+  /** 문항 출처: 공고문에 없고 접수 사이트에만 있는 경우를 구분 */
+  essaySource: "announcement_pdf" | "apply_site" | "not_found";
+  preferences: Preference[];
+  attachments: Attachment[];
+}
+
+// ── 시드 1: 한국가스안전공사 — 무필기·공무직/인턴·문항 有 트랙 ──
+// 근거: 2026 하반기 공고문 원문 16p 전수 분석 (2026-07-26)
+
+export const POSTINGS: Posting[] = [
+  {
+    id: "kgs-2026-h2",
+    slug: "kgs-2026-h2-gongmujik",
+    orgName: "한국가스안전공사",
+    orgCategory: "준정부기관",
+    title: "2026년 하반기 공무직 및 청년인턴 채용",
+    applyStart: "2026-07-30T14:00:00+09:00",
+    applyEnd: "2026-08-07T12:00:00+09:00",
+    applyUrl: "https://kgs1.saramin.co.kr",
+    sourceUrl: "https://job.alio.go.kr/recruit.do", // 실제 공고 상세 URL로 교체
+    sourceType: "jobalio",
+    regions: ["충북", "충남", "경기", "경북", "강원"],
+    blindHiring: true,
+    reviewedAt: "2026-07-26",
+    positions: [
+      {
+        id: "kgs-p1", jobGroup: "공무직", jobTitle: "시설관리(기계)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        recruitType: "신입+경력", headcount: 2, workLocation: ["가스안전교육원(충남 천안)", "수소제품시험평가센터(충북 음성)"],
+        ncsCategory: "기계·설비", qualification: "학력·연령 제한 없음(만 60세 미만), 교대·주간 근로형태 동의자",
+        screeningMethod: "혼합", writtenExam: false,
+        conversionNote: "수습 3개월 → 근무성적 평정 60점 이상 시 공무직(무기계약직) 전환",
+        essayWeightNote: "서류 100점 중 자소서(정성) 40점", salaryNote: "월 약 225~243만원(수습)",
+      },
+      {
+        id: "kgs-p2", jobGroup: "공무직", jobTitle: "시설관리(전기)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        recruitType: "신입+경력", headcount: 2, workLocation: ["산업가스안전기술센터(충북 진천)", "가스안전교육원(충남 천안)"],
+        ncsCategory: "전기·전자", qualification: "학력·연령 제한 없음(만 60세 미만), 3교대 가능자",
+        screeningMethod: "혼합", writtenExam: false,
+        conversionNote: "수습 3개월 → 평정 60점 이상 시 무기계약 전환",
+        essayWeightNote: "자소서(정성) 40점 + 자격 정량 60점", salaryNote: "월 약 243~310만원",
+      },
+      {
+        id: "kgs-p3", jobGroup: "공무직", jobTitle: "미화", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        recruitType: "신입+경력", headcount: 4, workLocation: ["본사(충북 음성)", "가스안전교육원(충남 천안)"],
+        ncsCategory: "현장·기타", qualification: "학력 제한 없음, 만 65세 미만(고령자 친화 직종)",
+        screeningMethod: "혼합", writtenExam: false,
+        conversionNote: "수습 3개월 → 무기계약 전환", essayWeightNote: "자소서(정성) 80점 — 자소서 비중 최상",
+        salaryNote: "월 약 225만원(수습)",
+      },
+      {
+        id: "kgs-p4", jobGroup: "공무직", jobTitle: "운전(대형운전)", employmentType: "공무직(수습 3개월 후 무기계약 전환)",
+        recruitType: "신입+경력", headcount: 1, workLocation: ["가스안전교육원(충남 천안)"],
+        ncsCategory: "현장·기타", qualification: "45인승 대형버스 운행 가능자(1종 대형면허)",
+        screeningMethod: "혼합", writtenExam: false,
+        conversionNote: "수습 3개월 → 무기계약 전환", essayWeightNote: "자소서+경력기술서(정성) 60점",
+      },
+      {
+        id: "kgs-p5", jobGroup: "청년인턴", jobTitle: "LPG용기 사용가구 시설개선 점검/검수", employmentType: "청년인턴(체험형·기간제 3개월)",
+        recruitType: "신입", headcount: 7, workLocation: ["경기 수원·광주", "충남 천안", "경북 포항", "강원 강릉"],
+        ncsCategory: "건설·안전", qualification: "만 15~34세(입사예정일 기준), 공사 체험형 인턴 무경험자",
+        ageLimit: "만 15~34세", screeningMethod: "혼합", writtenExam: false,
+        conversionNote: "2026.10.1~12.31 근무, 계약연장·정규 전환 없음", salaryNote: "월 약 198만원",
+      },
+    ],
+    scheduleEvents: [
+      { stageType: "ANNOUNCE", label: "공고기간", startDate: "2026-07-23", endDate: "2026-08-07", confirmed: true, sortOrder: 1 },
+      { stageType: "APPLY", label: "지원서 접수", startDate: "2026-07-30", endDate: "2026-08-07", startTime: "14:00", endTime: "12:00", confirmed: true, sortOrder: 2 },
+      { stageType: "DOC_SCREENING", label: "1차전형(서류평가)", startDate: "2026-08-10", endDate: "2026-08-24", confirmed: true, sortOrder: 3 },
+      { stageType: "DOC_RESULT", label: "1차전형 합격 발표", startDate: "2026-08-25", endDate: "2026-08-25", confirmed: true, sortOrder: 4 },
+      { stageType: "PERSONALITY_TEST", label: "온라인 인성검사(공무직만)", startDate: "2026-08-28", endDate: "2026-08-31", confirmed: true, sortOrder: 5 },
+      { stageType: "EVIDENCE_SUBMIT", label: "증빙서류 제출", startDate: "2026-08-28", endDate: "2026-08-31", confirmed: true, sortOrder: 6 },
+      { stageType: "INTERVIEW", label: "최종전형(면접평가)", startDate: "2026-09-07", endDate: "2026-09-08", confirmed: true, sortOrder: 7 },
+      { stageType: "FINAL_RESULT", label: "최종 합격자 발표", startDate: "2026-09-18", endDate: "2026-09-18", confirmed: true, sortOrder: 8 },
+      { stageType: "JOIN", label: "입사", startDate: "2026-10-01", endDate: "2026-10-01", confirmed: true, sortOrder: 9 },
+    ],
+    essayQuestions: [
+      { docType: "자기소개서", questionNo: 1, charLimit: 500, targetPositionIds: null, evalCriteria: "직업윤리",
+        questionText: "지원 직무와 관련하여 법정 기준 또는 내부규정 준수를 위해 위험요인을 발견하고 조치한 경험을 구체적으로 설명해 주십시오." },
+      { docType: "자기소개서", questionNo: 2, charLimit: 500, targetPositionIds: null, evalCriteria: "문제해결",
+        questionText: "예기치 못한 문제, 사고 등이 발생했던 경험을 바탕으로 당시 상황을 어떻게 파악·분석하고 어떤 조치를 했는지 구체적으로 설명해 주십시오." },
+      { docType: "자기소개서", questionNo: 3, charLimit: 500, targetPositionIds: null, evalCriteria: "의사소통",
+        questionText: "동료·협력사·외부고객 등과 협업 및 의사소통을 통해 성과를 이룬 경험을 구체적으로 설명해 주십시오." },
+      { docType: "자기소개서", questionNo: 4, charLimit: 500, targetPositionIds: null, evalCriteria: "자기개발",
+        questionText: "스스로 목표를 설정하고 이를 달성하기 위해 계획을 수립, 실행했던 경험을 구체적으로 기술해 주십시오." },
+      { docType: "경력기술서", questionNo: 1, charLimit: 1000, targetPositionIds: ["kgs-p4"],
+        questionText: "시간 역순으로 주요성과·담당업무·보유스킬을 포함하여 경력기술서를 작성해 주십시오." },
+    ],
+    essaySource: "announcement_pdf",
+    preferences: [
+      { category: "취업지원대상자(국가보훈)", bonusRate: "5~10%", appliedStages: ["서류", "면접"], duplicable: false },
+      { category: "장애인", bonusRate: "10%", appliedStages: ["서류", "면접"], duplicable: false },
+      { category: "저소득층", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
+      { category: "한부모가정", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
+      { category: "북한이탈주민", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
+      { category: "다문화가족", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
+      { category: "자립준비청년", bonusRate: "5%", appliedStages: ["서류"], duplicable: false },
+    ],
+    attachments: [
+      { docType: "공고문", fileName: "[공고문] 2026년 하반기 공무직 및 청년인턴.pdf", fileFormat: "pdf", url: "#" },
+      { docType: "입사지원서", fileName: "[입사지원서] 2026년 하반기 공무직 및 청년인턴.pdf", fileFormat: "pdf", url: "#" },
+      { docType: "직무기술서", fileName: "[직무기술서] 2026년 하반기 공무직 및 청년인턴.zip", fileFormat: "zip", url: "#" },
+    ],
+  },
+
+  // ── 시드 2: KOMSA — 필기·정규직·직렬 2계층·문항 미확보 트랙 ──
+  // 근거: 2026 제3차 정규직 공고문 원문 20p 분석 (2026-07-26)
+  {
+    id: "komsa-2026-3",
+    slug: "komsa-2026-3rd-regular",
+    orgName: "한국해양교통안전공단",
+    orgCategory: "준정부기관",
+    title: "2026년도 제3차 신규직원(정규직) 채용",
+    announceNo: "공고 2026-83호",
+    applyStart: "2026-07-22T00:00:00+09:00",
+    applyEnd: "2026-08-07T15:00:00+09:00",   // ★ 15:00 마감 — datetime 필수 근거
+    applyUrl: "https://komsa.ncsplus.co.kr",
+    sourceUrl: "https://job.alio.go.kr/recruit.do",
+    sourceType: "jobalio",
+    regions: ["세종", "부산", "울산", "경남", "경북", "서울", "인천", "강원", "충남", "전북", "제주"],
+    blindHiring: true,
+    reviewedAt: "2026-07-26",
+    positions: [
+      { id: "komsa-p1", jobGroup: "행정직", jobTitle: "일반행정", grade: "6급", employmentType: "정규직",
+        recruitType: "신입", headcount: 2, workLocation: ["본사(세종)"], ncsCategory: "사무·행정",
+        qualification: "제한 없음", screeningMethod: "정성평가",
+        writtenExam: true, writtenExamNote: "NCS 직업공통능력 40% + 직무수행능력 60% (+인성검사 적/부)",
+        conversionNote: "수습 후 정규 임용", salaryNote: "연봉 41,783~45,506천원" },
+      { id: "komsa-p2", jobGroup: "행정직", jobTitle: "안전관리", grade: "6급", employmentType: "정규직",
+        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "건설·안전",
+        qualification: "제한 없음", screeningMethod: "정성평가",
+        writtenExam: true, writtenExamNote: "NCS 40% + 직무수행 60%" },
+      { id: "komsa-p3", jobGroup: "행정직", jobTitle: "전산", grade: "6급", employmentType: "정규직",
+        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "전산·IT",
+        qualification: "제한 없음", screeningMethod: "정성평가",
+        writtenExam: true, writtenExamNote: "NCS 40% + 직무수행 60%" },
+      { id: "komsa-p4", jobGroup: "검사직", jobTitle: "선체검사원", grade: "6급", employmentType: "정규직",
+        recruitType: "신입+경력", headcount: 7, workLocation: ["본사·지사"], ncsCategory: "기계·설비",
+        qualification: "해양계·수산계·조선 관련 학과 졸업 후 관련 분야 2년+ 경력, 또는 3급 항해사 이상+3년, 조선기술사 등 (택1)",
+        screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70% — 자격 충족 시 전원 필기 응시" },
+      { id: "komsa-p5", jobGroup: "검사직", jobTitle: "기관검사원", grade: "6급", employmentType: "정규직",
+        recruitType: "신입+경력", headcount: 5, workLocation: ["본사·지사"], ncsCategory: "기계·설비",
+        qualification: "기관·기계 관련 학과+경력 2년, 3급 기관사+3년, 기계기술사 등 (택1)",
+        screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
+      { id: "komsa-p6", jobGroup: "운항관리직", jobTitle: "운항관리자", grade: "6급", employmentType: "정규직",
+        recruitType: "신입+경력", headcount: 6, workLocation: ["본사·지사", "운항관리센터"], ncsCategory: "현장·기타",
+        qualification: "3급 이상 해기사(항해사·기관사·운항사) 취득 후 승선경력 3년 이상",
+        screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%",
+        conversionNote: "업무특성상 지역 순환근무(섬 근무 포함)·교대근무 가능" },
+      { id: "komsa-p7", jobGroup: "연구조사직", jobTitle: "해사정책·연구", grade: "6급", employmentType: "정규직",
+        recruitType: "신입+경력", headcount: 3, workLocation: ["본사(세종)"], ncsCategory: "연구",
+        qualification: "관련분야(해양·수산·조선·선박·교통·경영·정책) 석사 이상, 또는 학사+관련 경력 2년",
+        screeningMethod: "정성평가", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
+      { id: "komsa-p8", jobGroup: "연구조사직", jobTitle: "기상예보", grade: "6급", employmentType: "정규직",
+        recruitType: "신입+경력", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "연구",
+        qualification: "기상 관련 석사+기상예보사 면허, 또는 학사+기상예보업무 2년+면허",
+        screeningMethod: "정성평가", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
+    ],
+    scheduleEvents: [
+      { stageType: "ANNOUNCE", label: "채용공고", startDate: "2026-07-22", endDate: "2026-08-07", endTime: "15:00", confirmed: true, sortOrder: 1 },
+      { stageType: "APPLY", label: "지원서 접수", startDate: "2026-07-22", endDate: "2026-08-07", endTime: "15:00", confirmed: true, sortOrder: 2 },
+      { stageType: "DOC_RESULT", label: "서류심사 합격자 발표", startDate: "2026-08-26", endDate: "2026-08-26", confirmed: true, sortOrder: 3 },
+      { stageType: "WRITTEN_EXAM", label: "필기시험", startDate: "2026-09-05", endDate: "2026-09-05", confirmed: true, sortOrder: 4 },
+      { stageType: "WRITTEN_RESULT", label: "필기시험 합격자 발표", startDate: "2026-09-09", endDate: "2026-09-09", confirmed: true, sortOrder: 5 },
+      { stageType: "INTERVIEW", label: "면접시험", startDate: "2026-09-14", endDate: "2026-09-18", confirmed: true, sortOrder: 6 },
+      { stageType: "FINAL_RESULT", label: "최종합격자 발표", startDate: "2026-10-01", endDate: "2026-10-01", confirmed: true, sortOrder: 7 },
+      { stageType: "JOIN", label: "임용(예정)", startDate: "2026-10-15", endDate: "2026-10-15", confirmed: true, sortOrder: 8 },
+    ],
+    // ★ 문항 미확보가 "정상 케이스"인 실례 — 입사지원서가 온라인 접수 사이트에만 존재
+    essayQuestions: [],
+    essaySource: "apply_site",
+    preferences: [
+      { category: "취업지원대상자", bonusRate: "5~10%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "장애인", bonusRate: "10%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "이전지역인재", bonusRate: "3%", appliedStages: ["서류"], duplicable: false,
+        region: "세종·대전·충북·충남", regionScheme: "30%목표제",
+        note: "혁신도시법 제29조의2 — 대학원 제외 최종학력 기준 해당 지역 소재 학교 졸업(예정)자" },
+      { category: "고졸자", bonusRate: "5%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "저소득층", bonusRate: "3%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "북한이탈주민", bonusRate: "3%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "다문화가족", bonusRate: "3%", appliedStages: ["서류", "필기", "면접"], duplicable: false },
+      { category: "자립준비청년", bonusRate: "3%", appliedStages: ["서류"], duplicable: false },
+      { category: "공단근무경력", bonusRate: "5%", appliedStages: ["서류"], duplicable: true },
+      { category: "한국사능력검정시험(1·2급)", bonusRate: "2~3%", appliedStages: ["서류"], duplicable: true },
+    ],
+    attachments: [
+      { docType: "공고문", fileName: "채용공고문(26년 제3차 정규직).pdf", fileFormat: "pdf", url: "#" },
+      { docType: "직무기술서", fileName: "직무기술서.zip", fileFormat: "zip", url: "#" },
+      { docType: "기타", fileName: "장애유형별 편의지원 내용 및 신청서.hwp", fileFormat: "hwp", url: "#" },
+    ],
+  },
+];
+
+// ── 검색·조회 셀렉터 (QuickJobRegistration 자동완성이 사용) ──────
+
+export function searchPostings(q: string) {
+  const t = q.trim().toLowerCase();
+  if (!t) return { orgs: [], postings: [], positions: [] };
+  const orgs = [...new Set(POSTINGS.filter(p => p.orgName.toLowerCase().includes(t)).map(p => p.orgName))];
+  const postings = POSTINGS.filter(p => p.title.toLowerCase().includes(t));
+  const positions = POSTINGS.flatMap(p =>
+    p.positions.filter(pos => pos.jobTitle.toLowerCase().includes(t)).map(pos => ({ posting: p, position: pos })),
+  );
+  return { orgs, postings, positions };
+}
+
+export const getPostingBySlug = (slug: string) => POSTINGS.find(p => p.slug === slug);
+export const getPostingById = (id: string) => POSTINGS.find(p => p.id === id);
+
+/** 마감 D-day — 시각까지 고려. 기존 ds/calcDday 대체용 */
+export function calcPostingDday(applyEnd: string): number {
+  const end = new Date(applyEnd);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const endDay = new Date(end); endDay.setHours(0, 0, 0, 0);
+  return Math.round((endDay.getTime() - today.getTime()) / 86400000);
+}
