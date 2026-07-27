@@ -506,70 +506,81 @@ function getProgress(job: Job): JobProgress {
   };
 }
 
-// 공고 행 — 구분은 섹션이 아니라 버튼 라벨로만(작성하기 / 이어서 작성하기 / 수정).
-// 쓰던 글은 내가 쓴 문장 미리보기가 이어져 "글 쓰는 곳" 감각 유지. 행 전체 클릭 = 바로 작성 진입.
-function JobRow({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
+// 대시보드 카드형(DocumentStatusList 카드)과 동일 해부도 — 탭1 계열과 한 언어.
+// D-day는 대시보드 카드와 같은 글자색 규칙(§5-4-1 예외 계열), 진행은 바 없이 N/M 텍스트만(§0-10).
+const ddayLabel = (dday: number) => (dday > 0 ? `D-${dday}` : dday === 0 ? "D-Day" : `D+${Math.abs(dday)}`);
+const ddayCls = (dday: number) =>
+  dday <= 0
+    ? "text-muted-foreground/50"
+    : dday <= 3
+      ? "text-pickd-red font-semibold"
+      : dday <= 7
+        ? "text-pickd-orange"
+        : "text-foreground/60";
+
+// 마감일 목데이터 — dday와 항상 일치하도록 오늘 기준 파생 (탭1 대시보드 mockDeadline 방식)
+function deadlineOf(dday: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + dday);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function JobCard({ job, p, onSelect }: { job: Job; p: JobProgress; onSelect: () => void }) {
   const writing = p.written > 0 || p.finished;
   return (
-    <li
-      className="py-4 first:pt-2 flex items-start justify-between gap-4 cursor-pointer group"
+    <button
+      type="button"
       onClick={onSelect}
-      role="button"
       aria-label={`${job.org} 자소서 작성`}
+      className="bg-card border border-border rounded-lg px-4 py-3.5 hover:bg-muted/20 hover:border-primary/40 transition-colors flex flex-col text-left"
     >
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-foreground">{job.org}</span>
-          <span className="text-xs text-muted-foreground">{job.role}</span>
-          <DdayChip days={job.dday} size="sm" />
-          {writing ? (
-            <>
-              <EssayStatus status={p.finished ? "완료" : "작성중"} />
-              <span className="text-chip text-muted-foreground tabular-nums">문항 {p.written}/{p.total} 작성</span>
-            </>
-          ) : (
-            <span className="text-chip text-muted-foreground tabular-nums">문항 {job.questions.length}개</span>
-          )}
-        </div>
-        {writing && p.preview ? (
-          <p className="mt-1.5 text-body text-muted-foreground leading-relaxed truncate">{p.preview}</p>
-        ) : (
-          <p className="mt-1 text-xs text-muted-foreground/50">아직 작성된 내용이 없어요</p>
-        )}
+      {/* 제목 행 */}
+      <p className="text-body font-semibold text-foreground leading-tight">
+        {job.org} {job.role}
+      </p>
+
+      {/* 서브라인: 자소서 · D-day (대시보드 카드의 '지원서 · D-N'과 동일 문법) */}
+      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+        <span className="text-chip text-muted-foreground">자소서</span>
+        <span className="text-muted-foreground/40 text-mini">·</span>
+        <span className={cn("text-chip tabular-nums", ddayCls(job.dday))}>{ddayLabel(job.dday)}</span>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className={cn(
-          "shrink-0 h-8 text-xs gap-1 whitespace-nowrap rounded-md border-border",
-          writing && !p.finished ? "text-primary hover:text-primary" : "text-muted-foreground",
-        )}
-        onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      >
-        {p.finished ? "수정" : writing ? "이어서 작성하기" : "작성하기"}
-      </Button>
-    </li>
+
+      {/* 문항 작성 현황 — 진행 바 대신 N/M 텍스트 (§0-10) */}
+      <div className="mt-2.5 flex items-center justify-between text-mini text-muted-foreground tabular-nums">
+        <span>문항</span>
+        <span>{writing ? `${p.written}/${p.total} 작성` : `${job.questions.length}개`}</span>
+      </div>
+
+      {/* 마감일 · CTA */}
+      <div className="mt-2 flex items-center justify-between text-mini tabular-nums">
+        <span className="text-muted-foreground">마감 {deadlineOf(job.dday)}</span>
+        <span className={cn("font-medium", writing && !p.finished ? "text-primary" : "text-muted-foreground")}>
+          {p.finished ? "수정" : writing ? "이어서 작성하기" : "작성하기"}
+        </span>
+      </div>
+    </button>
   );
 }
 
 function JobSelect({ onSelect }: { onSelect: (id: string) => void }) {
-  // 한 리스트, 공고 기준 — 마감 임박 순 (섹션 구분 없음, 2026-07-27 확정)
+  // 공고 기준 카드 그리드 — 마감 임박 순 (탭1 대시보드 카드형과 동일 구조, 2026-07-27 확정)
   const rows = JOBS.map((job) => ({ job, p: getProgress(job) })).sort((a, b) => a.job.dday - b.job.dday);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-10 py-8">
+        <div className="max-w-5xl mx-auto px-10 py-8">
           <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">AI 자소서</h1>
           <p className="text-sm text-muted-foreground mt-1.5">공고를 누르면 바로 문항 작성으로 들어가요.</p>
 
-          <div className="mt-6 bg-card border border-border rounded-2xl px-6 py-4">
-            <ol className="divide-y divide-border">
-              {rows.map(({ job, p }) => (
-                <JobRow key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
-              ))}
-            </ol>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {rows.map(({ job, p }) => (
+              <JobCard key={job.id} job={job} p={p} onSelect={() => onSelect(job.id)} />
+            ))}
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground">
