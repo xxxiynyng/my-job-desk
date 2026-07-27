@@ -656,6 +656,30 @@ export default function JobDetail() {
               )}
             </div>
 
+            {seedPosting && detailUnlocked && (() => {
+              const reg = getRegistration(seedPosting.id);
+              const pos = seedPosting.positions.find((p) => p.id === reg?.positionId);
+              if (!pos) return null;
+              return (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-chip rounded-md px-2.5 py-1 bg-pickd-green-light text-pickd-green">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    담은 직무 · {pos.jobTitle}
+                  </span>
+                  <button
+                    onClick={() => {
+                      removeRegistration(seedPosting.id);
+                      toast("공고를 뺐어요 — 연결된 일정도 함께 정리돼요", { duration: 2000 });
+                      navigate("/");
+                    }}
+                    className="text-chip text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    공고 빼기
+                  </button>
+                </div>
+              );
+            })()}
+
             {(job.expired || urgent) && (
               <div className={cn(
                 "mt-3 inline-flex items-center gap-1.5 text-chip rounded-md px-2.5 py-1",
@@ -667,7 +691,7 @@ export default function JobDetail() {
             )}
           </header>
 
-          {seedPosting && (
+          {seedPosting && !detailUnlocked && (
             <PositionPickerSection posting={seedPosting} preselect={preselectPosition} />
           )}
 
@@ -759,7 +783,7 @@ export default function JobDetail() {
             }
           >
             <div className="space-y-5">
-              {reqGroups.map(([label, items]) => (
+              {reqGroups.filter(([label]) => label !== "우대사항").map(([label, items]) => (
                 <ReqGroup
                   key={label}
                   label={label}
@@ -769,6 +793,29 @@ export default function JobDetail() {
                   onToggle={toggleHighlight}
                 />
               ))}
+              {(() => {
+                const pref = reqGroups.find(([label]) => label === "우대사항");
+                if (!pref || pref[1].length === 0) return null;
+                // 우대는 해당자에게만 의미 — 기본 접힘, 개수만 노출 (프로필 기반 개인화는 로드맵)
+                return (
+                  <details className="group">
+                    <summary className="cursor-pointer list-none flex items-center gap-1.5 text-xs font-semibold text-muted-foreground select-none">
+                      <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
+                      우대사항 {pref[1].length}개
+                      <span className="font-normal text-muted-foreground/60">— 해당되는 경우에만 확인하세요</span>
+                    </summary>
+                    <div className="mt-2 pl-5">
+                      <ReqGroup
+                        label=""
+                        items={pref[1]}
+                        section="eligibility"
+                        isHighlighted={isHighlighted}
+                        onToggle={toggleHighlight}
+                      />
+                    </div>
+                  </details>
+                );
+              })()}
             </div>
           </Section>
 

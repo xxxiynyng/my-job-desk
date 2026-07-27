@@ -183,7 +183,10 @@ export function postingToJobDetail(posting: Posting): Record<string, unknown> {
       우대사항: posting.preferences.map(
         (p) => `${p.category} — ${p.bonusRate} (${p.appliedStages.join("·")})${p.note ? ` · ${p.note}` : ""}`,
       ),
-      "제출 서류": posting.attachments.map((a) => `${a.fileName} (${a.fileFormat})`),
+      // 공고 첨부(공고문·직무기술서)는 "제출할 서류"가 아니라 참고 자료 — 별도 그룹으로 분리
+      "공고 자료": posting.attachments.map((a) => `${a.fileName} (${a.fileFormat})`),
+      // 제출 서류는 공고 원문에 명시된 것이 없으면 비움 (섹션 5에서 사용자가 직접 추가)
+      "제출 서류": [],
     },
     process: posting.scheduleEvents
       .filter((ev) => ev.stageType !== "ANNOUNCE")
