@@ -92,67 +92,75 @@
 ### 라우트 구조 (App.tsx)
 
 ```
-/onboarding     → Onboarding.tsx      온보딩 (미완료 시 / 진입이 리다이렉트)
-/               → Index.tsx           지원 대시보드 (RequireOnboarded)
-/jobs/:slug     → JobDetail.tsx       공고 상세
-/experiences    → Experiences.tsx     경험·스펙 DB (탭: db / basic-info / files)
+/onboarding     → features/onboarding/OnboardingPage.tsx   (미완료 시 / 진입이 리다이렉트)
+/               → features/jobs/DashboardPage.tsx          지원 대시보드 (RequireOnboarded)
+/jobs/:slug     → features/jobs/JobDetailPage.tsx          공고 상세
+/experiences    → features/experiences/ExperiencesPage.tsx 경험·스펙 DB (탭: db / basic-info / files)
 /basic-info     → redirect → /experiences?tab=basic-info
 /files          → redirect → /experiences?tab=files
-/ai-cover       → AICover.tsx
-/settings       → Settings.tsx
-/calendar       → Calendar.tsx
+/ai-cover       → features/ai-cover/AICoverPage.tsx
+/settings       → features/settings/SettingsPage.tsx
+/calendar       → features/calendar/CalendarPage.tsx
 ```
 
 ### 주요 파일
 
+> **구조 규칙 (2026-07-29 재편)**
+> 1. 한 기능에서만 쓰는 파일은 `features/<기능>/` 안에 둔다. 2개 이상 기능이 쓰면 공용(`components/`·`lib/`·`data/`)으로 승격한다.
+> 2. 기능 폴더 내부: `<Name>Page.tsx`(라우트 진입, default export) · `components/`(기능 전용 UI) · `model/`(기능 전용 타입·상수·데이터).
+> 3. 의존 방향은 `features/ → components/·lib/·data/` 단방향. 역방향(공용이 features를 import) 금지, `data/ → components/` 금지(순수 유틸은 `lib/`로).
+> 4. 도메인 결합이 없는 범용 유틸은 사용처가 1곳이어도 `lib/`에 둔다(예: `csv.ts`). 도메인에 묶이면 기능 폴더로(예: `exportExperiences.ts`).
+
 ```
 src/
-├── App.tsx                              라우터 루트
-├── pages/
-│   ├── Index.tsx                        대시보드 (지원 현황, 오늘 할 일)
-│   ├── Experiences.tsx                  경험·스펙 DB (~1600줄)
-│   │   └── tabs: db | basic-info | files
-│   ├── experiences/                     탭2 분리 모듈 — DetailEditor·CopyGenerator·RepExperienceViews·fieldWidgets·tableWidgets·presets·mockData
-│   ├── JobDetail.tsx                    공고 상세 + 자소서 작성
-│   ├── AICover.tsx                      AI 자소서 생성
-│   ├── Calendar.tsx                     일정 캘린더
-│   ├── Settings.tsx                     설정
-│   ├── Onboarding.tsx                   온보딩 (+ onboardingData.ts, ProfileCompletionCard 포함)
-│   └── NotFound.tsx                     404
-├── data/
-│   ├── basicInfoFields.ts               ★ InfoKey(34종)·INFO_FIELDS·기본정보 LS 키 상수의 정본
-│   └── calendarData.ts                  캘린더 데이터 소스
-├── components/pickd/
-│   ├── PickdSidebar.tsx                 좌측 60px 아이콘 사이드바
-│   ├── BasicInfoPanel.tsx               기본정보 탭 (Experiences에서 렌더)
-│   ├── FilesPanel.tsx                   파일함 탭
-│   ├── DashboardHeader.tsx              대시보드 상단
-│   ├── JobPostingTable.tsx              공고 목록 테이블 (탭1)
-│   ├── JobRegistrationModal.tsx         공고 등록 모달
-│   ├── QuickJobRegistration.tsx         공고 빠른 등록
-│   ├── StatusManagementModal.tsx        상태 관리 모달 (일정·할일 포함)
-│   ├── RowContextMenu.tsx               행 그립·컨텍스트 메뉴 (탭1·탭2 공용)
-│   ├── TodayPanel.tsx                   대시보드 오늘 패널
-│   ├── DocumentStatusList.tsx           대시보드 서류 현황 (목데이터, dday는 calcDday 실계산)
-│   ├── CalendarMini.tsx                 대시보드 미니 캘린더
-│   ├── MoodRefresh.tsx                  대시보드 기분전환 카드
-│   ├── TrashPanel.tsx                   전역 통합 휴지통 뷰 (설정>데이터 관리에서 렌더)
-│   ├── ExportModal.tsx                  내보내기 2스텝 모달 (탭2, 값→형식 Excel/Word/PDF)
-│   ├── calendar/                        캘린더 페이지 모듈 — MonthlyCalendar·ListHeader·ContextPanel·CreateModal·DetailModal·ProgressRing
-│   └── ds/                              디자인시스템 프리미티브 — 사용 중: StatusBadge·DdayChip / 나머지 11종은 미사용 예비
-├── components/table/                    탭1·탭2 공용 테이블 부품
-│   ├── StarToggle / ColumnDivider / DragHandle / HeaderCell / SortableColumnHeader
-│   ├── BatchActionBar / HeaderFilter / useTableDividers
-├── hooks/
-│   ├── useResizableCols.tsx             컬럼 리사이즈 훅
-│   └── use-mobile.tsx                   shadcn 기본 훅
-├── lib/
-│   ├── designTokens.ts                  ★ 폰트 크기 토큰 FONT_SIZE 단일 출처 — config·utils가 파생 (§1)
-│   ├── utils.ts                         cn() + tailwind-merge (FONT_SIZE에서 파생 등록, §1 참조)
-│   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1, 소프트삭제·복원·14일 purge)
-│   ├── exportExperiences.ts             내보내기 생성기 (Excel=xlsx·Word=docx·PDF=브라우저 인쇄)
-│   └── csv.ts                           CSV 내보내기 (탭1 JobPostingTable 사용)
-└── test/                                vitest — example.test.ts + design-tokens.test.ts(cn 폰트 토큰 보존, §2)
+├── main.tsx                             엔트리 (index.html이 참조 — 위치 고정)
+├── index.css
+├── app/                                 셸 (거의 안 바뀜)
+│   ├── App.tsx                          라우터 루트 + RequireOnboarded
+│   └── NotFoundPage.tsx
+├── features/                            ★ 기능별 — 수정이 가장 잦은 영역
+│   ├── jobs/                            탭1 지원 대시보드(공고)
+│   │   ├── DashboardPage.tsx            대시보드 (구 pages/Index.tsx)
+│   │   ├── JobDetailPage.tsx            공고 상세 + 자소서 문항
+│   │   └── components/                  DashboardHeader·MoodRefresh·JobPostingTable·DocumentStatusList
+│   │                                    ·StatusManagementModal·QuickJobRegistration·FallbackUploadModal
+│   │                                    ·TodayPanel·TodayMiniCalendar(구 CalendarMini)
+│   ├── experiences/                     탭2 경험·스펙 DB
+│   │   ├── ExperiencesPage.tsx          탭 셸 + db 탭 (~1600줄)
+│   │   ├── components/                  BasicInfoPanel·FilesPanel·ExportModal·DetailEditor
+│   │   │                                ·CopyGenerator·RepExperienceViews·fieldWidgets·tableWidgets
+│   │   └── model/                       presets.ts(도메인 모델 Item·PRESETS)·mockData.ts
+│   │                                    ·basicInfoFields.ts(★InfoKey 34종 정본)·exportExperiences.ts
+│   ├── ai-cover/AICoverPage.tsx         탭3 AI 자소서
+│   ├── calendar/                        CalendarPage.tsx + components/(MonthlyCalendar·ContextPanel
+│   │                                    ·CreateModal·DetailModal·ListHeader·ProgressRing)
+│   ├── onboarding/                      OnboardingPage.tsx + model/onboardingData.ts
+│   └── settings/                        SettingsPage.tsx + components/TrashPanel.tsx
+├── components/                          공용 UI (기능 2개 이상이 사용)
+│   ├── layout/PickdSidebar.tsx          좌측 60px 아이콘 사이드바 (전 화면)
+│   ├── table/                           탭1·탭2 공용 테이블 부품
+│   │   ├── HeaderCell·HeaderFilter·SortableColumnHeader·ColumnDivider·DragHandle
+│   │   ├── StarToggle·BatchActionBar·useTableDividers·RowContextMenu(Job/Exp 양쪽)
+│   │   └── tableState.ts                ★ 컬럼 필터·정렬 setter 팩토리 (탭1·탭2 공용)
+│   ├── ds/                              디자인시스템 프리미티브
+│   │                                    사용 중: StatusBadge·DdayChip·EssayStatus
+│   │                                    미사용 예비 11종(Avatar·Badge·Button·Card·Checkbox
+│   │                                    ·IconButton·Input·Select·Stepper·Tabs·Tag)
+│   └── ui/                              shadcn/ui 벤더 (46개, 직접 수정 지양)
+├── data/                                도메인 데이터·스토어 (기능 공용)
+│   ├── jobStatus.ts                     ★ 전형 6단계 JobStage·JOB_STAGES·FinalResult 정본
+│   ├── jobStore.ts                      담은 공고 등록 스토어 (pickd.jobs.registrations.v1)
+│   ├── postings.seed.ts                 공고 시드 3건 + 검색 셀렉터 (백엔드 API 응답 계약)
+│   └── calendarData.ts                  캘린더 데이터 + 등록 공고 파생 셀렉터
+├── lib/                                 순수 유틸 (도메인 무관)
+│   ├── designTokens.ts                  ★ 폰트 크기 토큰 FONT_SIZE 단일 출처 (§1)
+│   ├── utils.ts                         cn() + tailwind-merge (FONT_SIZE에서 파생)
+│   ├── storage.ts                       ★ localStorage lsGet/lsSet 단일 출처
+│   ├── dday.ts                          ddayLabel/ddayCls (D-day 라벨·색)
+│   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1)
+│   └── csv.ts                           CSV 내보내기
+├── hooks/                               useResizableCols.tsx · use-mobile.tsx
+└── test/                                vitest — example.test.ts + design-tokens.test.ts
 ```
 
 ### 데이터 지속성 (localStorage 키)
@@ -183,8 +191,8 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 
 ### 기본정보 (경험·스펙 DB > 기본정보 탭)
 
-- 렌더 경로: `/experiences?tab=basic-info` → Experiences.tsx → `<BasicInfoPanel />`
-- **InfoKey 34종·필드 정의의 정본 = `src/data/basicInfoFields.ts`** (문서에 목록을 중복 기재하지 않는다)
+- 렌더 경로: `/experiences?tab=basic-info` → ExperiencesPage.tsx → `<BasicInfoPanel />`
+- **InfoKey 34종·필드 정의의 정본 = `src/features/experiences/model/basicInfoFields.ts`** (문서에 목록을 중복 기재하지 않는다)
 - 공인외국어시험은 InfoKey 방식 아님 — `LangExam[]` 별도 리스트(`specs.info.langExams.v1`). 필드: id, lang, examName, score, date, expiry
 - FIELD_GROUPS(뷰 모드): 인적사항 / 연락처 / 학력 / 고등학교 / 온라인 프로필 / 병역·면허 (+ 공인외국어시험 별도 렌더)
 - 편집: 뷰 모드 인라인 편집(hover 연필) + 전체 편집 모달
