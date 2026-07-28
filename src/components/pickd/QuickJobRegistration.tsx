@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, FileText, Search, Upload, Briefcase, Check, CornerDownLeft } from "lucide-react";
+import { Building2, FileText, Search, Upload, Briefcase, Check, CornerDownLeft, X, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FallbackUploadModal } from "./FallbackUploadModal";
 import {
@@ -9,10 +10,45 @@ import {
   searchPostings,
   calcPostingDday,
   type Posting,
+  type NcsCategory8,
 } from "@/data/postings.seed";
 import { formatApplyEnd, isRegistered } from "@/data/jobStore";
 
-// ── 드롭다운 항목 평탄화 (키보드 탐색용) ─────────────────────────
+// ── 최근 검색어 (localStorage) ───────────────────────────────────
+const RECENT_KEY = "pickd.jobs.recentSearches.v1";
+const RECENT_MAX = 8;
+function getRecent(): string[] {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]"); } catch { return []; }
+}
+function pushRecent(q: string) {
+  const t = q.trim();
+  if (!t) return;
+  const next = [t, ...getRecent().filter((v) => v !== t)].slice(0, RECENT_MAX);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+}
+function clearRecent() { localStorage.removeItem(RECENT_KEY); }
+
+// ── 필터 정의 (탭1 기획 4축 중 드롭다운용 3축 — 기관유형은 탐색 화면에서) ──
+const JOB_FILTERS: NcsCategory8[] = ["사무·행정", "전산·IT", "전기·전자", "기계·설비", "건설·안전", "보건·의료", "연구", "현장·기타"];
+const REGION_FILTERS = ["부산", "울산", "경남", "경북"] as const;
+const TYPE_FILTERS = ["신입", "인턴", "경력"] as const;
+
+type Filters = { job: NcsCategory8 | null; region: string | null; type: string | null };
+const EMPTY_FILTERS: Filters = { job: null, region: null, type: null };
+
+function matchPosting(p: Posting, f: Filters): boolean {
+  if (f.region && !p.regions.some((r) => r.includes(f.region!))) return false;
+  const positions = p.positions.filter((pos) => {
+    if (f.job && pos.ncsCategory !== f.job) return false;
+    if (f.type === "인턴") return pos.employmentType.includes("인턴");
+    if (f.type === "신입") return pos.recruitType.includes("신입") && !pos.employmentType.includes("인턴");
+    if (f.type === "경력") return pos.recruitType.includes("경력");
+    return true;
+  });
+  return positions.length > 0;
+}
+
+// ── 검색 결과 옵션 (키보드 탐색용) ───────────────────────────────
 type Option =
   | { kind: "org"; org: string; count: number }
   | { kind: "posting"; posting: Posting }
@@ -20,101 +56,84 @@ type Option =
   | { kind: "fallback" };
 
 /**
- * 탭1 진입점 — 공고 검색(자동완성) → 직무 선택 → 담기.
- * 빈 포커스 = 진행중 공고 추천 / ↑↓·Enter 키보드 탐색 / 담은 공고 클릭 = 상세로 이동.
+ * 탭1 진입점 — 공고 검색.
+ * 빈 포커스: 좌측 필터로 찾기 + 우측 최근 검색어 / 입력: 기관·공고·직무 결과 + 키보드 탐색.
  */
 export function QuickJobRegistration() {
   const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
   const [focused, setFocused] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [fallbackOpen, setFallbackOpen] = useState(false);
   const blurTimer = useRef<number | null>(null);
 
   const hasQuery = q.trim().length > 0;
+  const hasFilter = !!(filters.job || filters.region || filters.type);
 
-  // 옵션 구성 — 검색어 없으면 "진행중 공고 추천"(마감 임박순), 있으면 검색 결과
   const options: Option[] = useMemo(() => {
-    if (!hasQuery) {
-      const open = POSTINGS.filter((p) => calcPostingDday(p.applyEnd) >= 0)
-        .sort((a, b) => calcPostingDday(a.applyEnd) - calcPostingDday(b.applyEnd))
-        .slice(0, 5);
-      return [...open.map<Option>((p) => ({ kind: "posting", posting: p })), { kind: "fallback" }];
-    }
+    if (!hasQuery) return [];
     const r = searchPostings(q);
     const opts: Option[] = [];
-    // 기관: 공고 제목과 중복되는 노이즈를 줄이기 위해 "이름이 검색어로 시작하거나 단어 매칭"만 우선
     r.orgs.forEach((org) =>
-      opts.push({
-        kind: "org",
-        org,
-        count: POSTINGS.filter((p) => p.orgName === org && calcPostingDday(p.applyEnd) >= 0).length,
-      }),
+      opts.push({ kind: "org", org, count: POSTINGS.filter((p) => p.orgName === org && calcPostingDday(p.applyEnd) >= 0).length }),
     );
     r.postings.forEach((p) => opts.push({ kind: "posting", posting: p }));
     r.positions.forEach(({ posting, position }) =>
-      opts.push({
-        kind: "position",
-        posting,
-        positionId: position.id,
-        jobTitle: position.jobTitle,
-        employmentType: position.employmentType,
-      }),
+      opts.push({ kind: "position", posting, positionId: position.id, jobTitle: position.jobTitle, employmentType: position.employmentType }),
     );
     opts.push({ kind: "fallback" });
     return opts;
   }, [q, hasQuery]);
 
-  const pick = (opt: Option) => {
-    if (opt.kind === "fallback") {
-      setFallbackOpen(true);
-      setFocused(false);
-      return;
-    }
-    const posting =
-      opt.kind === "org" ? POSTINGS.find((p) => p.orgName === opt.org) : opt.posting;
-    if (!posting) return;
-    // 공고 내용·원문을 먼저 확인하고 상세 페이지에서 직무를 골라 담는 플로우
-    const positionQuery = opt.kind === "position" ? `?position=${opt.positionId}` : "";
+  const filtered = useMemo(
+    () => (hasFilter ? POSTINGS.filter((p) => calcPostingDday(p.applyEnd) >= 0 && matchPosting(p, filters)) : []),
+    [filters, hasFilter],
+  );
+
+  const goPosting = (posting: Posting, positionId?: string) => {
+    if (hasQuery) pushRecent(q);
+    const positionQuery = positionId ? `?position=${positionId}` : "";
     navigate(`/jobs/${posting.slug}${positionQuery}`);
     setFocused(false);
     setQ("");
+    setFilters(EMPTY_FILTERS);
+  };
+
+  const pick = (opt: Option) => {
+    if (opt.kind === "fallback") { setFallbackOpen(true); setFocused(false); return; }
+    const posting = opt.kind === "org" ? POSTINGS.find((p) => p.orgName === opt.org) : opt.posting;
+    if (!posting) return;
+    goPosting(posting, opt.kind === "position" ? opt.positionId : undefined);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (!focused) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIdx((i) => Math.min(i + 1, options.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIdx((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (options[activeIdx]) pick(options[activeIdx]);
-    } else if (e.key === "Escape") {
-      setFocused(false);
+    if (!focused || !hasQuery) {
+      if (e.key === "Escape") setFocused(false);
+      return;
     }
+    if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, options.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Enter") { e.preventDefault(); if (options[activeIdx]) pick(options[activeIdx]); }
+    else if (e.key === "Escape") setFocused(false);
   };
 
-  const handleBlur = () => {
-    blurTimer.current = window.setTimeout(() => setFocused(false), 150);
-  };
+  const handleBlur = () => { blurTimer.current = window.setTimeout(() => setFocused(false), 150); };
   const handleFocus = () => {
     if (blurTimer.current) window.clearTimeout(blurTimer.current);
     setActiveIdx(0);
     setFocused(true);
   };
 
-  // 섹션 헤더 계산 (첫 등장 인덱스에만 라벨)
   const sectionLabel = (opt: Option, idx: number): string | null => {
-    const label =
-      opt.kind === "org" ? "기관" : opt.kind === "posting" ? (hasQuery ? "공고" : "지금 진행중인 공고") : opt.kind === "position" ? "직무" : null;
+    const label = opt.kind === "org" ? "기관" : opt.kind === "posting" ? "공고" : opt.kind === "position" ? "직무" : null;
     if (!label) return null;
     const prev = options[idx - 1];
-    if (!prev || prev.kind !== opt.kind) return label;
-    return null;
+    return !prev || prev.kind !== opt.kind ? label : null;
   };
+
+  const recent = getRecent();
 
   return (
     <>
@@ -122,79 +141,162 @@ export function QuickJobRegistration() {
         <div className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-2 pickd-shadow">
           <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <Input
+            ref={inputRef}
             value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setActiveIdx(0);
-            }}
+            onChange={(e) => { setQ(e.target.value); setActiveIdx(0); }}
             onFocus={handleFocus}
             onBlur={handleBlur}
             onKeyDown={onKeyDown}
             placeholder="기관명, 직무, 공고명을 검색해 보세요"
             className="border-0 shadow-none bg-transparent h-7 text-sm placeholder:text-muted-foreground/60 focus-visible:ring-0 px-0"
           />
-          <button
-            onClick={() => setFallbackOpen(true)}
-            className="text-chip text-muted-foreground hover:text-foreground inline-flex items-center gap-1 shrink-0 transition-colors"
+          <Button
+            size="sm"
+            className="h-8 text-xs gap-1.5 shrink-0"
+            onClick={() => { inputRef.current?.focus(); handleFocus(); }}
           >
-            <Upload className="w-3 h-3" />
-            직접 등록
-          </button>
+            <Search className="w-3.5 h-3.5" />
+            공고 검색하기
+          </Button>
         </div>
 
         {focused && (
           <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-card border border-border rounded-xl pickd-shadow overflow-hidden">
-            <div className="max-h-72 overflow-y-auto py-1">
-              {options.length === 1 && hasQuery ? (
-                <div className="px-4 py-4 text-center">
-                  <p className="text-sm text-muted-foreground">검색 결과가 없어요</p>
-                  <p className="text-chip text-muted-foreground/70 mt-0.5">
-                    지금은 공공기관 공고 {POSTINGS.length}건이 등록되어 있어요
-                  </p>
-                </div>
-              ) : null}
+            {hasQuery ? (
+              /* ── 검색 결과 모드 ─────────────────────────────── */
+              <div className="max-h-80 overflow-y-auto py-1">
+                {options.length === 1 && (
+                  <div className="px-4 py-4 text-center">
+                    <p className="text-sm text-muted-foreground">검색 결과가 없어요</p>
+                    <p className="text-chip text-muted-foreground/70 mt-0.5">
+                      지금은 공공기관 공고 {POSTINGS.length}건이 등록되어 있어요
+                    </p>
+                  </div>
+                )}
+                {options.map((opt, idx) => {
+                  const label = sectionLabel(opt, idx);
+                  return (
+                    <div key={idx}>
+                      {label && (
+                        <p className="px-4 pt-2 pb-0.5 text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">{label}</p>
+                      )}
+                      {opt.kind === "fallback" ? (
+                        <button
+                          onMouseDown={(e) => e.preventDefault()}
+                          onMouseEnter={() => setActiveIdx(idx)}
+                          onClick={() => pick(opt)}
+                          className={cn(
+                            "w-full flex items-center gap-2 px-4 py-2 text-left border-t border-border mt-1",
+                            "text-xs text-muted-foreground hover:text-foreground",
+                            idx === activeIdx && "bg-muted/60",
+                          )}
+                        >
+                          <Upload className="w-3 h-3" />
+                          찾는 공고가 없나요? PDF로 직접 등록하기
+                        </button>
+                      ) : (
+                        <OptionRow opt={opt} active={idx === activeIdx} onHover={() => setActiveIdx(idx)} onPick={() => pick(opt)} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* ── 빈 포커스: 좌 필터 / 우 최근 검색어 ───────────── */
+              <div className="flex">
+                {/* 좌: 필터로 찾기 */}
+                <div className="flex-1 min-w-0 p-4 border-r border-border">
+                  <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide mb-2">필터로 찾기</p>
+                  <FilterGroup
+                    label="직무"
+                    values={JOB_FILTERS}
+                    current={filters.job}
+                    onPick={(v) => setFilters((f) => ({ ...f, job: f.job === v ? null : (v as NcsCategory8) }))}
+                  />
+                  <FilterGroup
+                    label="지역"
+                    values={[...REGION_FILTERS]}
+                    current={filters.region}
+                    onPick={(v) => setFilters((f) => ({ ...f, region: f.region === v ? null : v }))}
+                  />
+                  <FilterGroup
+                    label="형태"
+                    values={[...TYPE_FILTERS]}
+                    current={filters.type}
+                    onPick={(v) => setFilters((f) => ({ ...f, type: f.type === v ? null : v }))}
+                  />
 
-              {options.map((opt, idx) => {
-                const label = sectionLabel(opt, idx);
-                return (
-                  <div key={idx}>
-                    {label && (
-                      <p className="px-4 pt-2 pb-0.5 text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">
-                        {label}
+                  {hasFilter && (
+                    <div className="mt-3 border-t border-border/60 pt-2">
+                      <p className="text-chip text-muted-foreground mb-1">
+                        조건에 맞는 공고 {filtered.length}건
+                        {filtered.length === 0 && <span className="text-muted-foreground/60"> — 조건을 넓혀보세요</span>}
                       </p>
-                    )}
-                    {opt.kind === "fallback" ? (
+                      <div className="max-h-40 overflow-y-auto -mx-2">
+                        {filtered.map((p) => (
+                          <OptionRow
+                            key={p.id}
+                            opt={{ kind: "posting", posting: p }}
+                            active={false}
+                            onHover={() => {}}
+                            onPick={() => goPosting(p)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 우: 최근 검색어 */}
+                <div className="w-[280px] shrink-0 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">최근 검색어</p>
+                    {recent.length > 0 && (
                       <button
                         onMouseDown={(e) => e.preventDefault()}
-                        onMouseEnter={() => setActiveIdx(idx)}
-                        onClick={() => pick(opt)}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-4 py-2 text-left border-t border-border mt-1",
-                          "text-xs text-muted-foreground hover:text-foreground",
-                          idx === activeIdx && "bg-muted/60",
-                        )}
+                        onClick={() => { clearRecent(); setQ(""); setFocused(true); }}
+                        className="text-chip text-muted-foreground/60 hover:text-foreground"
                       >
-                        <Upload className="w-3 h-3" />
-                        찾는 공고가 없나요? PDF로 직접 등록하기
+                        지우기
                       </button>
-                    ) : (
-                      <OptionRow
-                        opt={opt}
-                        active={idx === activeIdx}
-                        onHover={() => setActiveIdx(idx)}
-                        onPick={() => pick(opt)}
-                      />
                     )}
                   </div>
-                );
-              })}
-            </div>
-            <div className="flex items-center gap-3 px-4 py-1.5 border-t border-border bg-muted/30 text-mini text-muted-foreground/60">
-              <span className="inline-flex items-center gap-1">↑↓ 이동</span>
-              <span className="inline-flex items-center gap-1">
-                <CornerDownLeft className="w-2.5 h-2.5" /> 선택
-              </span>
-              <span>esc 닫기</span>
+                  {recent.length === 0 ? (
+                    <p className="text-xs text-muted-foreground/60 py-2">아직 검색 기록이 없어요</p>
+                  ) : (
+                    <ul className="space-y-0.5">
+                      {recent.map((r) => (
+                        <li key={r}>
+                          <button
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => { setQ(r); setActiveIdx(0); inputRef.current?.focus(); }}
+                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm text-foreground hover:bg-muted/50"
+                          >
+                            <History className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            <span className="truncate">{r}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between px-4 py-1.5 border-t border-border bg-muted/30">
+              <div className="flex items-center gap-3 text-mini text-muted-foreground/60">
+                <span>↑↓ 이동</span>
+                <span className="inline-flex items-center gap-1"><CornerDownLeft className="w-2.5 h-2.5" /> 선택</span>
+                <span>esc 닫기</span>
+              </div>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { setFallbackOpen(true); setFocused(false); }}
+                className="text-mini text-muted-foreground/60 hover:text-foreground inline-flex items-center gap-1"
+              >
+                <Upload className="w-2.5 h-2.5" />
+                PDF로 직접 등록
+              </button>
             </div>
           </div>
         )}
@@ -205,11 +307,36 @@ export function QuickJobRegistration() {
   );
 }
 
+function FilterGroup({
+  label, values, current, onPick,
+}: { label: string; values: string[]; current: string | null; onPick: (v: string) => void }) {
+  return (
+    <div className="flex items-start gap-2 mb-1.5">
+      <span className="text-chip text-muted-foreground w-8 shrink-0 pt-1">{label}</span>
+      <div className="flex flex-wrap gap-1">
+        {values.map((v) => (
+          <button
+            key={v}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onPick(v)}
+            className={cn(
+              "px-2 py-0.5 rounded-full border text-xs transition-colors",
+              current === v
+                ? "border-primary bg-accent text-primary font-medium"
+                : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
+            )}
+          >
+            {v}
+            {current === v && <X className="inline w-2.5 h-2.5 ml-0.5 -mt-px" />}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function OptionRow({
-  opt,
-  active,
-  onHover,
-  onPick,
+  opt, active, onHover, onPick,
 }: {
   opt: Exclude<Option, { kind: "fallback" }>;
   active: boolean;
@@ -245,10 +372,7 @@ function OptionRow({
       onMouseDown={(e) => e.preventDefault()}
       onMouseEnter={onHover}
       onClick={onPick}
-      className={cn(
-        "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors",
-        active && "bg-muted/60",
-      )}
+      className={cn("w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-muted/50", active && "bg-muted/60")}
     >
       <span className="text-muted-foreground shrink-0">{icon}</span>
       <span className="min-w-0 flex-1 flex items-baseline gap-2">

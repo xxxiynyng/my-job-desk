@@ -167,6 +167,7 @@ specs.settings.jobPrefs.v1         설정 > 직무 선호 (Settings.tsx)
 pickd.jobs.colWidths / visibleCols / colOrder / colPinned / rowOrder / sortMode
                                    탭1 테이블 뷰 상태 (너비·표시·순서·고정·행순서·정렬모드)
 pickd.jobs.registrations.v1        탭1 담은 공고 (JobRegistration[] — postingId·positionId 참조, 표시값은 postings.seed에서 파생)
+pickd.jobs.recentSearches.v1       탭1 검색창 최근 검색어 (string[], 최대 8)
 pickd.experiences.items            탭2 경험 목록 (Item[])
 pickd.experiences.visibleCols.v2 / colWidths.v2 / colOrder / colPinned / sortMode
                                    탭2 테이블 뷰 상태
