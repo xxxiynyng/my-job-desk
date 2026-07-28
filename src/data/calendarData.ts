@@ -1,9 +1,10 @@
+import { JOB_STAGES, type JobStage } from "./jobStatus";
+
 export type TaskPriority = "high" | "medium" | "low";
 export type TaskType = "서류" | "면접" | "자소서" | "기타";
 export type EventType = "interview" | "deadline" | "personal" | "task";
-export type ApplicationStatus =
-  | "작성중" | "지원완료" | "서류전형"
-  | "필기전형" | "면접전형" | "전형완료";
+// 정본은 ./jobStatus (JobStage). 기존 이름은 별칭으로 유지.
+export type ApplicationStatus = JobStage;
 export type ScheduleType = "posting" | "personal";
 
 export interface CalTask {
@@ -148,7 +149,7 @@ export function formatShortKoreanDate(date: Date): string {
 }
 
 // D-day 계산 정본은 ds/DdayChip.calcDday — 여기선 재수출만 (구 자체 구현 제거, 2026-07-06)
-export { calcDday as getDday } from "@/components/pickd/ds/DdayChip";
+export { calcDday as getDday } from "@/components/ds/DdayChip";
 
 export function getDdayStyle(dday: number): string {
   if (dday === 0) return "bg-red-500 text-white font-bold animate-pulse";
@@ -173,10 +174,7 @@ export function getDateRange(start: string, end: string): string[] {
 
 export type PostingFilterValue = "all" | "personal" | string;
 
-export const APPLICATION_STATUSES: ApplicationStatus[] = [
-  "작성중", "지원완료", "서류전형",
-  "필기전형", "면접전형", "전형완료",
-];
+export const APPLICATION_STATUSES: ApplicationStatus[] = JOB_STAGES;
 
 // ── 담은 공고 → 캘린더 파생 (jobStore 등록 참조 기반) ──────────────
 // 담기 시 "캘린더에 등록됐어요"를 실제로 지키는 셀렉터. Calendar·TodayPanel이 소비한다.
