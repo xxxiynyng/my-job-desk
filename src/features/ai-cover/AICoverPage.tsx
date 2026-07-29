@@ -52,7 +52,8 @@ function findSpellIssues(text: string): SpellIssue[] {
 }
 
 const PIPELINE_NODES = ["문항 분석", "경험 매칭", "초안 생성", "검토"];
-const STEPS = ["공고 선택", "문항", "경험 매칭", "초안", "완성"];
+// 스텝 플로우('공고 선택→…→초안→완성')는 제거(2026-07-29) — '초안' 단계 의미가 직관적이지 않고,
+// 진행 정보는 화면 요소(문항 페이저·상태 칩·AI 초안 생성 버튼)가 이미 보여줘 중복이었음.
 
 // 공고별 작성 상태 세션 캐시 — 화면 전환에도 유지 (실서비스: localStorage `pickd.essay.<slug>.vN`)
 type EssayCache = {
@@ -74,32 +75,6 @@ function KeywordChip({ children }: { children: ReactNode }) {
 
 // primary 스트로크 버튼 클래스 (JobDetail 색 가이드 §3 — solid 남발 방지)
 const PRIMARY_STROKE = "border-primary/40 text-primary hover:bg-primary/5 hover:text-primary";
-
-// 스텝 플로우 — 유동 정보라 가벼운 텍스트 표기만 (§0-8), 진행 바 아님
-function StepFlow({ currentIdx }: { currentIdx: number }) {
-  return (
-    <ol className="flex items-center gap-1.5" aria-label="작성 단계">
-      {STEPS.map((s, i) => {
-        const done = i < currentIdx;
-        const cur = i === currentIdx;
-        return (
-          <li key={s} className="flex items-center gap-1.5">
-            {i > 0 && <ChevronRight className="w-3 h-3 text-muted-foreground/40" />}
-            <span
-              className={cn(
-                "flex items-center gap-1 text-xs whitespace-nowrap",
-                cur ? "font-semibold text-primary" : done ? "text-muted-foreground" : "text-muted-foreground/50",
-              )}
-            >
-              {done && <Check className="w-3 h-3 text-pickd-green" />}
-              {s}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 // 문항 숫자 페이저 — 문항 수만큼 1..N 버튼, 언제든 이동. 내용 있는 문항은 번호 위 dot
 function QuestionPager({
@@ -498,7 +473,6 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
   const running = genNode >= 0;
   const selCount = selected.size;
   const over = text.length > q.limit;
-  const stepIdx = finished ? 4 : suggestionOpen[qIdx] ? 3 : selCount > 0 ? 2 : 1;
   const essayStatus = finished ? "완료" : text.length > 0 ? "작성중" : "미작성";
 
   // 공고별 작성 상태를 세션 캐시에 유지 (선택 화면 왕복에도 보존)
@@ -588,7 +562,8 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
         <div className="flex-1 min-w-0 overflow-y-auto bg-white">
           {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
-            <div className="mx-auto max-w-[820px] px-8 py-3 flex items-center justify-between gap-4">
+            {/* h-12 고정 — 오른쪽 도구 창 헤더와 같은 높이로 상단 선이 이어지게 (2026-07-29) */}
+            <div className="mx-auto max-w-[820px] px-8 h-12 flex items-center gap-4">
               {/* 브레드크럼 3단 폐기 → ← + 기관명 하나만 (2026-07-29 확정) */}
               <nav className="flex items-center gap-1.5 min-w-0">
                 <button
@@ -602,7 +577,6 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
                 </button>
                 <span className="text-sm font-semibold text-foreground truncate">{job.org}</span>
               </nav>
-              <StepFlow currentIdx={stepIdx} />
             </div>
           </div>
 
@@ -744,18 +718,21 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
             )}
           />
           {/* 창 선택 탭 + 좌우 교체 */}
-          <div className="px-3 py-2.5 border-b border-border flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-0.5 min-w-0">
+          {/* h-12 고정(왼쪽 상단 바와 정렬) + 세그먼트 컨트롤(회색 트랙+활성 흰 카드)로 탭임을 명확히 (2026-07-29) */}
+          <div className="px-3 h-12 border-b border-border flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-0.5 min-w-0 bg-muted/70 rounded-lg p-0.5" role="tablist" aria-label="보조 창 선택">
               {RIGHT_VIEWS.map((v) => (
                 <button
                   key={v.key}
                   type="button"
+                  role="tab"
+                  aria-selected={rightView === v.key}
                   onClick={() => setRightView(v.key)}
                   className={cn(
-                    "px-2 h-7 rounded-md text-xs whitespace-nowrap transition-colors",
+                    "px-2.5 h-7 rounded-md text-xs whitespace-nowrap transition-all",
                     rightView === v.key
-                      ? "bg-accent text-accent-foreground font-semibold"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      ? "bg-white text-foreground font-semibold shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {v.label}
