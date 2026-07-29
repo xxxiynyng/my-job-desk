@@ -1,15 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import { MoodRefresh } from "./MoodRefresh";
+import { PageTitle } from "@/components/PageTitle";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">
+        <PageTitle>
           지원자님의 대시보드
-        </h1>
+        </PageTitle>
         <p className="text-sm text-muted-foreground mt-1.5">
           오늘도 한 걸음 더 가까이.
         </p>

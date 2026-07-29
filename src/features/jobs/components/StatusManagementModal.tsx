@@ -9,16 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { JOB_STAGES, FINAL_RESULT_LABEL, type JobStage, type FinalResult } from "@/data/jobStatus";
+import { JOB_STAGES, FINAL_RESULT_LABEL, FINAL_RESULT_OPTIONS, type JobStage, type FinalResult } from "@/data/jobStatus";
 
 // 전형 단계 6개 (2026-07-02 재편) — 최종합격/불합격/보류는 "전형완료" + 세부 결과(FinalResult)로 표현
-// 정본은 @/data/jobStatus. 아래는 기존 소비처 호환용 별칭 재수출.
-export type AppStage = JobStage;
+// 단계·결과 목록의 정본은 @/data/jobStatus. 여기서는 파생만 한다.
 export type { FinalResult };
 
-const STAGE_FLOW: AppStage[] = JOB_STAGES;
-
-const FINAL_RESULT_OPTIONS: NonNullable<FinalResult>[] = ["합격", "불합격", "보류"];
+const STAGE_FLOW = JOB_STAGES;
 
 const finalResultStyles: Record<NonNullable<FinalResult>, string> = {
   합격: "bg-pickd-green-light text-pickd-green border-pickd-green/30",
@@ -54,9 +51,9 @@ interface Props {
     deadline: string;
     dday: number;
   } | null;
-  currentStage?: AppStage;
+  currentStage?: JobStage;
   currentFinalResult?: FinalResult;
-  onStageChange?: (stage: AppStage) => void;
+  onStageChange?: (stage: JobStage) => void;
   onFinalResultChange?: (result: FinalResult) => void;
 }
 
@@ -90,13 +87,13 @@ export function StatusManagementModal({
   onStageChange,
   onFinalResultChange,
 }: Props) {
-  const [stage, setStageLocal] = useState<AppStage>(currentStage);
+  const [stage, setStageLocal] = useState<JobStage>(currentStage);
   const [finalResult, setFinalResultLocal] = useState<FinalResult>(currentFinalResult);
 
   const activeStage = onStageChange ? currentStage : stage;
   const activeFinalResult = onFinalResultChange ? currentFinalResult : finalResult;
 
-  const setStage = (s: AppStage) => {
+  const setStage = (s: JobStage) => {
     setStageLocal(s);
     onStageChange?.(s);
   };

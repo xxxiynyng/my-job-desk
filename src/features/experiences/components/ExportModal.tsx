@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { FileSpreadsheet, FileText, Printer, Check } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toggleInSet } from "@/lib/setUtils";
 import type { Item } from "@/features/experiences/model/presets";
 import {
   EXPORT_FIELDS,
@@ -71,12 +72,8 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
   const canExport = scopeItems.length > 0 && hasFields;
 
   const toggleField = (k: ExportFieldKey) => {
-    if (k === "name") return;
-    setFields((p) => {
-      const n = new Set(p);
-      n.has(k) ? n.delete(k) : n.add(k);
-      return n;
-    });
+    if (k === "name") return; // 이름은 항상 포함 — 해제 불가
+    setFields((p) => toggleInSet(p, k));
   };
 
   const doExport = async () => {

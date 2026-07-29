@@ -1,10 +1,18 @@
 import { JOB_STAGES, type JobStage } from "./jobStatus";
+import { getRegistrations, getRegisteredPosition } from "./jobStore";
+import type { StageType } from "./postings.seed";
 
 export type TaskPriority = "high" | "medium" | "low";
+
+/** 우선순위 표기 — ContextPanel·DetailModal 공용 정본 */
+export const PRIORITY_LABEL: Record<TaskPriority, string> = { high: "긴급", medium: "보통", low: "낮음" };
+export const PRIORITY_STYLE: Record<TaskPriority, string> = {
+  high: "bg-red-100 text-red-600 border-red-200",
+  medium: "bg-primary/10 text-primary border-primary/30",
+  low: "bg-muted text-muted-foreground border-border",
+};
 export type TaskType = "서류" | "면접" | "자소서" | "기타";
 export type EventType = "interview" | "deadline" | "personal" | "task";
-// 정본은 ./jobStatus (JobStage). 기존 이름은 별칭으로 유지.
-export type ApplicationStatus = JobStage;
 export type ScheduleType = "posting" | "personal";
 
 export interface CalTask {
@@ -33,7 +41,7 @@ export interface CalApplication {
   id: string;
   company: string;
   position: string;
-  status: ApplicationStatus;
+  status: JobStage;
   deadline: string;
   stage: string;
   starred?: boolean;
@@ -149,7 +157,7 @@ export function formatShortKoreanDate(date: Date): string {
 }
 
 // D-day 계산 정본은 ds/DdayChip.calcDday — 여기선 재수출만 (구 자체 구현 제거, 2026-07-06)
-export { calcDday as getDday } from "@/components/ds/DdayChip";
+export { calcDday as getDday } from "@/lib/dday";
 
 export function getDdayStyle(dday: number): string {
   if (dday === 0) return "bg-red-500 text-white font-bold animate-pulse";
@@ -174,12 +182,10 @@ export function getDateRange(start: string, end: string): string[] {
 
 export type PostingFilterValue = "all" | "personal" | string;
 
-export const APPLICATION_STATUSES: ApplicationStatus[] = JOB_STAGES;
+export const APPLICATION_STATUSES: JobStage[] = JOB_STAGES;
 
 // ── 담은 공고 → 캘린더 파생 (jobStore 등록 참조 기반) ──────────────
 // 담기 시 "캘린더에 등록됐어요"를 실제로 지키는 셀렉터. Calendar·TodayPanel이 소비한다.
-import { getRegistrations, getRegisteredPosition } from "./jobStore";
-import type { StageType } from "./postings.seed";
 
 const STAGE_TO_SCHEDULE_TYPE: Partial<Record<StageType, string>> = {
   APPLY: "마감",
@@ -207,7 +213,7 @@ export function registeredCalApplications(): CalApplication[] {
       id: `reg-${posting.id}`,
       company: posting.orgName,
       position: position.jobTitle,
-      status: "작성중" as ApplicationStatus,
+      status: "작성중" as JobStage,
       deadline: posting.applyEnd.slice(0, 10),
       stage: "작성중",
       recruitmentStart: posting.applyStart.slice(0, 10),

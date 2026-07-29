@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ExtractJob, ExtractUnit } from "./api";
+import { TypingDots } from "./TypingDots";
 
 const MIN_CHARS = 200;
 const MAX_CHARS = 20000;
@@ -164,9 +165,7 @@ export function ExtractJobBanner({
     >
       {!failed && (
         <span className="inline-flex items-center gap-1.5 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" />
-          <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:150ms]" />
-          <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:300ms]" />
+          <TypingDots />
         </span>
       )}
       <div className="min-w-0">

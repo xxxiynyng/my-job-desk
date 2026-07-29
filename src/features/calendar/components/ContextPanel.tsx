@@ -7,10 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ListHeader } from "./ListHeader";
 import { cn } from "@/lib/utils";
-import {
-  formatKoreanDate, getDday, getDdayStyle,
-  CalTask, CalApplication, CalSchedule, PostingFilterValue, ApplicationStatus,
-} from "@/data/calendarData";
+import { formatKoreanDate, getDday, getDdayStyle, CalTask, CalApplication, CalSchedule, PostingFilterValue, PRIORITY_LABEL, PRIORITY_STYLE } from "@/data/calendarData";
+import type { JobStage } from "@/data/jobStatus";
 import { Clock, Sparkles, Star, ChevronDown, CalendarPlus, ListPlus, ChevronLeft } from "lucide-react";
 import { stageStyle } from "@/components/ds";
 import { CreateScheduleModal, CreateTaskModal } from "./CreateModal";
@@ -28,15 +26,11 @@ interface ContextPanelProps {
   progress: number;
   postingFilter: PostingFilterValue;
   onToggleStar: (id: string) => void;
-  onUpdateStatus: (id: string, status: ApplicationStatus) => void;
+  onUpdateStatus: (id: string, status: JobStage) => void;
 }
 
-const priorityStyles: Record<string, string> = {
-  high: "bg-red-100 text-red-600 border-red-200",
-  medium: "bg-primary/10 text-primary border-primary/30",
-  low: "bg-muted text-muted-foreground border-border",
-};
-const priorityLabels: Record<string, string> = { high: "긴급", medium: "보통", low: "낮음" };
+const priorityStyles = PRIORITY_STYLE;
+const priorityLabels = PRIORITY_LABEL;
 
 export function ContextPanel({
   selectedDate, tasks, carriedOverTasks, applications, schedules,

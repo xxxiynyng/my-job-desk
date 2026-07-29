@@ -35,6 +35,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { toggleInSet } from "@/lib/setUtils";
+import type { Job } from "../model/jobTypes";
+import { initialJobData } from "../model/jobsMock";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -54,18 +58,19 @@ import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/
 import { useTableDividers } from "@/components/table/useTableDividers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { StatusManagementModal, type AppStage, type FinalResult } from "./StatusManagementModal";
-import { FINAL_RESULT_LABEL, type JobStage } from "@/data/jobStatus";
+import { StatusManagementModal, type FinalResult } from "./StatusManagementModal";
+import { JOB_STAGES, ACTIVE_STAGES, COMPLETED_STAGES, FINAL_RESULT_LABEL, type JobStage } from "@/data/jobStatus";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DocumentStatusList } from "./DocumentStatusList";
 import { StatusBadge, DdayChip, calcDday, stageStyle } from "@/components/ds";
+import { KEY_BY_LABEL, type StageBadgeKey } from "@/components/ds/StatusBadge";
 import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";
-import { JobRowContextMenu, JobRowActionCell, type JobMenuStatus } from "@/components/table/RowContextMenu";
+import { JobRowContextMenu, JobRowActionCell } from "@/components/table/RowContextMenu";
 import { getRegistrations, registrationRowSeed, removeRegistration, REGISTRATIONS_EVENT } from "@/data/jobStore";
 import { lsGet } from "@/lib/storage";
-import { makeColFilterSetters, makeColSortSetters } from "@/components/table/tableState";
+import { makeColFilterSetters, makeColSortSetters, makeSelectAll, makeStickyProps, collectDistinct, type ColSortState } from "@/components/table/tableState";
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
@@ -101,23 +106,13 @@ const COL_MAX_WIDTHS: Record<string, number> = {
 // ── 타입 ──────────────────────────────────────────────────────────
 // 전형 단계 6개 (2026-07-02 재편 — 지원예정·서류합격 삭제, 최종합격/불합격/보류는
 // "전형완료" 단일 단계 + 세부 결과(finalResult) 배지로 구분)
-// 정본은 @/data/jobStatus (JobStage). 아래 별칭으로 기존 이름 유지.
-type StatusType = JobStage;
-const ACTIVE_STATUSES: StatusType[] = ["작성중", "지원완료", "서류전형", "필기전형", "면접전형"];
-const COMPLETED_STATUSES: StatusType[] = ["전형완료"];
-const STATUS_OPTIONS: StatusType[] = [...ACTIVE_STATUSES, ...COMPLETED_STATUSES];
+// 목록·칸반이 쓰는 단계 집합 — 전부 @/data/jobStatus 에서 파생한다(여기서 다시 적지 않는다).
+const ACTIVE_STATUSES = ACTIVE_STAGES;
+const COMPLETED_STATUSES = COMPLETED_STAGES;
+const STATUS_OPTIONS = JOB_STAGES;
 
-const STATUS_DS_KEY: Record<
-  StatusType,
-  "draft" | "applied" | "document" | "test" | "interview" | "finished"
-> = {
-  "작성중":   "draft",
-  "지원완료": "applied",
-  "서류전형": "document",
-  "필기전형": "test",
-  "면접전형": "interview",
-  "전형완료": "finished",
-};
+// 라벨 → DS 배지 키. STATUS_MAP(정본)의 역인덱스라 여기서 다시 적지 않는다.
+const STATUS_DS_KEY = KEY_BY_LABEL as Record<JobStage, StageBadgeKey>;
 
 // 전형완료의 세부 결과 → 배지 키·표시 라벨
 const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
@@ -126,138 +121,7 @@ const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected
   보류: "hold",
 };
 
-type Job = {
-  id: string;
-  slug: string;
-  company: string;
-  title: string;
-  role: string;
-  employType: string;
-  industry: string;
-  deadline: string;
-  dday: number;
-  status: StatusType;
-  finalResult: FinalResult;
-  linked: { schedules: number; todos: number };
-  starred: boolean;
-  updatedAt: string;
-  registeredAt: string;
-  stage: AppStage;
-  completedAt?: string;
-  url?: string;
-};
 
-const initialJobData: Job[] = [
-  {
-    id: "j1",
-    slug: "naver",
-    company: "네이버",
-    title: "프론트엔드 개발자",
-    role: "프론트엔드",
-    employType: "신입",
-    industry: "IT/테크",
-    deadline: "2026-07-01",
-    dday: calcDday("2026-07-01"),
-    status: "작성중",
-    finalResult: null,
-    linked: { schedules: 1, todos: 2 },
-    starred: false,
-    updatedAt: "2시간 전",
-    registeredAt: "2026-06-15",
-    stage: "작성중",
-  },
-  {
-    id: "j2",
-    slug: "kakao",
-    company: "카카오",
-    title: "백엔드 엔지니어",
-    role: "백엔드",
-    employType: "신입",
-    industry: "IT/테크",
-    deadline: "2026-07-05",
-    dday: calcDday("2026-07-05"),
-    status: "작성중",
-    finalResult: null,
-    linked: { schedules: 2, todos: 1 },
-    starred: true,
-    updatedAt: "3시간 전",
-    registeredAt: "2026-06-16",
-    stage: "작성중",
-  },
-  {
-    id: "j3",
-    slug: "toss",
-    company: "토스",
-    title: "Product Designer",
-    role: "디자인",
-    employType: "인턴",
-    industry: "핀테크",
-    deadline: "2026-06-30",
-    dday: calcDday("2026-06-30"),
-    status: "작성중",
-    finalResult: null,
-    linked: { schedules: 1, todos: 3 },
-    starred: true,
-    updatedAt: "1시간 전",
-    registeredAt: "2026-06-18",
-    stage: "작성중",
-  },
-  {
-    id: "j4",
-    slug: "samsung",
-    company: "삼성전자",
-    title: "SW 엔지니어",
-    role: "풀스택",
-    employType: "신입",
-    industry: "제조/전자",
-    deadline: "2026-07-10",
-    dday: calcDday("2026-07-10"),
-    status: "지원완료",
-    finalResult: null,
-    linked: { schedules: 0, todos: 1 },
-    starred: false,
-    updatedAt: "어제",
-    registeredAt: "2026-06-10",
-    stage: "지원완료",
-  },
-  {
-    id: "j5",
-    slug: "coupang",
-    company: "쿠팡",
-    title: "데이터 분석가",
-    role: "데이터",
-    employType: "경력",
-    industry: "이커머스",
-    deadline: "2026-06-15",
-    dday: calcDday("2026-06-15"),
-    status: "전형완료",
-    finalResult: "불합격",
-    linked: { schedules: 0, todos: 0 },
-    starred: false,
-    updatedAt: "3일 전",
-    registeredAt: "2026-05-20",
-    stage: "전형완료",
-    completedAt: "2026-06-15",
-  },
-  {
-    id: "j6",
-    slug: "line",
-    company: "라인",
-    title: "iOS 개발자",
-    role: "모바일",
-    employType: "신입",
-    industry: "IT/테크",
-    deadline: "2026-07-07",
-    dday: calcDday("2026-07-07"),
-    status: "면접전형",
-    finalResult: null,
-    linked: { schedules: 1, todos: 0 },
-    starred: false,
-    updatedAt: "5일 전",
-    registeredAt: "2026-06-05",
-    stage: "면접전형",
-  },
-];
 
 // ── 컬럼 정의 ──────────────────────────────────────────────────────
 type ColumnKey =
@@ -443,13 +307,13 @@ function KanbanView({
   onSelect,
 }: {
   jobs: Job[];
-  onMove: (jobId: string, toStatus: StatusType) => void;
+  onMove: (jobId: string, toStatus: JobStage) => void;
   onSelect: (job: Job) => void;
 }) {
   const dragId = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const [overCol, setOverCol] = useState<StatusType | null>(null);
-  const [expandedCols, setExpandedCols] = useState<Set<StatusType>>(new Set());
+  const [overCol, setOverCol] = useState<JobStage | null>(null);
+  const [expandedCols, setExpandedCols] = useState<Set<JobStage>>(new Set());
 
   // 드래그 중 컨테이너 가장자리에 가까워지면 자동으로 가로 스크롤 — 화면 밖으로 밀려난
   // "필기 전형" / "최종 결과" 컬럼에도 드롭할 수 있게 해줌
@@ -466,19 +330,14 @@ function KanbanView({
   };
 
   const byStatus = useMemo(() => {
-    const m = Object.fromEntries(STATUS_OPTIONS.map((s) => [s, []])) as Record<StatusType, Job[]>;
+    const m = Object.fromEntries(STATUS_OPTIONS.map((s) => [s, []])) as Record<JobStage, Job[]>;
     jobs.forEach((j) => {
       m[j.status]?.push(j);
     });
     return m;
   }, [jobs]);
 
-  const toggleColExpand = (col: StatusType) =>
-    setExpandedCols((p) => {
-      const n = new Set(p);
-      n.has(col) ? n.delete(col) : n.add(col);
-      return n;
-    });
+  const toggleColExpand = (col: JobStage) => setExpandedCols((p) => toggleInSet(p, col));
 
   return (
     <>
@@ -626,13 +485,13 @@ function JobRowGutterCell({
     setActivatorNodeRef: (el: HTMLElement | null) => void;
     listeners: ReturnType<typeof useSortable>["listeners"];
   };
-  job: { starred: boolean; updatedAt: string; url?: string; status: JobMenuStatus };
+  job: { starred: boolean; updatedAt: string; url?: string; status: JobStage };
   checked: boolean;
   onCheckedChange: () => void;
   onStar: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
-  onChangeStatus: (s: JobMenuStatus) => void;
+  onChangeStatus: (s: JobStage) => void;
   onDelete: () => void;
   sticky?: { style?: React.CSSProperties; className?: string };
 }) {
@@ -720,7 +579,7 @@ export function JobPostingTable() {
   // 삭제 확인 대기 id 목록(null = 닫힘). 탭2 경험 삭제 확인과 동일 패턴.
   const [deleteConfirm, setDeleteConfirm] = useState<string[] | null>(null);
   const [tableExpanded, setTableExpanded] = useState(false);
-  const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const [colSort, setColSort] = useState<ColSortState>(null);
 
   // 행 순서 커스텀 정렬 (드래그, 탭2 sortOrder와 동일 개념 — 탭1 jobs는 메모리 상태라 순서만 저장)
   const [rowOrder, setRowOrder] = useState<string[]>(() => lsGet<string[]>("pickd.jobs.rowOrder", []));
@@ -785,12 +644,7 @@ export function JobPostingTable() {
     } catch {}
   }, [visibleCols]);
   const isVisible = (k: ColumnKey) => visibleCols.has(k);
-  const toggleCol = (k: ColumnKey) =>
-    setVisibleCols((p) => {
-      const n = new Set(p);
-      n.has(k) ? n.delete(k) : n.add(k);
-      return n;
-    });
+  const toggleCol = (k: ColumnKey) => setVisibleCols((p) => toggleInSet(p, k));
 
   // 컬럼 너비 (최소 너비 적용)
   const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols(
@@ -829,12 +683,7 @@ export function JobPostingTable() {
       localStorage.setItem("pickd.jobs.colPinned", JSON.stringify([...pinnedCols]));
     } catch {}
   }, [pinnedCols]);
-  const togglePin = (k: ColumnKey) =>
-    setPinnedCols((p) => {
-      const n = new Set(p);
-      n.has(k) ? n.delete(k) : n.add(k);
-      return n;
-    });
+  const togglePin = (k: ColumnKey) => setPinnedCols((p) => toggleInSet(p, k));
 
   const orderedCols = useMemo(() => {
     const cols = colOrder.map((k) => ALL_COLUMNS.find((c) => c.key === k)!).filter(Boolean);
@@ -862,14 +711,7 @@ export function JobPostingTable() {
     return map;
   }, [pinnedCols, orderedCols, widths]);
 
-  const stickyProps = (key: string, header = false): { style?: React.CSSProperties; className?: string } => {
-    const f = frozenMap?.get(key);
-    if (!f) return {};
-    return {
-      style: { position: "sticky", left: f.left, zIndex: 30 },
-      className: cn(header ? "bg-slate-50" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
-    };
-  };
+  const stickyProps = makeStickyProps(frozenMap, cn);
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   const dividerBounds = useTableDividers(tableWrapRef, [widths, orderedCols, visibleCols]);
   const dividers = dividerBounds.map((b) => ({
@@ -962,14 +804,7 @@ export function JobPostingTable() {
   }, [searchedActive, activeFilter, colFilter]);
 
   // 헤더 필터 옵션 — 지원중 목록 기준 고유값
-  const distinctValues = (key: string): string[] => {
-    const set = new Set<string>();
-    for (const j of activeJobs) {
-      const v = getColValue(j, key);
-      if (v) set.add(v);
-    }
-    return Array.from(set).sort();
-  };
+  const distinctValues = (key: string): string[] => collectDistinct(activeJobs, (j) => getColValue(j, key));
 
   // 컬럼 키 → 컬럼 메뉴의 필터 서브메뉴 props (필터 없는 컬럼은 undefined)
   const filterPropsFor = (key: string): ColumnFilterProps | undefined => {
@@ -995,11 +830,7 @@ export function JobPostingTable() {
     [filtered, tableExpanded],
   );
 
-  const allSelected = filtered.length > 0 && filtered.every((j) => selected.has(j.id));
-  const toggleSelectAll = () => {
-    if (allSelected) setSelected(new Set());
-    else setSelected(new Set(filtered.map((j) => j.id)));
-  };
+  const { allSelected, toggleSelectAll } = makeSelectAll(filtered, selected, setSelected);
 
   const toggleStarred = (id: string) => setJobs((p) => p.map((j) => (j.id === id ? { ...j, starred: !j.starred } : j)));
 
@@ -1035,7 +866,7 @@ export function JobPostingTable() {
   };
 
   // 상태 변경 (칸반 드래그 포함)
-  const moveJob = (jobId: string, toStatus: StatusType) => {
+  const moveJob = (jobId: string, toStatus: JobStage) => {
     setJobs((p) =>
       p.map((j) => {
         if (j.id !== jobId) return j;
@@ -1056,9 +887,9 @@ export function JobPostingTable() {
   // 모달
   const modalJob = modalJobId ? (jobs.find((j) => j.id === modalJobId) ?? null) : null;
 
-  const handleStageChange = (stage: AppStage) => {
+  const handleStageChange = (stage: JobStage) => {
     if (!modalJobId) return;
-    setJobs((p) => p.map((j) => (j.id === modalJobId ? { ...j, status: stage as StatusType, stage } : j)));
+    setJobs((p) => p.map((j) => (j.id === modalJobId ? { ...j, status: stage as JobStage, stage } : j)));
   };
   const handleFinalResultChange = (result: FinalResult) => {
     if (!modalJobId) return;
@@ -1330,7 +1161,7 @@ export function JobPostingTable() {
                           starred: job.starred,
                           updatedAt: job.updatedAt,
                           url: job.url,
-                          status: job.status as JobMenuStatus,
+                          status: job.status as JobStage,
                         }}
                         checked={selected.has(job.id)}
                         onCheckedChange={() => {
@@ -1343,7 +1174,7 @@ export function JobPostingTable() {
                         onStar={() => toggleStarred(job.id)}
                         onEdit={() => setModalJobId(job.id)}
                         onDuplicate={() => duplicateJob(job.id)}
-                        onChangeStatus={(s) => moveJob(job.id, s as StatusType)}
+                        onChangeStatus={(s) => moveJob(job.id, s as JobStage)}
                         onDelete={() => setDeleteConfirm([job.id])}
                       />
                       {/* 별표 (공용 StarToggle) */}
@@ -1590,34 +1421,20 @@ export function JobPostingTable() {
         )}
 
         {/* ── 삭제 확인 다이얼로그 (탭2 경험 삭제와 동일 패턴) ──────── */}
-        <Dialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
-          <DialogContent className="max-w-[380px]">
-            <DialogHeader>
-              <DialogTitle className="text-base">정말 삭제하시겠어요?</DialogTitle>
-              <DialogDescription className="text-sm">
-                {deleteConfirm?.length === 1
-                  ? "이 공고를 삭제하면 되돌릴 수 없어요."
-                  : `${deleteConfirm?.length ?? 0}개의 공고를 삭제하면 되돌릴 수 없어요.`}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirm(null)}>
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  if (deleteConfirm) performDelete(deleteConfirm);
-                  setDeleteConfirm(null);
-                }}
-              >
-                삭제
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ConfirmDialog
+          open={!!deleteConfirm}
+          onOpenChange={(o) => !o && setDeleteConfirm(null)}
+          title="정말 삭제하시겠어요?"
+          description={
+            deleteConfirm?.length === 1
+              ? "이 공고를 삭제하면 되돌릴 수 없어요."
+              : `${deleteConfirm?.length ?? 0}개의 공고를 삭제하면 되돌릴 수 없어요.`
+          }
+          onConfirm={() => {
+            if (deleteConfirm) performDelete(deleteConfirm);
+            setDeleteConfirm(null);
+          }}
+        />
       </div>
     </TooltipProvider>
   );

@@ -7,14 +7,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Pencil, Clock, CalendarDays, ChevronRight } from "lucide-react";
-import { CalApplication, CalSchedule, CalTask, ApplicationStatus, APPLICATION_STATUSES, getDday, getDdayStyle } from "@/data/calendarData";
+import { CalApplication, CalSchedule, CalTask, APPLICATION_STATUSES, getDday, getDdayStyle, PRIORITY_LABEL } from "@/data/calendarData";
+import type { JobStage } from "@/data/jobStatus";
 
 interface PostingDetailProps {
   app: CalApplication | null;
   schedules: CalSchedule[];
   tasks: CalTask[];
   onClose: () => void;
-  onUpdateStatus: (id: string, status: ApplicationStatus) => void;
+  onUpdateStatus: (id: string, status: JobStage) => void;
   onToggleTask: (id: string) => void;
   onAddTask: (title: string, linkedPostingId?: string) => void;
 }
@@ -46,7 +47,7 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
           {/* 상태 + 마감일 한 줄 */}
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <Select value={app.status} onValueChange={(v) => onUpdateStatus(app.id, v as ApplicationStatus)}>
+              <Select value={app.status} onValueChange={(v) => onUpdateStatus(app.id, v as JobStage)}>
                 <SelectTrigger className="h-7 text-xs border-border bg-muted/40 focus:ring-0">
                   <SelectValue />
                 </SelectTrigger>
@@ -233,7 +234,7 @@ export function TaskDetailModal({ task, onClose, onToggle }: TaskDetailProps) {
   const [title, setTitle] = useState("");
   if (!task) return null;
 
-  const priorityLabels: Record<string, string> = { high: "긴급", medium: "보통", low: "낮음" };
+  const priorityLabels = PRIORITY_LABEL;
 
   return (
     <Dialog open={!!task} onOpenChange={(o) => !o && onClose()}>

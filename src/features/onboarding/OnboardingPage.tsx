@@ -25,7 +25,7 @@ import {
   MapPin, Search, Sparkles, User, X, type LucideIcon,
 } from "lucide-react";
 import {
-  CAREER_YEARS, DATA_VERSION, INDUSTRIES, JOB_TREE, MAJORS,
+  CAREER_YEARS, CORP_TYPES, DATA_VERSION, FOCUSES, INDUSTRIES, JOB_TREE, MAJORS,
   PERSONAS, REGIONS, SCHOOLS, TIMINGS, gradYears, type PickdProfileV1,
 } from "./model/onboardingData";
 
@@ -641,14 +641,11 @@ interface PendingField {
   saveToInfo?: string;
 }
 
-const CORP_TYPES_PENDING = ["대기업", "중견기업", "스타트업", "공기업·공공기관", "외국계", "금융권"];
-const FOCUSES_PENDING = ["서류·이력서", "자기소개서", "인적성·NCS", "면접", "포트폴리오", "어학·자격증"];
-
 const PENDING_FIELDS: PendingField[] = [
   { key: "gpa", title: "학점", why: "학점을 입력하면 지원 가능 공고만 걸러드려요", type: "input", placeholder: "예) 3.85 / 4.5", saveToInfo: "gpa" },
   { key: "region", title: "거주 지역", why: "가까운 채용 행사도 알려드릴게요", type: "select", options: REGIONS, saveToInfo: "address" },
-  { key: "corps", title: "희망 기업 유형", why: "기업 유형을 고르면 추천을 조정해요", type: "chips", options: CORP_TYPES_PENDING, max: 6 },
-  { key: "focus", title: "지금 집중하는 것", why: "집중하는 걸 알려주시면 할 일을 제안해요", type: "chips", options: FOCUSES_PENDING, max: 6 },
+  { key: "corps", title: "희망 기업 유형", why: "기업 유형을 고르면 추천을 조정해요", type: "chips", options: CORP_TYPES, max: 6 },
+  { key: "focus", title: "지금 집중하는 것", why: "집중하는 걸 알려주시면 할 일을 제안해요", type: "chips", options: FOCUSES, max: 6 },
   { key: "workRegions", title: "희망 근무 지역", why: "지역 조건이 맞는 공고를 먼저 보여드려요", type: "chips", options: REGIONS, max: 3 },
   { key: "gradY", title: "졸업 년도", why: "신입·경력 구분과 지원 자격 필터에 사용돼요", type: "select", options: gradYears(), saveToInfo: "gradYear" },
   { key: "gradM", title: "졸업 예정 월", why: "채용 일정 추천이 정교해져요", type: "select", options: ["2", "8"] },

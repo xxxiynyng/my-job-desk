@@ -19,33 +19,14 @@ import { Input } from "@/components/ui/input";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toggleInSet } from "@/lib/setUtils";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { pushTrash, removeTrash } from "@/lib/trash";
 import { lsGet, lsSet } from "@/lib/storage";
+import { FILE_KINDS, LS_FILES, LS_PHOTO_ID, LS_PHOTO_SHOWN, type FileItem, type FileKind } from "../model/files";
 
 // ── Types & constants ──────────────────────────────────────────
 
-// 프리셋 9종 + 사용자 지정 종류(직접 입력) 허용 → 안 맞는 '다른 파일'도 제자리 폴더를 갖는다.
-type FileKind = string;
-
-const FILE_KINDS: FileKind[] = [
-  "증명사진",
-  "성적증명서",
-  "졸업증명서",
-  "재학증명서",
-  "어학 성적표",
-  "자격증 사본",
-  "수상 증빙",
-  "교육 수료증",
-  "기타 제출서류",
-];
-
-type FileItem = {
-  id: string;
-  kind: FileKind;
-  name: string;
-  fileKind: "pdf" | "image";
-  url?: string;
-};
 
 type Preview = { kind: "image" | "pdf"; file: FileItem } | null;
 
@@ -60,9 +41,6 @@ const INITIAL_FILES: FileItem[] = [
   { id: "f4", kind: "어학 성적표", name: "toeic_945.png", fileKind: "image" },
 ];
 
-const LS_FILES = "specs.files.v2";
-const LS_PHOTO_ID = "specs.basicPhoto.id";
-const LS_PHOTO_SHOWN = "specs.basicPhoto.shown";
 
 
 // ── Panel ─────────────────────────────────────────────────────
@@ -141,34 +119,20 @@ export function FilesPanel() {
       />
 
       {/* ── 파일 삭제 확인 다이얼로그 (탭2 경험 삭제와 동일 패턴) ──── */}
-      <Dialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
-        <DialogContent className="max-w-[380px]">
-          <DialogHeader>
-            <DialogTitle className="text-base">휴지통으로 옮길까요?</DialogTitle>
-            <DialogDescription className="text-sm">
-              {files.find((f) => f.id === deleteConfirmId)?.name
-                ? `'${files.find((f) => f.id === deleteConfirmId)?.name}' 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`
-                : "이 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2 mt-2">
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirmId(null)}>
-              취소
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-8 text-xs"
-              onClick={() => {
-                if (deleteConfirmId) deleteFile(deleteConfirmId);
-                setDeleteConfirmId(null);
-              }}
-            >
-              삭제
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={!!deleteConfirmId}
+        onOpenChange={(o) => !o && setDeleteConfirmId(null)}
+        title="휴지통으로 옮길까요?"
+        description={
+          files.find((f) => f.id === deleteConfirmId)?.name
+            ? `'${files.find((f) => f.id === deleteConfirmId)?.name}' 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`
+            : "이 파일을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."
+        }
+        onConfirm={() => {
+          if (deleteConfirmId) deleteFile(deleteConfirmId);
+          setDeleteConfirmId(null);
+        }}
+      />
     </TooltipProvider>
   );
 }
@@ -193,12 +157,7 @@ function FileGrid({
   const [dragOver, setDragOver] = useState(false);
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const toggleCollapse = (k: string) =>
-    setCollapsed((prev) => {
-      const n = new Set(prev);
-      n.has(k) ? n.delete(k) : n.add(k);
-      return n;
-    });
+  const toggleCollapse = (k: string) => setCollapsed((prev) => toggleInSet(prev, k));
 
   const q = query.trim().toLowerCase();
   const byKind = useMemo(() => {

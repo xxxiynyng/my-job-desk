@@ -68,10 +68,7 @@ function MenuSearch({
 // Tab1 — 공고 행 컨텍스트 메뉴
 // ─────────────────────────────────────────────────────────────────
 
-// 정본은 @/data/jobStatus (JobStage). 기존 이름은 별칭으로 유지.
-export type JobMenuStatus = JobStage;
-
-const JOB_STATUS_OPTIONS: JobMenuStatus[] = JOB_STAGES;
+const JOB_STATUS_OPTIONS = JOB_STAGES;
 
 export function JobRowContextMenu({
   job,
@@ -87,12 +84,12 @@ export function JobRowContextMenu({
     starred: boolean;
     updatedAt: string;
     url?: string;
-    status: JobMenuStatus;
+    status: JobStage;
   };
   onStar: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
-  onChangeStatus: (s: JobMenuStatus) => void;
+  onChangeStatus: (s: JobStage) => void;
   onDelete: () => void;
   /** 행 드래그 그립과 겹칠 때 외부에서 열림 제어 (탭2 ExpRowContextMenu와 동일 패턴) */
   open?: boolean;

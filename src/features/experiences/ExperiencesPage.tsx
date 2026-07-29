@@ -58,6 +58,7 @@ import { ExportModal } from "@/features/experiences/components/ExportModal";
 import type { ExportFieldKey } from "@/features/experiences/model/exportExperiences";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/features/experiences/components/BasicInfoPanel";
+import { PageTitle } from "@/components/PageTitle";
 import { FilesPanel } from "@/features/experiences/components/FilesPanel";
 // ── 탭2 소재·역량 레이어 (경험 → 역량) ────────────────────────
 // 상태·전이는 useStoryFlow가 소유한다. 이 페이지는 그리기만 한다.
@@ -69,8 +70,20 @@ import { CompetencyChip } from "./story/StoryBits";
 import { useStoryFlow } from "./story/useStoryFlow";
 import { softDeleteByActivity, useStories } from "./story/store";
 import { liveTags, DEMAND_SEED } from "./story/model";
+import { INITIAL_EXPERIENCES } from "./model/mockData";
+import { RepExperienceGrid } from "./components/RepExperienceViews";
+import { DetailEditor } from "./components/DetailEditor";
+import { ManageIndicator } from "./components/tableWidgets";
+import { HeaderCell } from "@/components/table/HeaderCell";
+import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
+import { type ColumnFilterProps, type ColFilterShape } from "@/components/table/HeaderFilter";
+import { useTableDividers } from "@/components/table/useTableDividers";
+import { StarToggle } from "@/components/table/StarToggle";
+import { ExpRowContextMenu, ExpRowActionCell } from "@/components/table/RowContextMenu";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toggleInSet } from "@/lib/setUtils";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import {
   type ItemType,
   type Item,
@@ -78,7 +91,7 @@ import {
   SHARED_EXP_KEY,
   makeFromPreset,
 } from "./model/presets";
-import { makeColFilterSetters, makeColSortSetters } from "@/components/table/tableState";
+import { makeColFilterSetters, makeColSortSetters, makeSelectAll, makeStickyProps, collectDistinct, type ColSortState } from "@/components/table/tableState";
 
 // Pickd accent 팔레트 (2026-07-02, 브랜드 스티커 accent) — 유형 칩에 시범 적용.
 // 칩은 항목명보다 약한 보조 요소(SSOT 5-2)라 accent 원색을 그대로 채우지 않고
@@ -146,28 +159,6 @@ function TypeChip({ type }: { type: ItemType }) {
     </span>
   );
 }
-import { INITIAL_EXPERIENCES } from "./model/mockData";
-
-export {
-  type ItemType,
-  type Status,
-  type FieldType,
-  type FieldDef,
-  type Item,
-  type Preset,
-  SHARED_EXP_KEY,
-  NARRATIVE_TYPES,
-  SPEC_TYPES,
-  ALL_TYPES,
-  KEYWORD_OPTIONS,
-  withTail,
-  EXTRA_COMMON,
-  PRESETS,
-  makeFromPreset,
-} from "./model/presets";
-
-export { INITIAL_EXPERIENCES } from "./model/mockData";
-
 // ────────────────────────────────────────────────────────────────
 // localStorage helpers
 // ────────────────────────────────────────────────────────────────
@@ -578,12 +569,7 @@ export default function Experiences() {
       localStorage.setItem(LS_EXP_COL_PINNED, JSON.stringify([...pinnedCols]));
     } catch {}
   }, [pinnedCols]);
-  const togglePinCol = (k: ColumnKey) =>
-    setPinnedCols((p) => {
-      const n = new Set(p);
-      if (n.has(k)) n.delete(k); else n.add(k);
-      return n;
-    });
+  const togglePinCol = (k: ColumnKey) => setPinnedCols((p) => toggleInSet(p, k));
 
   // 표시 순서: 보이는 tail 중 고정 먼저, 그다음 일반 (각 그룹 내부는 colOrder 순서 유지)
   const orderedTailCols = useMemo(() => {
@@ -616,14 +602,7 @@ export default function Experiences() {
     return map;
   }, [pinnedCols, orderedTailCols, visibleCols, colW]);
 
-  const stickyProps = (key: string, header = false): { style?: React.CSSProperties; className?: string } => {
-    const f = frozenMap?.get(key);
-    if (!f) return {};
-    return {
-      style: { position: "sticky", left: f.left, zIndex: 30 },
-      className: cn(header ? "bg-slate-50" : "bg-card group-hover:bg-gray-50", f.last && "border-r border-border"),
-    };
-  };
+  const stickyProps = makeStickyProps(frozenMap, cn);
 
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   // table-fixed에서 남는 공간이 컬럼에 배분되면 계산값과 실제 경계가 어긋나던 문제 해결(2026-07-02)
@@ -721,15 +700,7 @@ export default function Experiences() {
     });
   }, [items, search, activeFilter, view, colFilter]);
 
-  const distinctValues = (key: string): string[] => {
-    const set = new Set<string>();
-    for (const i of items) {
-      const v = getColValue(i, key);
-      if (Array.isArray(v)) v.forEach((x) => x && set.add(x));
-      else if (v) set.add(String(v));
-    }
-    return Array.from(set).sort();
-  };
+  const distinctValues = (key: string): string[] => collectDistinct(items, (i) => getColValue(i, key));
 
   useEffect(() => {
     try {
@@ -738,23 +709,9 @@ export default function Experiences() {
   }, [visibleCols]);
 
   const isVisible = (k: ColumnKey) => visibleCols.has(k);
-  const toggleCol = (k: ColumnKey) =>
-    setVisibleCols((p) => {
-      const n = new Set(p);
-      if (n.has(k)) n.delete(k); else n.add(k);
-      return n;
-    });
-  const toggleSelect = (id: string) =>
-    setSelected((p) => {
-      const n = new Set(p);
-      if (n.has(id)) n.delete(id); else n.add(id);
-      return n;
-    });
-  const allFilteredSelected = filtered.length > 0 && filtered.every((i) => selected.has(i.id));
-  const toggleSelectAll = () => {
-    if (allFilteredSelected) setSelected(new Set());
-    else setSelected(new Set(filtered.map((i) => i.id)));
-  };
+  const toggleCol = (k: ColumnKey) => setVisibleCols((p) => toggleInSet(p, k));
+  const toggleSelect = (id: string) => setSelected((p) => toggleInSet(p, id));
+  const { allSelected: allFilteredSelected, toggleSelectAll } = makeSelectAll(filtered, selected, setSelected);
   const togglePin = (id: string) => setItems((p) => p.map((i) => (i.id === id ? { ...i, pinned: !i.pinned } : i)));
   const updateItem = (id: string, patch: Partial<Item>) =>
     setItems((p) => p.map((i) => (i.id === id ? { ...i, ...patch } : i)));
@@ -855,7 +812,7 @@ export default function Experiences() {
     return ["전체", ...ordered, ...extras];
   }, [items]);
 
-  const [colSort, setColSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
+  const [colSort, setColSort] = useState<ColSortState>(null);
   const [sortMode, setSortMode] = useState<"custom" | null>(() => {
     try {
       return localStorage.getItem(LS_SORT_MODE) === "custom" ? "custom" : null;
@@ -948,7 +905,7 @@ export default function Experiences() {
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">경험·스펙 DB</h1>
+                <PageTitle>경험·스펙 DB</PageTitle>
                 <p className="text-sm text-muted-foreground mt-1.5">
                   경험과 스펙을 한 곳에서 정리하고, 자소서·면접에 바로 꺼내 쓰세요.
                 </p>
@@ -1537,50 +1494,25 @@ export default function Experiences() {
           defaultScope={exportDefaultScope}
         />
 
-        <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-          <DialogContent className="max-w-[380px]">
-            <DialogHeader>
-              <DialogTitle className="text-base">휴지통으로 옮길까요?</DialogTitle>
-              <DialogDescription className="text-sm">
-                {pendingDeleteIds.length === 1
-                  ? "이 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."
-                  : `${pendingDeleteIds.length}개의 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDeleteConfirmOpen(false)}>
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  deleteItems(pendingDeleteIds);
-                  if (detailId && pendingDeleteIds.includes(detailId)) setDetailId(null);
-                  setSelected(new Set());
-                  setDeleteConfirmOpen(false);
-                }}
-              >
-                삭제
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ConfirmDialog
+          open={deleteConfirmOpen}
+          onOpenChange={setDeleteConfirmOpen}
+          title="휴지통으로 옮길까요?"
+          description={
+            pendingDeleteIds.length === 1
+              ? "이 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요."
+              : `${pendingDeleteIds.length}개의 경험을 휴지통으로 옮겨요. 14일 안에 복원할 수 있어요.`
+          }
+          onConfirm={() => {
+            deleteItems(pendingDeleteIds);
+            if (detailId && pendingDeleteIds.includes(detailId)) setDetailId(null);
+            setSelected(new Set());
+            setDeleteConfirmOpen(false);
+          }}
+        />
 
       </div>
     </TooltipProvider>
   );
 }
 
-import { RepExperienceGrid } from './components/RepExperienceViews';
-
-import { DetailEditor } from './components/DetailEditor';
-
-import { ManageIndicator } from './components/tableWidgets';
-import { HeaderCell } from "@/components/table/HeaderCell";
-import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
-import { type ColumnFilterProps, type ColFilterShape } from "@/components/table/HeaderFilter";
-import { useTableDividers } from "@/components/table/useTableDividers";
-import { StarToggle } from "@/components/table/StarToggle";
-import { ExpRowContextMenu, ExpRowActionCell } from "@/components/table/RowContextMenu";

@@ -21,6 +21,7 @@ import { tab2Api, type InterviewMode as Mode, type InterviewTurn, type Interview
 import type { ChipOption } from "./entryOptions";
 import { BLANK } from "./writingAids";
 import { type Competency, NCS_LABEL, uid } from "./model";
+import { TypingDots } from "./TypingDots";
 
 const MAX_TURNS = 3;
 
@@ -207,9 +208,7 @@ export function InterviewMode({
           {(thinking || finishing) && (
             <div className="max-w-[85%]">
               <div className="border border-border bg-card rounded-lg px-4 py-3 inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" />
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:150ms]" />
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:300ms]" />
+                <TypingDots />
                 {finishing && <span className="ml-2 text-chip text-muted-foreground">이야기를 정리하고 있어요</span>}
               </div>
               {slow && !finishing && (
@@ -406,4 +405,3 @@ export function InterviewMode({
 }
 
 /* 사용하지 않는 스타일 경고 방지용 (tailwind purge 힌트) */
-export const __interviewClasses = cn("hidden");

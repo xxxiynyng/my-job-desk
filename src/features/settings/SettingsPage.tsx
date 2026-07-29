@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TrashPanel } from "@/features/settings/components/TrashPanel";
 import { trashCount } from "@/lib/trash";
 import { lsGet, lsSet } from "@/lib/storage";
+import { PageTitle } from "@/components/PageTitle";
 
 const LS_JOB_PREFS = "specs.settings.jobPrefs.v1";
 
@@ -57,7 +58,7 @@ export default function Settings() {
           <div className="px-10 py-8 max-w-[720px] mx-auto">
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-7">
-              <h1 className="text-heading font-bold text-foreground tracking-[-0.04em] leading-tight">설정</h1>
+              <PageTitle>설정</PageTitle>
               {editMode ? (
                 <div className="flex items-center gap-1.5">
                   <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={cancel}>

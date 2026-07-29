@@ -37,6 +37,7 @@ import {
 } from "../model/presets";
 import { type SentenceCard, FieldRow, FieldAdder, AnnotatedView, SentenceCardView } from './fieldWidgets';
 import { StorySection } from '../story/StorySection';
+import { CopyGenerator } from './CopyGenerator';
 
 // ────────────────────────────────────────────────────────────────
 // DetailEditor
@@ -522,4 +523,3 @@ export function DetailEditor({
   );
 }
 
-import { CopyGenerator } from './CopyGenerator';

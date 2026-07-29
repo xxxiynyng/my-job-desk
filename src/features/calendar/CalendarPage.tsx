@@ -3,12 +3,8 @@ import { PickdSidebar } from "@/components/layout/PickdSidebar";
 import { MonthlyCalendar } from "@/features/calendar/components/MonthlyCalendar";
 import { ContextPanel } from "@/features/calendar/components/ContextPanel";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import {
-  mockCalTasks, mockCalCarriedOverTasks, mockCalEvents,
-  mockCalApplications, mockCalSchedules,
-  registeredCalApplications, registeredCalSchedules,
-  CalTask, PostingFilterValue, CalApplication, ApplicationStatus, CalSchedule,
-} from "@/data/calendarData";
+import { mockCalTasks, mockCalCarriedOverTasks, mockCalEvents, mockCalApplications, mockCalSchedules, registeredCalApplications, registeredCalSchedules, CalTask, PostingFilterValue, CalApplication, CalSchedule } from "@/data/calendarData";
+import type { JobStage } from "@/data/jobStatus";
 import { REGISTRATIONS_EVENT } from "@/data/jobStore";
 import { toast } from "sonner";
 
@@ -101,7 +97,7 @@ export default function Calendar() {
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, starred: !a.starred } : a)));
   }, []);
 
-  const handleUpdateStatus = useCallback((id: string, status: ApplicationStatus) => {
+  const handleUpdateStatus = useCallback((id: string, status: JobStage) => {
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status, stage: status } : a)));
     toast.success("지원 상태를 바꿨어요");
   }, []);

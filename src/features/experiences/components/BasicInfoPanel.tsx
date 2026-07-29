@@ -10,11 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toggleInSet } from "@/lib/setUtils";
 import {
   INFO_FIELDS, INFO_DEFAULTS, DEFAULT_VISIBLE, LS_INFO_VALUES, LS_INFO_VISIBLE,
   INFO_VALUES_EVENT, type InfoKey,
 } from "@/features/experiences/model/basicInfoFields";
 import { lsGet, lsSet } from "@/lib/storage";
+import { LS_FILES, LS_PHOTO_ID, LS_PHOTO_SHOWN, type FileItem } from "../model/files";
 
 // ── Types & constants ──────────────────────────────────────────
 // InfoKey / INFO_FIELDS / INFO_DEFAULTS / LS_INFO_VALUES 는 SSOT(@/features/experiences/model/basicInfoFields)로 이관.
@@ -41,11 +43,6 @@ const GROUP_ICON: Record<string, LucideIcon> = {
 // 프로필 헤더에 대표로 노출하는 필드 — 섹션 카드에서는 제외(중복 방지)
 const HEADER_KEYS: InfoKey[] = ["name", "hanjaName", "engName"];
 
-type FileItem = { id: string; kind: string; name: string; fileKind: "pdf" | "image"; url?: string };
-
-const LS_PHOTO_SHOWN  = "specs.basicPhoto.shown";
-const LS_PHOTO_ID     = "specs.basicPhoto.id";
-const LS_FILES        = "specs.files.v2";
 const LS_LANG_EXAMS   = "specs.info.langExams.v1";
 
 
@@ -148,12 +145,7 @@ export function BasicInfoPanel() {
     toast(`${title} ${lines.length}개 항목을 복사했어요`, { duration: 1400 });
   };
 
-  const toggleMask = (k: InfoKey) =>
-    setMasked((prev) => {
-      const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
-      return next;
-    });
+  const toggleMask = (k: InfoKey) => setMasked((prev) => toggleInSet(prev, k));
 
   const enterEdit = () => {
     setDraft({ ...infoValues });

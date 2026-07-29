@@ -45,6 +45,14 @@ const TONE_BY_LABEL: Record<string, Tone> = Object.fromEntries(
   Object.values(STATUS_MAP).map((s) => [s.label, s.tone]),
 );
 
+/** 전형 단계 배지 키(세부 결과 3종 제외) */
+export type StageBadgeKey = "draft" | "applied" | "document" | "test" | "interview" | "finished";
+
+/** 상태 라벨 → STATUS_MAP 키 역인덱스. 소비처가 라벨→키 표를 따로 들지 않게 한다. */
+export const KEY_BY_LABEL = Object.fromEntries(
+  Object.entries(STATUS_MAP).map(([k, v]) => [v.label, k]),
+) as Record<string, StatusKey>;
+
 /** 상태 라벨에 대응하는 §5-3-1 tone 인라인 스타일(칸반 헤더·캘린더 배지 공용).
  *  backgroundColor·color와 함께 borderColor(=dot 색, 점·border-left 재사용)를 돌려준다.
  *  색 정의는 STATUS_MAP+TONES 한 곳뿐 — 손으로 칠하지 말 것(§0-11 raw 금지). */
