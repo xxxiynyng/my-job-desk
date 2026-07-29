@@ -36,6 +36,7 @@ import {
   ALL_TYPES,
 } from "../model/presets";
 import { type SentenceCard, FieldRow, FieldAdder, AnnotatedView, SentenceCardView } from './fieldWidgets';
+import { StorySection } from '../story/StorySection';
 
 // ────────────────────────────────────────────────────────────────
 // DetailEditor
@@ -51,6 +52,7 @@ export function DetailEditor({
   onDelete,
   mergeOpen,
   setMergeOpen,
+  onRequestInterview,
 }: {
   item: Item;
   allItems: Item[];
@@ -60,6 +62,7 @@ export function DetailEditor({
   onDelete: () => void;
   mergeOpen: boolean;
   setMergeOpen: (b: boolean) => void;
+  onRequestInterview?: () => void;
 }) {
   const [saveState, setSaveState] = useState<"저장됨" | "작성중">("저장됨");
   const [copyOpen, setCopyOpen] = useState(false);
@@ -141,6 +144,12 @@ export function DetailEditor({
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-[1140px] w-[95vw] h-[96vh] max-h-[96vh] p-0 gap-0 overflow-hidden [&>button]:hidden flex flex-col">
+        {/* 이 모달은 헤더를 직접 그리므로 접근성 이름·설명을 스크린리더 전용으로 제공한다
+            (없으면 Radix가 aria-describedby 누락 경고를 낸다) */}
+        <DialogTitle className="sr-only">경험 상세</DialogTitle>
+        <DialogDescription className="sr-only">
+          경험의 기본 정보와 본문, 소재와 역량을 확인하고 수정할 수 있어요.
+        </DialogDescription>
         <div className="px-6 py-3.5 border-b border-border flex items-center justify-between gap-4 shrink-0">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 text-chip text-muted-foreground mb-1.5">
@@ -331,6 +340,15 @@ export function DetailEditor({
                   </p>
                 )}
               </section>
+
+              {/* ── 탭2 v2: 소재(story) 섹션 ─────────────────────── */}
+              {isNarrative && (
+                <>
+                  <div className="h-px bg-border/60" />
+                  <StorySection item={item} onRequestInterview={onRequestInterview} />
+                </>
+              )}
+
               {item.linkedExperiences !== undefined && (
                 <>
                   <div className="h-px bg-border/60" />

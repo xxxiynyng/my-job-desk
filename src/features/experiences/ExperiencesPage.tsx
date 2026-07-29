@@ -59,6 +59,16 @@ import type { ExportFieldKey } from "@/features/experiences/model/exportExperien
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/features/experiences/components/BasicInfoPanel";
 import { FilesPanel } from "@/features/experiences/components/FilesPanel";
+// ── 탭2 소재·역량 레이어 (경험 → 역량) ────────────────────────
+// 상태·전이는 useStoryFlow가 소유한다. 이 페이지는 그리기만 한다.
+import { InterviewMode } from "./story/InterviewMode";
+import { ExtractReview } from "./story/ExtractReview";
+import { CompetencyStrip, CompetencyView } from "./story/CompetencyView";
+import { ImportSheet, ExtractJobBanner } from "./story/ImportFlow";
+import { CompetencyChip } from "./story/StoryBits";
+import { useStoryFlow } from "./story/useStoryFlow";
+import { softDeleteByActivity, useStories } from "./story/store";
+import { liveTags, DEMAND_SEED } from "./story/model";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -162,20 +172,25 @@ export { INITIAL_EXPERIENCES } from "./model/mockData";
 // localStorage helpers
 // ────────────────────────────────────────────────────────────────
 
-const LS_EXP_COLS = "pickd.experiences.visibleCols.v2";
+const LS_EXP_COLS = "pickd.experiences.visibleCols.v3";
 
 // ────────────────────────────────────────────────────────────────
 // 경험 DB 컬럼 설정
 // ────────────────────────────────────────────────────────────────
 
-type ColumnKey = "type" | "name" | "org" | "period" | "keywords" | "importance" | "updated" | "manage";
+type ColumnKey = "type" | "name" | "org" | "period" | "storyCount" | "competency" | "keywords" | "importance" | "updated" | "manage";
 
 const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] = [
   { key: "type", label: "유형", defaultVisible: true },
   { key: "name", label: "항목명", defaultVisible: true },
   { key: "org", label: "기관/소속", defaultVisible: true },
   { key: "period", label: "기간", defaultVisible: true },
-  { key: "keywords", label: "주요 키워드", defaultVisible: true },
+  // 소재·역량 — 탭2가 "정리 도구"가 아니라 "번역기"임이 목록에서 바로 보이게 하는 두 컬럼
+  { key: "storyCount", label: "소재", defaultVisible: true },
+  { key: "competency", label: "역량", defaultVisible: true },
+  // 주요 키워드(자유 어휘)는 역량(NCS 축)과 자리를 다투므로 기본 표시에서 내린다.
+  // 데이터는 보존하고 "표시할 컬럼"에서 다시 켤 수 있다.
+  { key: "keywords", label: "주요 키워드", defaultVisible: false },
   { key: "importance", label: "중요도", defaultVisible: false },
   { key: "updated", label: "최근 수정", defaultVisible: true },
   { key: "manage", label: "관리", defaultVisible: true },
@@ -183,7 +198,7 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
 
 // 컬럼 순서 드래그(탭1과 동일 패턴) — 유형·항목명은 정체성 컬럼이라 고정, 나머지만 이동 가능
 const EXP_FIXED_COLS: ColumnKey[] = ["type", "name"];
-const EXP_TAIL_COLS: ColumnKey[] = ["org", "period", "keywords", "importance", "updated", "manage"];
+const EXP_TAIL_COLS: ColumnKey[] = ["org", "period", "storyCount", "competency", "keywords", "importance", "updated", "manage"];
 const LS_EXP_COL_ORDER = "pickd.experiences.colOrder";
 const LS_EXP_COL_PINNED = "pickd.experiences.colPinned";
 const COL_LABEL: Record<ColumnKey, string> = Object.fromEntries(
@@ -195,6 +210,8 @@ const DEFAULT_EXP_WIDTHS: Record<string, number> = {
   name: 260,
   org: 160,
   period: 140,
+  storyCount: 70,
+  competency: 240,
   keywords: 220,
   importance: 90,
   updated: 110,
@@ -206,6 +223,8 @@ const MIN_EXP_WIDTHS: Record<string, number> = {
   name: 100,
   org: 72,
   period: 72,
+  storyCount: 56,
+  competency: 100,
   keywords: 80,
   importance: 56,
   updated: 64,
@@ -219,6 +238,8 @@ const MAX_EXP_WIDTHS: Record<string, number> = {
   name: 420,
   org: 280,
   period: 220,
+  storyCount: 120,
+  competency: 380,
   keywords: 340,
   importance: 160,
   updated: 170,
@@ -244,11 +265,6 @@ const normalizeItemTypes = (list: Item[]): Item[] =>
 // Main Page
 // ────────────────────────────────────────────────────────────────
 
-const EXTRACT_MOCK_CANDIDATES: { id: string; type: ItemType; name: string; summary: string }[] = [
-  { id: "ec1", type: "프로젝트", name: "캡스톤 디자인 프로젝트", summary: "2024.09 ~ 2025.01 · PM / 기획" },
-  { id: "ec2", type: "경력/인턴", name: "여름 마케팅 인턴십", summary: "2024.07 ~ 2024.08 · 마케팅팀" },
-  { id: "ec3", type: "대외활동", name: "청년 창업 서포터즈", summary: "2024.03 ~ 2024.06 · 기획 파트" },
-];
 
 function SortableExpRow({
   item,
@@ -280,6 +296,8 @@ function SortableExpRow({
   stickyProps: (key: string, header?: boolean) => { style?: React.CSSProperties; className?: string };
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  // 이 행의 소재 — 스토어 구독(단일 출처). 행마다 구독해도 스냅샷을 공유하므로 저렴하다
+  const rowStories = useStories().filter((st) => st.activityId === item.id);
   const {
     attributes,
     listeners,
@@ -374,6 +392,37 @@ function SortableExpRow({
                 <span className="block truncate">{period || "—"}</span>
               </td>
             );
+          case "storyCount": {
+            const n = rowStories.length;
+            return (
+              <td key="storyCount" className={cn("px-4 py-2.5 text-body text-gray-500 tabular-nums overflow-hidden", sp.className)} style={sp.style}>
+                {n > 0 ? n : "—"}
+              </td>
+            );
+          }
+          case "competency": {
+            const tags = rowStories.flatMap((s) => liveTags(s));
+            const seen = new Set<string>();
+            const uniq = tags.filter((t) => (seen.has(t.competency) ? false : (seen.add(t.competency), true)));
+            return (
+              <td key="competency" className={cn("px-4 py-2.5 overflow-hidden", sp.className)} style={sp.style}>
+                {uniq.length === 0 ? (
+                  <span className="text-body text-gray-500">—</span>
+                ) : (
+                  <div className="flex flex-nowrap gap-1 overflow-hidden">
+                    {uniq.slice(0, 2).map((t) => (
+                      <span key={t.competency} className="shrink-0">
+                        <CompetencyChip tag={t} compact />
+                      </span>
+                    ))}
+                    {uniq.length > 2 && (
+                      <span className="text-chip text-muted-foreground shrink-0 self-center">+{uniq.length - 2}</span>
+                    )}
+                  </div>
+                )}
+              </td>
+            );
+          }
           case "keywords":
             return (
               <td key="keywords" className={cn("px-4 py-2.5 overflow-hidden", sp.className)} style={sp.style}>
@@ -460,6 +509,17 @@ export default function Experiences() {
     } catch {}
   }, [items]);
 
+  /* ── 탭2 소재·역량 흐름 (useStoryFlow가 소유) ─────────────── */
+  const flow = useStoryFlow({
+    createActivity: (title, category) => {
+      const type = (ALL_TYPES as string[]).includes(category) ? (category as ItemType) : "대외활동";
+      const item = { ...makeFromPreset(type, title), status: "완료" as const };
+      setItems((p) => [item, ...p]);
+      return item.id;
+    },
+  });
+  const stories = flow.stories;
+
   const [view, setView] = useState<"list" | "card" | "paste">("list");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [search, setSearch] = useState("");
@@ -485,7 +545,7 @@ export default function Experiences() {
     return new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key));
   });
   const { widths: colW, onMouseDown: onResize, resizingKey } = useResizableCols(
-    "pickd.experiences.colWidths.v2",
+    "pickd.experiences.colWidths.v3",
     DEFAULT_EXP_WIDTHS,
     MIN_EXP_WIDTHS,
     MAX_EXP_WIDTHS,
@@ -579,7 +639,7 @@ export default function Experiences() {
   const resetCols = () => {
     setVisibleCols(new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key)));
     try {
-      localStorage.removeItem("pickd.experiences.colWidths.v2");
+      localStorage.removeItem("pickd.experiences.colWidths.v3");
       localStorage.removeItem(LS_EXP_COLS);
     } catch {}
     window.location.reload();
@@ -587,9 +647,6 @@ export default function Experiences() {
 
   const [entryOpen, setEntryOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
-  const [extractLoading, setExtractLoading] = useState(false);
-  const [extractDoneOpen, setExtractDoneOpen] = useState(false);
   const [checkedCandidates, setCheckedCandidates] = useState<Set<string>>(
     new Set(["ec1", "ec2", "ec3"]),
   );
@@ -620,6 +677,10 @@ export default function Experiences() {
         return org;
       case "period":
         return period;
+      case "storyCount":
+        return String(stories.filter((s) => s.activityId === i.id).length);
+      case "competency":
+        return stories.filter((s) => s.activityId === i.id).flatMap((s) => liveTags(s).map((t) => t.competency));
       case "keywords":
         return i.keywords;
       case "updated":
@@ -729,7 +790,15 @@ export default function Experiences() {
     setExportDefaultScope(defaultScope);
     setExportOpen(true);
   };
+  /** 진입 모달의 선택지 — 무엇을 고르든 모달을 먼저 닫는다 (오버레이 잔류 방지) */
+  const chooseEntry = (fn: () => void) => () => {
+    setEntryOpen(false);
+    fn();
+  };
+
   const deleteItems = (ids: string[]) => {
+    // 활동이 지워지면 그 아래 소재도 함께 (기획서 4.5 삭제 범위)
+    softDeleteByActivity(ids);
     const removed = items.filter((i) => ids.includes(i.id));
     setItems((p) => p.filter((i) => !ids.includes(i.id)));
     setSelected(new Set());
@@ -886,7 +955,7 @@ export default function Experiences() {
               </div>
               {activeTab === "db" && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => setImportOpen(true)}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => flow.setImportOpen(true)}>
                     <Sparkles className="w-3 h-3" /> 자소서에서 추출
                   </Button>
                   <Button size="sm" variant="outline" className="h-7 text-xs px-3 rounded-md" onClick={() => openExport("all")}>
@@ -906,8 +975,38 @@ export default function Experiences() {
 
               <TabsContent value="db" className="space-y-5 mt-4 focus-visible:outline-none">
 
+            {/* ── 탭2 v2: 역량 뷰 ───────────────────────────────────── */}
+            {flow.dbView === "competency" && (
+              <CompetencyView
+                stories={stories}
+                hasPostings={flow.hasPostings}
+                onBack={() => flow.setDbView("list")}
+                onMakeStory={(c) => flow.openInterview("gap", c)}
+                onFindPostings={() => flow.setHasPostings(true)}
+              />
+            )}
+
+            {/* ── 탭2 v2: 역량 요약 스트립 ──────────────────────────── */}
+            {flow.dbView === "list" && flow.job && (
+              <ExtractJobBanner
+                job={flow.job}
+                onOpenResult={() => flow.setDbView("list")}
+                onRetry={flow.retryExtraction}
+                onDismiss={flow.dismissJob}
+              />
+            )}
+
+            {flow.dbView === "list" && (
+              <CompetencyStrip
+                stories={stories}
+                hasPostings={flow.hasPostings}
+                onOpen={() => flow.setDbView("competency")}
+                onFindPostings={() => flow.setDbView("competency")}
+              />
+            )}
+
             {/* ── 경험·스펙 목록 ─────────────────────────────────────── */}
-            <section>
+            <section className={cn(flow.dbView === "competency" && "hidden")}>
               {/* Toolbar */}
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <Button className="bg-action hover:bg-action-hover text-white rounded-lg px-4 py-2 text-sm font-medium gap-1.5" onClick={() => setEntryOpen(true)}>
@@ -1330,16 +1429,32 @@ export default function Experiences() {
           <DialogContent className="max-w-[480px]">
             <DialogHeader>
               <DialogTitle className="text-base">경험 추가</DialogTitle>
-              <DialogDescription className="text-sm">시작 방식을 선택하세요.</DialogDescription>
+              <DialogDescription className="text-sm">
+                질문에 답하는 게 가장 빨라요. 3개만 물어볼게요.
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-2 grid grid-cols-1 gap-2">
+              {/* v2: 인터뷰가 기본 경로 (기획서 1.4 · 결정 #2) */}
               <button
-                onClick={() => {
+                onClick={chooseEntry(() => flow.openInterview("cold_start"))}
+                className="text-left border border-blue-100 bg-blue-50/60 rounded-lg px-4 py-3.5 hover:bg-blue-50 transition-colors flex items-start gap-3"
+              >
+                <div className="mt-0.5 w-8 h-8 rounded-md bg-card border border-blue-100 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">질문에 답하며 만들기</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    처음엔 고르기만 하면 돼요. 3분이면 소재 하나가 만들어져요.
+                  </p>
+                </div>
+              </button>
+              <button
+                onClick={chooseEntry(() => {
                   const ni = makeFromPreset("프로젝트", "새 경험");
                   setItems((p) => [ni, ...p]);
-                  setEntryOpen(false);
                   setDetailId(ni.id);
-                }}
+                })}
                 className="text-left border border-border rounded-lg px-4 py-3.5 hover:bg-muted/40 transition-colors flex items-start gap-3"
               >
                 <div className="mt-0.5 w-8 h-8 rounded-md bg-accent/50 flex items-center justify-center shrink-0">
@@ -1351,10 +1466,7 @@ export default function Experiences() {
                 </div>
               </button>
               <button
-                onClick={() => {
-                  setEntryOpen(false);
-                  setImportOpen(true);
-                }}
+                onClick={chooseEntry(() => flow.setImportOpen(true))}
                 className="text-left border border-border rounded-lg px-4 py-3.5 hover:bg-muted/40 transition-colors flex items-start gap-3"
               >
                 <div className="mt-0.5 w-8 h-8 rounded-md bg-accent/50 flex items-center justify-center shrink-0">
@@ -1369,6 +1481,35 @@ export default function Experiences() {
           </DialogContent>
         </Dialog>
 
+        {/* ── 탭2 v2: 인터뷰 · 확인 화면 ─────────────────────────── */}
+        <InterviewMode
+          open={flow.interview.open}
+          mode={flow.interview.mode}
+          targetCompetency={flow.interview.target}
+          demandNote={
+            flow.interview.target
+              ? `담은 공고 ${DEMAND_SEED.postingCount}곳 중 ${DEMAND_SEED.byCompetency[flow.interview.target] ?? 1}곳이 이 역량을 물어요.`
+              : undefined
+          }
+          onClose={flow.closeInterview}
+          onComplete={flow.handleInterviewComplete}
+        />
+
+        <ExtractReview
+          open={flow.review.open}
+          groups={flow.review.groups}
+          sourceText={flow.review.sourceText}
+          onClose={flow.closeReview}
+          onSave={flow.saveReview}
+        />
+
+        <ImportSheet
+          open={flow.importOpen}
+          initialUnits={flow.lastUnits}
+          onClose={() => flow.setImportOpen(false)}
+          onStart={flow.startExtraction}
+        />
+
         {detail && (
           <DetailEditor
             item={detail}
@@ -1382,145 +1523,9 @@ export default function Experiences() {
             onDelete={() => confirmDelete([detail.id])}
             mergeOpen={mergeOpen}
             setMergeOpen={setMergeOpen}
+            onRequestInterview={() => flow.openInterview("cold_start")}
           />
         )}
-
-        <Dialog open={importOpen} onOpenChange={setImportOpen}>
-          <DialogContent className="max-w-[560px] p-0 overflow-hidden">
-            <DialogHeader className="px-6 py-4 border-b border-border">
-              <DialogTitle className="text-base">자소서 파일 불러오기</DialogTitle>
-              <DialogDescription className="text-sm">파일이나 텍스트를 붙여 넣으면 경험을 추출해요.</DialogDescription>
-            </DialogHeader>
-            <div className="px-6 py-5">
-              <Tabs defaultValue="file">
-                <TabsList className="grid grid-cols-2 w-full h-9">
-                  <TabsTrigger value="file" className="text-xs">
-                    파일 업로드
-                  </TabsTrigger>
-                  <TabsTrigger value="text" className="text-xs">
-                    텍스트 붙여넣기
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="file" className="mt-4">
-                  <label className="block border border-dashed border-border rounded-lg px-6 py-8 text-center cursor-pointer hover:bg-muted/30">
-                    <Upload className="w-5 h-5 mx-auto text-muted-foreground" />
-                    <p className="text-sm text-foreground mt-2">파일을 끌어다 놓거나 클릭하여 업로드</p>
-                    <p className="text-chip text-muted-foreground mt-1">PDF, DOCX, TXT</p>
-                    <input type="file" className="hidden" accept=".pdf,.docx,.txt" />
-                  </label>
-                </TabsContent>
-                <TabsContent value="text" className="mt-4 space-y-3">
-                  <Input className="h-9 text-sm" placeholder="자소서 문항 (선택)" />
-                  <Textarea className="min-h-[160px] text-sm" placeholder="자소서 답변을 붙여넣어 주세요." />
-                </TabsContent>
-              </Tabs>
-            </div>
-            <div className="px-6 py-3 border-t border-border flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setImportOpen(false)}>
-                취소
-              </Button>
-              <Button
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  setImportOpen(false);
-                  setExtractLoading(true);
-                  setTimeout(() => {
-                    setExtractLoading(false);
-                    setExtractDoneOpen(true);
-                  }, 1200);
-                }}
-              >
-                업로드하고 추출하기
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={extractLoading} onOpenChange={setExtractLoading}>
-          <DialogContent className="max-w-[380px]">
-            <DialogHeader>
-              <DialogTitle className="text-base">자소서에서 경험을 정리 중이에요</DialogTitle>
-              <DialogDescription className="text-sm">잠시만 기다려 주세요.</DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center py-4">
-              <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" />
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:150ms]" />
-                <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse [animation-delay:300ms]" />
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={extractDoneOpen} onOpenChange={setExtractDoneOpen}>
-          <DialogContent className="max-w-[480px]">
-            <DialogHeader>
-              <DialogTitle className="text-base">추출된 경험 후보</DialogTitle>
-              <DialogDescription className="text-sm">
-                자소서에서 {EXTRACT_MOCK_CANDIDATES.length}개의 경험을 찾았어요. 저장할 항목을 선택하세요.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 my-2">
-              {EXTRACT_MOCK_CANDIDATES.map((c) => (
-                <label
-                  key={c.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/30 cursor-pointer transition-colors"
-                >
-                  <Checkbox
-                    checked={checkedCandidates.has(c.id)}
-                    onCheckedChange={(v) =>
-                      setCheckedCandidates((prev) => {
-                        const next = new Set(prev);
-                        if (v) next.add(c.id); else next.delete(c.id);
-                        return next;
-                      })
-                    }
-                    aria-label={c.name}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-chip text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
-                        {c.type}
-                      </span>
-                      <span className="text-sm font-medium truncate">{c.name}</span>
-                    </div>
-                    <p className="text-chip text-muted-foreground mt-0.5">{c.summary}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-chip text-muted-foreground">{checkedCandidates.size}개 선택됨</span>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setExtractDoneOpen(false)}
-                >
-                  나중에
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-8 text-xs"
-                  disabled={checkedCandidates.size === 0}
-                  onClick={() => {
-                    const newItems = EXTRACT_MOCK_CANDIDATES.filter((c) =>
-                      checkedCandidates.has(c.id),
-                    ).map((c) => makeFromPreset(c.type, c.name));
-                    setItems((p) => [...newItems, ...p]);
-                    setExtractDoneOpen(false);
-                    setCheckedCandidates(new Set(EXTRACT_MOCK_CANDIDATES.map((c) => c.id)));
-                    toast.success(`${newItems.length}개 경험을 추가했어요`);
-                  }}
-                >
-                  선택 저장하기
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         <ExportModal
           open={exportOpen}
