@@ -10,7 +10,7 @@ import {
   searchPostings,
   calcPostingDday,
   type Posting,
-  type NcsCategory8,
+  type JobCategory,
 } from "@/data/postings.seed";
 import { formatApplyEnd, isRegistered } from "@/data/jobStore";
 
@@ -29,17 +29,46 @@ function pushRecent(q: string) {
 function clearRecent() { localStorage.removeItem(RECENT_KEY); }
 
 // ── 필터 정의 (탭1 기획 4축 중 드롭다운용 3축 — 기관유형은 탐색 화면에서) ──
-const JOB_FILTERS: NcsCategory8[] = ["사무·행정", "전산·IT", "전기·전자", "기계·설비", "건설·안전", "보건·의료", "연구", "현장·기타"];
-const REGION_FILTERS = ["부산", "울산", "경남", "경북"] as const;
+// 직무: 공공기관 실제 직렬 18종을 4그룹으로. 지역: 전국 17개 시도 + 해외.
+const JOB_GROUPS: { sub: string; values: JobCategory[] }[] = [
+  { sub: "관리·사무", values: ["사무·행정", "경영·기획", "회계·재무", "인사·법무", "홍보·대외"] },
+  { sub: "기술",     values: ["전산·IT", "전기·통신", "기계·설비", "토목·건축", "화공·환경"] },
+  { sub: "전문",     values: ["안전관리", "검사·품질", "보건·의료", "연구·조사", "교육·상담"] },
+  { sub: "현장",     values: ["운전·운송", "시설·미화", "기타"] },
+];
+
+/** 지역 칩 — label은 표시용, match는 공고 regions 값과 대조할 별칭 */
+type RegionChip = { label: string; match: string[] };
+const REGION_GROUPS: { sub: string; values: RegionChip[] }[] = [
+  { sub: "동남권", values: [
+    { label: "부산", match: ["부산"] }, { label: "울산", match: ["울산"] },
+    { label: "경남", match: ["경남"] }, { label: "경북", match: ["경북"] },
+  ]},
+  { sub: "그 외", values: [
+    { label: "서울", match: ["서울"] }, { label: "인천", match: ["인천"] },
+    { label: "경기", match: ["경기"] }, { label: "강원", match: ["강원"] },
+    { label: "대전", match: ["대전"] }, { label: "세종", match: ["세종"] },
+    { label: "충북", match: ["충북"] }, { label: "충남", match: ["충남"] },
+    { label: "대구", match: ["대구"] },
+    { label: "전북", match: ["전북"] }, { label: "전남·광주", match: ["전남", "광주"] },
+    { label: "제주", match: ["제주"] }, { label: "해외", match: ["해외"] },
+  ]},
+];
+const REGION_MATCH: Record<string, string[]> = Object.fromEntries(
+  REGION_GROUPS.flatMap((g) => g.values).map((r) => [r.label, r.match]),
+);
 const TYPE_FILTERS = ["신입", "인턴", "경력"] as const;
 
-type Filters = { job: NcsCategory8 | null; region: string | null; type: string | null };
+type Filters = { job: JobCategory | null; region: string | null; type: string | null };
 const EMPTY_FILTERS: Filters = { job: null, region: null, type: null };
 
 function matchPosting(p: Posting, f: Filters): boolean {
-  if (f.region && !p.regions.some((r) => r.includes(f.region!))) return false;
+  if (f.region) {
+    const aliases = REGION_MATCH[f.region] ?? [f.region];
+    if (!p.regions.some((r) => aliases.some((a) => r.includes(a)))) return false;
+  }
   const positions = p.positions.filter((pos) => {
-    if (f.job && pos.ncsCategory !== f.job) return false;
+    if (f.job && pos.jobCategory !== f.job) return false;
     if (f.type === "인턴") return pos.employmentType.includes("인턴");
     if (f.type === "신입") return pos.recruitType.includes("신입") && !pos.employmentType.includes("인턴");
     if (f.type === "경력") return pos.recruitType.includes("경력");
@@ -207,21 +236,21 @@ export function QuickJobRegistration() {
                 {/* 좌: 필터로 찾기 */}
                 <div className="flex-1 min-w-0 p-4 border-r border-border">
                   <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide mb-2">필터로 찾기</p>
-                  <FilterGroup
+                  <FilterSection
                     label="직무"
-                    values={JOB_FILTERS}
+                    groups={JOB_GROUPS.map((g) => ({ sub: g.sub, values: [...g.values] }))}
                     current={filters.job}
-                    onPick={(v) => setFilters((f) => ({ ...f, job: f.job === v ? null : (v as NcsCategory8) }))}
+                    onPick={(v) => setFilters((f) => ({ ...f, job: f.job === v ? null : (v as JobCategory) }))}
                   />
-                  <FilterGroup
+                  <FilterSection
                     label="지역"
-                    values={[...REGION_FILTERS]}
+                    groups={REGION_GROUPS.map((g) => ({ sub: g.sub, values: g.values.map((r) => r.label) }))}
                     current={filters.region}
                     onPick={(v) => setFilters((f) => ({ ...f, region: f.region === v ? null : v }))}
                   />
-                  <FilterGroup
+                  <FilterSection
                     label="형태"
-                    values={[...TYPE_FILTERS]}
+                    groups={[{ sub: "", values: [...TYPE_FILTERS] }]}
                     current={filters.type}
                     onPick={(v) => setFilters((f) => ({ ...f, type: f.type === v ? null : v }))}
                   />
@@ -307,28 +336,42 @@ export function QuickJobRegistration() {
   );
 }
 
-function FilterGroup({
-  label, values, current, onPick,
-}: { label: string; values: string[]; current: string | null; onPick: (v: string) => void }) {
+function FilterSection({
+  label, groups, current, onPick,
+}: {
+  label: string;
+  groups: { sub: string; values: string[] }[];
+  current: string | null;
+  onPick: (v: string) => void;
+}) {
   return (
-    <div className="flex items-start gap-2 mb-1.5">
+    <div className="flex items-start gap-2 mb-2">
       <span className="text-chip text-muted-foreground w-8 shrink-0 pt-1">{label}</span>
-      <div className="flex flex-wrap gap-1">
-        {values.map((v) => (
-          <button
-            key={v}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onPick(v)}
-            className={cn(
-              "px-2 py-0.5 rounded-full border text-xs transition-colors",
-              current === v
-                ? "border-primary bg-accent text-primary font-medium"
-                : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
+      <div className="min-w-0 flex-1 space-y-1">
+        {groups.map((g) => (
+          <div key={g.sub} className="flex items-start gap-2">
+            {g.sub && (
+              <span className="text-mini text-muted-foreground/50 w-12 shrink-0 pt-1 text-right">{g.sub}</span>
             )}
-          >
-            {v}
-            {current === v && <X className="inline w-2.5 h-2.5 ml-0.5 -mt-px" />}
-          </button>
+            <div className="flex flex-wrap gap-1">
+              {g.values.map((v) => (
+                <button
+                  key={v}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onPick(v)}
+                  className={cn(
+                    "px-2 py-0.5 rounded-full border text-xs transition-colors",
+                    current === v
+                      ? "border-primary bg-accent text-primary font-medium"
+                      : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
+                  )}
+                >
+                  {v}
+                  {current === v && <X className="inline w-2.5 h-2.5 ml-0.5 -mt-px" />}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

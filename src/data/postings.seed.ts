@@ -21,10 +21,20 @@ export type NcsCompetency =
   | "의사소통" | "수리" | "문제해결" | "자기개발" | "자원관리"
   | "대인관계" | "정보" | "기술" | "조직이해" | "직업윤리";
 
-/** NCS 대분류 → Pickd 8개 축약 카테고리 (필터 축) */
-export type NcsCategory8 =
-  | "사무·행정" | "전산·IT" | "전기·전자" | "기계·설비"
-  | "건설·안전" | "보건·의료" | "연구" | "현장·기타";
+/**
+ * 공고 직무 분류 (필터 축) — 공공기관 실제 직렬 기준 18종.
+ * 그룹: 관리·사무 / 기술 / 전문 / 현장. 잡알리오 NCS 대분류를 취준생이 쓰는
+ * 직렬 어휘로 재매핑한 것이라 NCS 24 대분류와 1:1이 아니다.
+ */
+export type JobCategory =
+  // 관리·사무
+  | "사무·행정" | "경영·기획" | "회계·재무" | "인사·법무" | "홍보·대외"
+  // 기술
+  | "전산·IT" | "전기·통신" | "기계·설비" | "토목·건축" | "화공·환경"
+  // 전문
+  | "안전관리" | "검사·품질" | "보건·의료" | "연구·조사" | "교육·상담"
+  // 현장
+  | "운전·운송" | "시설·미화" | "기타";
 
 export type OrgCategory = "공기업" | "준정부기관" | "기타공공기관" | "지방공기업" | "지방출자출연" | "기타";
 export type ScreeningMethod = "적격심사" | "정량평가" | "정성평가" | "혼합";
@@ -51,7 +61,7 @@ export interface Position {
   recruitType: "신입" | "경력" | "신입+경력";
   headcount: number;
   workLocation: string[];
-  ncsCategory: NcsCategory8;
+  jobCategory: JobCategory;
   qualification: string;       // 응시자격 요약 (원문 축약)
   ageLimit?: string;
   screeningMethod: ScreeningMethod;      // v4 신규 — 서류전형 방식
@@ -143,7 +153,7 @@ export const POSTINGS: Posting[] = [
         duties: "청사·기숙사 기계설비(냉난방·공조·보일러) 작동점검, 유지보수, 자재 재고관리",
         competencies: ["기계설비(FCU·EHP·공조기) 운영·점검 능력", "냉난방 배관·펌프 유지보수 기술", "기계 관련 기능사 이상 자격 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 2, workLocation: ["가스안전교육원(충남 천안)", "수소제품시험평가센터(충북 음성)"],
-        ncsCategory: "기계·설비", qualification: "학력·연령 제한 없음(만 60세 미만), 교대·주간 근로형태 동의자",
+        jobCategory: "기계·설비", qualification: "학력·연령 제한 없음(만 60세 미만), 교대·주간 근로형태 동의자",
         screeningMethod: "혼합", writtenExam: false,
         conversionNote: "수습 3개월 → 근무성적 평정 60점 이상 시 공무직(무기계약직) 전환",
         essayWeightNote: "서류 100점 중 자소서(정성) 40점", salaryNote: "월 약 225~243만원(수습)",
@@ -153,7 +163,7 @@ export const POSTINGS: Posting[] = [
         duties: "청사 전기/통신설비 유지보수 및 안전관리 — 수변전·발전기·태양광 시스템 운영, UPS·누설전류 점검",
         competencies: ["수변전·발전설비 기술 지식", "전기설비 도면 해석·배선작업 기술", "전기 관련 기능사 이상 자격 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 2, workLocation: ["산업가스안전기술센터(충북 진천)", "가스안전교육원(충남 천안)"],
-        ncsCategory: "전기·전자", qualification: "학력·연령 제한 없음(만 60세 미만), 3교대 가능자",
+        jobCategory: "전기·통신", qualification: "학력·연령 제한 없음(만 60세 미만), 3교대 가능자",
         screeningMethod: "혼합", writtenExam: false,
         conversionNote: "수습 3개월 → 평정 60점 이상 시 무기계약 전환",
         essayWeightNote: "자소서(정성) 40점 + 자격 정량 60점", salaryNote: "월 약 243~310만원",
@@ -163,7 +173,7 @@ export const POSTINGS: Posting[] = [
         duties: "청사·교육원·생활관 전 구역 환경미화, 폐기물 처리·분리수거, 위험요소 사전진단",
         competencies: ["청소 장비·약품 운용 능력", "산업안전보건법에 따른 약품 관리 이해"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 4, workLocation: ["본사(충북 음성)", "가스안전교육원(충남 천안)"],
-        ncsCategory: "현장·기타", qualification: "학력 제한 없음, 만 65세 미만(고령자 친화 직종)",
+        jobCategory: "시설·미화", qualification: "학력 제한 없음, 만 65세 미만(고령자 친화 직종)",
         screeningMethod: "혼합", writtenExam: false,
         conversionNote: "수습 3개월 → 무기계약 전환", essayWeightNote: "자소서(정성) 80점 — 자소서 비중 최상",
         salaryNote: "월 약 225만원(수습)",
@@ -173,7 +183,7 @@ export const POSTINGS: Posting[] = [
         duties: "교육생 수송 버스 운행, 운행 전후 차량 점검, 운행일지 등 차량관리 행정",
         competencies: ["1종 대형면허·버스운전자격증", "안전운전·비상상황 대처 능력", "최근 5년 무사고 우대"], employmentType: "공무직(수습 3개월 후 무기계약 전환)",
         recruitType: "신입+경력", headcount: 1, workLocation: ["가스안전교육원(충남 천안)"],
-        ncsCategory: "현장·기타", qualification: "45인승 대형버스 운행 가능자(1종 대형면허)",
+        jobCategory: "운전·운송", qualification: "45인승 대형버스 운행 가능자(1종 대형면허)",
         screeningMethod: "혼합", writtenExam: false,
         conversionNote: "수습 3개월 → 무기계약 전환", essayWeightNote: "자소서+경력기술서(정성) 60점",
       },
@@ -182,7 +192,7 @@ export const POSTINGS: Posting[] = [
         duties: "LPG용기 사용가구 시설개선사업 현장 검수 지원, 수혜자 데이터 관리·전산 입력, 행정 사무보조",
         competencies: ["가스 법령(액화석유가스법·KGS Code) 기초 이해", "체크리스트 기반 현장 검수·기록 능력", "엑셀·한글 등 문서작성 활용 능력"], employmentType: "청년인턴(체험형·기간제 3개월)",
         recruitType: "신입", headcount: 7, workLocation: ["경기 수원·광주", "충남 천안", "경북 포항", "강원 강릉"],
-        ncsCategory: "건설·안전", qualification: "만 15~34세(입사예정일 기준), 공사 체험형 인턴 무경험자",
+        jobCategory: "안전관리", qualification: "만 15~34세(입사예정일 기준), 공사 체험형 인턴 무경험자",
         ageLimit: "만 15~34세", screeningMethod: "혼합", writtenExam: false,
         conversionNote: "2026.10.1~12.31 근무, 계약연장·정규 전환 없음", salaryNote: "월 약 198만원",
       },
@@ -246,37 +256,37 @@ export const POSTINGS: Posting[] = [
     reviewedAt: "2026-07-26",
     positions: [
       { id: "komsa-p1", jobGroup: "행정직", jobTitle: "일반행정", grade: "6급", employmentType: "정규직",
-        recruitType: "신입", headcount: 2, workLocation: ["본사(세종)"], ncsCategory: "사무·행정",
+        recruitType: "신입", headcount: 2, workLocation: ["본사(세종)"], jobCategory: "사무·행정",
         qualification: "제한 없음", screeningMethod: "정성평가",
         writtenExam: true, writtenExamNote: "NCS 직업공통능력 40% + 직무수행능력 60% (+인성검사 적/부)",
         conversionNote: "수습 후 정규 임용", salaryNote: "연봉 41,783~45,506천원" },
       { id: "komsa-p2", jobGroup: "행정직", jobTitle: "안전관리", grade: "6급", employmentType: "정규직",
-        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "건설·안전",
+        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], jobCategory: "안전관리",
         qualification: "제한 없음", screeningMethod: "정성평가",
         writtenExam: true, writtenExamNote: "NCS 40% + 직무수행 60%" },
       { id: "komsa-p3", jobGroup: "행정직", jobTitle: "전산", grade: "6급", employmentType: "정규직",
-        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "전산·IT",
+        recruitType: "신입", headcount: 1, workLocation: ["본사(세종)"], jobCategory: "전산·IT",
         qualification: "제한 없음", screeningMethod: "정성평가",
         writtenExam: true, writtenExamNote: "NCS 40% + 직무수행 60%" },
       { id: "komsa-p4", jobGroup: "검사직", jobTitle: "선체검사원", grade: "6급", employmentType: "정규직",
-        recruitType: "신입+경력", headcount: 7, workLocation: ["본사·지사"], ncsCategory: "기계·설비",
+        recruitType: "신입+경력", headcount: 7, workLocation: ["본사·지사"], jobCategory: "검사·품질",
         qualification: "해양계·수산계·조선 관련 학과 졸업 후 관련 분야 2년+ 경력, 또는 3급 항해사 이상+3년, 조선기술사 등 (택1)",
         screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70% — 자격 충족 시 전원 필기 응시" },
       { id: "komsa-p5", jobGroup: "검사직", jobTitle: "기관검사원", grade: "6급", employmentType: "정규직",
-        recruitType: "신입+경력", headcount: 5, workLocation: ["본사·지사"], ncsCategory: "기계·설비",
+        recruitType: "신입+경력", headcount: 5, workLocation: ["본사·지사"], jobCategory: "검사·품질",
         qualification: "기관·기계 관련 학과+경력 2년, 3급 기관사+3년, 기계기술사 등 (택1)",
         screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
       { id: "komsa-p6", jobGroup: "운항관리직", jobTitle: "운항관리자", grade: "6급", employmentType: "정규직",
-        recruitType: "신입+경력", headcount: 6, workLocation: ["본사·지사", "운항관리센터"], ncsCategory: "현장·기타",
+        recruitType: "신입+경력", headcount: 6, workLocation: ["본사·지사", "운항관리센터"], jobCategory: "운전·운송",
         qualification: "3급 이상 해기사(항해사·기관사·운항사) 취득 후 승선경력 3년 이상",
         screeningMethod: "적격심사", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%",
         conversionNote: "업무특성상 지역 순환근무(섬 근무 포함)·교대근무 가능" },
       { id: "komsa-p7", jobGroup: "연구조사직", jobTitle: "해사정책·연구", grade: "6급", employmentType: "정규직",
-        recruitType: "신입+경력", headcount: 3, workLocation: ["본사(세종)"], ncsCategory: "연구",
+        recruitType: "신입+경력", headcount: 3, workLocation: ["본사(세종)"], jobCategory: "연구·조사",
         qualification: "관련분야(해양·수산·조선·선박·교통·경영·정책) 석사 이상, 또는 학사+관련 경력 2년",
         screeningMethod: "정성평가", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
       { id: "komsa-p8", jobGroup: "연구조사직", jobTitle: "기상예보", grade: "6급", employmentType: "정규직",
-        recruitType: "신입+경력", headcount: 1, workLocation: ["본사(세종)"], ncsCategory: "연구",
+        recruitType: "신입+경력", headcount: 1, workLocation: ["본사(세종)"], jobCategory: "연구·조사",
         qualification: "기상 관련 석사+기상예보사 면허, 또는 학사+기상예보업무 2년+면허",
         screeningMethod: "정성평가", writtenExam: true, writtenExamNote: "NCS 30% + 직무수행 70%" },
     ],
@@ -338,7 +348,7 @@ export const POSTINGS: Posting[] = [
         recruitType: "경력",
         headcount: 3,
         workLocation: ["근로복지공단 울산병원(울산)"],
-        ncsCategory: "보건·의료",
+        jobCategory: "보건·의료",
         qualification:
           "2급: 약사 면허 취득 후 7년 이상 해당 업무 경력 / 3급: 약사 면허 취득 후 3년 이상 해당 업무 경력 (마감일 기준)",
         screeningMethod: "적격심사",
