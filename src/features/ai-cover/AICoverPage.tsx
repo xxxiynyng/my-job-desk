@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowLeftRight, ArrowRight, Check, ChevronDown, ChevronRight, Maximize2, RefreshCw,
+  ArrowLeft, ArrowLeftRight, ArrowRight, Check, ChevronDown, ChevronRight, Maximize2, Minimize2, MoreHorizontal, RefreshCw,
   Send, SpellCheck as SpellCheckIcon, Sparkles, X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { PickdSidebar } from "@/components/layout/PickdSidebar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DdayChip } from "@/components/ds/DdayChip";
 import { EssayStatus } from "@/components/ds/EssayStatus";
 import { TONES, type Tone } from "@/components/ds/StatusBadge";
@@ -160,7 +161,7 @@ function PanelSection({
           />
         </span>
       </button>
-      {open && <div className="px-5 pb-4">{children}</div>}
+      {open && <div className="px-5 pb-5">{children}</div>}
     </section>
   );
 }
@@ -588,14 +589,18 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
             <div className="mx-auto max-w-[820px] px-8 py-3 flex items-center justify-between gap-4">
-              <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
-                <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
-                <ChevronRight className="w-3 h-3 shrink-0" />
-                <button type="button" onClick={onBack} className="hover:text-foreground transition-colors shrink-0">
-                  AI 자소서
+              {/* 브레드크럼 3단 폐기 → ← + 기관명 하나만 (2026-07-29 확정) */}
+              <nav className="flex items-center gap-1.5 min-w-0">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  aria-label="AI 자소서 목록으로 돌아가기"
+                  title="목록으로"
+                  className="w-7 h-7 -ml-1.5 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+                >
+                  <ArrowLeft className="w-4 h-4" />
                 </button>
-                <ChevronRight className="w-3 h-3 shrink-0" />
-                <span className="text-foreground font-medium truncate">{job.org}</span>
+                <span className="text-sm font-semibold text-foreground truncate">{job.org}</span>
               </nav>
               <StepFlow currentIdx={stepIdx} />
             </div>
@@ -739,7 +744,7 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
             )}
           />
           {/* 창 선택 탭 + 좌우 교체 */}
-          <div className="px-3 py-2 border-b border-border flex items-center justify-between gap-2 shrink-0">
+          <div className="px-3 py-2.5 border-b border-border flex items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-0.5 min-w-0">
               {RIGHT_VIEWS.map((v) => (
                 <button
@@ -757,22 +762,37 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-chip text-muted-foreground tabular-nums">문항 {q.no}/{job.questions.length}</span>
-              <button
-                type="button"
-                onClick={() => setReversed((v) => !v)}
-                title="좌우 위치 바꾸기"
-                aria-label="좌우 위치 바꾸기"
-                className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            {/* ⇄ 아이콘 단독 → ⋯ 메뉴로 (기능이 라벨로 보이게, 2026-07-29 확정). '문항 N/M'은 페이저와 중복이라 제거 */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="창 옵션"
+                  title="창 옵션"
+                  className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 data-[state=open]:bg-muted data-[state=open]:text-foreground"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => setReversed((v) => !v)} className="gap-2 text-body">
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  좌우 위치 바꾸기
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPanelW(Math.floor(window.innerWidth * 0.5))} className="gap-2 text-body">
+                  <Maximize2 className="w-3.5 h-3.5 text-muted-foreground" />
+                  화면 반반으로
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPanelW(430)} className="gap-2 text-body">
+                  <Minimize2 className="w-3.5 h-3.5 text-muted-foreground" />
+                  기본 크기로
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {rightView === "helper" && (<>
-          <div className="flex-1 overflow-y-auto divide-y divide-border/60">
+          <div className="flex-1 overflow-y-auto divide-y divide-border/40">
             {/* 1. 문항 분석 */}
             <PanelSection n={1} title="문항 분석">
               <TruncText text={q.intent} className="text-sm text-foreground leading-relaxed" />
@@ -850,7 +870,7 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
               }
             >
               {selCount === 0 && <AddExperienceNotice />}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {EXPERIENCES.map((exp) => (
                   <ExpCard
                     key={exp.id}
@@ -903,7 +923,7 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1.5">자기소개서 문항 {job.questions.length}개</p>
-                <ol className="divide-y divide-border/60">
+                <ol className="divide-y divide-border/40">
                   {job.questions.map((qq, i) => (
                     <li key={qq.no}>
                       <button
