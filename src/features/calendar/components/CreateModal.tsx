@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface CreateScheduleModalProps {
 
 export function CreateScheduleModal({ open, onClose, onSave, applications, defaultDate, defaultPostingId }: CreateScheduleModalProps) {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(defaultDate || new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(defaultDate || toISODate(new Date()));
   const [time, setTime] = useState("");
   const [linkedPostingId, setLinkedPostingId] = useState(defaultPostingId || "none");
   const [notes, setNotes] = useState("");
@@ -72,7 +73,7 @@ interface CreateTaskModalProps {
 
 export function CreateTaskModal({ open, onClose, onSave, applications, defaultDate, defaultPostingId }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState(defaultDate || new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState(defaultDate || toISODate(new Date()));
   const [dueTime, setDueTime] = useState("");
   const [priority, setPriority] = useState("medium");
   const [linkedPostingId, setLinkedPostingId] = useState(defaultPostingId || "none");

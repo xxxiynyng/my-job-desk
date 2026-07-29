@@ -8,6 +8,7 @@
 //    두 건이 스키마의 양극단을 커버하므로 UI 전 케이스 테스트 픽스처로 사용 가능
 // ─────────────────────────────────────────────────────────────
 
+import { calcDday } from "@/lib/dday";
 // ── 타입 (탭1_기획개발 문서 2부·4부 스키마와 1:1) ──────────────
 
 export type StageType =
@@ -394,10 +395,9 @@ export function searchPostings(q: string) {
 export const getPostingBySlug = (slug: string) => POSTINGS.find(p => p.slug === slug);
 export const getPostingById = (id: string) => POSTINGS.find(p => p.id === id);
 
-/** 마감 D-day — 시각까지 고려. 기존 ds/calcDday 대체용 */
+/** 마감 D-day — lib/dday.calcDday 위임(2026-07-29 통합).
+ *  applyEnd는 시드 전 건이 풀 ISO(+09:00)라 두 구현의 계산 결과 동일(자정 절사 후 일수차).
+ *  차이는 빈 문자열 가드(calcDday는 0 반환)뿐 — 시드에 빈 값 없음. */
 export function calcPostingDday(applyEnd: string): number {
-  const end = new Date(applyEnd);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const endDay = new Date(end); endDay.setHours(0, 0, 0, 0);
-  return Math.round((endDay.getTime() - today.getTime()) / 86400000);
+  return calcDday(applyEnd);
 }

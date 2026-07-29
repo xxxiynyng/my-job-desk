@@ -20,7 +20,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toggleInSet } from "@/lib/setUtils";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ds/ConfirmDialog";
 import { pushTrash, removeTrash } from "@/lib/trash";
 import { lsGet, lsSet } from "@/lib/storage";
 import { FILE_KINDS, LS_FILES, LS_PHOTO_ID, LS_PHOTO_SHOWN, type FileItem, type FileKind } from "../model/files";

@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { useState, useMemo, useEffect, useRef, cloneElement } from "react";
 import type React from "react";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ import { cn } from "@/lib/utils";
 import { toggleInSet } from "@/lib/setUtils";
 import type { Job } from "../model/jobTypes";
 import { initialJobData } from "../model/jobsMock";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ds/ConfirmDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -850,7 +851,7 @@ export function JobPostingTable() {
   const exportJobs = (list: Job[]) => {
     if (!list.length) return;
     exportCsv(
-      `공고_${new Date().toISOString().slice(0, 10)}`,
+      `공고_${toISODate(new Date())}`,
       ["기업명", "공고명", "직무", "고용형태", "마감일", "현재 상태", "결과"],
       list.map((j) => [j.company, j.title, j.role, j.employType, j.deadline, j.status, j.finalResult ?? ""]),
     );
@@ -876,7 +877,7 @@ export function JobPostingTable() {
             ...j,
             status: toStatus,
             stage: toStatus,
-            completedAt: new Date().toISOString().split("T")[0],
+            completedAt: toISODate(new Date()),
           };
         }
         return { ...j, status: toStatus, stage: toStatus };
@@ -897,7 +898,7 @@ export function JobPostingTable() {
       p.map((j) => {
         if (j.id !== modalJobId) return j;
         if (result)
-          return { ...j, finalResult: result, status: "전형완료", stage: "전형완료", completedAt: new Date().toISOString().split("T")[0] };
+          return { ...j, finalResult: result, status: "전형완료", stage: "전형완료", completedAt: toISODate(new Date()) };
         return { ...j, finalResult: null };
       }),
     );

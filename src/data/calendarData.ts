@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { JOB_STAGES, type JobStage } from "./jobStatus";
 import { getRegistrations, getRegisteredPosition } from "./jobStore";
 import type { StageType } from "./postings.seed";
@@ -66,7 +67,7 @@ const today = new Date();
 const y = today.getFullYear();
 const m = today.getMonth();
 const d = today.getDate();
-const fmt = (date: Date) => date.toISOString().split("T")[0];
+const fmt = toISODate;
 
 export const mockCalTasks: CalTask[] = [
   { id: "t1", title: "삼성전자 자소서 최종 검토", completed: false, priority: "high", type: "자소서", linkedPosting: "삼성전자", linkedPostingId: "a1", deadline: fmt(new Date(y, m, d)), dueTime: "18:00" },
@@ -174,7 +175,7 @@ export function getDateRange(start: string, end: string): string[] {
   cur.setHours(0, 0, 0, 0);
   endDate.setHours(0, 0, 0, 0);
   while (cur <= endDate) {
-    dates.push(cur.toISOString().split("T")[0]);
+    dates.push(toISODate(cur));
     cur.setDate(cur.getDate() + 1);
   }
   return dates;

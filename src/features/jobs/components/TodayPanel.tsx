@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ChevronRight } from "lucide-react";
@@ -45,7 +46,7 @@ type ScheduleItem = { id: string; title: string; time: string; company?: string 
 
 // 오늘 날짜의 담은 공고 일정(파생) + 목데이터
 function buildScheduleItems(): ScheduleItem[] {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toISODate(new Date());
   const derived: ScheduleItem[] = registeredCalSchedules()
     .filter((sc) => sc.date === today)
     .map((sc) => ({ id: sc.id, title: `${sc.linkedPosting} ${sc.title}`, time: sc.time ?? "종일", company: sc.linkedPosting }));

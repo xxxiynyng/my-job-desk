@@ -58,7 +58,7 @@ import { ExportModal } from "@/features/experiences/components/ExportModal";
 import type { ExportFieldKey } from "@/features/experiences/model/exportExperiences";
 import { useSearchParams } from "react-router-dom";
 import { BasicInfoPanel } from "@/features/experiences/components/BasicInfoPanel";
-import { PageTitle } from "@/components/PageTitle";
+import { PageTitle } from "@/components/ds/PageTitle";
 import { FilesPanel } from "@/features/experiences/components/FilesPanel";
 // ── 탭2 소재·역량 레이어 (경험 → 역량) ────────────────────────
 // 상태·전이는 useStoryFlow가 소유한다. 이 페이지는 그리기만 한다.
@@ -83,7 +83,7 @@ import { ExpRowContextMenu, ExpRowActionCell } from "@/components/table/RowConte
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toggleInSet } from "@/lib/setUtils";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ConfirmDialog } from "@/components/ds/ConfirmDialog";
 import {
   type ItemType,
   type Item,

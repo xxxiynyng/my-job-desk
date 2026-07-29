@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,7 +30,7 @@ export function ListHeader({
   period, onPeriodChange,
   onAdd, className,
 }: ListHeaderProps) {
-  const isToday = selectedDate.toISOString().split("T")[0] === new Date().toISOString().split("T")[0];
+  const isToday = toISODate(selectedDate) === toISODate(new Date());
   const todayLabel = isToday ? "오늘" : formatShortKoreanDate(selectedDate);
   const monthLabel = `${currentMonth.getFullYear()}년 ${MONTHS_KO[currentMonth.getMonth()]}`;
 

@@ -30,7 +30,7 @@ import {
   REGISTRATIONS_EVENT,
 } from "@/data/jobStore";
 import { Users, MapPin, CheckCircle2 } from "lucide-react";
-import { PageTitle } from "@/components/PageTitle";
+import { PageTitle } from "@/components/ds/PageTitle";
 import { jobDetails } from "./model/jobDetailMock";
 
 // TODO: MOCK_DATA - 실제 API 연결 시 제거. API: GET /job-postings/:id

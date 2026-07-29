@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProgressRing } from "./ProgressRing";
@@ -37,8 +38,8 @@ export function ContextPanel({
   onToggleTask, onAddTask, onAddSchedule, progress,
   postingFilter, onToggleStar, onUpdateStatus,
 }: ContextPanelProps) {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const dateStr = selectedDate.toISOString().split("T")[0];
+  const todayStr = toISODate(new Date());
+  const dateStr = toISODate(selectedDate);
   const isToday = dateStr === todayStr;
 
   const [detailApp, setDetailApp] = useState<CalApplication | null>(null);

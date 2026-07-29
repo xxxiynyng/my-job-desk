@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TrashPanel } from "@/features/settings/components/TrashPanel";
 import { trashCount } from "@/lib/trash";
 import { lsGet, lsSet } from "@/lib/storage";
-import { PageTitle } from "@/components/PageTitle";
+import { PageTitle } from "@/components/ds/PageTitle";
 
 const LS_JOB_PREFS = "specs.settings.jobPrefs.v1";
 

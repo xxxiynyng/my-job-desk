@@ -6,6 +6,7 @@
 // localStorage: pickd.jobs.registrations.v1
 // ─────────────────────────────────────────────────────────────
 
+import { toISODate } from "@/lib/date";
 import {
   POSTINGS,
   getPostingById,
@@ -57,7 +58,7 @@ export function addRegistration(postingId: string, positionId: string): boolean 
   list.push({
     postingId,
     positionId,
-    registeredAt: new Date().toISOString().slice(0, 10),
+    registeredAt: toISODate(new Date()),
   });
   write(list);
   return true;

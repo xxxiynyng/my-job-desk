@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import { MoodRefresh } from "./MoodRefresh";
-import { PageTitle } from "@/components/PageTitle";
+import { PageTitle } from "@/components/ds/PageTitle";
 
 export function DashboardHeader() {
   const navigate = useNavigate();

@@ -1,3 +1,4 @@
+import { toISODate } from "@/lib/date";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,7 +110,7 @@ export function MonthlyCalendar({
     return { dates: new Set(getDateRange(app.recruitmentStart, app.recruitmentEnd)), color: app.brandColor || '#3B82F6' };
   }, [hoveredPostingId, selectedPostingId, applications]);
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = toISODate(new Date());
   const prevMonth = () => onMonthChange(new Date(year, month - 1, 1));
   const nextMonth = () => onMonthChange(new Date(year, month + 1, 1));
 
@@ -128,7 +129,7 @@ export function MonthlyCalendar({
   };
 
   const getPillPosition = (dateStr: string, dates: Set<string>, allDays: { date: Date; isCurrentMonth: boolean }[]) => {
-    const allDateStrs = allDays.map(d => d.date.toISOString().split("T")[0]);
+    const allDateStrs = allDays.map(d => toISODate(d.date));
     const idx = allDateStrs.indexOf(dateStr);
     if (idx < 0) return null;
     const col = idx % 7;
@@ -188,7 +189,7 @@ export function MonthlyCalendar({
       {/* Grid */}
       <div className={cn("grid grid-cols-7 flex-1", viewMode === "week" ? "grid-rows-1" : "grid-rows-6")}>
         {days.map(({ date, isCurrentMonth }, idx) => {
-          const dateStr = date.toISOString().split("T")[0];
+          const dateStr = toISODate(date);
           const isToday = dateStr === todayStr;
           const isSelected =
             date.getDate() === selectedDate.getDate() &&
