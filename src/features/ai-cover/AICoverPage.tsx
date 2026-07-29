@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode, CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Check, ChevronDown, ChevronRight, Maximize2, RefreshCw, SpellCheck as SpellCheckIcon, Sparkles, X,
+  ArrowLeftRight, ArrowRight, Check, ChevronDown, ChevronRight, Maximize2, RefreshCw,
+  Send, SpellCheck as SpellCheckIcon, Sparkles, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -438,10 +439,51 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // ── 분할 뷰(2026-07-29): 도구 창에 [작성 도우미|공고 정보|AI 챗] 선택, ⇄로 좌우 교체,
+  //    드래그로 최대 60%(반반 이상)까지 — 노트북 스플릿 뷰처럼 참고하며 쓰기
+  const [rightView, setRightView] = useState<"helper" | "job" | "ai">("helper");
+  const [reversed, setReversed] = useState(false); // true = 도구 창이 왼쪽
+  const RIGHT_VIEWS: { key: "helper" | "job" | "ai"; label: string }[] = [
+    { key: "helper", label: "작성 도우미" },
+    { key: "job", label: "공고 정보" },
+    { key: "ai", label: "AI 챗" },
+  ];
+
+  // AI 챗 (목업 — 실서비스는 자소서 특화 생성형 AI 연결. 응답은 기존 목업 로직 재사용, 없는 사실 생성 없음)
+  const [chat, setChat] = useState<{ role: "user" | "ai"; text: string }[]>([
+    { role: "ai", text: "안녕하세요! 문항·인재상·담은 경험을 같이 보면서 도와드릴게요. 아래 질문을 눌러 시작해도 좋아요. (목업 응답이에요)" },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  function aiReply(msg: string): string {
+    if (msg.includes("초안")) {
+      return selCount > 0
+        ? `이 문항이라면 담은 경험으로 이렇게 이어 볼 수 있어요.\n\n${buildSuggestion(qIdx, variants[qIdx])}\n\n마음에 드는 문장만 골라 본문에 이어 붙여도 좋아요.`
+        : "먼저 작성 도우미에서 이 문항에 담을 경험을 골라 주세요. 그 경험으로 초안을 제안해 드릴게요.";
+    }
+    if (msg.includes("첫 문장")) {
+      const first = EXPERIENCES.find((e) => selected.has(e.id)) ?? EXPERIENCES[0];
+      return `'${job.talent.line}'과 내 경험이 만나는 지점에서 시작해 보세요. 예를 들면 — "${first.line}"`;
+    }
+    if (msg.includes("강점")) {
+      return "지금 글은 경험에서 배운 점을 또렷하게 말하고 있어요. 여기에 '그래서 이 기관에서 무엇을 하고 싶은지' 한 문장을 이어 주면 흐름이 완성돼요.";
+    }
+    return `${q.intent} 이 기준에 맞춰, 담고 싶은 경험 하나를 골라 구체적인 장면부터 적어 보세요.`;
+  }
+  function sendChat(msgRaw?: string) {
+    const msg = (msgRaw ?? chatInput).trim();
+    if (!msg) return;
+    setChatInput("");
+    setChat((c) => [...c, { role: "user", text: msg }]);
+    timerRef.current.push(setTimeout(() => setChat((c) => [...c, { role: "ai", text: aiReply(msg) }]), 500));
+  }
+
   function startPanelResize(e: React.PointerEvent) {
     e.preventDefault();
-    const onMove = (ev: PointerEvent) =>
-      setPanelW(Math.min(640, Math.max(340, window.innerWidth - ev.clientX)));
+    const rev = reversed;
+    const onMove = (ev: PointerEvent) => {
+      const w = rev ? ev.clientX : window.innerWidth - ev.clientX;
+      setPanelW(Math.min(Math.floor(window.innerWidth * 0.6), Math.max(340, w)));
+    };
     const onUp = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
@@ -540,9 +582,9 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* ── 가운데: 작성 캔버스 (JobDetail과 동일한 bg-white 컬럼) ── */}
-        <div className="flex-1 overflow-y-auto bg-white">
+      <div className={cn("flex-1 flex overflow-hidden", reversed && "flex-row-reverse")}>
+        {/* ── 에디터 창 (⇄로 좌우 교체 가능) ── */}
+        <div className="flex-1 min-w-0 overflow-y-auto bg-white">
           {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
             <div className="mx-auto max-w-[820px] px-8 py-3 flex items-center justify-between gap-4">
@@ -678,26 +720,58 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           </div>
         </div>
 
-        {/* ── 우측 패널 — 플랫 섹션(divide-y) + 하단 고정 컨트롤. 왼쪽 가장자리 드래그로 폭 조절 ── */}
+        {/* ── 도구 창 — [작성 도우미|공고 정보|AI 챗] 선택 + ⇄ 좌우 교체 + 가장자리 드래그로 폭 조절(최대 60%) ── */}
         <aside
-          className="relative border-l border-border bg-white flex flex-col shrink-0"
+          className={cn("relative bg-white flex flex-col shrink-0", reversed ? "border-r border-border" : "border-l border-border")}
           style={{ width: panelW }}
-          aria-label="문항 보조 패널"
+          aria-label="보조 창"
         >
           {/* 리사이즈 핸들 */}
           <div
             role="separator"
             aria-orientation="vertical"
-            aria-label="패널 너비 조절"
-            title="드래그해서 패널 크기 조절"
+            aria-label="창 너비 조절"
+            title="드래그해서 창 크기 조절 (반반까지 넓힐 수 있어요)"
             onPointerDown={startPanelResize}
-            className="absolute left-0 top-0 bottom-0 w-1.5 -ml-0.5 cursor-col-resize z-10 hover:bg-primary/25 active:bg-primary/40 transition-colors"
+            className={cn(
+              "absolute top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-primary/25 active:bg-primary/40 transition-colors",
+              reversed ? "right-0 -mr-0.5" : "left-0 -ml-0.5",
+            )}
           />
-          <div className="px-5 py-3 border-b border-border flex items-baseline justify-between gap-3 shrink-0">
-            <p className="text-sm font-semibold text-foreground leading-tight">작성 도우미</p>
-            <p className="text-chip text-muted-foreground truncate">문항 {q.no} / {job.questions.length}</p>
+          {/* 창 선택 탭 + 좌우 교체 */}
+          <div className="px-3 py-2 border-b border-border flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-0.5 min-w-0">
+              {RIGHT_VIEWS.map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  onClick={() => setRightView(v.key)}
+                  className={cn(
+                    "px-2 h-7 rounded-md text-xs whitespace-nowrap transition-colors",
+                    rightView === v.key
+                      ? "bg-accent text-accent-foreground font-semibold"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-chip text-muted-foreground tabular-nums">문항 {q.no}/{job.questions.length}</span>
+              <button
+                type="button"
+                onClick={() => setReversed((v) => !v)}
+                title="좌우 위치 바꾸기"
+                aria-label="좌우 위치 바꾸기"
+                className="w-7 h-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
+          {rightView === "helper" && (<>
           <div className="flex-1 overflow-y-auto divide-y divide-border/60">
             {/* 1. 문항 분석 */}
             <PanelSection n={1} title="문항 분석">
@@ -814,6 +888,100 @@ function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
                 : "경험을 선택하면 초안을 제안해 드려요"}
             </p>
           </div>
+          </>)}
+
+          {/* ── 공고 정보 뷰 — 공고 요강을 보면서 쓰기 (탭1 연동 전 목업 요약) ── */}
+          {rightView === "job" && (
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+              <div>
+                <p className="text-sm font-semibold text-foreground">{job.org}</p>
+                <div className="mt-1 flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                  <span>{job.role}</span>
+                  <KeywordChip>공공기관</KeywordChip>
+                  <DdayChip days={job.dday} size="sm" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-1.5">자기소개서 문항 {job.questions.length}개</p>
+                <ol className="divide-y divide-border/60">
+                  {job.questions.map((qq, i) => (
+                    <li key={qq.no}>
+                      <button
+                        type="button"
+                        onClick={() => setQIdx(i)}
+                        className="w-full text-left py-2.5 flex items-start gap-2 hover:bg-muted/30 rounded-md px-2 -mx-2 transition-colors"
+                        aria-label={`문항 ${qq.no}로 이동`}
+                      >
+                        <span className="text-chip font-semibold text-muted-foreground tabular-nums shrink-0 mt-0.5">Q{qq.no}</span>
+                        <span className="min-w-0">
+                          <span className={cn("block text-sm leading-relaxed text-foreground", i === qIdx && "font-medium")}>{qq.text}</span>
+                          <span className="mt-0.5 block text-chip text-muted-foreground tabular-nums">
+                            {qq.limit.toLocaleString()}자{(texts[i] ?? "").trim() && ` · ${texts[i].length.toLocaleString()}자 작성 중`}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-1.5">인재상</p>
+                <p className="text-sm font-semibold text-foreground">“{job.talent.line}”</p>
+                <p className="mt-1 text-xs text-muted-foreground">{job.talent.tags.map((t) => `#${t}`).join(" · ")}</p>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                자격요건·우대사항 등 공고 전문은 탭1 공고 연동 시 여기에 표시돼요.{" "}
+                <Link to="/" className="text-primary hover:underline">지원 대시보드로 이동</Link>
+              </p>
+            </div>
+          )}
+
+          {/* ── AI 챗 뷰 — 생성형 AI와 대화하며 쓰기 (목업 응답) ── */}
+          {rightView === "ai" && (
+            <>
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                {chat.map((m, i) =>
+                  m.role === "ai" ? (
+                    <div key={i} className="flex items-start gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-1" />
+                      <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap min-w-0">{m.text}</p>
+                    </div>
+                  ) : (
+                    <div key={i} className="flex justify-end">
+                      <p className="max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm text-foreground leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                    </div>
+                  ),
+                )}
+              </div>
+              <div className="shrink-0 border-t border-border px-4 py-3">
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {["이 문항 초안 제안해 줘", "첫 문장만 잡아 줘", "내 글의 강점 짚어 줘"].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => sendChat(s)}
+                      className="px-2 py-1 rounded-md border border-border bg-white text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) sendChat(); }}
+                    placeholder="글에 대해 무엇이든 물어보세요"
+                    className="flex-1 h-9 rounded-md border border-input bg-white px-3 text-sm outline-none focus:border-primary/50"
+                    aria-label="AI 챗 입력"
+                  />
+                  <Button variant="outline" size="sm" className={cn("h-9 px-3", PRIMARY_STROKE)} onClick={() => sendChat()} aria-label="보내기">
+                    <Send className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </aside>
       </div>
     </div>
