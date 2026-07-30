@@ -1087,7 +1087,8 @@ export function JobPostingTable() {
                   <col style={{ width: "100%" }} />
                 </colgroup>
                 <thead className="bg-slate-50">
-                  <tr className="text-xs font-medium text-gray-600 select-none border-b border-border">
+                  {/* 크기는 th의 HEADER_CELL_CLASS(text-body)가 정본 — tr에 다시 적지 않는다 */}
+                  <tr className="font-medium text-gray-600 select-none border-b border-border">
                     <th
                       className={cn("w-12 pl-1 pr-3 py-3", stickyProps("__gutter__", true).className)}
                       style={stickyProps("__gutter__", true).style}

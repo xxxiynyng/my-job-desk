@@ -117,7 +117,7 @@ export function TrashPanel({ open, onClose }: { open: boolean; onClose: () => vo
           <div className="max-h-[52vh] overflow-y-auto -mx-1 px-1">
             <table className="w-full text-body">
               <thead>
-                <tr className="bg-slate-50 text-xs font-medium text-gray-600 border-b border-border">
+                <tr className="bg-slate-50 text-body font-medium text-gray-600 border-b border-border">
                   <th className="text-left font-medium px-3 py-2 w-[4rem]">종류</th>
                   <th className="text-left font-medium px-2 py-2">이름</th>
                   <th className="text-left font-medium px-2 py-2 w-[6.5rem]">남은 기간</th>
