@@ -19,7 +19,7 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tab2Api, type InterviewMode as Mode, type InterviewTurn, type InterviewDraft } from "./api";
 import type { ChipOption } from "./entryOptions";
-import { BLANK } from "./writingAids";
+import { BLANK, readAnswerSignal, signalMessage } from "./writingAids";
 import { type Competency, NCS_LABEL, uid } from "./model";
 import { TypingDots } from "./TypingDots";
 
@@ -85,7 +85,7 @@ export function InterviewMode({
   async function ask(turnNo: number, prev: string[]) {
     setThinking(true);
     setTurn(null);
-    const t = await tab2Api.nextInterviewTurn({ mode, targetCompetency, turnNo, answers: prev });
+    const t = await tab2Api.nextInterviewTurn({ mode, targetCompetency, turnNo, answers: prev, picked });
     setThinking(false);
     if (t.reaction) setBubbles((b) => [...b, { role: "ai", text: t.reaction! }]);
     setBubbles((b) => [...b, { role: "ai", text: t.question, hint: t.hint }]);
@@ -147,6 +147,8 @@ export function InterviewMode({
   };
 
   const canSaveNow = answers.length >= 1 && !thinking && !finishing;
+  /** 지금 쓰고 있는 답이 소재가 될 준비가 됐는지 — 채워졌을 때만 한 줄 뜬다 (재촉 금지) */
+  const draftSignal = signalMessage(readAnswerSignal(draft));
   const remainingLabel = `${MAX_TURNS}개 중 ${Math.min(answers.length + 1, MAX_TURNS)}번째`;
 
   return (
@@ -347,6 +349,14 @@ export function InterviewMode({
             </div>
           )}
 
+          {/* 준비됐다는 신호 — 채워졌을 때만 뜬다. 부족할 때는 아무 말도 하지 않는다(⑦ 재촉 금지) */}
+          {turn?.kind === "text" && draftSignal && (
+            <p className="text-chip text-primary mt-1.5 flex items-center gap-1">
+              <Check className="w-3 h-3" />
+              {draftSignal}
+            </p>
+          )}
+
           <div className="flex items-center gap-3 mt-2.5">
             {/* ⑦ 언제든 건너뛰기 */}
             {turn && (
@@ -373,29 +383,47 @@ export function InterviewMode({
           </div>
         </div>
 
-        {/* 닫기 확인 */}
+        {/* 닫기 확인 — 나가는 길이 두 갈래다. 저장할 수도, 버릴 수도 있어야 한다.
+            전에는 [계속할게요]와 [여기까지 저장] 둘뿐이라, 잘못 시작했거나 답이 마음에
+            안 드는 사람에게 탈출구가 없었다. 원하지 않는 활동이 목록에 쌓이는 것도
+            "정리해야 할 짐"이 된다(부록 C-17). */}
         {confirmClose && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[360px] shadow-lg">
+            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[400px] shadow-lg">
               <p className="text-title font-semibold text-foreground">정말 그만할까요?</p>
               <p className="text-body text-muted-foreground mt-1.5">
-                지금까지 답한 건 저장돼요. 나중에 이어서 할 수 있어요.
+                지금까지 답한 {answers.filter(Boolean).length}개를 저장하면 나중에 이어서 쓸 수 있어요.
               </p>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setConfirmClose(false)}>
-                  계속할게요
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-8 text-xs bg-action hover:bg-action-hover text-white"
+              <div className="flex items-center gap-2 mt-4">
+                {/* 파괴적 선택은 주 동선에서 떼어 왼쪽에 둔다 */}
+                <button
                   onClick={() => {
                     setConfirmClose(false);
-                    void finish(answers.filter(Boolean));
+                    onClose();
                   }}
+                  className="text-chip text-muted-foreground hover:text-destructive"
                 >
-                  여기까지 저장
-                </Button>
+                  저장 안 하고 닫기
+                </button>
+                <div className="ml-auto flex gap-2">
+                  <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setConfirmClose(false)}>
+                    계속할게요
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs bg-action hover:bg-action-hover text-white"
+                    onClick={() => {
+                      setConfirmClose(false);
+                      void finish(answers.filter(Boolean));
+                    }}
+                  >
+                    여기까지 저장
+                  </Button>
+                </div>
               </div>
+              <p className="text-mini text-muted-foreground mt-2.5">
+                저장 안 하고 닫으면 답한 내용은 남지 않아요.
+              </p>
             </div>
           </div>
         )}

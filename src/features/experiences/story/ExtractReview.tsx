@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { CompetencyChip, EvidenceBody } from "./StoryBits";
 import { liveTags, type Story } from "./model";
+import { tab2Api } from "./api";
 
 export type ReviewGroup = {
   tempId: string;
@@ -40,7 +42,9 @@ export function ExtractReview({
   const [checkedStories, setCheckedStories] = useState<Set<string>>(new Set(allStoryIds));
   const [verdicts, setVerdicts] = useState<Record<string, Record<number, "accepted" | "rejected">>>({});
   const [evidence, setEvidence] = useState<string | null>(null);
-  const [showInsufficient, setShowInsufficient] = useState(false);
+  const [showInsufficient, setShowInsufficient] = useState(true);
+  /** 부족한 소재를 이 화면에서 바로 채우는 입력 — storyId → 덧붙인 문장 */
+  const [patches, setPatches] = useState<Record<string, string>>({});
 
   // groups가 바뀌면 선택 초기화
   useMemo(() => {
@@ -48,17 +52,43 @@ export function ExtractReview({
     setCheckedStories(new Set(groups.flatMap((g) => g.stories.map((s) => s.id))));
     setVerdicts({});
     setEvidence(null);
+    setPatches({});
   }, [groups]);
 
-  const sufficient = groups.map((g) => ({ ...g, stories: g.stories.filter((s) => !s.insufficient) }));
-  const insufficientStories = groups.flatMap((g) => g.stories.filter((s) => s.insufficient));
-
-  const counts = {
-    activities: groups.length,
-    stories: groups.flatMap((g) => g.stories).filter((s) => !s.insufficient).length,
+  /**
+   * 보강 입력을 반영한 소재.
+   * 덧붙인 문장은 body와 rawExcerpt **양쪽에** 들어간다 — 그래야 재태깅이 만드는
+   * 근거 문장이 원문의 부분 문자열이라는 불변식(타협 불가 ①)이 유지된다.
+   * 채워져서 승격되면 그 자리에서 역량 태그도 다시 붙는다.
+   */
+  const resolve = (s: Story): Story => {
+    const add = (patches[s.id] ?? "").trim();
+    if (!add) return s;
+    const body = `${s.body} ${add}`.trim();
+    const rawExcerpt = `${s.rawExcerpt} ${add}`.trim();
+    const nowEnough = tab2Api.checkSufficient(body);
+    return {
+      ...s,
+      body,
+      rawExcerpt,
+      insufficient: !nowEnough,
+      competencies: nowEnough ? tab2Api.tagCompetencies(rawExcerpt) : s.competencies,
+    };
   };
-  const selectedCount =
-    [...checkedGroups].length + [...checkedStories].filter((id) => allStoryIds.includes(id)).length;
+
+  const resolved = groups.map((g) => ({ ...g, stories: g.stories.map(resolve) }));
+  const sufficient = resolved.map((g) => ({ ...g, stories: g.stories.filter((s) => !s.insufficient) }));
+  const insufficientStories = resolved.flatMap((g) => g.stories.filter((s) => s.insufficient));
+
+  const savedStoryIds = sufficient.flatMap((g) =>
+    checkedGroups.has(g.tempId) ? g.stories.filter((s) => checkedStories.has(s.id)).map((s) => s.id) : [],
+  );
+  const counts = {
+    activities: [...checkedGroups].length,
+    stories: savedStoryIds.length,
+  };
+  /** 저장 버튼 활성 판정 — 실제로 저장될 것의 개수여야 한다 */
+  const selectedCount = counts.activities + counts.stories;
 
   const toggleGroup = (id: string, on: boolean) => {
     setCheckedGroups((p) => {
@@ -101,9 +131,11 @@ export function ExtractReview({
         <DialogHeader className="px-6 py-4 border-b border-border text-left space-y-0">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <DialogTitle className="text-title font-semibold">이렇게 정리했어요</DialogTitle>
+              <DialogTitle className="text-title font-semibold">이렇게 이해했는데, 맞나요?</DialogTitle>
               <DialogDescription className="text-body text-muted-foreground mt-1">
-                활동 {counts.activities}개, 소재 {counts.stories}개를 찾았어요.
+                {counts.stories > 0
+                  ? `맞는 것만 남기고 저장하면, 자소서 쓸 때 여기서 꺼내 써요. 지금 소재 ${counts.stories}개.`
+                  : "맞는 것만 남기고 저장하면, 자소서 쓸 때 여기서 꺼내 써요."}
               </DialogDescription>
             </div>
             <button aria-label="닫기" onClick={onClose} className="p-1 rounded hover:bg-muted text-muted-foreground">
@@ -130,15 +162,12 @@ export function ExtractReview({
                         {g.category}
                       </span>
                       <span className="text-sm font-medium text-foreground">{g.title}</span>
-                      {g.isDuplicateCandidate ? (
+                      {/* 중복 후보일 때만 배지를 단다. 전에는 아닐 때 "새로 찾음"을 띄웠는데,
+                          중복 검사가 아직 없는 지금은 모든 항목에 붙어 아무 정보도 주지 않았다. */}
+                      {g.isDuplicateCandidate && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-mini font-semibold rounded-full bg-violet-50 text-violet-600">
                           <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
                           기존과 비슷함 — 확인해 주세요
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-mini font-semibold rounded-full bg-blue-50 text-primary">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                          새로 찾음
                         </span>
                       )}
                     </div>
@@ -197,12 +226,21 @@ export function ExtractReview({
               </div>
             ))}
 
-            {sufficient.every((g) => g.stories.length === 0) && insufficientStories.length === 0 && (
-              <div className="border border-dashed border-border rounded-xl px-5 py-8 text-center">
-                <p className="text-body text-foreground">이 글에서는 소재를 찾지 못했어요</p>
-                <p className="text-chip text-muted-foreground mt-1.5">
-                  구체적인 행동과 그 결과가 함께 적힌 문단이 있어야 소재로 만들 수 있어요.
+            {sufficient.every((g) => g.stories.length === 0) && (
+              <div className="border border-dashed border-border rounded-xl px-5 py-6 bg-muted/30">
+                <p className="text-body font-medium text-foreground">아직 소재는 없어요</p>
+                <p className="text-chip text-muted-foreground mt-1.5 leading-relaxed">
+                  활동만 저장해도 목록에는 남아요. 다만 <strong className="text-foreground">소재</strong>가 있어야
+                  자소서 문항에 넣을 이야기가 되고, 공고가 묻는 역량과도 맞춰볼 수 있어요.
+                  <br />
+                  소재가 되려면 <strong className="text-foreground">무엇을 했는지</strong>와{" "}
+                  <strong className="text-foreground">그래서 어떻게 됐는지</strong>가 한 덩어리로 있어야 해요.
                 </p>
+                {insufficientStories.length > 0 && (
+                  <p className="text-chip text-primary mt-2">
+                    아래 「조금 더 채우면 소재가 되는 것」에 한 줄만 더 적으면 바로 소재가 돼요.
+                  </p>
+                )}
               </div>
             )}
 
@@ -224,10 +262,18 @@ export function ExtractReview({
                 </button>
                 {showInsufficient && (
                   <div className="px-4 pb-3 space-y-2">
+                    {/* 여기가 이 화면의 두 번째 목적이다 — 확인만 하는 곳이 아니라,
+                        모자란 소재를 그 자리에서 완성하는 곳. 인터뷰를 다시 열지 않아도 된다. */}
                     {insufficientStories.map((s) => (
-                      <div key={s.id} className="border border-border rounded-lg px-3 py-2">
+                      <div key={s.id} className="border border-border rounded-lg px-3 py-2.5">
                         <p className="text-body text-foreground">{s.headline}</p>
                         <p className="text-chip text-muted-foreground mt-1">{s.body}</p>
+                        <Textarea
+                          value={patches[s.id] ?? ""}
+                          onChange={(e) => setPatches((p) => ({ ...p, [s.id]: e.target.value }))}
+                          placeholder="그래서 어떻게 됐는지 한 줄만 더 — 예: 그래서 매주 정리하게 바꿨더니 미납이 3명으로 줄었어요"
+                          className="mt-2 min-h-[52px] text-sm resize-none"
+                        />
                       </div>
                     ))}
                   </div>
@@ -253,7 +299,11 @@ export function ExtractReview({
         </div>
 
         <div className="px-6 py-3 border-t border-border flex items-center justify-between">
-          <span className="text-chip text-muted-foreground">{selectedCount}개 선택됨</span>
+          <span className="text-chip text-muted-foreground">
+            {counts.stories > 0
+              ? `활동 ${counts.activities}개 · 소재 ${counts.stories}개 저장`
+              : `활동 ${counts.activities}개 저장 · 소재 없음`}
+          </span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onClose}>
               나중에

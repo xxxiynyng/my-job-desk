@@ -12,7 +12,17 @@ import { buildCoverage, liveTags, NCS, type Story } from "../model";
 import { __resetStore, getStories, upsertStories, softDeleteStories, patchStory } from "../store";
 import { COLD_CHIPS, GAP_CHIPS } from "../entryOptions";
 import { NARRATIVE_TYPES } from "../../model/presets";
-import { AIDS_ROLE, AIDS_TROUBLE, BLANK } from "../writingAids";
+import {
+  AIDS_ROLE,
+  AIDS_TROUBLE,
+  ALL_AID_STARTERS,
+  ALL_AID_WORDS,
+  BLANK,
+  roleAids,
+  troubleAids,
+  readAnswerSignal,
+  signalMessage,
+} from "../writingAids";
 
 const SAMPLE =
   "동아리 총무를 맡아 회비를 관리했어요. 정산이 매번 밀려서, 엑셀 양식을 만들어 매주 정리하게 바꿨어요. 덕분에 마감이 3주에서 5일로 줄었어요.";
@@ -155,22 +165,20 @@ describe("⑥ 인터뷰 칩 ↔ 유형 프리셋 연결", () => {
 
 describe("⑦ 입력 보조는 문장을 대신 써주지 않는다", () => {
   const ALL_AIDS = [AIDS_ROLE, AIDS_TROUBLE];
+  /** 유형별 묶음까지 전수 — 낱말이 유형마다 갈리므로 기본값만 봐서는 부족하다 */
+  const EVERY_TOKEN = [...ALL_AID_STARTERS, ...ALL_AID_WORDS.flat()];
 
   it("말머리·낱말은 종결어미로 끝나지 않는다 (그대로 제출 못 하게)", () => {
     // "…했어요" 같은 완성 문장을 넣어주면 사용자가 그대로 보내 버린다.
     // 그러면 실제로 안 한 일이 소재가 된다 (원칙 ③ · 과장 방지)
     const 종결 = /(어요|습니다|았다|었다|해요|이다)$/;
-    ALL_AIDS.forEach((a) => {
-      [...a.starters, ...a.words].forEach((t) => expect(t).not.toMatch(종결));
-    });
+    EVERY_TOKEN.forEach((t) => expect(t).not.toMatch(종결));
   });
 
   it("보조어는 짧다 — 문장이 아니라 조각이다", () => {
     // 10자는 "제일 힘들었던 건"(9자) 같은 자연스러운 말머리를 허용하면서
     // 완성 문장은 걸러내는 선. 종결어미 검사와 함께 봐야 의미가 있다.
-    ALL_AIDS.forEach((a) => {
-      [...a.starters, ...a.words].forEach((t) => expect(t.length).toBeLessThanOrEqual(10));
-    });
+    EVERY_TOKEN.forEach((t) => expect(t.length).toBeLessThanOrEqual(10));
   });
 
   it("숫자 틀은 빈칸 자리표시자를 쓴다", () => {
@@ -183,5 +191,33 @@ describe("⑦ 입력 보조는 문장을 대신 써주지 않는다", () => {
       const all = [...a.starters, ...a.words];
       expect(new Set(all).size).toBe(all.length);
     });
+    ALL_AID_WORDS.forEach((w) => expect(new Set(w).size).toBe(w.length));
+  });
+
+  it("1턴 칩 8종 전부에 대해 낱말 묶음이 존재한다", () => {
+    // 「팀 프로젝트」를 고른 사람에게 "총무·회장"을 권하지 않기 위한 장치.
+    COLD_CHIPS.forEach((c) => {
+      expect(roleAids(c.category).words.length).toBeGreaterThan(0);
+      expect(troubleAids(c.category).words.length).toBeGreaterThan(0);
+    });
+  });
+
+  it("유형이 다르면 낱말도 다르다 (전부 같은 묶음이면 고도화가 무의미하다)", () => {
+    const sets = COLD_CHIPS.map((c) => roleAids(c.category).words.join("|"));
+    expect(new Set(sets).size).toBeGreaterThan(1);
+  });
+});
+
+describe("⑧ 준비 신호는 재촉하지 않는다", () => {
+  it("행동·결과가 다 있을 때만 문구가 나온다", () => {
+    expect(signalMessage(readAnswerSignal("회비를 관리했어요"))).toBeNull();
+    expect(signalMessage(readAnswerSignal("엑셀 양식을 만들어 미납이 3명으로 줄었어요"))).not.toBeNull();
+  });
+
+  it("부족할 때는 침묵한다 — '아직 부족해요' 류 문구를 만들지 않는다", () => {
+    // 재촉 문구가 생기면 이 화면은 대화가 아니라 검사가 된다 (피로 설계 ⑦)
+    ["", "동아리요", "그냥 했어요"].forEach((t) =>
+      expect(signalMessage(readAnswerSignal(t))).toBeNull(),
+    );
   });
 });

@@ -11,7 +11,7 @@ import { NCS_SUB, uid, type Competency, type StoryCompetency, type Story, type S
 // 타입 계약은 api.ts 가 정본 — 여기는 그 구현이다 (import type 이라 런타임 순환 없음)
 import type { InterviewMode, InterviewTurn, InterviewDraft, ExtractJob, ExtractUnit } from "./api";
 import { COLD_CHIPS, GAP_CHIPS, type ChipOption } from "./entryOptions";
-import { AIDS_ROLE, AIDS_TROUBLE } from "./writingAids";
+import { roleAids, troubleAids } from "./writingAids";
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -137,10 +137,13 @@ export async function nextInterviewTurn(opts: {
   targetCompetency?: Competency;
   turnNo: number;
   answers: string[];
+  picked?: ChipOption[];
 }): Promise<InterviewTurn> {
   await wait(650 + Math.floor(Math.random() * 700));
-  const { mode, targetCompetency, turnNo, answers } = opts;
+  const { mode, targetCompetency, turnNo, answers, picked } = opts;
   const last = answers[answers.length - 1] ?? "";
+  // 이야기를 듣는 대상은 첫 번째로 고른 것 — 보조 낱말도 그 유형을 따라간다
+  const focus = picked?.[0]?.category;
 
   if (turnNo === 1) {
     if (mode === "gap" && targetCompetency) {
@@ -173,7 +176,7 @@ export async function nextInterviewTurn(opts: {
       question: `${last.replace(/·/g, " ")}에서 뭘 맡았어요?`,
       hint: "한 줄이면 충분해요.",
       placeholder: "예: 회비 관리랑 행사 예산 짜는 걸 맡았어요",
-      aids: AIDS_ROLE,
+      aids: roleAids(focus),
       isLast: false,
     };
   }
@@ -185,7 +188,7 @@ export async function nextInterviewTurn(opts: {
     question: "하면서 제일 손이 많이 갔던 게 뭐예요?",
     hint: "귀찮았던 것, 잘 안 됐던 것도 좋아요. 그걸 어떻게 했는지까지 적어주시면 딱이에요.",
     placeholder: "예: 정산이 매번 밀려서, 엑셀 양식을 만들어 매주 정리하게 바꿨어요",
-    aids: AIDS_TROUBLE,
+    aids: troubleAids(focus),
     isLast: true,
   };
 }

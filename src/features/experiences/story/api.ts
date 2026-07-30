@@ -85,6 +85,8 @@ export interface Tab2Api {
     targetCompetency?: Competency;
     turnNo: number;
     answers: string[];
+    /** 1턴에서 고른 칩 — 서술 턴의 입력 보조를 유형에 맞게 고르는 데 쓴다 */
+    picked?: ChipOption[];
   }): Promise<InterviewTurn>;
 
   /** 답변들 → 활동·소재 초안. 저장하지 않는다(사용자 승인 전) */
