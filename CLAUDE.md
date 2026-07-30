@@ -23,9 +23,11 @@
 
 - **백엔드 없음** — API 호출·fetch·서버 사이드 로직 금지. (예정된 예외: 파일함 저장소로 Notion API 프록시 도입 확정 — 기획 SSOT §4-6, 2026-07-12. 구현 착수 전에 이 규칙과 시크릿 취급 규칙을 먼저 개정할 것)
   - 단서(2026-07-30): 탭2 `src/features/experiences/story/api.ts`의 `tab2Api`는 **서버 경계로 설계**돼 있으나 현재 목 구현(`api.mock.ts`)이라 이 규칙을 지킨다. 실서버(`api.server.ts`) 교체 착수 전에 이 규칙을 먼저 개정할 것.
-- **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-h2`(22) · `text-heading`(26) · `text-display`(30). **정의 위치: `src/lib/designTokens.ts`의 `FONT_SIZE`(단일 출처) — `tailwind.config.ts`와 `src/lib/utils.ts`가 여기서 파생**(2026-07-13 통합). `text-xs`(12)·`text-sm`(14)은 Tailwind 기본이라 FONT_SIZE에 없음. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다). eslint 룰이 `text-[Npx]`·raw hex를 warn으로 감지.
+- **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(11, **최소**) · `text-chip`(12) · `text-xs`(13) · `text-body`(14) · `text-sm`(15) · `text-title`(17) · `text-h2`(24) · `text-heading`(29) · `text-display`(33) — 전부 1.0배 스케일(10·11·12·13·14·15·22·26·30)에 ×1.1 반올림한 값이다(2026-07-30 배율 도입). **정의 위치: `src/lib/designTokens.ts`의 `FONT_SIZE`(단일 출처) — `tailwind.config.ts`와 `src/lib/utils.ts`가 여기서 파생**(2026-07-13 통합). `text-xs`·`text-sm`은 Tailwind 기본 토큰이라 `FONT_SIZE`가 아니라 같은 파일의 `TW_BASE_FONT_SIZE_OVERRIDE`에서 덮어쓴다(벤더 컴포넌트가 대량으로 써서 안 덮으면 화면이 섞인다). 여기에만 line-height를 함께 적는데, Tailwind 기본값이 원래 [크기, 줄간격] 쌍이라 크기만 덮으면 세로 리듬이 무너지기 때문 — 줄간격은 rem으로 두어 노브를 탄다. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다). eslint 룰이 `text-[Npx]`·raw hex를 warn으로 감지.
 - **색 하드코딩 금지** — 임의 `bg-[#hex]`·`text-[#hex]` 금지. 색 값은 디자인 SSOT 2장이 정본. 파랑은 raw `blue-500`/`blue-600` 클래스 직접 사용 금지 — 역할 토큰(`action`=채움 버튼 / `brand`=표시)만 사용(디자인 SSOT §0 원칙 11, 2026-07-12).
 - **⚠️ 폰트 토큰은 `src/lib/designTokens.ts`의 `FONT_SIZE` 한 곳에만 추가** — `tailwind.config.ts`(유틸 생성)와 `src/lib/utils.ts`(tailwind-merge `font-size` classGroup)가 이 객체를 `import`해 파생하므로 자동 동기화된다. 안 하면 `cn()`이 같은 호출의 색 클래스와 충돌로 보고 크기 토큰을 런타임 삭제한다(2026-07-05 사고, 부록 참조). 두 곳에 손으로 맞춰 적던 옛 구조가 그 뿌리였고, 단일 출처화로 원인 제거(2026-07-13). 파생 테스트 `src/test/design-tokens.test.ts`가 `FONT_SIZE`를 순회하며 회귀를 자동 차단.
+- **UI 배율은 노브 하나로만 바꾼다** — 여백·크기·라운드는 `src/index.css`의 `--ui-scale`(현재 1.1)이 루트 폰트(`font-size: calc(100% * var(--ui-scale))`)와 px CSS 변수를 함께 끌어올린다. Tailwind 기본 유틸(`p-4`·`gap-3`·`h-10`·`rounded-lg` …)은 전부 rem이라 자동으로 따라온다 — **`p-4`는 16px가 아니라 17.6px다.** TS 쪽 짝은 `designTokens.ts`의 `UI_SCALE`(localStorage px 마이그레이션용)이고, 두 값이 갈라지지 않게 `design-tokens.test.ts`가 묶어 검증한다.
+- **임의 크기값은 px가 아니라 rem** — `w-[60px]`이 아니라 `w-[3.75rem]`(= px÷16). px로 적으면 노브를 못 타서 그 요소만 옛 크기로 남는다. **예외: 헤어라인·미세 오프셋(≤2px)은 px 유지**(1px 선은 1.1px가 되면 흐려진다). 아이콘은 `size={16}` 같은 px prop 대신 `className="w-4 h-4"`(rem)를 쓴다 — 기존 `size={N}` 18곳은 ×1.1 정수로 박아 두었다.
 - **토큰에 line-height 금지**(크기만). 줄간격 토큰화는 SSOT에 먼저 정의 후 별도로.
 - **임의 새 디자인 값(색/굵기/간격) 발명 금지** — 어색하면 ① SSOT의 기존 토큰·규칙 확인 → ② 기존 컴포넌트 재사용 → ③ 그래도 필요하면 토큰을 먼저 정의(SSOT + `tailwind.config.ts`)하고 그 이름을 쓴다. "통일"은 한쪽을 **기존 잘 된 쪽**에 맞추는 것이지 양쪽을 새 값으로 바꾸는 게 아니다.
 - **SSOT 문서 취향 수정 금지** — 실제 확정·구현된 값만 기록하고, 최신 상태값만 유지한다(구기록·이력 누적 금지).
@@ -222,13 +224,13 @@ specs.info.langExams.v1            공인외국어시험 목록 (LangExam[])
 specs.basicPhoto.shown / .id       증명사진 표시 여부 / 대표 증명사진 ID
 specs.files.v2                     제출파일함 파일 목록
 specs.settings.jobPrefs.v1         설정 > 직무 선호 (Settings.tsx)
-pickd.jobs.colWidths / visibleCols / colOrder / colPinned / rowOrder / sortMode
+pickd.jobs.colWidths.v2 / visibleCols / colOrder / colPinned / rowOrder / sortMode
                                    탭1 테이블 뷰 상태 (너비·표시·순서·고정·행순서·정렬모드)
 pickd.jobs.registrations.v1        탭1 담은 공고 (JobRegistration[] — postingId·positionId 참조, 표시값은 postings.seed에서 파생)
 pickd.jobs.recentSearches.v1       탭1 검색창 최근 검색어 (string[], 최대 8)
 pickd.experiences.items            탭2 경험 목록 (활동 = Item[])
 pickd.stories.v1                   탭2 소재 목록 (Story[] — 활동 1개에 소재 N개, story/store.ts 단독 접근)
-pickd.experiences.visibleCols.v3 / colWidths.v3 / colOrder / colPinned / sortMode
+pickd.experiences.visibleCols.v3 / colWidths.v4 / colOrder / colPinned / sortMode
                                    탭2 테이블 뷰 상태 (소재·역량 컬럼 추가로 .v2 → .v3 상향)
 pickd.experiences.export.fields.v1 / format.v1   내보내기 마지막 선택 (필드/형식)
 pickd.trash.v1                     전역 통합 휴지통 스냅샷 (14일 보관 후 자동 purge)
@@ -273,6 +275,8 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 - 확정된 규칙·결정은 문서 수를 늘리지 말고 해당 SSOT의 최신값만 갱신.
 - 동기화 스크립트: `pickd-design-update.sh` — 코드 수정 + Notion SSOT 업데이트 자동화(구 pickd-notion-update.sh 통합). 위치는 레포 밖 `/Users/xxxiynyng/Claude/Projects/Pickd Design/`(디자인 SSOT §9-4와 일치 — 2026-07-22 실폴더 확인 후 SSOT 정정 완료).
 
+> 컬럼 폭만 rem이 아니라 px 숫자로 저장돼 `--ui-scale`을 못 탄다(드래그 계산이 clientX 기준 px라 유지). 2026-07-30 배율 도입 때 기본·최소·최대값을 ×1.1 하고 저장값은 키 버전을 올려 `migrateScaledPxMap`(lib/storage.ts)으로 1회 이관했다. **다음에 배율을 또 바꾸면 같은 절차를 반복해야 한다.**
+
 ## 부록 — 사고 아카이브 (배경은 여기 한 줄씩만)
 
 - **2026-07-05 tailwind-merge**: 커스텀 폰트 토큰 미등록으로 `cn()`이 크기 토큰을 런타임 삭제 — "소스는 맞는데 화면엔 안 나옴"으로 하루 소모. 배포·캐시·URL 전부 무죄였다. 해소 커밋 `1ca1684`. → §1 등록 규칙, §2 사다리 1번.
@@ -281,4 +285,5 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 - **2026-07-06 text-micro 제거**: 9px 폐기, 최소 10px(`text-mini`)로 통일(커밋 `1b20fd6`·`da43c30`).
 - **2026-07-13 폰트 토큰 단일 출처화**: `designTokens.ts`(FONT_SIZE)로 통합해 config·utils 손동기화 제거(2026-07-05 사고 원인 소멸), 하드코딩 `text-[Npx]` 30곳 토큰화(반픽셀 18곳 반올림·값동일 9곳·헤딩 3곳), `h2`(22)·`display`(30) 신설, 죽은 헤딩 CSS 변수 제거, 파생 테스트 + eslint 금지룰(warn) 추가. 커밋 `1271a0b`→`a3a6a73`(6개).
 - **2026-07-29 세션 병행**: 구조 재편(`c41c910`) 중 다른 세션이 옛 경로 지도로 파일을 써, 앱에 연결되지 않은 채 tsc만 깨졌다. 마운트 세션이 남긴 `.git/index.lock`으로 로컬 git까지 막혔다. → §3 세션 병행 규칙.
+- **2026-07-30 UI 배율 1.1배**: "화면이 전체적으로 한 단계 작다" → 브라우저 110% 확대와 같은 밀도를 기본값으로. `--ui-scale` 노브(루트 폰트 17.6px)로 rem 유틸 3,000여 곳을 한 번에 올리고, 폰트 토큰 9종은 ×1.1 반올림 정수로, 임의 px 127곳은 rem으로, 아이콘 `size={N}` 18곳·StatusBadge 인라인·컬럼 폭 상수는 ×1.1로 맞췄다. 실측(1280/1440/1920): root 17.6 · body 15 · H1 29 · 사이드바 66 · 행높이 48.4 · 배지 22px, 가로 스크롤 없음.
 - **2025-06**: 미연결 dead code `Specs.tsx` 삭제.
