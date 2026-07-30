@@ -4,7 +4,10 @@ type StatusKey =
   | "draft" | "applied" | "document" | "test" | "interview"
   | "finished" | "passed" | "rejected" | "hold";
 
-export type Tone = "neutral" | "brand" | "info" | "active" | "success" | "warning" | "danger" | "caution";
+export type Tone =
+  | "neutral" | "brand" | "info" | "active" | "success" | "warning" | "danger" | "caution"
+  | "dim"    // 회색 채움 — 끝났고 확정된 것 (neutral보다 한 톤 진하다)
+  | "ghost"; // 흰 배경 + 테두리 — 아직 확정되지 않은 것
 
 interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status?: StatusKey;
@@ -23,13 +26,15 @@ export const STATUS_MAP: Record<StatusKey, { label: string; tone: Tone }> = {
   interview: { label: "면접전형", tone: "warning" },
   finished:  { label: "전형완료", tone: "neutral" },
   // 세부 결과 배지 (전형완료 옆에 표시)
+  // 색을 갖는 건 합격 하나뿐이다(2026-07-30 결정). 목록을 훑을 때 초록만 눈에 들어오게 하고,
+  // 불합격·보류는 무채색으로 물러난다 — 채워짐(확정)과 비어있음(미확정)으로 둘을 가른다.
   passed:    { label: "최종합격", tone: "success" },
-  rejected:  { label: "불합격",   tone: "danger" },
-  hold:      { label: "보류",     tone: "caution" },
+  rejected:  { label: "불합격",   tone: "dim" },
+  hold:      { label: "보류",     tone: "ghost" },
 };
 
 // §5-3-1 tone 팔레트 — 정본. 상태칩을 손으로 칠하지 말고 이 값을 재사용할 것(§0-11 raw 금지).
-export const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
+export const TONES: Record<Tone, { bg: string; fg: string; dot: string; border?: string }> = {
   neutral: { bg: "var(--bg-muted)", fg: "var(--text-body-color)", dot: "var(--slate-400)" },
   brand:   { bg: "var(--brand-subtle)", fg: "var(--brand-hover)", dot: "var(--blue-500)" },
   info:    { bg: "var(--indigo-50)", fg: "var(--indigo-600)", dot: "var(--indigo-500)" },
@@ -38,6 +43,8 @@ export const TONES: Record<Tone, { bg: string; fg: string; dot: string }> = {
   warning: { bg: "var(--warning-subtle)", fg: "var(--amber-700)", dot: "var(--amber-500)" },
   danger:  { bg: "var(--danger-subtle)", fg: "var(--red-700)", dot: "var(--red-500)" },
   caution: { bg: "var(--violet-50)", fg: "var(--violet-600)", dot: "var(--violet-500)" },
+  dim:     { bg: "var(--slate-200)", fg: "var(--slate-700)", dot: "var(--slate-500)" },
+  ghost:   { bg: "var(--slate-0)", fg: "var(--slate-500)", dot: "var(--slate-300)", border: "var(--slate-200)" },
 };
 
 // 상태 라벨(예: "작성중") → tone 역인덱스. STATUS_MAP 정본에서 파생 — 라벨↔색 매핑을 이중 관리하지 않는다.
@@ -72,6 +79,7 @@ export function StatusBadge({ status = "applied", label, tone, size = "md", styl
         display: "inline-flex", alignItems: "center", gap: "0.375rem",
         height: sm ? "1.25rem" : "1.5rem", padding: sm ? "0 0.5rem" : "0 0.625rem",
         background: t.bg, color: t.fg,
+        boxShadow: t.border ? `inset 0 0 0 1px ${t.border}` : undefined,
         fontSize: sm ? "var(--text-mini)" : "var(--text-chip)",
         fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
         letterSpacing: "-0.01em",

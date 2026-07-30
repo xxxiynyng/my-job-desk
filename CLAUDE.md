@@ -198,6 +198,8 @@ src/
 │   └── ui/                              shadcn/ui 벤더 (46개, 직접 수정 지양)
 ├── data/                                도메인 데이터·스토어 (기능 공용)
 │   ├── jobStatus.ts                     ★ 전형 6단계 JobStage·JOB_STAGES·FinalResult 정본
+│   │                                    + FINAL_RESULT_BADGE(결과→ds 배지 키) — 최종결과를
+│   │                                      그리는 네 화면이 이 표 하나만 본다(2026-07-30 일원화)
 │   ├── jobStore.ts                      담은 공고 등록 스토어 (pickd.jobs.registrations.v1)
 │   ├── postings.seed.ts                 공고 시드 3건 + 검색 셀렉터 (백엔드 API 응답 계약)
 │   └── calendarData.ts                  캘린더 데이터 + 등록 공고 파생 셀렉터

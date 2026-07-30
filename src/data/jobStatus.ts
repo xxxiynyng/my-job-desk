@@ -18,5 +18,13 @@ export const FINAL_RESULT_LABEL: Record<NonNullable<FinalResult>, string> = {
   보류: "보류",
 };
 
+/** 결과 → ds/StatusBadge 배지 키. 최종 결과를 그리는 모든 화면이 이 표 하나만 본다
+ *  (전에는 목록은 배지, 상세 모달은 손으로 칠한 Tailwind 클래스라 보류 색이 서로 달랐다). */
+export const FINAL_RESULT_BADGE: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
+  합격: "passed",
+  불합격: "rejected",
+  보류: "hold",
+};
+
 /** 선택지 목록 — 라벨 맵에서 파생한다(키 삽입 순서 = 합격/불합격/보류). */
 export const FINAL_RESULT_OPTIONS = Object.keys(FINAL_RESULT_LABEL) as NonNullable<FinalResult>[];

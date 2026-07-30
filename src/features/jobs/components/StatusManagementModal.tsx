@@ -9,7 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { JOB_STAGES, FINAL_RESULT_LABEL, FINAL_RESULT_OPTIONS, type JobStage, type FinalResult } from "@/data/jobStatus";
+import { JOB_STAGES, FINAL_RESULT_LABEL, FINAL_RESULT_OPTIONS, FINAL_RESULT_BADGE, type JobStage, type FinalResult } from "@/data/jobStatus";
+import { StatusBadge } from "@/components/ds/StatusBadge";
 import { ddayLabel } from "@/lib/dday";
 
 // 전형 단계 6개 (2026-07-02 재편) — 최종합격/불합격/보류는 "전형완료" + 세부 결과(FinalResult)로 표현
@@ -17,12 +18,6 @@ import { ddayLabel } from "@/lib/dday";
 export type { FinalResult };
 
 const STAGE_FLOW = JOB_STAGES;
-
-const finalResultStyles: Record<NonNullable<FinalResult>, string> = {
-  합격: "bg-pickd-green-light text-pickd-green border-pickd-green/30",
-  불합격: "bg-pickd-red-light text-pickd-red border-pickd-red/30",
-  보류: "bg-muted text-muted-foreground border-border",
-};
 
 type ItemType = "일정" | "할 일";
 type ItemStatus = "예정" | "진행 중" | "완료" | "지연";
@@ -208,14 +203,18 @@ export function StatusManagementModal({
                     <button
                       key={r}
                       onClick={() => setFinalResult(activeFinalResult === r ? null : r)}
-                      className={cn(
-                        "px-2 py-0.5 rounded-full border text-mini font-semibold transition-colors",
-                        activeFinalResult === r
-                          ? finalResultStyles[r]
-                          : "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
-                      )}
+                      aria-pressed={activeFinalResult === r}
+                      className="rounded-full transition-opacity hover:opacity-75"
                     >
-                      {FINAL_RESULT_LABEL[r]}
+                      {/* 고른 것은 목록·칸반과 완전히 같은 배지, 안 고른 것은 점선 테두리.
+                          점선인 이유: 보류 배지가 흰 배경이라 실선 테두리로는 "고른 것"과 구분이 안 된다. */}
+                      {activeFinalResult === r ? (
+                        <StatusBadge status={FINAL_RESULT_BADGE[r]} size="sm" />
+                      ) : (
+                        <span className="inline-flex items-center h-5 px-2 rounded-full border border-dashed border-border text-mini font-semibold text-muted-foreground/70 hover:text-foreground hover:border-solid hover:bg-muted transition-colors">
+                          {FINAL_RESULT_LABEL[r]}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>

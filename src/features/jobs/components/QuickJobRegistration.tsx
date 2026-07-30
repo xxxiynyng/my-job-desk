@@ -37,25 +37,23 @@ const JOB_GROUPS: { sub: string; values: JobCategory[] }[] = [
   { sub: "현장",     values: ["운전·운송", "시설·미화", "기타"] },
 ];
 
-/** 지역 칩 — label은 표시용, match는 공고 regions 값과 대조할 별칭 */
+/** 지역 칩 — label은 표시용, match는 공고 regions 값과 대조할 별칭.
+ *  순서는 행정 표준(서울→부산→…→제주) 그대로. 권역으로 묶지 않는다 —
+ *  "동남권"처럼 낯선 묶음명은 찾는 지역이 어디 줄에 있는지 한 번 더 생각하게 만든다. */
 type RegionChip = { label: string; match: string[] };
-const REGION_GROUPS: { sub: string; values: RegionChip[] }[] = [
-  { sub: "동남권", values: [
-    { label: "부산", match: ["부산"] }, { label: "울산", match: ["울산"] },
-    { label: "경남", match: ["경남"] }, { label: "경북", match: ["경북"] },
-  ]},
-  { sub: "그 외", values: [
-    { label: "서울", match: ["서울"] }, { label: "인천", match: ["인천"] },
-    { label: "경기", match: ["경기"] }, { label: "강원", match: ["강원"] },
-    { label: "대전", match: ["대전"] }, { label: "세종", match: ["세종"] },
-    { label: "충북", match: ["충북"] }, { label: "충남", match: ["충남"] },
-    { label: "대구", match: ["대구"] },
-    { label: "전북", match: ["전북"] }, { label: "전남·광주", match: ["전남", "광주"] },
-    { label: "제주", match: ["제주"] }, { label: "해외", match: ["해외"] },
-  ]},
+const REGION_CHIPS: RegionChip[] = [
+  { label: "서울", match: ["서울"] }, { label: "부산", match: ["부산"] },
+  { label: "대구", match: ["대구"] }, { label: "인천", match: ["인천"] },
+  { label: "광주", match: ["광주"] }, { label: "대전", match: ["대전"] },
+  { label: "울산", match: ["울산"] }, { label: "세종", match: ["세종"] },
+  { label: "경기", match: ["경기"] }, { label: "강원", match: ["강원"] },
+  { label: "충북", match: ["충북"] }, { label: "충남", match: ["충남"] },
+  { label: "전북", match: ["전북"] }, { label: "전남", match: ["전남"] },
+  { label: "경북", match: ["경북"] }, { label: "경남", match: ["경남"] },
+  { label: "제주", match: ["제주"] }, { label: "해외", match: ["해외"] },
 ];
 const REGION_MATCH: Record<string, string[]> = Object.fromEntries(
-  REGION_GROUPS.flatMap((g) => g.values).map((r) => [r.label, r.match]),
+  REGION_CHIPS.map((r) => [r.label, r.match]),
 );
 const TYPE_FILTERS = ["신입", "인턴", "경력"] as const;
 
@@ -234,8 +232,8 @@ export function QuickJobRegistration() {
               /* ── 빈 포커스: 좌 필터 / 우 최근 검색어 ───────────── */
               <div className="flex">
                 {/* 좌: 필터로 찾기 */}
-                <div className="flex-1 min-w-0 p-4 border-r border-border">
-                  <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide mb-2">필터로 찾기</p>
+                <div className="flex-1 min-w-0 p-5 border-r border-border">
+                  <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide mb-4">필터로 찾기</p>
                   <FilterSection
                     label="직무"
                     groups={JOB_GROUPS.map((g) => ({ sub: g.sub, values: [...g.values] }))}
@@ -244,7 +242,7 @@ export function QuickJobRegistration() {
                   />
                   <FilterSection
                     label="지역"
-                    groups={REGION_GROUPS.map((g) => ({ sub: g.sub, values: g.values.map((r) => r.label) }))}
+                    groups={[{ sub: "", values: REGION_CHIPS.map((r) => r.label) }]}
                     current={filters.region}
                     onPick={(v) => setFilters((f) => ({ ...f, region: f.region === v ? null : v }))}
                   />
@@ -256,8 +254,8 @@ export function QuickJobRegistration() {
                   />
 
                   {hasFilter && (
-                    <div className="mt-3 border-t border-border/60 pt-2">
-                      <p className="text-chip text-muted-foreground mb-1">
+                    <div className="mt-4 border-t border-border/60 pt-3">
+                      <p className="text-chip text-muted-foreground mb-2">
                         조건에 맞는 공고 {filtered.length}건
                         {filtered.length === 0 && <span className="text-muted-foreground/60"> — 조건을 넓혀보세요</span>}
                       </p>
@@ -277,8 +275,8 @@ export function QuickJobRegistration() {
                 </div>
 
                 {/* 우: 최근 검색어 */}
-                <div className="w-[17.5rem] shrink-0 p-4">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="w-[17.5rem] shrink-0 p-5">
+                  <div className="flex items-center justify-between mb-4">
                     <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">최근 검색어</p>
                     {recent.length > 0 && (
                       <button
@@ -312,7 +310,7 @@ export function QuickJobRegistration() {
               </div>
             )}
 
-            <div className="flex items-center justify-between px-4 py-1.5 border-t border-border bg-muted/30">
+            <div className="flex items-center justify-between px-5 py-2 border-t border-border bg-muted/30">
               <div className="flex items-center gap-3 text-mini text-muted-foreground/60">
                 <span>↑↓ 이동</span>
                 <span className="inline-flex items-center gap-1"><CornerDownLeft className="w-2.5 h-2.5" /> 선택</span>
@@ -345,22 +343,22 @@ function FilterSection({
   onPick: (v: string) => void;
 }) {
   return (
-    <div className="flex items-start gap-2 mb-2">
-      <span className="text-chip text-muted-foreground w-8 shrink-0 pt-1">{label}</span>
-      <div className="min-w-0 flex-1 space-y-1">
+    <div className="flex items-start gap-3 mb-5">
+      <span className="text-chip text-muted-foreground w-9 shrink-0 pt-1.5">{label}</span>
+      <div className="min-w-0 flex-1 space-y-2">
         {groups.map((g) => (
-          <div key={g.sub} className="flex items-start gap-2">
+          <div key={g.sub} className="flex items-start gap-3">
             {g.sub && (
-              <span className="text-mini text-muted-foreground/50 w-12 shrink-0 pt-1 text-right">{g.sub}</span>
+              <span className="text-mini text-muted-foreground/50 w-12 shrink-0 pt-1.5 text-right">{g.sub}</span>
             )}
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {g.values.map((v) => (
                 <button
                   key={v}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => onPick(v)}
                   className={cn(
-                    "px-2 py-0.5 rounded-full border text-xs transition-colors",
+                    "px-2.5 py-1 rounded-full border text-xs transition-colors",
                     current === v
                       ? "border-primary bg-accent text-primary font-medium"
                       : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",

@@ -60,7 +60,7 @@ import { useTableDividers } from "@/components/table/useTableDividers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type FinalResult } from "./StatusManagementModal";
-import { JOB_STAGES, ACTIVE_STAGES, COMPLETED_STAGES, FINAL_RESULT_LABEL, type JobStage } from "@/data/jobStatus";
+import { JOB_STAGES, ACTIVE_STAGES, COMPLETED_STAGES, FINAL_RESULT_LABEL, FINAL_RESULT_BADGE, type JobStage } from "@/data/jobStatus";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DocumentStatusList } from "./DocumentStatusList";
@@ -120,13 +120,6 @@ const STATUS_OPTIONS = JOB_STAGES;
 
 // 라벨 → DS 배지 키. STATUS_MAP(정본)의 역인덱스라 여기서 다시 적지 않는다.
 const STATUS_DS_KEY = KEY_BY_LABEL as Record<JobStage, StageBadgeKey>;
-
-// 전형완료의 세부 결과 → 배지 키·표시 라벨
-const FINAL_RESULT_DS_KEY: Record<NonNullable<FinalResult>, "passed" | "rejected" | "hold"> = {
-  합격: "passed",
-  불합격: "rejected",
-  보류: "hold",
-};
 
 
 
@@ -296,7 +289,7 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                         </span>
                       )}
                       {job.finalResult && (
-                        <span className="text-chip text-muted-foreground font-medium">{FINAL_RESULT_LABEL[job.finalResult]}</span>
+                        <StatusBadge status={FINAL_RESULT_BADGE[job.finalResult]} size="sm" />
                       )}
                     </span>
                   </div>
@@ -426,7 +419,7 @@ function KanbanView({
                         <span className="text-mini text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-sm tabular-nums shrink-0">{job.employType}</span>
                         {!COMPLETED_STATUSES.includes(col) && <DdayChip days={ddayOf(job)} size="sm" />}
                         {COMPLETED_STATUSES.includes(col) && job.finalResult && (
-                          <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
+                          <StatusBadge status={FINAL_RESULT_BADGE[job.finalResult]} size="sm" />
                         )}
                       </div>
                     </div>
@@ -1279,7 +1272,7 @@ export function JobPostingTable() {
                                     <StatusBadge status={STATUS_DS_KEY[job.status]} size="sm" />
                                     {job.status === "전형완료" && job.finalResult && (
                                       <StatusBadge
-                                        status={FINAL_RESULT_DS_KEY[job.finalResult]}
+                                        status={FINAL_RESULT_BADGE[job.finalResult]}
                                         label={FINAL_RESULT_LABEL[job.finalResult]}
                                         size="sm"
                                       />
