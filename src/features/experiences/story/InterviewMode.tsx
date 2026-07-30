@@ -162,7 +162,7 @@ export function InterviewMode({
         }
       }}
     >
-      <DialogContent className="max-w-[720px] w-[92vw] max-h-[88vh] p-0 gap-0 overflow-hidden flex flex-col [&>button]:hidden">
+      <DialogContent className="max-w-[45rem] w-[92vw] max-h-[88vh] p-0 gap-0 overflow-hidden flex flex-col [&>button]:hidden">
         {/* 헤더 */}
         <DialogHeader className="px-6 py-4 border-b border-border text-left space-y-0">
           <div className="flex items-start justify-between gap-3">
@@ -317,7 +317,7 @@ export function InterviewMode({
                   }
                 }}
                 placeholder={turn.placeholder}
-                className="min-h-[64px] text-sm resize-none"
+                className="min-h-[4rem] text-sm resize-none"
               />
               <Button
                 className="h-9 px-4 bg-action hover:bg-action-hover text-white shrink-0"
@@ -370,7 +370,7 @@ export function InterviewMode({
             나가기)만 왼쪽으로 떼어 색으로 구분한다. */}
         {confirmClose && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[420px] shadow-lg">
+            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[26.25rem] shadow-lg">
               <p className="text-title font-semibold text-foreground">정말 그만할까요?</p>
               <p className="text-body text-muted-foreground mt-1.5">
                 지금까지 답한 {answers.filter(Boolean).length}개를 저장하면 나중에 이어서 쓸 수 있어요.

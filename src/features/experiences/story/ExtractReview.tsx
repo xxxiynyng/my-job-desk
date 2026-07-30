@@ -127,7 +127,7 @@ export function ExtractReview({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-[860px] w-[92vw] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col [&>button]:hidden">
+      <DialogContent className="max-w-[53.75rem] w-[92vw] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col [&>button]:hidden">
         <DialogHeader className="px-6 py-4 border-b border-border text-left space-y-0">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -144,7 +144,7 @@ export function ExtractReview({
           </div>
         </DialogHeader>
 
-        <div className={cn("flex-1 overflow-hidden grid", evidence ? "grid-cols-[1fr_320px]" : "grid-cols-[1fr_0px]")}>
+        <div className={cn("flex-1 overflow-hidden grid", evidence ? "grid-cols-[1fr_20rem]" : "grid-cols-[1fr_0px]")}>
           <div className="overflow-y-auto px-6 py-4 space-y-3">
             {sufficient.map((g) => (
               <div key={g.tempId} className="border border-border rounded-xl bg-card">
@@ -272,7 +272,7 @@ export function ExtractReview({
                           value={patches[s.id] ?? ""}
                           onChange={(e) => setPatches((p) => ({ ...p, [s.id]: e.target.value }))}
                           placeholder="그래서 어떻게 됐는지 한 줄만 더 — 예: 그래서 매주 정리하게 바꿨더니 미납이 3명으로 줄었어요"
-                          className="mt-2 min-h-[52px] text-sm resize-none"
+                          className="mt-2 min-h-[3.25rem] text-sm resize-none"
                         />
                       </div>
                     ))}
