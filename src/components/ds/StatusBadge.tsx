@@ -69,8 +69,8 @@ export function StatusBadge({ status = "applied", label, tone, size = "md", styl
   return (
     <span
       style={{
-        display: "inline-flex", alignItems: "center", gap: 6,
-        height: sm ? 20 : 24, padding: sm ? "0 8px" : "0 10px",
+        display: "inline-flex", alignItems: "center", gap: "0.375rem",
+        height: sm ? "1.25rem" : "1.5rem", padding: sm ? "0 0.5rem" : "0 0.625rem",
         background: t.bg, color: t.fg,
         fontSize: sm ? "var(--text-mini)" : "var(--text-chip)",
         fontWeight: "var(--weight-semibold)" as React.CSSProperties["fontWeight"],
@@ -80,7 +80,7 @@ export function StatusBadge({ status = "applied", label, tone, size = "md", styl
       }}
       {...rest}
     >
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: t.dot, flex: "none" }} />
+      <span style={{ width: "0.375rem", height: "0.375rem", borderRadius: "50%", background: t.dot, flex: "none" }} />
       {label ?? def.label}
     </span>
   );

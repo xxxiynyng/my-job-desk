@@ -7,7 +7,7 @@ interface ProgressRingProps {
   className?: string;
 }
 
-export function ProgressRing({ progress, size = 48, strokeWidth = 4, className }: ProgressRingProps) {
+export function ProgressRing({ progress, size = 53, strokeWidth = 4.4, className }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;

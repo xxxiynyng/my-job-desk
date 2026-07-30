@@ -109,13 +109,13 @@ export function ContextPanel({
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <ProgressRing progress={progress} size={44} strokeWidth={3.5} />
+          <ProgressRing progress={progress} size={48} strokeWidth={3.85} />
           <Button
             variant="ghost" size="sm"
             className="h-7 text-xs text-muted-foreground hover:text-foreground px-2 gap-1"
             onClick={() => setPanelMode(m => m === "date" ? "all" : "date")}
           >
-            {panelMode === "date" ? "전체보기" : <><ChevronLeft size={12} />날짜별</>}
+            {panelMode === "date" ? "전체보기" : <><ChevronLeft size={13} />날짜별</>}
           </Button>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function ContextPanel({
         <div className="space-y-4">
           <Collapsible open={postingsOpen} onOpenChange={setPostingsOpen}>
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left group">
-              <ChevronDown size={14} className={cn("text-muted-foreground transition-transform", !postingsOpen && "-rotate-90")} />
+              <ChevronDown size={15} className={cn("text-muted-foreground transition-transform", !postingsOpen && "-rotate-90")} />
               <span className="text-sm font-semibold">다가오는 공고</span>
               <span className="text-mini text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{upcomingApps.length}</span>
             </CollapsibleTrigger>
@@ -142,7 +142,7 @@ export function ContextPanel({
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <button onClick={(e) => { e.stopPropagation(); onToggleStar(app.id); }} aria-label={app.starred ? "중요 표시 해제" : "중요 표시"} className="shrink-0">
-                            <Star size={13} className={cn(app.starred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30")} />
+                            <Star size={14} className={cn(app.starred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30")} />
                           </button>
                           <div className="min-w-0">
                             <span className="font-medium text-sm truncate block">{app.position}</span>
@@ -180,7 +180,7 @@ export function ContextPanel({
             {filteredSchedules.length === 0 ? (
               <button onClick={() => setShowCreateSchedule(true)}
                 className="w-full flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground hover:text-primary hover:bg-accent/30 rounded-md border border-dashed border-border transition-colors">
-                <CalendarPlus size={14} />선택한 날짜에 일정 추가하기
+                <CalendarPlus size={15} />선택한 날짜에 일정 추가하기
               </button>
             ) : (
               <div className="flex flex-col gap-1">
@@ -192,7 +192,7 @@ export function ContextPanel({
                       {s.linkedPosting && <span className="text-mini text-muted-foreground">{s.linkedPosting}</span>}
                       {s.scheduleType === "personal" && <Badge variant="outline" className="text-mini h-4 bg-muted border-0">개인</Badge>}
                     </div>
-                    {s.time && <span className="text-chip text-muted-foreground flex items-center gap-0.5 shrink-0"><Clock size={10} />{s.time}</span>}
+                    {s.time && <span className="text-chip text-muted-foreground flex items-center gap-0.5 shrink-0"><Clock size={11} />{s.time}</span>}
                   </div>
                 ))}
               </div>
@@ -211,7 +211,7 @@ export function ContextPanel({
             {allTodayTasks.length === 0 ? (
               <button onClick={() => setShowCreateTask(true)}
                 className="w-full flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground hover:text-primary hover:bg-accent/30 rounded-md border border-dashed border-border transition-colors">
-                <ListPlus size={14} />선택한 날짜에 할 일 추가하기
+                <ListPlus size={15} />선택한 날짜에 할 일 추가하기
               </button>
             ) : (
               <div className="flex flex-col gap-1">
@@ -230,7 +230,7 @@ export function ContextPanel({
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <Badge variant="outline" className={cn("text-mini h-3.5 px-1 border-0", priorityStyles[task.priority])}>{priorityLabels[task.priority]}</Badge>
                         {task.linkedPosting && <span className="text-mini text-muted-foreground">{task.linkedPosting}</span>}
-                        {task.dueTime && <span className="text-mini text-muted-foreground flex items-center gap-0.5"><Clock size={9} />{task.dueTime}</span>}
+                        {task.dueTime && <span className="text-mini text-muted-foreground flex items-center gap-0.5"><Clock size={10} />{task.dueTime}</span>}
                       </div>
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export function ContextPanel({
 
           <div className="bg-accent/60 border border-primary/20 rounded-md p-3">
             <div className="flex items-start gap-2">
-              <Sparkles size={14} className="text-primary mt-0.5 shrink-0" />
+              <Sparkles size={15} className="text-primary mt-0.5 shrink-0" />
               <p className="text-xs text-foreground">
                 <span className="font-semibold">AI 제안:</span> 삼성전자 마감이 오늘이에요. '최종 검토'를 오늘 할 일에 추가할까요?
               </p>

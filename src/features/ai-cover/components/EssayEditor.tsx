@@ -36,7 +36,7 @@ export function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
   const [genNode, setGenNode] = useState(-1); // -1 = 대기, 0~3 = 진행 중 노드
   const [spellIssues, setSpellIssues] = useState<SpellIssue[] | null>(null); // null = 닫힘
   // 우측 패널 폭 — 왼쪽 가장자리 드래그로 조절(내용이 많을 때 크게 보기, 2026-07-27 요청)
-  const [panelW, setPanelW] = useState(430);
+  const [panelW, setPanelW] = useState(473);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -298,7 +298,7 @@ export function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
               onChange={(e) => setTexts((t) => t.map((x, i) => (i === qIdx ? e.target.value : x)))}
               placeholder="여기에 나의 이야기를 자유롭게 써 보세요. 문체는 그대로, 다듬는 건 함께 해요."
               className="mt-5 w-full resize-none border-0 bg-transparent p-0 text-title text-foreground leading-[1.8] outline-none placeholder:text-muted-foreground/50"
-              style={{ minHeight: 240 }}
+              style={{ minHeight: 264 }}
               aria-label={`문항 ${q.no} 답변`}
             />
 

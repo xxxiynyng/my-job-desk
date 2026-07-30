@@ -48,9 +48,9 @@ export function ListHeader({
       <div className="flex items-center gap-1">
         {mode === "today" ? (
           <div className="flex items-center gap-0.5">
-            <Button aria-label="이전 날" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftDate(-1)}><ChevronLeft size={12} /></Button>
+            <Button aria-label="이전 날" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftDate(-1)}><ChevronLeft size={13} /></Button>
             <button onClick={onResetToday} className="text-xs text-muted-foreground hover:text-foreground px-1 min-w-[2.5rem] text-center">{todayLabel}</button>
-            <Button aria-label="다음 날" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftDate(1)}><ChevronRight size={12} /></Button>
+            <Button aria-label="다음 날" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftDate(1)}><ChevronRight size={13} /></Button>
           </div>
         ) : (
           <div className="flex items-center gap-0.5">
@@ -69,13 +69,13 @@ export function ListHeader({
                 ))}
               </PopoverContent>
             </Popover>
-            <Button aria-label="이전 달" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftMonth(-1)}><ChevronLeft size={12} /></Button>
+            <Button aria-label="이전 달" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftMonth(-1)}><ChevronLeft size={13} /></Button>
             <span className="text-xs text-muted-foreground min-w-[5rem] text-center">{monthLabel}</span>
-            <Button aria-label="다음 달" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftMonth(1)}><ChevronRight size={12} /></Button>
+            <Button aria-label="다음 달" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onShiftMonth(1)}><ChevronRight size={13} /></Button>
           </div>
         )}
         <button onClick={onAdd} className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors ml-1" title={`${label} 추가`}>
-          <Plus size={14} />
+          <Plus size={15} />
         </button>
       </div>
     </div>

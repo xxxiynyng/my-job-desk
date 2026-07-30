@@ -1227,11 +1227,11 @@ export default function Experiences() {
                   <table className="w-full min-w-full text-body table-fixed">
                     {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                     <colgroup>
-                      <col style={{ width: 48 }} />
+                      <col style={{ width: 53 }} />
                       {displayCols.map((k) => (
                         <col key={k} style={{ width: colW[k] }} />
                       ))}
-                      <col style={{ width: 56 }} />
+                      <col style={{ width: 62 }} />
                     </colgroup>
                     <thead>
                       <tr className="bg-slate-50 text-xs font-medium text-gray-600 select-none border-b border-border">

@@ -1072,8 +1072,8 @@ export function JobPostingTable() {
               <table className="w-full min-w-full text-body table-fixed">
                 {/* colgroup — table-fixed의 컬럼 너비 기준 명시, thead/tbody 정렬 보장 */}
                 <colgroup>
-                  <col style={{ width: 48 }} />
-                  <col style={{ width: 36 }} />
+                  <col style={{ width: 53 }} />
+                  <col style={{ width: 40 }} />
                   <col style={{ width: widths.company }} />
                   <col style={{ width: widths.title }} />
                   {orderedCols
@@ -1082,7 +1082,7 @@ export function JobPostingTable() {
                       const w = Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
                       return <col key={col.key} style={{ width: w }} />;
                     })}
-                  <col style={{ width: 56 }} />
+                  <col style={{ width: 62 }} />
                   {/* 스페이서 — width:100%로 남는 폭을 흡수(헤더 배경이 카드 우측 끝까지 채워짐).
                       table-fixed에서 width:auto col은 남는 폭을 안 먹어 헤더 배경이 끊겼음(2026-07-06 수정). */}
                   <col style={{ width: "100%" }} />
