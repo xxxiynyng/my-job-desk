@@ -7,6 +7,16 @@
 
 @layer base {
   :root {
+    /* ── UI 전역 배율 노브 (2026-07-30) ─────────────────────────
+       화면 전체가 한 단계 작다는 판단으로 브라우저 110% 확대와 같은 밀도를 기본값으로 삼는다.
+       루트 폰트를 올리면 Tailwind 기본 유틸이 전부 rem이라(p-4·gap-3·h-10·rounded-lg …)
+       여백·크기·라운드가 한꺼번에 따라온다. 아래 px 변수도 같은 노브를 곱해 쓴다.
+       ⚠️ src/lib/designTokens.ts의 UI_SCALE과 항상 같은 값 (design-tokens.test.ts가 검증).
+       폰트 크기는 반픽셀을 피하려고 FONT_SIZE에 ×1.1 반올림 정수로 박아 두었으므로
+       이 값만 바꿔서는 글자가 따라오지 않는다 — 배율 변경 시 FONT_SIZE도 다시 반올림할 것. */
+    --ui-scale: 1.1;
+    font-size: calc(100% * var(--ui-scale));
+
     /* ── Pickd raw palette ─────────────────────────────────────── */
     --blue-50: #EFF6FF;
     --blue-100: #DBEAFE;
@@ -135,24 +145,24 @@
     --tracking-wide: 0.02em;
 
     /* ── Pickd spacing & layout ────────────────────────────────── */
-    --space-0: 0px; --space-1: 2px; --space-2: 4px; --space-3: 6px;
-    --space-4: 8px; --space-5: 12px; --space-6: 16px; --space-7: 20px;
-    --space-8: 24px; --space-9: 32px; --space-10: 40px; --space-11: 48px;
-    --space-12: 64px; --space-13: 80px;
+    --space-0: 0px; --space-1: calc(2px * var(--ui-scale)); --space-2: calc(4px * var(--ui-scale)); --space-3: calc(6px * var(--ui-scale));
+    --space-4: calc(8px * var(--ui-scale)); --space-5: calc(12px * var(--ui-scale)); --space-6: calc(16px * var(--ui-scale)); --space-7: calc(20px * var(--ui-scale));
+    --space-8: calc(24px * var(--ui-scale)); --space-9: calc(32px * var(--ui-scale)); --space-10: calc(40px * var(--ui-scale)); --space-11: calc(48px * var(--ui-scale));
+    --space-12: calc(64px * var(--ui-scale)); --space-13: calc(80px * var(--ui-scale));
 
-    --container-max: 1320px;
-    --sidebar-w: 248px;
-    --row-h: 44px;
-    --control-h: 36px;
-    --control-h-sm: 30px;
-    --control-h-lg: 42px;
+    --container-max: calc(1320px * var(--ui-scale));
+    --sidebar-w: calc(248px * var(--ui-scale));
+    --row-h: calc(44px * var(--ui-scale));
+    --control-h: calc(36px * var(--ui-scale));
+    --control-h-sm: calc(30px * var(--ui-scale));
+    --control-h-lg: calc(42px * var(--ui-scale));
 
     /* ── Pickd radius ──────────────────────────────────────────── */
-    --radius-xs: 4px;
-    --radius-sm: 6px;    /* inputs, buttons, tags */
-    --radius-md: 8px;    /* cards, menus */
-    --radius-lg: 12px;   /* panels, modals */
-    --radius-xl: 16px;
+    --radius-xs: calc(4px * var(--ui-scale));
+    --radius-sm: calc(6px * var(--ui-scale));    /* inputs, buttons, tags */
+    --radius-md: calc(8px * var(--ui-scale));    /* cards, menus */
+    --radius-lg: calc(12px * var(--ui-scale));   /* panels, modals */
+    --radius-xl: calc(16px * var(--ui-scale));
     --radius-pill: 999px;
 
     /* ── Pickd shadows ─────────────────────────────────────────── */
@@ -284,15 +294,15 @@
 
 /* ── 전역 얇은 스크롤바 ───────────────────────────── */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: calc(4px * var(--ui-scale));
+  height: calc(4px * var(--ui-scale));
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-scale));
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.4);
