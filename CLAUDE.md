@@ -142,10 +142,11 @@ src/
 │   │   ├── HeaderCell·HeaderFilter·SortableColumnHeader·ColumnDivider·DragHandle
 │   │   ├── StarToggle·BatchActionBar·useTableDividers·RowContextMenu(Job/Exp 양쪽)
 │   │   └── tableState.ts                ★ 컬럼 필터·정렬 setter 팩토리 (탭1·탭2 공용)
-│   ├── ds/                              디자인시스템 프리미티브
-│   │                                    사용 중: StatusBadge·DdayChip·EssayStatus
-│   │                                    미사용 예비 11종(Avatar·Badge·Button·Card·Checkbox
-│   │                                    ·IconButton·Input·Select·Stepper·Tabs·Tag)
+│   ├── ds/                              디자인시스템 프리미티브 (6종, 전부 사용 중)
+│   │                                    StatusBadge·DdayChip·EssayStatus
+│   │                                    ConfirmDialog·KeywordChip·PageTitle
+│   │                                    ※ 미사용 예비 11종은 2026-07 삭제.
+│   │                                      새 프리미티브가 필요하면 ui/를 먼저 확인
 │   └── ui/                              shadcn/ui 벤더 (46개, 직접 수정 지양)
 ├── data/                                도메인 데이터·스토어 (기능 공용)
 │   ├── jobStatus.ts                     ★ 전형 6단계 JobStage·JOB_STAGES·FinalResult 정본
