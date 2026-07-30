@@ -144,7 +144,7 @@ export function DetailEditor({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[1140px] w-[95vw] h-[96vh] max-h-[96vh] p-0 gap-0 overflow-hidden [&>button]:hidden flex flex-col">
+      <DialogContent className="max-w-[71.25rem] w-[95vw] h-[96vh] max-h-[96vh] p-0 gap-0 overflow-hidden [&>button]:hidden flex flex-col">
         {/* 이 모달은 헤더를 직접 그리므로 접근성 이름·설명을 스크린리더 전용으로 제공한다
             (없으면 Radix가 aria-describedby 누락 경고를 낸다) */}
         <DialogTitle className="sr-only">경험 상세</DialogTitle>
@@ -163,7 +163,7 @@ export function DetailEditor({
                     <ChevronDown className="w-3 h-3 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="min-w-[180px] max-h-[60vh] overflow-y-auto">
+                <DropdownMenuContent align="start" className="min-w-[11.25rem] max-h-[60vh] overflow-y-auto">
                   <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                     유형 선택
                   </DropdownMenuLabel>
@@ -275,13 +275,13 @@ export function DetailEditor({
         <div
           className={cn(
             "grid flex-1 min-h-0 overflow-hidden transition-[grid-template-columns]",
-            aiOpen ? "grid-cols-[1fr_320px]" : "grid-cols-[1fr_0px]",
+            aiOpen ? "grid-cols-[1fr_20rem]" : "grid-cols-[1fr_0px]",
           )}
         >
           <div className="overflow-y-auto bg-background">
-            <div className="max-w-[820px] mx-auto px-10 py-8 space-y-8">
+            <div className="max-w-[51.25rem] mx-auto px-10 py-8 space-y-8">
               <section>
-                <div className="grid grid-cols-[120px_1fr] gap-x-4">
+                <div className="grid grid-cols-[7.5rem_1fr] gap-x-4">
                   {visibleFields.map((f, idx) => (
                     <FieldRow
                       key={f.key}
@@ -332,7 +332,7 @@ export function DetailEditor({
                         ? "자유롭게 써내려가 보세요. 자소서 초안을 그대로 옮겨 적어도 좋아요."
                         : "이 항목과 관련된 메모나 학습 과정을 자유롭게 적어 보세요."
                     }
-                    className="min-h-[440px] text-sm leading-7 bg-transparent border-0 px-0 focus-visible:ring-0 resize-none whitespace-pre-wrap shadow-none placeholder:text-muted-foreground/50"
+                    className="min-h-[27.5rem] text-sm leading-7 bg-transparent border-0 px-0 focus-visible:ring-0 resize-none whitespace-pre-wrap shadow-none placeholder:text-muted-foreground/50"
                   />
                 )}
                 {preset.writingGuide.length > 0 && !item.document && (
@@ -434,7 +434,7 @@ export function DetailEditor({
                   value={draftAnswer}
                   onChange={(e) => setDraftAnswer(e.target.value)}
                   placeholder="짧게 답변해 주세요. AI가 자소서 톤의 문장으로 다듬어 드려요."
-                  className="min-h-[80px] text-xs"
+                  className="min-h-[5rem] text-xs"
                 />
                 <Button
                   size="sm"
@@ -472,7 +472,7 @@ export function DetailEditor({
         <CopyGenerator open={copyOpen} onOpenChange={setCopyOpen} item={item} />
 
         <Dialog open={mergeOpen} onOpenChange={setMergeOpen}>
-          <DialogContent className="max-w-[860px] p-0 overflow-hidden">
+          <DialogContent className="max-w-[53.75rem] p-0 overflow-hidden">
             <DialogHeader className="px-6 py-4 border-b border-border">
               <DialogTitle className="text-base">비슷한 항목과 합치기</DialogTitle>
               <DialogDescription className="text-sm">최종 항목에 반영할 내용을 선택하세요.</DialogDescription>

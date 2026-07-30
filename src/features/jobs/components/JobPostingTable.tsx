@@ -258,7 +258,7 @@ function CompletedJobsSection({ jobs }: { jobs: Job[] }) {
                 return (
                   <div
                     key={job.id}
-                    className="flex flex-col items-center gap-1.5 w-[80px] py-3 px-1 rounded-lg select-none hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="flex flex-col items-center gap-1.5 w-[5rem] py-3 px-1 rounded-lg select-none hover:bg-muted/50 transition-colors cursor-pointer"
                   >
                     <div className="relative">
                       <FolderSvgIcon />
@@ -353,7 +353,7 @@ function KanbanView({
 
   return (
     <>
-      <div ref={scrollRef} onDragOver={handleContainerDragOver} className="flex gap-4 p-5 overflow-x-auto min-h-[320px]">
+      <div ref={scrollRef} onDragOver={handleContainerDragOver} className="flex gap-4 p-5 overflow-x-auto min-h-[20rem]">
         {STATUS_OPTIONS.map((col) => {
           const theme = stageStyle(col);
           const colJobs = byStatus[col];
@@ -363,7 +363,7 @@ function KanbanView({
             <div
               key={col}
               className={cn(
-                "flex-1 min-w-[180px] max-w-[240px] rounded-xl border-2 border-transparent bg-muted/15 p-2 transition-colors",
+                "flex-1 min-w-[11.25rem] max-w-[15rem] rounded-xl border-2 border-transparent bg-muted/15 p-2 transition-colors",
                 overCol === col && "border-primary/30 bg-primary/5",
               )}
               onDragOver={(e) => {
@@ -1021,7 +1021,7 @@ export function JobPostingTable() {
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">표시할 컬럼</TooltipContent>
                 </Tooltip>
-                <DropdownMenuContent align="end" className="min-w-[160px]">
+                <DropdownMenuContent align="end" className="min-w-[10rem]">
                   <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                     표시할 컬럼 선택
                   </DropdownMenuLabel>

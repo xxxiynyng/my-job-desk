@@ -139,7 +139,7 @@ export function CompetencyView({
       )}
 
       <div className="border border-border bg-card rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[168px_200px_190px_1fr] items-center px-5 py-2.5 bg-slate-50 border-b border-border text-xs font-medium text-gray-600">
+        <div className="grid grid-cols-[10.5rem_12.5rem_11.875rem_1fr] items-center px-5 py-2.5 bg-slate-50 border-b border-border text-xs font-medium text-gray-600">
           <span>역량</span>
           <span>내 소재</span>
           <span>{hasPostings ? "담은 공고가 묻는 곳" : "평균적으로 묻는 정도"}</span>
@@ -186,7 +186,7 @@ function Row({
   return (
     <div
       className={cn(
-        "grid grid-cols-[168px_200px_190px_1fr] items-center px-5 h-11 border-b border-border/50 last:border-b-0",
+        "grid grid-cols-[10.5rem_12.5rem_11.875rem_1fr] items-center px-5 h-11 border-b border-border/50 last:border-b-0",
         onOpen && "hover:bg-gray-50 cursor-pointer",
       )}
       onClick={() => onOpen?.(r.competency)}

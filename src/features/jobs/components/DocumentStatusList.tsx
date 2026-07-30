@@ -172,7 +172,7 @@ export function DocumentStatusList() {
 
                 {/* 2행: 진행률 바 + 퍼센트 */}
                 <div className="flex items-center gap-2 mt-2 pl-6">
-                  <Progress value={doc.progress} className="h-1.5 flex-1 max-w-[220px]" />
+                  <Progress value={doc.progress} className="h-1.5 flex-1 max-w-[13.75rem]" />
                   <span className="text-mini text-muted-foreground tabular-nums w-8 text-right">{doc.progress}%</span>
                 </div>
 

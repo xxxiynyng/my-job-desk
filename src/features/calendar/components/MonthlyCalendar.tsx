@@ -159,7 +159,7 @@ export function MonthlyCalendar({
       {/* Posting filter */}
       <div className="flex gap-2 mb-3 px-1">
         <Select value={postingFilter} onValueChange={onPostingFilterChange}>
-          <SelectTrigger className="h-8 text-xs w-auto min-w-[180px]">
+          <SelectTrigger className="h-8 text-xs w-auto min-w-[11.25rem]">
             <SelectValue>{filterLabel(postingFilter)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -213,7 +213,7 @@ export function MonthlyCalendar({
               key={idx}
               onClick={() => onDateSelect(date)}
               className={cn(
-                "relative flex flex-col items-start p-1 border border-transparent rounded-md text-left transition-colors min-h-[80px]",
+                "relative flex flex-col items-start p-1 border border-transparent rounded-md text-left transition-colors min-h-[5rem]",
                 isCurrentMonth ? "text-foreground" : "text-muted-foreground/40",
                 isSelected && "border-primary bg-accent/50",
                 !isSelected && isCurrentMonth && "hover:bg-accent/30"

@@ -69,7 +69,7 @@ export function JobSelect({ onSelect }: { onSelect: (id: string, qIdx?: number) 
     <div className="flex h-screen bg-background overflow-hidden">
       <PickdSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-[1320px] mx-auto px-8 py-7">
+        <div className="max-w-[82.5rem] mx-auto px-8 py-7">
           <div className="flex items-baseline justify-between gap-3 flex-wrap">
             <div>
               <PageTitle>AI 자소서</PageTitle>

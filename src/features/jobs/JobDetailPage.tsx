@@ -436,7 +436,7 @@ export default function JobDetail() {
         <div className="flex-1 overflow-y-auto bg-white">
         {/* Sticky top bar */}
         <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
-          <div className="mx-auto max-w-[860px] px-8 py-3 flex items-center justify-between">
+          <div className="mx-auto max-w-[53.75rem] px-8 py-3 flex items-center justify-between">
             <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
               <Link to="/" className="hover:text-foreground transition-colors shrink-0">지원 대시보드</Link>
               <ChevronRight className="w-3 h-3 shrink-0" />
@@ -466,7 +466,7 @@ export default function JobDetail() {
         </div>
 
         {/* Centered content column */}
-        <div className="mx-auto max-w-[860px] px-8 pt-11 pb-24">
+        <div className="mx-auto max-w-[53.75rem] px-8 pt-11 pb-24">
 
           {/* Title + minimal at-a-glance meta */}
           <header className="mb-8">
@@ -729,7 +729,7 @@ export default function JobDetail() {
                       className="flex-1 min-w-0 flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded text-left hover:bg-muted/30 transition-colors"
                     >
                       <span className={cn(
-                        "shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-colors",
+                        "shrink-0 w-4 h-4 rounded-[0.3125rem] border flex items-center justify-center transition-colors",
                         checked ? "bg-pickd-green border-pickd-green text-white" : "border-border bg-background"
                       )}>
                         {checked && <Check className="w-3 h-3" />}
@@ -764,7 +764,7 @@ export default function JobDetail() {
             {/* 공고에 없는 서류 직접 추가 — 목록 행처럼 자연스러운 입력 + 체크로 확인 */}
             {addingDoc && (
               <div className="flex items-center gap-2.5 px-2 py-1.5 -mx-2">
-                <span className="shrink-0 w-4 h-4 rounded-[5px] border border-dashed border-border bg-background" />
+                <span className="shrink-0 w-4 h-4 rounded-[0.3125rem] border border-dashed border-border bg-background" />
                 <input
                   autoFocus
                   value={newDoc}
@@ -852,11 +852,11 @@ export default function JobDetail() {
         <aside
           className={cn(
             "border-l border-border flex flex-col shrink-0 transition-all duration-300 overflow-hidden bg-white",
-            rawOpen ? "w-[440px]" : "w-0"
+            rawOpen ? "w-[27.5rem]" : "w-0"
           )}
         >
           {rawOpen && (
-            <div className="flex flex-col h-full w-[440px]">
+            <div className="flex flex-col h-full w-[27.5rem]">
               <div className="px-5 py-3.5 border-b border-border bg-muted/20 flex items-center justify-between shrink-0 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center shrink-0">

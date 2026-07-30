@@ -46,7 +46,7 @@ export function ImportSheet({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-[560px] p-0 overflow-hidden">
+      <DialogContent className="max-w-[35rem] p-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b border-border text-left space-y-0">
           <DialogTitle className="text-title font-semibold">자소서 붙여넣기</DialogTitle>
           <DialogDescription className="text-body text-muted-foreground mt-1">
@@ -88,7 +88,7 @@ export function ImportSheet({
                   <Textarea
                     value={u.answer}
                     onChange={(e) => set(i, { answer: e.target.value.slice(0, MAX_CHARS) })}
-                    className="min-h-[150px] text-sm"
+                    className="min-h-[9.375rem] text-sm"
                     placeholder="자소서 답변을 붙여넣어 주세요."
                   />
                 </div>

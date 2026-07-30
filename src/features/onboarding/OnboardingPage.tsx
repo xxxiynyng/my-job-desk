@@ -244,7 +244,7 @@ export default function Onboarding() {
       aria-label="내 픽 카드"
       className={cn(
         "rounded-xl border border-border bg-card p-5",
-        standalone ? "w-full" : "w-full lg:w-[300px] lg:sticky lg:top-6 lg:shrink-0 lg:order-last"
+        standalone ? "w-full" : "w-full lg:w-[18.75rem] lg:sticky lg:top-6 lg:shrink-0 lg:order-last"
       )}
     >
       <div className="flex items-center justify-between">
@@ -257,9 +257,9 @@ export default function Onboarding() {
           </span>
         )}
       </div>
-      <div className="mt-3 min-h-[26px] text-lg font-bold text-foreground">{s.nickname ? `${s.nickname}님` : " "}</div>
+      <div className="mt-3 min-h-[1.625rem] text-lg font-bold text-foreground">{s.nickname ? `${s.nickname}님` : " "}</div>
       <div className="text-xs text-muted-foreground">입력할수록 공고 추천이 정확해져요</div>
-      <div className="mt-4 flex min-h-[32px] flex-wrap gap-1.5">
+      <div className="mt-4 flex min-h-[2rem] flex-wrap gap-1.5">
         {pickChips.length === 0 ? (
           <span className="py-1 text-xs text-muted-foreground">아직 담긴 정보가 없어요</span>
         ) : (
@@ -357,7 +357,7 @@ export default function Onboarding() {
   if (s.step === "login") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-16 text-center">
-        <div className="mb-7 flex h-[72px] w-[72px] items-center justify-center rounded-2xl bg-primary/10">
+        <div className="mb-7 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-2xl bg-primary/10">
           <img src="/logo-mark.svg" alt="Pickd" className="h-10 w-auto" />
         </div>
         <h1 className="text-display font-bold leading-[1.3] tracking-tight">
@@ -367,7 +367,7 @@ export default function Onboarding() {
           공고·일정·경험·자소서를 한 곳에서.<br className="sm:hidden" /> 1분이면 시작해요.
         </p>
 
-        <div className="mt-9 w-full max-w-[320px]">
+        <div className="mt-9 w-full max-w-[20rem]">
           {clientId ? (
             <div ref={btnRef} className="flex justify-center" />
           ) : (
@@ -381,13 +381,13 @@ export default function Onboarding() {
           )}
         </div>
 
-        <div className="mt-12 grid w-full max-w-[560px] grid-cols-3 gap-3">
+        <div className="mt-12 grid w-full max-w-[35rem] grid-cols-3 gap-3">
           {([[ClipboardList, "공고·일정을 한눈에", "마감·전형 일정을 놓치지 않게"],
              [Layers, "경험은 한 번만 정리", "자소서·이력서에 그대로 재사용"],
              [Sparkles, "AI 자소서 초안까지", "내 경험으로 초안을 빠르게"]] as const).map(([Icon, title, desc]) => (
             <div key={title} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card px-3 py-4 text-center">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Icon className="h-[18px] w-[18px] text-primary" />
+                <Icon className="h-[1.125rem] w-[1.125rem] text-primary" />
               </span>
               <div className="text-body font-bold text-foreground">{title}</div>
               <div className="text-xs leading-relaxed text-muted-foreground">{desc}</div>
@@ -444,13 +444,13 @@ export default function Onboarding() {
         <p className="mt-2 text-center text-sm text-muted-foreground">
           이 정보로 맞는 공고를 찾아드릴게요.<br />나머지는 쓰면서 채워도 충분해요.
         </p>
-        <div className="mt-6 w-full max-w-[360px]">
+        <div className="mt-6 w-full max-w-[22.5rem]">
           <PickCard standalone done />
         </div>
         <button
           type="button"
           onClick={finish}
-          className="mt-7 inline-flex w-full max-w-[360px] items-center justify-center gap-1.5 rounded-lg bg-action px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-action-hover"
+          className="mt-7 inline-flex w-full max-w-[22.5rem] items-center justify-center gap-1.5 rounded-lg bg-action px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-action-hover"
         >
           Pickd 시작하기 <ArrowRight className="h-4 w-4" />
         </button>
@@ -462,7 +462,7 @@ export default function Onboarding() {
   return (
     <Shell>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-8">
-        <div className="min-w-0 w-full rounded-xl border border-border bg-card p-5 sm:p-6 lg:w-[600px] lg:flex-none">
+        <div className="min-w-0 w-full rounded-xl border border-border bg-card p-5 sm:p-6 lg:w-[37.5rem] lg:flex-none">
 
           {s.step === "me" && (
             <>
@@ -555,7 +555,7 @@ export default function Onboarding() {
                     />
                   </div>
                   {jobQuery.trim() ? (
-                    <div className="max-h-[290px] space-y-0.5 overflow-auto rounded-lg border border-border p-2.5">
+                    <div className="max-h-[18.125rem] space-y-0.5 overflow-auto rounded-lg border border-border p-2.5">
                       {jobHits.length === 0 ? (
                         <p className="px-2.5 py-2 text-xs text-muted-foreground">검색 결과가 없어요 — 다른 키워드로 찾아보세요</p>
                       ) : jobHits.map(({ cat, job }) => (
@@ -567,18 +567,18 @@ export default function Onboarding() {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid min-h-[250px] grid-cols-[120px_1fr] overflow-hidden rounded-lg border border-border sm:grid-cols-[160px_1fr]">
-                      <div className="flex max-h-[320px] flex-col overflow-y-auto border-r border-border bg-[hsl(var(--muted))]/40">
+                    <div className="grid min-h-[15.625rem] grid-cols-[7.5rem_1fr] overflow-hidden rounded-lg border border-border sm:grid-cols-[10rem_1fr]">
+                      <div className="flex max-h-[20rem] flex-col overflow-y-auto border-r border-border bg-[hsl(var(--muted))]/40">
                         {Object.keys(JOB_TREE).map(c => (
                           <button
                             key={c} type="button" onClick={() => up({ jobCat: c })}
-                            className={cn("shrink-0 border-b border-border px-3.5 py-3 text-left text-sm", s.jobCat === c && "bg-card font-bold text-primary shadow-[inset_3px_0_0] shadow-primary")}
+                            className={cn("shrink-0 border-b border-border px-3.5 py-3 text-left text-sm", s.jobCat === c && "bg-card font-bold text-primary shadow-[inset_0.1875rem_0_0] shadow-primary")}
                           >
                             {c}
                           </button>
                         ))}
                       </div>
-                      <div className="max-h-[320px] space-y-0.5 overflow-auto p-2.5">
+                      <div className="max-h-[20rem] space-y-0.5 overflow-auto p-2.5">
                         {(JOB_TREE[s.jobCat] ?? []).map(j => (
                           <label key={j} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm hover:bg-muted">
                             <input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" checked={s.jobs.includes(j)} onChange={() => up({ jobs: toggleIn(s.jobs, j, 5) })} />
@@ -792,7 +792,7 @@ function StepHead({ q, sub }: { q: React.ReactNode; sub?: string }) {
 
 function CheckBox({ on }: { on: boolean }) {
   return (
-    <span className={cn("flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md border text-primary-foreground transition-colors", on ? "border-primary bg-primary" : "border-border")}>
+    <span className={cn("flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-md border text-primary-foreground transition-colors", on ? "border-primary bg-primary" : "border-border")}>
       {on && <Check className="h-3.5 w-3.5" />}
     </span>
   );

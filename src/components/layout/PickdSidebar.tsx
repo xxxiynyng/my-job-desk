@@ -18,7 +18,7 @@ export function PickdSidebar() {
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
 
   return (
-    <aside className="flex flex-col w-[60px] border-r border-border bg-card py-4 items-center shrink-0">
+    <aside className="flex flex-col w-[3.75rem] border-r border-border bg-card py-4 items-center shrink-0">
       <NavLink to="/"><img src="/logo-mark.svg" alt="Pickd" className="w-7 h-7 mb-6" /></NavLink>
 
       <nav className="flex flex-col gap-1 flex-1">
@@ -37,7 +37,7 @@ export function PickdSidebar() {
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
-                  <item.icon className="w-[18px] h-[18px] shrink-0" />
+                  <item.icon className="w-[1.125rem] h-[1.125rem] shrink-0" />
                 </NavLink>
               </TooltipTrigger>
               <TooltipContent side="right">{item.label}</TooltipContent>
@@ -59,7 +59,7 @@ export function PickdSidebar() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                <CalendarDays className="w-[18px] h-[18px] shrink-0" />
+                <CalendarDays className="w-[1.125rem] h-[1.125rem] shrink-0" />
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">캘린더</TooltipContent>
@@ -80,7 +80,7 @@ export function PickdSidebar() {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
-              <Settings className="w-[18px] h-[18px] shrink-0" />
+              <Settings className="w-[1.125rem] h-[1.125rem] shrink-0" />
             </NavLink>
           </TooltipTrigger>
           <TooltipContent side="right">설정</TooltipContent>
@@ -93,7 +93,7 @@ export function PickdSidebar() {
                 aria-label={item.label}
                 className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
-                <item.icon className="w-[18px] h-[18px] shrink-0" />
+                <item.icon className="w-[1.125rem] h-[1.125rem] shrink-0" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">{item.label}</TooltipContent>

@@ -55,7 +55,7 @@ export default function Settings() {
       <div className="flex h-screen bg-background overflow-hidden">
         <PickdSidebar />
         <main className="flex-1 overflow-y-auto">
-          <div className="px-10 py-8 max-w-[720px] mx-auto">
+          <div className="px-10 py-8 max-w-[45rem] mx-auto">
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-7">
               <PageTitle>설정</PageTitle>
@@ -105,7 +105,7 @@ export default function Settings() {
                 <div className="grid grid-cols-2 gap-x-10 gap-y-0.5 mt-3">
                   {PREFS_FIELDS.filter(({ key }) => prefs[key]).map(({ key, label }) => (
                     <div key={key} className="flex items-center gap-3 py-1.5 border-b border-border/30">
-                      <span className="text-chip text-muted-foreground w-[96px] shrink-0">{label}</span>
+                      <span className="text-chip text-muted-foreground w-[6rem] shrink-0">{label}</span>
                       <span className="text-xs text-foreground truncate">{prefs[key]}</span>
                     </div>
                   ))}

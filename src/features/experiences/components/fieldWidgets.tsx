@@ -85,7 +85,7 @@ export function FieldRow({
               value={value}
               onChange={(e) => onChangeValue(e.target.value)}
               placeholder={field.placeholder ?? "내용을 입력하세요"}
-              className="min-h-[32px] text-body bg-transparent border-0 px-0 py-0 focus-visible:ring-0 resize-none shadow-none placeholder:text-muted-foreground/50"
+              className="min-h-[2rem] text-body bg-transparent border-0 px-0 py-0 focus-visible:ring-0 resize-none shadow-none placeholder:text-muted-foreground/50"
             />
           ) : field.type === "file" ? (
             <button className="text-body text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
@@ -179,7 +179,7 @@ export function FieldAdder({
             필드 추가
           </TooltipContent>
         </Tooltip>
-        <DropdownMenuContent align="start" className="min-w-[220px] max-h-[60vh] overflow-y-auto">
+        <DropdownMenuContent align="start" className="min-w-[13.75rem] max-h-[60vh] overflow-y-auto">
           {ownExtras.length > 0 && (
             <>
               {ownExtras.map((f) => (
@@ -239,7 +239,7 @@ export function FieldAdder({
       </DropdownMenu>
 
       <Dialog open={customOpen} onOpenChange={setCustomOpen}>
-        <DialogContent className="max-w-[420px]">
+        <DialogContent className="max-w-[26.25rem]">
           <DialogHeader>
             <DialogTitle className="text-base">사용자 지정 필드</DialogTitle>
             <DialogDescription className="text-xs">원하는 항목명과 값을 자유롭게 입력하세요.</DialogDescription>
@@ -322,7 +322,7 @@ export function KeywordEditor({ keywords, onChange }: { keywords: string[]; onCh
             }
           }}
           placeholder="키워드 입력 후 Enter"
-          className="text-chip px-2 py-0.5 rounded-full border border-border bg-card focus:outline-none focus:border-primary min-w-[120px]"
+          className="text-chip px-2 py-0.5 rounded-full border border-border bg-card focus:outline-none focus:border-primary min-w-[7.5rem]"
         />
       ) : (
         <DropdownMenu>

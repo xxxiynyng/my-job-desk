@@ -160,7 +160,7 @@ export function TodayMiniCalendar({
             <div
               key={i}
               className={cn(
-                "min-h-[44px] border-r border-b border-border/60 p-1 text-mini",
+                "min-h-[2.75rem] border-r border-b border-border/60 p-1 text-mini",
                 (i + 1) % 7 === 0 && "border-r-0",
                 !d && "bg-muted/10",
               )}

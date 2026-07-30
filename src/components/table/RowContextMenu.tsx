@@ -300,7 +300,7 @@ export function ExpRowContextMenu({
               <span className="w-4 text-center shrink-0">🔄</span>
               유형 변경
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-40 max-h-[280px] overflow-y-auto">
+            <DropdownMenuSubContent className="w-40 max-h-[17.5rem] overflow-y-auto">
               {typeOptions.map((t) => (
                 <DropdownMenuItem
                   key={t}

@@ -51,7 +51,7 @@ export function CreateScheduleModal({ open, onClose, onSave, applications, defau
               </SelectContent>
             </Select>
           </div>
-          <div><Label className="text-xs">메모</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="메모" className="mt-1 text-sm min-h-[60px]" /></div>
+          <div><Label className="text-xs">메모</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="메모" className="mt-1 text-sm min-h-[3.75rem]" /></div>
         </div>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
@@ -119,7 +119,7 @@ export function CreateTaskModal({ open, onClose, onSave, applications, defaultDa
               </Select>
             </div>
           </div>
-          <div><Label className="text-xs">메모</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="메모" className="mt-1 text-sm min-h-[60px]" /></div>
+          <div><Label className="text-xs">메모</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="메모" className="mt-1 text-sm min-h-[3.75rem]" /></div>
         </div>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={onClose}>취소</Button>

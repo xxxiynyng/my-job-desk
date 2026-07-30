@@ -204,7 +204,7 @@ export function BasicInfoPanel() {
     const val       = infoValues[f.key] ?? "";
     return (
       <div key={f.key} className="group/row flex items-start gap-3 py-2 border-b border-border/40 last:border-0 min-w-0">
-        <span className="text-xs text-muted-foreground w-[76px] shrink-0 leading-tight pt-[3px]" title={f.label}>{f.label}</span>
+        <span className="text-xs text-muted-foreground w-[4.75rem] shrink-0 leading-tight pt-[0.1875rem]" title={f.label}>{f.label}</span>
         <div className="flex-1 min-w-0 flex items-start gap-1">
           {isEditing ? (
             <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -232,7 +232,7 @@ export function BasicInfoPanel() {
               className="flex-1 min-w-0 inline-flex items-start gap-1.5 text-body text-foreground text-left rounded-md px-1.5 -mx-1.5 py-0.5 hover:bg-muted transition-colors"
             >
               <span className="break-words min-w-0">{val}</span>
-              <Copy className="w-3 h-3 mt-[3px] opacity-0 group-hover/row:opacity-60 shrink-0 transition-opacity text-muted-foreground" />
+              <Copy className="w-3 h-3 mt-[0.1875rem] opacity-0 group-hover/row:opacity-60 shrink-0 transition-opacity text-muted-foreground" />
             </button>
           ) : (
             <button onClick={() => startInline(f.key)} className="flex-1 text-left text-xs text-muted-foreground/50 italic hover:text-primary inline-flex items-center gap-1">
@@ -266,11 +266,11 @@ export function BasicInfoPanel() {
               <div className="group/sec bg-card border border-border rounded-xl px-4 py-3.5">
                 <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border/50">
                   {photoShown && basicPhoto?.url ? (
-                    <div className="w-12 h-[60px] rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0">
+                    <div className="w-12 h-[3.75rem] rounded-lg border border-border overflow-hidden bg-muted/30 shrink-0">
                       <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-12 h-[60px] rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-12 h-[3.75rem] rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <User className="w-6 h-6 text-muted-foreground/50" />
                     </div>
                   )}
@@ -373,7 +373,7 @@ export function BasicInfoPanel() {
           {/* 증명사진 */}
           <EditSection title="증명사진">
             <div className="flex items-center gap-5">
-              <div className="w-[80px] h-[108px] rounded-xl border border-border overflow-hidden bg-muted/30 shrink-0 shadow-sm">
+              <div className="w-[5rem] h-[6.75rem] rounded-xl border border-border overflow-hidden bg-muted/30 shrink-0 shadow-sm">
                 {basicPhoto?.url
                   ? <img src={basicPhoto.url} alt="증명사진" className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 text-mini">사진 없음</div>

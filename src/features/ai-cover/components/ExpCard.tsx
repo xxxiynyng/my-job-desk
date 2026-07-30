@@ -24,7 +24,7 @@ export function ExpCard({ exp, checked, onToggle }: { exp: Exp; checked: boolean
         <span className="text-sm font-medium text-foreground truncate">{exp.name}</span>
         <span
           className={cn(
-            "w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center transition-colors",
+            "w-[1.125rem] h-[1.125rem] rounded-full shrink-0 flex items-center justify-center transition-colors",
             checked ? "text-white" : "border-2 border-border",
           )}
           style={checked ? { background: "var(--brand)" } : undefined}

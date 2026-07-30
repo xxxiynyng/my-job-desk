@@ -136,7 +136,7 @@ function RepExperienceCard({
         <div className="space-y-1.5">
           {filledFields.map((f) => (
             <div key={f.key} className="flex items-start gap-3 group/row">
-              <span className="text-chip text-muted-foreground w-[92px] shrink-0 pt-0.5">{f.label}</span>
+              <span className="text-chip text-muted-foreground w-[5.75rem] shrink-0 pt-0.5">{f.label}</span>
               <button
                 onClick={() => onCopy(f.value)}
                 className="group/val inline-flex items-start gap-1 text-body text-foreground text-left flex-1 min-w-0 rounded px-1 -mx-1 hover:bg-muted transition-colors"
@@ -194,7 +194,7 @@ export function InfoRow({
 
   return (
     <div className="flex items-center gap-3 min-w-0 group">
-      <span className="text-chip text-muted-foreground w-[96px] shrink-0">{label}</span>
+      <span className="text-chip text-muted-foreground w-[6rem] shrink-0">{label}</span>
       {editing ? (
         <input
           ref={inputRef}

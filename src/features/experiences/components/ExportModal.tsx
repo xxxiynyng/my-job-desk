@@ -100,7 +100,7 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[520px]">
+      <DialogContent className="max-w-[32.5rem]">
         <DialogHeader>
           <DialogTitle className="text-base">내보내기</DialogTitle>
           <DialogDescription className={cn("text-chip", step === 1 && "sr-only")}>
@@ -127,7 +127,7 @@ export function ExportModal({ open, onClose, selectedItems, allItems, visibleKey
                   >
                     <span
                       className={cn(
-                        "w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0",
+                        "w-3.5 h-3.5 rounded-[0.1875rem] border flex items-center justify-center shrink-0",
                         on ? "bg-primary border-primary" : "border-border",
                       )}
                     >

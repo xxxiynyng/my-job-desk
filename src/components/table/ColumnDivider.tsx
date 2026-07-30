@@ -47,7 +47,7 @@ export function ColumnDivider({ left, onResizeMouseDown, active }: ColumnDivider
       {/* 리사이즈 히트박스 — 경계에서 왼쪽으로만 확장([x-10, x-2]), 경계 바로 앞 2px는 비워서
           오른쪽 옆 컬럼 그립(DragHandle, 경계에서 2px 띄워 시작)과 절대 겹치지 않게 한다. */}
       <div
-        className="absolute inset-y-0 left-0 w-2 -translate-x-[10px] cursor-col-resize select-none"
+        className="absolute inset-y-0 left-0 w-2 -translate-x-[0.625rem] cursor-col-resize select-none"
         style={{ touchAction: "none" }}
         onMouseDown={onResizeMouseDown}
       />

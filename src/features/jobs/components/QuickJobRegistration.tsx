@@ -277,7 +277,7 @@ export function QuickJobRegistration() {
                 </div>
 
                 {/* 우: 최근 검색어 */}
-                <div className="w-[280px] shrink-0 p-4">
+                <div className="w-[17.5rem] shrink-0 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">최근 검색어</p>
                     {recent.length > 0 && (

@@ -31,7 +31,7 @@ export function CopyGenerator({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[560px]">
+      <DialogContent className="max-w-[35rem]">
         <DialogHeader>
           <DialogTitle className="text-base">복붙용 문장 만들기</DialogTitle>
           <DialogDescription className="text-sm">목적과 글자수에 맞춰 문장을 다듬어 드려요.</DialogDescription>
@@ -81,7 +81,7 @@ export function CopyGenerator({
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="min-h-[180px] text-body mt-1"
+          className="min-h-[11.25rem] text-body mt-1"
           placeholder="생성된 문장이 여기에 표시돼요"
         />
         <div className="flex items-center justify-between mt-1">

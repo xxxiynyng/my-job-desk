@@ -188,7 +188,7 @@ export function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           {/* Sticky top bar — JobDetail 패턴. 'AI 자소서'를 누르면 공고 선택으로 */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-border/60">
             {/* h-12 고정 — 오른쪽 도구 창 헤더와 같은 높이로 상단 선이 이어지게 (2026-07-29) */}
-            <div className="mx-auto max-w-[820px] px-8 h-12 flex items-center gap-4">
+            <div className="mx-auto max-w-[51.25rem] px-8 h-12 flex items-center gap-4">
               {/* 브레드크럼 3단 폐기 → ← + 기관명 하나만 (2026-07-29 확정) */}
               <nav className="flex items-center gap-1.5 min-w-0">
                 <button
@@ -206,7 +206,7 @@ export function EssayEditor({ job, onBack }: { job: Job; onBack: () => void }) {
           </div>
 
           {/* Centered content column */}
-          <div className="mx-auto max-w-[820px] px-8 pt-9 pb-24">
+          <div className="mx-auto max-w-[51.25rem] px-8 pt-9 pb-24">
             {/* 얇은 문서 헤더 — 태그 무채색, 컬러는 D-day 하나만 */}
             <header className="mb-7">
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">

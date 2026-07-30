@@ -155,7 +155,7 @@ export function StoryCard({
                 <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[160px]">
+            <DropdownMenuContent align="end" className="min-w-[10rem]">
               {onSplit && (
                 <DropdownMenuItem onClick={onSplit} className="text-xs">
                   <Scissors className="w-3.5 h-3.5" /> 둘로 나누기

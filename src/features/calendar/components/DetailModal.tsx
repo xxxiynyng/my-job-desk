@@ -73,7 +73,7 @@ export function PostingDetailModal({ app, schedules, tasks, onClose, onUpdateSta
                 <div className="absolute left-0 top-1 bottom-1 w-px bg-border" />
                 {app.keyDates.map((kd, i) => (
                   <div key={i} className="flex items-center gap-3 py-1 relative">
-                    <div className="absolute -left-[5px] w-2.5 h-2.5 rounded-full border-2 border-border bg-background" />
+                    <div className="absolute -left-[0.3125rem] w-2.5 h-2.5 rounded-full border-2 border-border bg-background" />
                     <span className="text-chip tabular-nums text-muted-foreground w-20 shrink-0">{kd.date}</span>
                     <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
                     <span className="text-xs font-medium text-foreground">{kd.label}</span>

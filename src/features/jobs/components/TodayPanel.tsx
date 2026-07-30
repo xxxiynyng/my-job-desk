@@ -82,7 +82,7 @@ export function TodayPanel() {
   const handleAddTodo    = () => navigate("/calendar");
 
   return (
-    <div className="space-y-4 py-4 px-4 min-w-[288px]">
+    <div className="space-y-4 py-4 px-4 min-w-[18rem]">
       {/* 날짜 헤더 — 클릭 시 캘린더 탭으로 이동 */}
       <button
         onClick={() => navigate("/calendar")}

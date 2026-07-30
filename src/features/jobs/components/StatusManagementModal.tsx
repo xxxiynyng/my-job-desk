@@ -60,7 +60,7 @@ interface Props {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[100px_1fr] gap-3 py-1.5 items-center">
+    <div className="grid grid-cols-[6.25rem_1fr] gap-3 py-1.5 items-center">
       <div className="text-chip text-muted-foreground">{label}</div>
       <div className="text-body text-foreground">{children}</div>
     </div>
@@ -123,7 +123,7 @@ export function StatusManagementModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-[860px] w-[94vw] max-h-[90vh] p-0 gap-0 overflow-hidden bg-background border-border rounded-xl [&>button]:hidden"
+        className="max-w-[53.75rem] w-[94vw] max-h-[90vh] p-0 gap-0 overflow-hidden bg-background border-border rounded-xl [&>button]:hidden"
         onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
@@ -157,7 +157,7 @@ export function StatusManagementModal({
 
         <DialogTitle className="sr-only">지원 상태 관리</DialogTitle>
 
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)] px-6 py-5 space-y-6 bg-muted/20">
+        <div className="overflow-y-auto max-h-[calc(90vh-5rem)] px-6 py-5 space-y-6 bg-muted/20">
           {/* 공고 기본 정보 */}
           <Section title="공고 기본 정보">
             <div className="bg-card border border-border rounded-lg px-4 py-2">
@@ -283,7 +283,7 @@ export function StatusManagementModal({
                               {it.status}
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="min-w-[100px]">
+                          <DropdownMenuContent align="start" className="min-w-[6.25rem]">
                             {(["예정", "진행 중", "완료", "지연"] as ItemStatus[]).map((s) => (
                               <DropdownMenuItem
                                 key={s}

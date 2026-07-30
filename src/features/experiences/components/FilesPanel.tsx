@@ -262,7 +262,7 @@ function FileGrid({
                               title={f.name}
                               className="group text-left bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-sm transition-all"
                             >
-                              <div className="h-[104px] bg-muted/30 flex items-center justify-center overflow-hidden">
+                              <div className="h-[6.5rem] bg-muted/30 flex items-center justify-center overflow-hidden">
                                 {f.fileKind === "image" && f.url ? (
                                   <img src={f.url} alt={f.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                                 ) : (
@@ -467,7 +467,7 @@ function PreviewModal({
         </DialogHeader>
 
         {/* 미리보기 */}
-        <div className="bg-muted/30 border border-border rounded-lg overflow-hidden flex items-center justify-center min-h-[420px]">
+        <div className="bg-muted/30 border border-border rounded-lg overflow-hidden flex items-center justify-center min-h-[26.25rem]">
           {f.fileKind === "image" ? (
             f.url ? (
               <img src={f.url} alt={f.name} className="max-h-[60vh] object-contain" />

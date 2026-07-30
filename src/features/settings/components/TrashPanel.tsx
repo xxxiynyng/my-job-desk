@@ -61,7 +61,7 @@ export function TrashPanel({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-[640px]">
+      <DialogContent className="max-w-[40rem]">
         <DialogHeader>
           <div className="flex items-center justify-between pr-6">
             <DialogTitle className="text-base flex items-center gap-2">
@@ -118,10 +118,10 @@ export function TrashPanel({ open, onClose }: { open: boolean; onClose: () => vo
             <table className="w-full text-body">
               <thead>
                 <tr className="bg-slate-50 text-xs font-medium text-gray-600 border-b border-border">
-                  <th className="text-left font-medium px-3 py-2 w-[64px]">종류</th>
+                  <th className="text-left font-medium px-3 py-2 w-[4rem]">종류</th>
                   <th className="text-left font-medium px-2 py-2">이름</th>
-                  <th className="text-left font-medium px-2 py-2 w-[104px]">남은 기간</th>
-                  <th className="text-right font-medium px-3 py-2 w-[128px]">관리</th>
+                  <th className="text-left font-medium px-2 py-2 w-[6.5rem]">남은 기간</th>
+                  <th className="text-right font-medium px-3 py-2 w-[8rem]">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,8 +135,8 @@ export function TrashPanel({ open, onClose }: { open: boolean; onClose: () => vo
                         </span>
                       </td>
                       <td className="px-2 py-2.5 align-middle">
-                        <div className="text-xs text-foreground truncate max-w-[240px]">{e.name}</div>
-                        {e.sub && <div className="text-mini text-muted-foreground/70 truncate max-w-[240px]">{e.sub}</div>}
+                        <div className="text-xs text-foreground truncate max-w-[15rem]">{e.name}</div>
+                        {e.sub && <div className="text-mini text-muted-foreground/70 truncate max-w-[15rem]">{e.sub}</div>}
                       </td>
                       <td className={cn("px-2 py-2.5 align-middle text-chip", urgent ? "text-amber-600" : "text-muted-foreground")}>
                         {daysLeftLabel(e.deletedAt)}

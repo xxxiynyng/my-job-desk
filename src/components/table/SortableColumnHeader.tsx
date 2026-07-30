@@ -85,7 +85,7 @@ export function SortableColumnHeader({
         ref={setActivatorNodeRef}
         {...listeners}
         iconClassName="w-3 h-3"
-        className="absolute left-[2px] inset-y-1 w-[16px] z-30 text-gray-400 hover:text-gray-600"
+        className="absolute left-[2px] inset-y-1 w-[1rem] z-30 text-gray-400 hover:text-gray-600"
       />
       <span className="inline-flex items-center gap-1">
         <SortHeaderButton label={label} dir={sortDir} onSort={onSortToggle} />

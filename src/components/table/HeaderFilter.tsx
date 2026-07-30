@@ -81,7 +81,7 @@ export function HeaderFilterContent({
           className="h-7 text-chip"
         />
       )}
-      <div className="max-h-[220px] overflow-y-auto -mx-1 px-1">
+      <div className="max-h-[13.75rem] overflow-y-auto -mx-1 px-1">
         {filtered.length === 0 && <p className="text-chip text-muted-foreground px-1 py-2">옵션이 없어요.</p>}
         {filtered.map((o) => {
           const checked = selectedSet.has(o);

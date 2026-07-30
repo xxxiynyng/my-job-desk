@@ -107,7 +107,7 @@ export function ColumnMenuContent({
               <ListFilter className="w-3.5 h-3.5" /> 필터
               {filterActive && <span className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />}
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="min-w-[220px] p-2">
+            <DropdownMenuSubContent className="min-w-[13.75rem] p-2">
               <HeaderFilterContent {...filter} />
             </DropdownMenuSubContent>
           </DropdownMenuSub>

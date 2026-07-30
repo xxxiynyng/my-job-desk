@@ -901,7 +901,7 @@ export default function Experiences() {
         <PickdSidebar />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-10 pt-8 pb-10 max-w-[1400px] mx-auto space-y-3">
+          <div className="px-10 pt-8 pb-10 max-w-[87.5rem] mx-auto space-y-3">
             {/* ── 페이지 헤더 ───────────────────────────────────────── */}
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -996,7 +996,7 @@ export default function Experiences() {
                           >
                             <Filter className="w-3 h-3" />
                             {activeFilterCount > 0 && (
-                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-mini leading-[14px] text-center">
+                              <span className="absolute -top-1 -right-1 min-w-[0.875rem] h-[0.875rem] px-1 rounded-full bg-primary text-primary-foreground text-mini leading-[0.875rem] text-center">
                                 {activeFilterCount}
                               </span>
                             )}
@@ -1007,7 +1007,7 @@ export default function Experiences() {
                         필터
                       </TooltipContent>
                     </Tooltip>
-                    <DropdownMenuContent align="end" className="min-w-[220px]">
+                    <DropdownMenuContent align="end" className="min-w-[13.75rem]">
                       <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                         활성 필터
                       </DropdownMenuLabel>
@@ -1068,7 +1068,7 @@ export default function Experiences() {
                           표시할 컬럼
                         </TooltipContent>
                       </Tooltip>
-                      <DropdownMenuContent align="end" className="min-w-[180px]">
+                      <DropdownMenuContent align="end" className="min-w-[11.25rem]">
                         <DropdownMenuLabel className="text-chip text-muted-foreground font-normal">
                           표시할 컬럼
                         </DropdownMenuLabel>
@@ -1383,7 +1383,7 @@ export default function Experiences() {
 
         {/* ── Dialogs ─────────────────────────────────────────── */}
         <Dialog open={entryOpen} onOpenChange={setEntryOpen}>
-          <DialogContent className="max-w-[480px]">
+          <DialogContent className="max-w-[30rem]">
             <DialogHeader>
               <DialogTitle className="text-base">경험 추가</DialogTitle>
               <DialogDescription className="text-sm">
