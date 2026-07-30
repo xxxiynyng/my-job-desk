@@ -17,7 +17,8 @@ export function calcDday(deadline: string): number {
 }
 
 // D-day 라벨/색 규칙 (대시보드 카드 계열 공용 — §5-4-1 예외 계열)
-// 주의: TodayPanel의 ddayLabel/ddayColor는 라벨("오늘")과 색 규칙이 달라 별개다. 통합 금지.
+// 라벨은 이 함수가 전 화면 정본이다 — 0일 표기가 "D-Day"/"오늘"로 갈리던 4벌을 통일했다(2026-07-30 daf3a36).
+// 주의: 색 규칙만 화면별로 남아 있다(TodayPanel.ddayColor·DdayChip). 경계값이 달라 통합 금지.
 export const ddayLabel = (dday: number) => (dday > 0 ? `D-${dday}` : dday === 0 ? "D-Day" : `D+${Math.abs(dday)}`);
 export const ddayCls = (dday: number) =>
   dday <= 0

@@ -22,6 +22,7 @@
 ## 1. 🚫 절대 금지
 
 - **백엔드 없음** — API 호출·fetch·서버 사이드 로직 금지. (예정된 예외: 파일함 저장소로 Notion API 프록시 도입 확정 — 기획 SSOT §4-6, 2026-07-12. 구현 착수 전에 이 규칙과 시크릿 취급 규칙을 먼저 개정할 것)
+  - 단서(2026-07-30): 탭2 `src/features/experiences/story/api.ts`의 `tab2Api`는 **서버 경계로 설계**돼 있으나 현재 목 구현(`api.mock.ts`)이라 이 규칙을 지킨다. 실서버(`api.server.ts`) 교체 착수 전에 이 규칙을 먼저 개정할 것.
 - **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(10, **최소**) · `text-chip`(11) · `text-xs`(12) · `text-body`(13) · `text-sm`(14) · `text-title`(15) · `text-h2`(22) · `text-heading`(26) · `text-display`(30). **정의 위치: `src/lib/designTokens.ts`의 `FONT_SIZE`(단일 출처) — `tailwind.config.ts`와 `src/lib/utils.ts`가 여기서 파생**(2026-07-13 통합). `text-xs`(12)·`text-sm`(14)은 Tailwind 기본이라 FONT_SIZE에 없음. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다). eslint 룰이 `text-[Npx]`·raw hex를 warn으로 감지.
 - **색 하드코딩 금지** — 임의 `bg-[#hex]`·`text-[#hex]` 금지. 색 값은 디자인 SSOT 2장이 정본. 파랑은 raw `blue-500`/`blue-600` 클래스 직접 사용 금지 — 역할 토큰(`action`=채움 버튼 / `brand`=표시)만 사용(디자인 SSOT §0 원칙 11, 2026-07-12).
 - **⚠️ 폰트 토큰은 `src/lib/designTokens.ts`의 `FONT_SIZE` 한 곳에만 추가** — `tailwind.config.ts`(유틸 생성)와 `src/lib/utils.ts`(tailwind-merge `font-size` classGroup)가 이 객체를 `import`해 파생하므로 자동 동기화된다. 안 하면 `cn()`이 같은 호출의 색 클래스와 충돌로 보고 크기 토큰을 런타임 삭제한다(2026-07-05 사고, 부록 참조). 두 곳에 손으로 맞춰 적던 옛 구조가 그 뿌리였고, 단일 출처화로 원인 제거(2026-07-13). 파생 테스트 `src/test/design-tokens.test.ts`가 `FONT_SIZE`를 순회하며 회귀를 자동 차단.
@@ -59,15 +60,42 @@
 - **터미널 프롬프트 위임은 예외 2경우만** — 자리 비우고 도는 대량/자율주행 작업, 또는 코드 폴더 접근이 끊긴 세션. 프롬프트 형식: ① 원인/목표 한 줄 → ② 정확한 위치(파일·컴포넌트·클래스)와 변경 전→후 → ③ 자가검증(tsc 신규 에러 0 + diff 요약) → ④ 커밋 메시지.
 - push, git lock 정리 등 삭제 권한이 필요한 마무리만 사람이 터미널에서 한 줄 명령으로 처리.
 
+### 🚨 세션 병행 규칙 (2026-07-29 사고 후 신설)
+
+**한 레포에 코드를 쓰는 세션은 하나만 둔다.** 각 세션은 자기가 마지막으로 읽은 파일 지도를 기억한다.
+그 사이 다른 세션이 구조를 바꾸면, **사라진 경로에 파일을 쓰게 되고 그 작업은 앱에 연결되지 않은 채 tsc만 깬다.**
+
+1. **구조를 바꾼 직후에는 열려 있던 다른 세션을 닫고 새로 연다.** 새 세션은 바뀐 구조를 읽고 시작한다.
+2. 역할을 나눈다 — **코드는 한 세션, 기획·문서는 다른 세션.** 같은 파일을 두 세션이 쓰지 않게.
+3. 코드 세션이 아닌 쪽은 **레포에 git 명령을 돌리지 않는다.** 마운트로 붙은 세션은 `.git/index.lock`을 만들고 지우지 못해 로컬 git이 막힌다.
+4. 작업 시작 전 `git status`로 **모르는 미추적 파일이 없는지** 확인한다. 옛 경로(`src/pages/`·`components/pickd/`)에 파일이 있으면 다른 세션이 구식 지도로 쓴 것이다 — **지우지 말고** 3-way 머지로 현행 구조에 이식한다:
+   `git merge-file -p <현행> <갈라진 지점의 원본> <옛 경로 파일>`
+
 ## 4. 코드 규칙
 
-- 컴포넌트는 named export(`export function Foo`) / 페이지 컴포넌트는 default export.
+- 컴포넌트는 named export(`export function Foo`) / 페이지 컴포넌트는 default export. 페이지는 default 하나만 두고 **재수출 배럴로 쓰지 않는다**(정본이 페이지에 있다는 착시를 만든다). **파일 밖에서 안 쓰는 심볼에는 `export`를 붙이지 않는다** — public API인 척하는 내부 함수는 매번 grep을 부른다.
 - `cn()` 유틸로 조건부 클래스 병합(`import { cn } from "@/lib/utils"`). shadcn/ui 컴포넌트는 `@/components/ui/`에서 import.
 - 토스트는 sonner, **"~어요" 체 통일**(예: "저장됐어요", "복사했어요").
 - **데스크톱 전용(min-width: 1280px)** — `sm:`/`md:`/`lg:` prefix가 거의 없는 것은 의도적 결정. **예외: 온보딩 화면 파일만 반응형 허용**(온보딩 SSOT §8-A, 2026-07-06 확정 — 모바일 유입 대응).
 - localStorage 키는 breaking change 시 버전 suffix(`.vN`) 상향.
-- 같은 스타일은 **공용 컴포넌트**로 묶어 한 곳에서 관리(`components/table/`의 ColumnDivider·DragHandle·HeaderCell 등이 탭1·탭2 공용 사례).
+- 같은 스타일은 **공용 컴포넌트**로 묶어 한 곳에서 관리(`components/table/`의 ColumnDivider·DragHandle·HeaderCell 등이 탭1·탭2 공용 사례). 묶을지 둘지는 아래 통합 판정표로 정한다.
 - 테이블 헤더 행 배경 = `bg-slate-50`(surface-header-row). 그 외 디자인 값·컴포넌트 규칙은 디자인 SSOT 참조.
+
+### 통합 판정 — 무엇을 합치고 무엇을 두는가 (2026-07-29 확정)
+
+같은 코드가 여러 곳에 있을 때, 합칠지 둘지는 이 표로 판정한다. **판정 기준은 "코드가 비슷한가"가 아니라 "결과가 같은가"다.**
+
+| 판정 | 조건 | 처리 |
+|---|---|---|
+| **합친다** | 렌더 DOM·클래스·실행 결과가 **완전히 동일** | 공용화 |
+| **일부만 합친다** | 공통 코어는 같고 주변이 다름 | **코어만** 뽑고 차이는 호출부에 남긴다 |
+| **두고 기록한다** | 경계값·시간대·문구·이펙트 순서가 다름 | 손대지 않고 이유를 주석으로 남긴다 |
+
+- **훅 추출은 기본적으로 "두고 기록한다"에 넣는다** — `useState`/`useEffect`가 훅 안으로 들어가면 이펙트 등록 순서와 첫 렌더 내용이 바뀔 수 있다. **순수 함수·팩토리 추출만 안전으로 본다.**
+- 현행 사례(2026-07-30 실측):
+  - **두고 기록한다** — `sortMode` 저장 포맷이 탭1은 JSON(`JSON.stringify("custom")`), 탭2는 생문자열(`setItem(k, "custom")`). 키가 별개라 합칠 실익이 없고, 포맷을 맞추면 기존 저장값이 깨진다.
+  - **일부만 합친다** — D-day는 계산(`calcDday`)·라벨(`ddayLabel`)만 `lib/dday.ts`로 뽑고, **색 규칙은 화면마다 남겼다**(`TodayPanel.ddayColor`·`ddayCls`·`DdayChip` 3벌). 0일 표기가 `"D-Day"`/`"오늘"`로 갈리던 4벌은 2026-07-30 `daf3a36`으로 통일 완료 — 더 이상 "두고 기록한다" 사례가 아니다.
+  - **합친다(단, 동작은 보존)** — 날짜 변환 3갈래는 `lib/date.ts`의 `toISODate`로 통합했다. 셋의 **결과가 같았기 때문**이며, `toISOString()`이 UTC라 KST 자정 경계에서 하루 밀리는 특성까지 그대로 뒀다. 통합은 동작을 고치는 자리가 아니다(§5 구조 규칙 6번).
 
 ## 5. 저장소 사실 (코드가 정본 — 이 절이 코드와 어긋나면 코드가 맞고, 이 절을 갱신한다)
 
@@ -105,11 +133,13 @@
 
 ### 주요 파일
 
-> **구조 규칙 (2026-07-29 재편)**
-> 1. 한 기능에서만 쓰는 파일은 `features/<기능>/` 안에 둔다. 2개 이상 기능이 쓰면 공용(`components/`·`lib/`·`data/`)으로 승격한다.
+> **구조 규칙 (2026-07-29 재편, 2026-07-30 5~6번 추가 — 구 `REFACTOR_RULES.md` 흡수)**
+> 1. 한 기능에서만 쓰는 파일은 `features/<기능>/` 안에 둔다. 2개 이상 기능이 쓰면 공용(`components/`·`hooks/`·`lib/`·`data/`)으로 승격한다. 승격 대상 판정: `app/`=앱 진입 셸 · `data/`=화면을 모른다 · `lib/`=React를 모른다.
 > 2. 기능 폴더 내부: `<Name>Page.tsx`(라우트 진입, default export) · `components/`(기능 전용 UI) · `model/`(기능 전용 타입·상수·데이터).
 > 3. 의존 방향은 `features/ → components/·lib/·data/` 단방향. 역방향(공용이 features를 import) 금지, `data/ → components/` 금지(순수 유틸은 `lib/`로).
 > 4. 도메인 결합이 없는 범용 유틸은 사용처가 1곳이어도 `lib/`에 둔다(예: `csv.ts`). 도메인에 묶이면 기능 폴더로(예: `exportExperiences.ts`).
+> 5. **서브도메인 폴더 허용** — 기능 폴더 안에 `components/`·`model/` 외 세 번째 폴더를 둘 수 있다(현재 유일 사례 `features/experiences/story/`). 조건: **자체 스토어·서버 경계·타입을 갖고 기능 안에서 독립적으로 유지되는 단위**일 것. `model/`·`components/`로 쪼개면 "서버 붙으면 `api.ts` 한 줄만 교체"라는 경계가 세 곳으로 흩어지므로 폴더째 유지한다.
+> 6. **리팩토링 제1원칙: 기존 동작과 UI 렌더 결과의 완전한 보존.** 위 규칙보다 항상 우선한다 — 규칙을 지키려다 렌더가 1px이라도 달라지면 규칙을 어기고 현행을 유지한 뒤 보고에 기록한다. import는 파일 최상단 한 블록에만 둔다.
 
 ```
 src/
@@ -122,16 +152,32 @@ src/
 │   ├── jobs/                            탭1 지원 대시보드(공고)
 │   │   ├── DashboardPage.tsx            대시보드 (구 pages/Index.tsx)
 │   │   ├── JobDetailPage.tsx            공고 상세 + 자소서 문항
-│   │   └── components/                  DashboardHeader·MoodRefresh·JobPostingTable·DocumentStatusList
-│   │                                    ·StatusManagementModal·QuickJobRegistration·FallbackUploadModal
-│   │                                    ·TodayPanel·TodayMiniCalendar(구 CalendarMini)
+│   │   ├── components/                  DashboardHeader·MoodRefresh·JobPostingTable·DocumentStatusList
+│   │   │                                ·StatusManagementModal·QuickJobRegistration·FallbackUploadModal
+│   │   │                                ·TodayPanel·TodayMiniCalendar(구 CalendarMini)
+│   │   └── model/                       jobTypes.ts·jobsMock.ts·jobDetailMock.ts
 │   ├── experiences/                     탭2 경험·스펙 DB
-│   │   ├── ExperiencesPage.tsx          탭 셸 + db 탭 (~1600줄)
+│   │   ├── ExperiencesPage.tsx          탭 셸 + db 탭 (~1500줄)
 │   │   ├── components/                  BasicInfoPanel·FilesPanel·ExportModal·DetailEditor
 │   │   │                                ·CopyGenerator·RepExperienceViews·fieldWidgets·tableWidgets
-│   │   └── model/                       presets.ts(도메인 모델 Item·PRESETS)·mockData.ts
-│   │                                    ·basicInfoFields.ts(★InfoKey 34종 정본)·exportExperiences.ts
-│   ├── ai-cover/AICoverPage.tsx         탭3 AI 자소서
+│   │   ├── model/                       presets.ts(도메인 모델 Item·PRESETS)·mockData.ts
+│   │   │                                ·basicInfoFields.ts(★InfoKey 34종 정본)·exportExperiences.ts
+│   │   │                                ·files.ts(FileItem 타입·파일함 스토어)
+│   │   └── story/                       ★ 소재·역량 서브도메인 (구조 규칙 5번 — 폴더째 유지)
+│   │                                    model.ts(★Story·NCS 10축·NCS_SUB·커버리지 셀렉터
+│   │                                      ·DEMAND_SEED·BASELINE_DEMAND)
+│   │                                    store.ts(pickd.stories.v1, useSyncExternalStore)
+│   │                                    api.ts(★서버 경계 tab2Api — 교체 지점)·api.mock.ts
+│   │                                    useStoryFlow.ts(페이지 배선 훅)
+│   │                                    entryOptions.ts(칩↔프리셋 단일 출처)·writingAids.ts
+│   │                                    InterviewMode·ExtractReview·ImportFlow·CompetencyView
+│   │                                    ·StorySection·StoryBits·TypingDots
+│   │                                    __tests__/invariants.test.ts(불변식 8군)
+│   ├── ai-cover/                        탭3 AI 자소서
+│   │   ├── AICoverPage.tsx
+│   │   ├── components/                  EssayEditor·JobSelectView·PipelineView·QuestionPager
+│   │   │                                ·SuggestionBlock·ExpCard·PanelParts
+│   │   └── model/                       aiCoverMock.ts·essayCache.ts·spellRules.ts
 │   ├── calendar/                        CalendarPage.tsx + components/(MonthlyCalendar·ContextPanel
 │   │                                    ·CreateModal·DetailModal·ListHeader·ProgressRing)
 │   ├── onboarding/                      OnboardingPage.tsx + model/onboardingData.ts
@@ -158,10 +204,13 @@ src/
 │   ├── utils.ts                         cn() + tailwind-merge (FONT_SIZE에서 파생)
 │   ├── storage.ts                       ★ localStorage lsGet/lsSet 단일 출처
 │   ├── dday.ts                          ★ D-day 정본 — calcDday(계산)·ddayLabel("D-Day")·ddayCls
+│   ├── date.ts                          toISODate("YYYY-MM-DD") — ⚠️ UTC 기준 보존(기존 동작 유지)
+│   ├── setUtils.ts                      Set 토글 등 집합 헬퍼
 │   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1)
 │   └── csv.ts                           CSV 내보내기
 ├── hooks/                               useResizableCols.tsx · use-mobile.tsx
-└── test/                                vitest — example.test.ts + design-tokens.test.ts
+└── test/                                vitest — setup.ts + example.test.ts + design-tokens.test.ts
+                                         (기능 테스트는 해당 폴더 안: story/__tests__/)
 ```
 
 ### 데이터 지속성 (localStorage 키)
@@ -177,9 +226,10 @@ pickd.jobs.colWidths / visibleCols / colOrder / colPinned / rowOrder / sortMode
                                    탭1 테이블 뷰 상태 (너비·표시·순서·고정·행순서·정렬모드)
 pickd.jobs.registrations.v1        탭1 담은 공고 (JobRegistration[] — postingId·positionId 참조, 표시값은 postings.seed에서 파생)
 pickd.jobs.recentSearches.v1       탭1 검색창 최근 검색어 (string[], 최대 8)
-pickd.experiences.items            탭2 경험 목록 (Item[])
-pickd.experiences.visibleCols.v2 / colWidths.v2 / colOrder / colPinned / sortMode
-                                   탭2 테이블 뷰 상태
+pickd.experiences.items            탭2 경험 목록 (활동 = Item[])
+pickd.stories.v1                   탭2 소재 목록 (Story[] — 활동 1개에 소재 N개, story/store.ts 단독 접근)
+pickd.experiences.visibleCols.v3 / colWidths.v3 / colOrder / colPinned / sortMode
+                                   탭2 테이블 뷰 상태 (소재·역량 컬럼 추가로 .v2 → .v3 상향)
 pickd.experiences.export.fields.v1 / format.v1   내보내기 마지막 선택 (필드/형식)
 pickd.trash.v1                     전역 통합 휴지통 스냅샷 (14일 보관 후 자동 purge)
 pickd.onboarding.state.v1 / done.v1   온보딩 진행 상태(재개용) / 완료 플래그
@@ -200,7 +250,14 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 
 ### 도메인 용어 (처음 읽는 세션용)
 
-탭1 = 지원 대시보드(공고 관리, Index.tsx) · 탭2 = 경험·스펙 DB(Experiences.tsx) · 탭3 = AI 자소서(기획 단계, 미구현) · 공고 = Job · 경험 = Item · 대표 스펙 = 탭2에서 카드로 뽑아 쓰는 대표 경험 · 픽 카드 = 온보딩에서 만드는 프로필 카드 · 전형 6단계 = 작성중/지원완료/서류전형/필기전형/면접전형/전형완료(+finalResult 배지)
+탭1 = 지원 대시보드(공고 관리, DashboardPage) · 탭2 = 경험·스펙 DB(ExperiencesPage) · 탭3 = AI 자소서(프론트 목업, API 미연결) · 공고 = Job · 대표 스펙 = 탭2에서 카드로 뽑아 쓰는 대표 경험 · 픽 카드 = 온보딩에서 만드는 프로필 카드 · 전형 6단계 = 작성중/지원완료/서류전형/필기전형/면접전형/전형완료(+finalResult 배지)
+
+탭2는 2계층이다(2026-07-29 도입):
+
+- **활동(Activity) = 코드의 `Item`** — "무엇을 했나"(공모전 참가, 인턴 근무). 13개 프리셋이 이 계층.
+- **소재(Story)** — "그 활동 안에서 자소서에 쓸 한 장면"(갈등 조율, 지표 개선). 활동 1개에 소재 N개, `pickd.stories.v1` 저장.
+- **역량** — 소재에 붙는 **NCS 직업기초능력 10축** 태그. 축은 국가 표준이라 발명·변형하지 않는다(정본 `story/model.ts`의 `NCS`·`NCS_SUB`).
+- **커버리지 / 갭** — 확정 소재(`user_confirmed`)가 역량을 몇 개 덮었나 / 공고가 요구하는데 내 소재가 0인 역량.
 
 ## 6. 🚀 배포 (Vercel)
 
@@ -212,6 +269,7 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 ## 7. 문서 위생·자동화
 
 - 임시 산출물은 `docs/tasks/`에 모으고, 실행 완료되면 주기적으로 삭제(git 히스토리 보존, `git log`·`git show`로 복원).
+- 루트 `REFACTOR_RULES.md`는 §5 구조 규칙(5·6번)으로 **흡수 완료(2026-07-30)** — 규칙 정본은 이 파일뿐이다. 그 파일은 삭제 후보이며, 남아 있는 동안에도 규칙 근거로 인용하지 않는다.
 - 확정된 규칙·결정은 문서 수를 늘리지 말고 해당 SSOT의 최신값만 갱신.
 - 동기화 스크립트: `pickd-design-update.sh` — 코드 수정 + Notion SSOT 업데이트 자동화(구 pickd-notion-update.sh 통합). 위치는 레포 밖 `/Users/xxxiynyng/Claude/Projects/Pickd Design/`(디자인 SSOT §9-4와 일치 — 2026-07-22 실폴더 확인 후 SSOT 정정 완료).
 
@@ -222,4 +280,5 @@ cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.t
 - **2026-07-05 토큰화**: 손으로 박은 `text-[13px]` 300여 곳 → 토큰화. 계획서는 `git show 847d4da:docs/tasks/토큰_마이그레이션_계획.md`. 잔여 하드코딩 ~30곳은 기획 SSOT 기술 백로그에서 추적.
 - **2026-07-06 text-micro 제거**: 9px 폐기, 최소 10px(`text-mini`)로 통일(커밋 `1b20fd6`·`da43c30`).
 - **2026-07-13 폰트 토큰 단일 출처화**: `designTokens.ts`(FONT_SIZE)로 통합해 config·utils 손동기화 제거(2026-07-05 사고 원인 소멸), 하드코딩 `text-[Npx]` 30곳 토큰화(반픽셀 18곳 반올림·값동일 9곳·헤딩 3곳), `h2`(22)·`display`(30) 신설, 죽은 헤딩 CSS 변수 제거, 파생 테스트 + eslint 금지룰(warn) 추가. 커밋 `1271a0b`→`a3a6a73`(6개).
+- **2026-07-29 세션 병행**: 구조 재편(`c41c910`) 중 다른 세션이 옛 경로 지도로 파일을 써, 앱에 연결되지 않은 채 tsc만 깨졌다. 마운트 세션이 남긴 `.git/index.lock`으로 로컬 git까지 막혔다. → §3 세션 병행 규칙.
 - **2025-06**: 미연결 dead code `Specs.tsx` 삭제.
