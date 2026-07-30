@@ -108,7 +108,10 @@ export interface Posting {
   id: string;
   slug: string;                          // 라우팅 키: /jobs/:slug
   orgName: string;
-  orgCategory: OrgCategory;
+  orgCategory: OrgCategory;            // 조직 형태 (공기업/준정부기관/…)
+  /** 기관이 무슨 일을 하는가 — 조직 형태(orgCategory)와 다른 축이다.
+   *  잡알리오가 주지 않으므로 검수자가 기관 성격을 보고 넣는다. */
+  industry: string;
   title: string;
   announceNo?: string;
   applyStart: string;                    // ISO datetime — 시각 포함
@@ -139,6 +142,7 @@ export const POSTINGS: Posting[] = [
     slug: "kgs-2026-h2-gongmujik",
     orgName: "한국가스안전공사",
     orgCategory: "준정부기관",
+    industry: "에너지·안전",
     title: "2026년 하반기 공무직 및 청년인턴 채용",
     applyStart: "2026-07-30T14:00:00+09:00",
     applyEnd: "2026-08-07T12:00:00+09:00",
@@ -245,6 +249,7 @@ export const POSTINGS: Posting[] = [
     slug: "komsa-2026-3rd-regular",
     orgName: "한국해양교통안전공단",
     orgCategory: "준정부기관",
+    industry: "해양·교통",
     title: "2026년도 제3차 신규직원(정규직) 채용",
     announceNo: "공고 2026-83호",
     applyStart: "2026-07-22T00:00:00+09:00",
@@ -331,6 +336,7 @@ export const POSTINGS: Posting[] = [
     slug: "kcomwel-ulsan-2026-pharmacist",
     orgName: "근로복지공단",
     orgCategory: "준정부기관",
+    industry: "보건·의료",
     title: "[울산병원] 의료직 2, 3급(약사) 채용 공고",
     applyStart: "2026-07-24T00:00:00+09:00",
     applyEnd: "2026-08-03T00:00:00+09:00",
@@ -390,6 +396,16 @@ export function searchPostings(q: string) {
     p.positions.filter(pos => pos.jobTitle.toLowerCase().includes(t)).map(pos => ({ posting: p, position: pos })),
   );
   return { orgs, postings, positions };
+}
+
+/** 고용형태 4종 — 표·검색 필터가 함께 쓰는 정본.
+ *  인턴은 기간제라 채용구분(신입/경력)보다 먼저 본다. "전체"는 신입·경력을 함께 뽑는 모집이다. */
+export type EmployType = "인턴" | "신입" | "경력" | "전체";
+export const EMPLOY_TYPES: EmployType[] = ["인턴", "신입", "경력", "전체"];
+export function employTypeOf(pos: Position): EmployType {
+  if (pos.employmentType.includes("인턴")) return "인턴";
+  if (pos.recruitType === "신입+경력") return "전체";
+  return pos.recruitType;
 }
 
 export const getPostingBySlug = (slug: string) => POSTINGS.find(p => p.slug === slug);

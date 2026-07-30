@@ -11,6 +11,7 @@ import {
   POSTINGS,
   getPostingById,
   calcPostingDday,
+  employTypeOf,
   type Posting,
   type Position,
   type ScheduleEvent,
@@ -106,8 +107,11 @@ export function registrationRowSeed(reg: JobRegistration) {
     company: posting.orgName,
     title: posting.title,
     role: position.jobTitle,
-    employType: position.recruitType,
-    industry: posting.orgCategory,
+    employType: employTypeOf(position),
+    // 산업(무슨 일을 하는 기관인가)과 기관유형(조직 형태)은 다른 축 — 한 칸에 섞지 않는다.
+    industry: posting.industry,
+    orgCategory: posting.orgCategory,
+    workLocation: position.workLocation.join(" · "),
     deadline: posting.applyEnd.slice(0, 10),  // 날짜 편집 UI(DeadlinePicker)용
     deadlineAt: posting.applyEnd,              // 시각 포함 원본 — 표시·D-day 계산의 기준
     dday: calcPostingDday(posting.applyEnd),

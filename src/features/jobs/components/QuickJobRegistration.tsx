@@ -11,6 +11,8 @@ import {
   calcPostingDday,
   type Posting,
   type JobCategory,
+  EMPLOY_TYPES,
+  employTypeOf,
 } from "@/data/postings.seed";
 import { formatApplyEnd, isRegistered } from "@/data/jobStore";
 
@@ -55,7 +57,9 @@ const REGION_CHIPS: RegionChip[] = [
 const REGION_MATCH: Record<string, string[]> = Object.fromEntries(
   REGION_CHIPS.map((r) => [r.label, r.match]),
 );
-const TYPE_FILTERS = ["신입", "인턴", "경력"] as const;
+// 표의 고용형태 컬럼과 같은 4종을 쓴다 — 정본은 postings.seed의 EMPLOY_TYPES.
+// "전체"는 필터 해제가 아니라 **신입·경력을 함께 뽑는 모집**을 뜻한다.
+const TYPE_FILTERS = EMPLOY_TYPES;
 
 // 세 축 모두 **다중 선택**(2026-07-31). 같은 축 안에서는 OR, 축끼리는 AND —
 // "부산 또는 울산에서, 사무·행정 또는 경영·기획을, 신입으로" 처럼 읽힌다.
@@ -65,14 +69,6 @@ const EMPTY_FILTERS: Filters = { job: [], region: [], type: [] };
 /** 있으면 빼고 없으면 넣는다 — 칩 토글 */
 const toggle = <T,>(list: T[], v: T): T[] =>
   list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
-
-/** 채용형태 1종과 모집단위가 맞는가 */
-function matchType(pos: Posting["positions"][number], t: string): boolean {
-  if (t === "인턴") return pos.employmentType.includes("인턴");
-  if (t === "신입") return pos.recruitType.includes("신입") && !pos.employmentType.includes("인턴");
-  if (t === "경력") return pos.recruitType.includes("경력");
-  return true;
-}
 
 function matchPosting(p: Posting, f: Filters): boolean {
   if (f.region.length) {
@@ -84,7 +80,7 @@ function matchPosting(p: Posting, f: Filters): boolean {
   }
   const positions = p.positions.filter((pos) => {
     if (f.job.length && !f.job.includes(pos.jobCategory)) return false;
-    if (f.type.length && !f.type.some((t) => matchType(pos, t))) return false;
+    if (f.type.length && !f.type.includes(employTypeOf(pos))) return false;
     return true;
   });
   return positions.length > 0;

@@ -90,6 +90,8 @@ const COL_MIN_WIDTHS: Record<string, number> = {
   status: 99,
   linked: 94,
   industry: 88,
+  orgCategory: 110,
+  workLocation: 121,
   registeredAt: 105,   // 등록일 — "2026-06-15" 한 줄 보장
   updated: 105,        // 최근 수정일
 };
@@ -106,6 +108,8 @@ const COL_MAX_WIDTHS: Record<string, number> = {
   status: 176,
   linked: 176,
   industry: 176,
+  orgCategory: 198,
+  workLocation: 242,
   registeredAt: 176,
   updated: 176,
 };
@@ -127,7 +131,9 @@ const STATUS_DS_KEY = KEY_BY_LABEL as Record<JobStage, StageBadgeKey>;
 type ColumnKey =
   | "employType"
   | "role"
+  | "workLocation"
   | "industry"
+  | "orgCategory"
   | "deadline"
   | "dday"
   | "status"
@@ -137,12 +143,17 @@ type ColumnKey =
 
 const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] = [
   { key: "role", label: "직무", defaultVisible: true },
+  { key: "workLocation", label: "근무지", defaultVisible: false },
+  // 값은 인턴/신입/경력/전체 4종 — 정본은 postings.seed의 employTypeOf (2026-07-31)
   { key: "employType", label: "고용형태", defaultVisible: true },
   { key: "status", label: "현재 상태", defaultVisible: true },
   { key: "deadline", label: "마감일", defaultVisible: true },
   { key: "dday", label: "D-day", defaultVisible: true },
-  { key: "linked", label: "일정/할 일", defaultVisible: true },
+  // 담는 값이 연결된 일정 개수뿐이라 "일정/할 일"에서 좁혔다(2026-07-31)
+  { key: "linked", label: "일정", defaultVisible: true },
+  // 산업(무슨 일을 하는가)과 기관유형(조직 형태)은 다른 축 — 전 행이 둘 다 갖는다
   { key: "industry", label: "산업", defaultVisible: false },
+  { key: "orgCategory", label: "기관유형", defaultVisible: false },
   { key: "updated", label: "최근 수정일", defaultVisible: false },
   { key: "registeredAt", label: "등록일", defaultVisible: false },
 ];
@@ -157,6 +168,8 @@ const DEFAULT_WIDTHS: Record<string, number> = {
   status: 110,
   linked: 99,
   industry: 99,
+  orgCategory: 121,
+  workLocation: 143,
   registeredAt: 105,
   updated: 110,
 };
@@ -172,6 +185,18 @@ const deadlineTimeOf = (j: { deadlineAt?: string }) => {
 
 /** D-day는 항상 이 함수로만 구한다 — 시각이 있으면 마감 일시 기준, 없으면 날짜 기준 */
 const ddayOf = (j: { deadline: string; deadlineAt?: string }) => calcDday(j.deadlineAt ?? j.deadline);
+
+/**
+ * 정렬 키 — 화면에 보이는 값과 줄 세우는 값이 다른 컬럼을 여기서 갈라준다.
+ * "최근 수정일"이 대표 사례: "2시간 전"·"3일 전"을 문자열로 비교하면 2가 3보다 앞이라
+ * 오래된 것이 최근처럼 올라온다. 표시는 그대로 두고 경과 분(updatedMinsAgo)으로만 센다.
+ */
+const sortValue = (j: Job, key: string): string | number => {
+  if (key === "updated") return -(j.updatedMinsAgo ?? Number.MAX_SAFE_INTEGER); // 최근일수록 큰 값
+  if (key === "dday") return ddayOf(j);
+  if (key === "deadline") return j.deadlineAt ?? j.deadline;
+  return String(j[key as keyof Job] ?? "");
+};
 
 const FILTER_CHIPS = ["전체", "★", "마감임박", "|", ...ACTIVE_STATUSES];
 const ROW_CAP = 7;
@@ -565,6 +590,8 @@ export function JobPostingTable() {
             role: s.role,
             employType: s.employType,
             industry: s.industry,
+            orgCategory: s.orgCategory,
+            workLocation: s.workLocation,
             deadline: s.deadline,
             deadlineAt: s.deadlineAt,
             dday: s.dday,
@@ -573,6 +600,7 @@ export function JobPostingTable() {
             linked: { schedules: s.linkedSchedules, todos: 0 },
             starred: false,
             updatedAt: "방금",
+            updatedMinsAgo: 0,
             registeredAt: s.registeredAt,
             stage: "작성중",
             url: s.url,
@@ -622,7 +650,9 @@ export function JobPostingTable() {
       case "title": return j.title;
       case "role": return j.role;
       case "employType": return j.employType;
-      case "industry": return j.industry;
+      case "industry": return j.industry ?? "";
+      case "orgCategory": return j.orgCategory ?? "";
+      case "workLocation": return j.workLocation ?? "";
       case "status": return j.status;
       case "deadline": return j.deadline;
       case "registeredAt": return j.registeredAt;
@@ -638,6 +668,8 @@ export function JobPostingTable() {
     role: "select",
     employType: "select",
     industry: "select",
+    orgCategory: "select",
+    workLocation: "select",
     status: "select",
     deadline: "text",
     registeredAt: "text",
@@ -676,8 +708,10 @@ export function JobPostingTable() {
   // 컬럼 순서 드래그
   const [colOrder, setColOrder] = useState<ColumnKey[]>(() => {
     const saved = lsGet<ColumnKey[]>("pickd.jobs.colOrder", []);
-    if (saved.length === ALL_COLUMNS.length) return saved;
-    return ALL_COLUMNS.map((c) => c.key);
+    const all = ALL_COLUMNS.map((c) => c.key);
+    // 컬럼이 늘어도 저장된 순서를 통째로 버리지 않는다 — 아는 것만 남기고 새 컬럼은 뒤에 붙인다
+    const kept = saved.filter((k) => all.includes(k));
+    return [...kept, ...all.filter((k) => !kept.includes(k))];
   });
   useEffect(() => {
     try {
@@ -769,9 +803,12 @@ export function JobPostingTable() {
     }
     if (!colSort) return [...activeJobs];
     return [...activeJobs].sort((a, b) => {
-      const av = a[colSort.key as keyof Job] ?? "";
-      const bv = b[colSort.key as keyof Job] ?? "";
-      const cmp = String(av).localeCompare(String(bv), "ko", { numeric: true });
+      const av = sortValue(a, colSort.key);
+      const bv = sortValue(b, colSort.key);
+      const cmp =
+        typeof av === "number" && typeof bv === "number"
+          ? av - bv
+          : String(av).localeCompare(String(bv), "ko", { numeric: true });
       return colSort.dir === "asc" ? cmp : -cmp;
     });
   }, [activeJobs, colSort, sortMode, rowOrder]);
@@ -1260,6 +1297,24 @@ export function JobPostingTable() {
                                   className="px-4 py-2.5 text-body text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis"
                                 >
                                   {job.industry}
+                                </td>
+                              );
+                            case "orgCategory":
+                              return (
+                                <td
+                                  key="orgCategory"
+                                  className="px-4 py-2.5 text-body text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis"
+                                >
+                                  {job.orgCategory}
+                                </td>
+                              );
+                            case "workLocation":
+                              return (
+                                <td
+                                  key="workLocation"
+                                  className="px-4 py-2.5 text-body text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis"
+                                >
+                                  {job.workLocation}
                                 </td>
                               );
                             case "status":
