@@ -50,6 +50,8 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useResizableCols } from "@/hooks/useResizableCols";
+import { migrateScaledPxMap } from "@/lib/storage";
+import { UI_SCALE } from "@/lib/designTokens";
 import { ColumnDivider } from "@/components/table/ColumnDivider";
 import { DragHandle } from "@/components/table/DragHandle";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
@@ -164,6 +166,9 @@ function TypeChip({ type }: { type: ItemType }) {
 // ────────────────────────────────────────────────────────────────
 
 const LS_EXP_COLS = "pickd.experiences.visibleCols.v3";
+// 컬럼 폭은 px 저장이라 --ui-scale을 못 탄다 — 2026-07-30 배율 1.1배 도입 시 저장값도 1회 이관(탭1과 동일 규칙).
+const LS_EXP_COL_WIDTHS = "pickd.experiences.colWidths.v4";
+migrateScaledPxMap("pickd.experiences.colWidths.v3", LS_EXP_COL_WIDTHS, UI_SCALE);
 
 // ────────────────────────────────────────────────────────────────
 // 경험 DB 컬럼 설정
@@ -197,44 +202,44 @@ const COL_LABEL: Record<ColumnKey, string> = Object.fromEntries(
 ) as Record<ColumnKey, string>;
 
 const DEFAULT_EXP_WIDTHS: Record<string, number> = {
-  type: 90,
-  name: 260,
-  org: 160,
-  period: 140,
-  storyCount: 70,
-  competency: 240,
-  keywords: 220,
-  importance: 90,
-  updated: 110,
-  manage: 80,
+  type: 99,
+  name: 286,
+  org: 176,
+  period: 154,
+  storyCount: 77,
+  competency: 264,
+  keywords: 242,
+  importance: 99,
+  updated: 121,
+  manage: 88,
 };
 
 const MIN_EXP_WIDTHS: Record<string, number> = {
-  type: 56,
-  name: 100,
-  org: 72,
-  period: 72,
-  storyCount: 56,
-  competency: 100,
-  keywords: 80,
-  importance: 56,
-  updated: 64,
-  manage: 60,
+  type: 62,
+  name: 110,
+  org: 79,
+  period: 79,
+  storyCount: 62,
+  competency: 110,
+  keywords: 88,
+  importance: 62,
+  updated: 70,
+  manage: 66,
 };
 
 // 컬럼 최대 너비 — 내용보다 훨씬 넓게 드래그해서 헤더·본문 사이에 큰 빈 공백이
 // 남는 것을 방지. 저장된 값이 이보다 크면 useResizableCols가 자동으로 clamp한다.
 const MAX_EXP_WIDTHS: Record<string, number> = {
-  type: 160,
-  name: 420,
-  org: 280,
-  period: 220,
-  storyCount: 120,
-  competency: 380,
-  keywords: 340,
-  importance: 160,
-  updated: 170,
-  manage: 140,
+  type: 176,
+  name: 462,
+  org: 308,
+  period: 242,
+  storyCount: 132,
+  competency: 418,
+  keywords: 374,
+  importance: 176,
+  updated: 187,
+  manage: 154,
 };
 
 // 유형 탭 표기 순서 — 13개 프리셋 기준(상세 서술형 → 스펙·증빙형). 데이터에 있는(count>0) 유형만 노출,
@@ -536,7 +541,7 @@ export default function Experiences() {
     return new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key));
   });
   const { widths: colW, onMouseDown: onResize, resizingKey } = useResizableCols(
-    "pickd.experiences.colWidths.v3",
+    LS_EXP_COL_WIDTHS,
     DEFAULT_EXP_WIDTHS,
     MIN_EXP_WIDTHS,
     MAX_EXP_WIDTHS,
@@ -597,7 +602,7 @@ export default function Experiences() {
     map.set("__gutter__", { left: 0, last: keys.length === 0 });
     keys.forEach((k, i) => {
       map.set(k, { left: x, last: i === keys.length - 1 });
-      x += colW[k] ?? DEFAULT_EXP_WIDTHS[k] ?? 100;
+      x += colW[k] ?? DEFAULT_EXP_WIDTHS[k] ?? 110;
     });
     return map;
   }, [pinnedCols, orderedTailCols, visibleCols, colW]);
@@ -618,7 +623,7 @@ export default function Experiences() {
   const resetCols = () => {
     setVisibleCols(new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key)));
     try {
-      localStorage.removeItem("pickd.experiences.colWidths.v3");
+      localStorage.removeItem(LS_EXP_COL_WIDTHS);
       localStorage.removeItem(LS_EXP_COLS);
     } catch {}
     window.location.reload();

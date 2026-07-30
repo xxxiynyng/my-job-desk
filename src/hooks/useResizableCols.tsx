@@ -16,7 +16,7 @@ export function useResizableCols(
 ) {
   const clamp = useCallback(
     (key: string, v: number) => {
-      const min = minWidths?.[key] ?? 60;
+      const min = minWidths?.[key] ?? 66;
       const max = maxWidths?.[key] ?? Infinity;
       return Math.min(Math.max(v, min), max);
     },
@@ -55,7 +55,7 @@ export function useResizableCols(
       dragRef.current = {
         key,
         startX: e.clientX,
-        startW: widths[key] ?? defaults[key] ?? 120,
+        startW: widths[key] ?? defaults[key] ?? 132,
       };
       const onMove = (ev: MouseEvent) => {
         if (!dragRef.current) return;

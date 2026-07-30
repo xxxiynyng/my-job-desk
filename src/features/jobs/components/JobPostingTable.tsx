@@ -70,38 +70,44 @@ import { StarToggle } from "@/components/table/StarToggle";
 import { exportCsv } from "@/lib/csv";
 import { JobRowContextMenu, JobRowActionCell } from "@/components/table/RowContextMenu";
 import { getRegistrations, registrationRowSeed, removeRegistration, REGISTRATIONS_EVENT } from "@/data/jobStore";
-import { lsGet } from "@/lib/storage";
+import { lsGet, migrateScaledPxMap } from "@/lib/storage";
+import { UI_SCALE } from "@/lib/designTokens";
 import { makeColFilterSetters, makeColSortSetters, makeSelectAll, makeStickyProps, collectDistinct, type ColSortState } from "@/components/table/tableState";
+
+// 컬럼 폭은 rem이 아니라 px 숫자로 저장돼 --ui-scale을 따라오지 못한다. 2026-07-30 배율 1.1배
+// 도입 때 기본값을 전부 ×1.1 했으므로, 사용자가 직접 조정해 둔 저장값도 같은 비율로 1회 이관한다.
+const LS_JOB_COL_WIDTHS = "pickd.jobs.colWidths.v2";
+migrateScaledPxMap("pickd.jobs.colWidths", LS_JOB_COL_WIDTHS, UI_SCALE);
 
 // ── 컬럼 최소 너비 (제목 + 내용 기준) ───────────────────────────
 const COL_MIN_WIDTHS: Record<string, number> = {
-  company: 80,
-  title: 130,
-  role: 70,
-  employType: 70,
-  dday: 60,
-  deadline: 90,
-  status: 90,
-  linked: 85,
-  industry: 80,
-  registeredAt: 95,   // 등록일 — "2026-06-15" 한 줄 보장
-  updated: 95,        // 최근 수정일
+  company: 88,
+  title: 143,
+  role: 77,
+  employType: 77,
+  dday: 66,
+  deadline: 99,
+  status: 99,
+  linked: 94,
+  industry: 88,
+  registeredAt: 105,   // 등록일 — "2026-06-15" 한 줄 보장
+  updated: 105,        // 최근 수정일
 };
 
 // 컬럼 최대 너비 — 내용보다 훨씬 넓게 드래그해서 헤더·본문 사이에 큰 빈 공백이
 // 남는 것을 방지. 저장된 값이 이보다 크면 useResizableCols가 자동으로 clamp한다.
 const COL_MAX_WIDTHS: Record<string, number> = {
-  company: 200,
-  title: 320,
-  role: 160,
-  employType: 140,
-  dday: 120,
-  deadline: 160,
-  status: 160,
-  linked: 160,
-  industry: 160,
-  registeredAt: 160,
-  updated: 160,
+  company: 220,
+  title: 352,
+  role: 176,
+  employType: 154,
+  dday: 132,
+  deadline: 176,
+  status: 176,
+  linked: 176,
+  industry: 176,
+  registeredAt: 176,
+  updated: 176,
 };
 
 // ── 타입 ──────────────────────────────────────────────────────────
@@ -149,17 +155,17 @@ const ALL_COLUMNS: { key: ColumnKey; label: string; defaultVisible: boolean }[] 
 ];
 
 const DEFAULT_WIDTHS: Record<string, number> = {
-  company: 90,
-  title: 160,
-  role: 80,
-  employType: 75,
-  dday: 65,
-  deadline: 100,
-  status: 100,
-  linked: 90,
-  industry: 90,
-  registeredAt: 95,
-  updated: 100,
+  company: 99,
+  title: 176,
+  role: 88,
+  employType: 83,
+  dday: 72,
+  deadline: 110,
+  status: 110,
+  linked: 99,
+  industry: 99,
+  registeredAt: 105,
+  updated: 110,
 };
 
 
@@ -661,7 +667,7 @@ export function JobPostingTable() {
 
   // 컬럼 너비 (최소 너비 적용)
   const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols(
-    "pickd.jobs.colWidths",
+    LS_JOB_COL_WIDTHS,
     DEFAULT_WIDTHS,
     COL_MIN_WIDTHS,
     COL_MAX_WIDTHS,
@@ -669,7 +675,7 @@ export function JobPostingTable() {
   const widths = useMemo(() => {
     const result: Record<string, number> = {};
     for (const key of Object.keys(rawWidths)) {
-      result[key] = Math.max(rawWidths[key] ?? DEFAULT_WIDTHS[key] ?? 80, COL_MIN_WIDTHS[key] ?? 60);
+      result[key] = Math.max(rawWidths[key] ?? DEFAULT_WIDTHS[key] ?? 88, COL_MIN_WIDTHS[key] ?? 66);
     }
     return result;
   }, [rawWidths]);
@@ -714,7 +720,7 @@ export function JobPostingTable() {
       { key: "__star__", w: 36 },
       { key: "company", w: widths.company },
       { key: "title", w: widths.title },
-      ...pinned.map((c) => ({ key: c.key as string, w: Math.max(widths[c.key] ?? 100, COL_MIN_WIDTHS[c.key] ?? 60) })),
+      ...pinned.map((c) => ({ key: c.key as string, w: Math.max(widths[c.key] ?? 110, COL_MIN_WIDTHS[c.key] ?? 66) })),
     ];
     let x = 0;
     block.forEach((b, i) => {
@@ -1079,7 +1085,7 @@ export function JobPostingTable() {
                   {orderedCols
                     .filter((c) => isVisible(c.key))
                     .map((col) => {
-                      const w = Math.max(widths[col.key] ?? 100, COL_MIN_WIDTHS[col.key] ?? 60);
+                      const w = Math.max(widths[col.key] ?? 110, COL_MIN_WIDTHS[col.key] ?? 66);
                       return <col key={col.key} style={{ width: w }} />;
                     })}
                   <col style={{ width: 62 }} />
