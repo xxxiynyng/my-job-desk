@@ -46,7 +46,7 @@ export function InterviewMode({
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [turn, setTurn] = useState<InterviewTurn | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
-  /** 1턴에서 고른 것들 — 여러 개 고를 수 있다 */
+  /** 1턴에서 고른 것 — 단일 선택이므로 길이는 0 또는 1 (2026-07-30 다중 선택 철회) */
   const [picked, setPicked] = useState<ChipOption[]>([]);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -82,10 +82,11 @@ export function InterviewMode({
     return () => clearTimeout(t);
   }, [thinking]);
 
-  async function ask(turnNo: number, prev: string[]) {
+  // picked 를 인자로 받는다 — 칩을 누른 직후 바로 호출하므로 state 는 아직 갱신 전이다
+  async function ask(turnNo: number, prev: string[], pick: ChipOption[] = picked) {
     setThinking(true);
     setTurn(null);
-    const t = await tab2Api.nextInterviewTurn({ mode, targetCompetency, turnNo, answers: prev, picked });
+    const t = await tab2Api.nextInterviewTurn({ mode, targetCompetency, turnNo, answers: prev, picked: pick });
     setThinking(false);
     if (t.reaction) setBubbles((b) => [...b, { role: "ai", text: t.reaction! }]);
     setBubbles((b) => [...b, { role: "ai", text: t.question, hint: t.hint }]);
@@ -93,7 +94,7 @@ export function InterviewMode({
     setTimeout(() => inputRef.current?.focus(), 60);
   }
 
-  async function submit(value: string) {
+  async function submit(value: string, pick: ChipOption[] = picked) {
     const v = value.trim();
     if (!v) return;
     const nextAnswers = [...answers, v];
@@ -101,17 +102,17 @@ export function InterviewMode({
     setBubbles((b) => [...b, { role: "me", text: v }]); // 낙관적 표시
     setDraft("");
     if (nextAnswers.length >= MAX_TURNS) {
-      await finish(nextAnswers);
+      await finish(nextAnswers, pick);
     } else {
-      await ask(nextAnswers.length + 1, nextAnswers);
+      await ask(nextAnswers.length + 1, nextAnswers, pick);
     }
   }
 
-  async function finish(finalAnswers: string[]) {
+  async function finish(finalAnswers: string[], pick: ChipOption[] = picked) {
     if (finalAnswers.length === 0) return;
     setFinishing(true);
     setTurn(null);
-    const d = await tab2Api.buildInterviewDraft({ mode, answers: finalAnswers, picked, activityId: uid() });
+    const d = await tab2Api.buildInterviewDraft({ mode, answers: finalAnswers, picked: pick, activityId: uid() });
     setFinishing(false);
     onComplete(d); // ⑥ "하나 더 하실래요?"를 띄우지 않는다 — 결과 확인 화면으로 바로 넘긴다
   }
@@ -219,59 +220,38 @@ export function InterviewMode({
             </div>
           )}
 
-          {/* ① 1턴은 타이핑 0 — 칩만 고르면 넘어간다. 여러 개 고를 수 있다 */}
+          {/* ① 1턴은 타이핑 0. 칩을 누르면 그 자리에서 다음 질문으로 넘어간다.
+              단일 선택이라 「선택 상태」가 화면에 머무르지 않으므로, 선택 표시로 칩 폭이
+              변해 줄바꿈이 밀리던 문제(2026-07-30)가 구조적으로 사라진다.
+              여러 개 고르게 했더니 소재 0개인 빈 활동이 쌓여 되돌렸다 — 구 부록 C-17. */}
           {turn?.kind === "chips" && (
             <div className="pt-1">
               <div className="flex flex-wrap gap-2">
-                {turn.chips?.map((c) => {
-                  const on = picked.some((x) => x.label === c.label);
-                  return (
-                    <button
-                      key={c.label}
-                      aria-pressed={on}
-                      onClick={() =>
-                        setPicked((p) =>
-                          on ? p.filter((x) => x.label !== c.label) : [...p, c],
-                        )
-                      }
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 text-body rounded-lg border transition-colors",
-                        on
-                          ? "border-blue-100 bg-blue-50 text-primary font-medium"
-                          : "border-border bg-card hover:bg-blue-50 hover:border-blue-100 hover:text-primary",
-                      )}
-                    >
-                      {on && <Check className="w-3.5 h-3.5" />}
-                      {c.label}
-                    </button>
-                  );
-                })}
+                {turn.chips?.map((c) => (
+                  <button
+                    key={c.label}
+                    onClick={() => {
+                      setPicked([c]);
+                      void submit(c.label, [c]);
+                    }}
+                    className="px-3.5 py-2 text-body rounded-lg border border-border bg-card text-foreground hover:bg-blue-50 hover:border-blue-200 hover:text-primary active:bg-blue-100 transition-colors"
+                  >
+                    {c.label}
+                  </button>
+                ))}
                 <button
                   onClick={() => {
                     setTurn({ ...turn, kind: "text", placeholder: "직접 적어주세요", hint: undefined });
                     setTimeout(() => inputRef.current?.focus(), 60);
                   }}
-                  className="px-3 py-1.5 text-body rounded-lg border border-dashed border-border text-muted-foreground hover:text-foreground"
+                  className="px-3.5 py-2 text-body rounded-lg border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
                   직접 쓸게요
                 </button>
               </div>
-
-              {/* 여러 개 골랐을 때 무슨 일이 생기는지 미리 알려준다 */}
-              <div className="flex items-center gap-3 mt-3">
-                <Button
-                  className="h-9 px-4 bg-action hover:bg-action-hover text-white"
-                  disabled={picked.length === 0}
-                  onClick={() => void submit(picked.map((c) => c.label).join(" · "))}
-                >
-                  {picked.length > 1 ? `${picked.length}개 고르고 다음` : "다음"}
-                </Button>
-                {picked.length > 1 && (
-                  <span className="text-chip text-muted-foreground">
-                    첫 번째 「{picked[0].label}」부터 이야기를 들을게요. 나머지는 활동으로만 저장해 둘게요.
-                  </span>
-                )}
-              </div>
+              <p className="text-chip text-muted-foreground mt-2.5">
+                하나만 골라주세요. 다른 것도 있으면 저장한 뒤에 또 만들 수 있어요.
+              </p>
             </div>
           )}
 
@@ -383,28 +363,30 @@ export function InterviewMode({
           </div>
         </div>
 
-        {/* 닫기 확인 — 나가는 길이 두 갈래다. 저장할 수도, 버릴 수도 있어야 한다.
-            전에는 [계속할게요]와 [여기까지 저장] 둘뿐이라, 잘못 시작했거나 답이 마음에
-            안 드는 사람에게 탈출구가 없었다. 원하지 않는 활동이 목록에 쌓이는 것도
-            "정리해야 할 짐"이 된다(부록 C-17). */}
+        {/* 닫기 확인 — 나가는 길이 세 갈래다(저장/계속/취소). 전에는 [계속할게요]와
+            [여기까지 저장] 둘뿐이라, 잘못 시작했거나 답이 마음에 안 드는 사람에게 탈출구가
+            없었다 — 원하지 않는 활동이 목록에 쌓이는 것도 "정리해야 할 짐"이 된다(부록 C-17).
+            셋이 동등한 선택으로 읽히게 전부 버튼으로 두고, 되돌릴 수 없는 것(취소하고
+            나가기)만 왼쪽으로 떼어 색으로 구분한다. */}
         {confirmClose && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[400px] shadow-lg">
+            <div className="bg-card border border-border rounded-xl px-6 py-5 max-w-[420px] shadow-lg">
               <p className="text-title font-semibold text-foreground">정말 그만할까요?</p>
               <p className="text-body text-muted-foreground mt-1.5">
                 지금까지 답한 {answers.filter(Boolean).length}개를 저장하면 나중에 이어서 쓸 수 있어요.
               </p>
               <div className="flex items-center gap-2 mt-4">
-                {/* 파괴적 선택은 주 동선에서 떼어 왼쪽에 둔다 */}
-                <button
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/5 px-2.5"
                   onClick={() => {
                     setConfirmClose(false);
                     onClose();
                   }}
-                  className="text-chip text-muted-foreground hover:text-destructive"
                 >
-                  저장 안 하고 닫기
-                </button>
+                  취소하고 나가기
+                </Button>
                 <div className="ml-auto flex gap-2">
                   <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setConfirmClose(false)}>
                     계속할게요
@@ -422,7 +404,7 @@ export function InterviewMode({
                 </div>
               </div>
               <p className="text-mini text-muted-foreground mt-2.5">
-                저장 안 하고 닫으면 답한 내용은 남지 않아요.
+                취소하고 나가면 답한 내용은 남지 않아요.
               </p>
             </div>
           </div>

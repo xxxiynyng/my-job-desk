@@ -53,23 +53,15 @@ export function useStoryFlow(opts: {
       closeInterview();
       setReview({
         open: true,
-        sourceText: d.primary.story.rawExcerpt,
+        sourceText: d.story.rawExcerpt,
         groups: [
           {
-            tempId: d.primary.story.activityId,
-            title: d.primary.activityTitle,
-            category: d.primary.activityCategory,
+            tempId: d.story.activityId,
+            title: d.activityTitle,
+            category: d.activityCategory,
             meta: "질문에 답해서 만든 활동이에요",
-            stories: [d.primary.story],
+            stories: [d.story],
           },
-          // 함께 고른 나머지 — 활동만. 소재는 나중에 만들 수 있다
-          ...d.extras.map((e) => ({
-            tempId: uid(),
-            title: e.activityTitle,
-            category: e.activityCategory,
-            meta: "함께 고른 활동이에요 · 소재는 나중에 만들 수 있어요",
-            stories: [],
-          })),
         ],
       });
     },

@@ -151,9 +151,8 @@ export async function nextInterviewTurn(opts: {
         turnNo: 1,
         kind: "chips",
         question: `${targetCompetency} — 이 중에 해본 게 있어요?`,
-        hint: "생각나는 걸 골라주세요. 여러 개도 되고, 없으면 넘어가도 돼요.",
+        hint: "생각나는 걸 하나 골라주세요. 없으면 넘어가도 돼요.",
         chips: GAP_CHIPS[targetCompetency] ?? [{ label: "비슷한 일을 해본 적 있어요", category: "대외활동" }],
-        multi: true,
         isLast: false,
       };
     }
@@ -161,9 +160,8 @@ export async function nextInterviewTurn(opts: {
       turnNo: 1,
       kind: "chips",
       question: "최근 1년 안에, 이 중에 해본 게 있어요?",
-      hint: "거창하지 않아도 돼요. 여러 개 골라도 됩니다.",
+      hint: "거창하지 않아도 돼요.",
       chips: COLD_CHIPS,
-      multi: true,
       isLast: false,
     };
   }
@@ -173,7 +171,10 @@ export async function nextInterviewTurn(opts: {
       turnNo: 2,
       kind: "text",
       reaction: reactionFor(last),
-      question: `${last.replace(/·/g, " ")}에서 뭘 맡았어요?`,
+      // ⚠️ last 를 그대로 넣으면 안 된다 — 다중 선택 시절 답은 "팀 프로젝트 · 아르바이트"처럼
+      //    이어져 있어 "팀 프로젝트 아르바이트에서 뭘 맡았어요?"로 문장이 깨졌다.
+      //    이야기를 듣는 대상은 언제나 하나뿐이므로 고른 칩(없으면 첫 조각)만 쓴다.
+      question: `${picked?.[0]?.label ?? last.split(" · ")[0]}에서 뭘 맡았어요?`,
       hint: "한 줄이면 충분해요.",
       placeholder: "예: 회비 관리랑 행사 예산 짜는 걸 맡았어요",
       aids: roleAids(focus),
@@ -227,10 +228,9 @@ export async function buildInterviewDraft(opts: {
   };
 
   return {
-    primary: { activityTitle: first.label, activityCategory: first.category, story },
-    // 함께 고른 나머지는 활동만 만든다 — 한 번의 인터뷰로 목록이 채워지되
-    // 질문 수는 늘어나지 않는다 (피로 설계)
-    extras: picked.slice(1).map((c) => ({ activityTitle: c.label, activityCategory: c.category })),
+    activityTitle: first.label,
+    activityCategory: first.category,
+    story,
   };
 }
 

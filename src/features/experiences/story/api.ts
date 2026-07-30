@@ -27,8 +27,6 @@ export type InterviewTurn = {
   question: string;
   hint?: string;
   chips?: ChipOption[];
-  /** true면 여러 개 고를 수 있다 (칩 턴 전용) */
-  multi?: boolean;
   placeholder?: string;
   /** 서술 턴의 입력 보조 — 말머리·낱말·단위 (백지 방지) */
   aids?: WritingAids;
@@ -39,12 +37,12 @@ export type InterviewTurn = {
 
 export type DraftActivity = { activityTitle: string; activityCategory: string };
 
-export type InterviewDraft = {
-  /** 첫 번째로 고른 것 — 3턴을 거쳐 소재까지 만들어진 활동 */
-  primary: DraftActivity & { story: Story };
-  /** 함께 고른 나머지 — 활동만 만들고 소재는 나중에 (피로를 늘리지 않으려는 선택) */
-  extras: DraftActivity[];
-};
+/**
+ * 인터뷰 1회의 결과 — **활동 하나 + 소재 하나**.
+ * 2026-07-30에 1턴을 단일 선택으로 되돌리면서 primary/extras 구조를 걷어냈다.
+ * 여러 개를 고르게 하면 소재 0개인 빈 활동이 목록에 쌓여 "정리해야 할 짐"이 됐다(구 부록 C-17).
+ */
+export type InterviewDraft = DraftActivity & { story: Story };
 
 /* ── 추출 작업 ────────────────────────────────────────────────── */
 
