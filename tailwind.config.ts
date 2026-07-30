@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { FONT_SIZE } from "./src/lib/designTokens";
+import { FONT_SIZE, TW_BASE_FONT_SIZE_OVERRIDE } from "./src/lib/designTokens";
 
 export default {
   darkMode: ["class"],
@@ -17,7 +17,7 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)"],
       },
-      fontSize: FONT_SIZE,
+      fontSize: { ...FONT_SIZE, ...TW_BASE_FONT_SIZE_OVERRIDE },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -122,12 +122,12 @@
 
     /* 헤딩 크기 토큰은 designTokens.ts(FONT_SIZE) 정본에서 Tailwind 유틸(text-h2/heading/display)로 파생.
        구 --text-display/heading/h2/h3/h4 CSS 변수는 소비처 0·토큰과 값 충돌(34/21 등)이라 제거(2026-07-13). */
-    --text-title: 15px;
-    --text-sm: 14px;
-    --text-body: 13px;
-    --text-xs: 12px;
-    --text-chip: 11px;
-    --text-mini: 10px;
+    --text-title: 17px;
+    --text-sm: 15px;
+    --text-body: 14px;
+    --text-xs: 13px;
+    --text-chip: 12px;
+    --text-mini: 11px;
 
     --leading-tight: 1.25;
     --leading-snug: 1.4;
