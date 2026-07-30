@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { JOB_STAGES, FINAL_RESULT_LABEL, FINAL_RESULT_OPTIONS, type JobStage, type FinalResult } from "@/data/jobStatus";
+import { ddayLabel } from "@/lib/dday";
 
 // 전형 단계 6개 (2026-07-02 재편) — 최종합격/불합격/보류는 "전형완료" + 세부 결과(FinalResult)로 표현
 // 단계·결과 목록의 정본은 @/data/jobStatus. 여기서는 파생만 한다.
@@ -171,7 +172,7 @@ export function StatusManagementModal({
                     job.dday <= 3 && job.dday > 0 ? "text-pickd-red" : "text-muted-foreground",
                   )}
                 >
-                  {job.dday > 0 ? `D-${job.dday}` : job.dday === 0 ? "D-Day" : `D+${Math.abs(job.dday)}`}
+                  {ddayLabel(job.dday)}
                 </span>
               </Field>
             </div>

@@ -157,7 +157,7 @@ src/
 │   ├── designTokens.ts                  ★ 폰트 크기 토큰 FONT_SIZE 단일 출처 (§1)
 │   ├── utils.ts                         cn() + tailwind-merge (FONT_SIZE에서 파생)
 │   ├── storage.ts                       ★ localStorage lsGet/lsSet 단일 출처
-│   ├── dday.ts                          ddayLabel/ddayCls (D-day 라벨·색)
+│   ├── dday.ts                          ★ D-day 정본 — calcDday(계산)·ddayLabel("D-Day")·ddayCls
 │   ├── trash.ts                         전역 통합 휴지통 스토어 (pickd.trash.v1)
 │   └── csv.ts                           CSV 내보내기
 ├── hooks/                               useResizableCols.tsx · use-mobile.tsx

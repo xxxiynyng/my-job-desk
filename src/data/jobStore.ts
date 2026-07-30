@@ -108,7 +108,8 @@ export function registrationRowSeed(reg: JobRegistration) {
     role: position.jobTitle,
     employType: position.recruitType,
     industry: posting.orgCategory,
-    deadline: posting.applyEnd.slice(0, 10),
+    deadline: posting.applyEnd.slice(0, 10),  // 날짜 편집 UI(DeadlinePicker)용
+    deadlineAt: posting.applyEnd,              // 시각 포함 원본 — 표시·D-day 계산의 기준
     dday: calcPostingDday(posting.applyEnd),
     linkedSchedules: posting.scheduleEvents.length,
     registeredAt: reg.registeredAt,

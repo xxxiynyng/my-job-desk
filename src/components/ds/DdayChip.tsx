@@ -17,7 +17,7 @@ export function DdayChip({ days = 0, size = "md", className }: DdayChipProps) {
     label = `D+${Math.abs(days)}`;
     colorClass = "bg-gray-100 text-gray-400";
   } else if (days === 0) {
-    label = "D-DAY";
+    label = "D-Day";
     colorClass = "bg-red-500 text-white font-bold animate-pulse";
   } else if (days <= 3) {
     label = `D-${days}`;

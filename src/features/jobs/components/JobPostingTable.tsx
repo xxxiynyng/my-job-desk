@@ -163,6 +163,17 @@ const DEFAULT_WIDTHS: Record<string, number> = {
 };
 
 
+/** 마감 시각("12:00") — 자정(00:00)이면 표시하지 않는다 */
+const deadlineTimeOf = (j: { deadlineAt?: string }) => {
+  if (!j.deadlineAt) return "";
+  const d = new Date(j.deadlineAt);
+  if (d.getHours() === 0 && d.getMinutes() === 0) return "";
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+
+/** D-day는 항상 이 함수로만 구한다 — 시각이 있으면 마감 일시 기준, 없으면 날짜 기준 */
+const ddayOf = (j: { deadline: string; deadlineAt?: string }) => calcDday(j.deadlineAt ?? j.deadline);
+
 const FILTER_CHIPS = ["전체", "★", "마감임박", "|", ...ACTIVE_STATUSES];
 const ROW_CAP = 7;
 
@@ -407,7 +418,7 @@ function KanbanView({
                       {/* 하단: 고용형태 + D-day / 결과 */}
                       <div className="flex items-center justify-between mt-2.5 gap-1">
                         <span className="text-mini text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded-sm tabular-nums shrink-0">{job.employType}</span>
-                        {!COMPLETED_STATUSES.includes(col) && <DdayChip days={calcDday(job.deadline)} size="sm" />}
+                        {!COMPLETED_STATUSES.includes(col) && <DdayChip days={ddayOf(job)} size="sm" />}
                         {COMPLETED_STATUSES.includes(col) && job.finalResult && (
                           <StatusBadge status={FINAL_RESULT_DS_KEY[job.finalResult]} size="sm" />
                         )}
@@ -556,6 +567,7 @@ export function JobPostingTable() {
             employType: s.employType,
             industry: s.industry,
             deadline: s.deadline,
+            deadlineAt: s.deadlineAt,
             dday: s.dday,
             status: "작성중",
             finalResult: null,
@@ -777,7 +789,7 @@ export function JobPostingTable() {
   const chipCount = (f: string) => {
     if (f === "전체") return searchedActive.length;
     if (f === "★") return searchedActive.filter((j) => j.starred).length;
-    if (f === "마감임박") return searchedActive.filter((j) => { const d = calcDday(j.deadline); return d > 0 && d <= 3; }).length;
+    if (f === "마감임박") return searchedActive.filter((j) => { const d = ddayOf(j); return d > 0 && d <= 3; }).length;
     return searchedActive.filter((j) => j.status === f).length;
   };
 
@@ -787,7 +799,7 @@ export function JobPostingTable() {
       if (activeFilter === "★") {
         if (!j.starred) return false;
       } else if (activeFilter === "마감임박") {
-        const d = calcDday(j.deadline);
+        const d = ddayOf(j);
         if (!(d > 0 && d <= 3)) return false;
       } else if (activeFilter !== "전체") {
         if (j.status !== activeFilter) return false;
@@ -836,7 +848,7 @@ export function JobPostingTable() {
   const toggleStarred = (id: string) => setJobs((p) => p.map((j) => (j.id === id ? { ...j, starred: !j.starred } : j)));
 
   const updateDeadline = (id: string, v: string) =>
-    setJobs((p) => p.map((j) => (j.id === id ? { ...j, deadline: v, dday: calcDday(v) } : j)));
+    setJobs((p) => p.map((j) => (j.id === id ? { ...j, deadline: v, deadlineAt: undefined, dday: calcDday(v) } : j)));
 
   // 실제 삭제 수행 — 확인 다이얼로그 승인 후에만 호출
   const performDelete = (ids: string[]) => {
@@ -1276,10 +1288,17 @@ export function JobPostingTable() {
                                   className="px-4 py-2.5 whitespace-nowrap"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <DeadlinePicker
-                                    value={job.deadline}
-                                    onChange={(v) => updateDeadline(job.id, v)}
-                                  />
+                                  <span className="inline-flex items-baseline gap-1">
+                                    <DeadlinePicker
+                                      value={job.deadline}
+                                      onChange={(v) => updateDeadline(job.id, v)}
+                                    />
+                                    {deadlineTimeOf(job) && (
+                                      <span className="text-chip tabular-nums text-muted-foreground shrink-0">
+                                        {deadlineTimeOf(job)}
+                                      </span>
+                                    )}
+                                  </span>
                                 </td>
                               );
                             case "dday":
@@ -1288,7 +1307,7 @@ export function JobPostingTable() {
                                   key="dday"
                                   className="px-4 py-2.5 text-left whitespace-nowrap"
                                 >
-                                  <DdayChip days={calcDday(job.deadline)} size="sm" />
+                                  <DdayChip days={ddayOf(job)} size="sm" />
                                 </td>
                               );
                             case "linked":

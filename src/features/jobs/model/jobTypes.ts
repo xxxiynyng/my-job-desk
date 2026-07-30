@@ -9,7 +9,8 @@ export type Job = {
   role: string;
   employType: string;
   industry: string;
-  deadline: string;
+  deadline: string;      // YYYY-MM-DD — 편집·정렬용
+  deadlineAt?: string;   // 시각 포함 ISO — 있으면 표시·D-day 계산의 기준
   dday: number;
   status: JobStage;
   finalResult: FinalResult;

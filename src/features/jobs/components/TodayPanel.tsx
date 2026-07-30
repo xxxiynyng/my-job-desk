@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { getRegistrations, getRegisteredPosition } from "@/data/jobStore";
 import { calcPostingDday } from "@/data/postings.seed";
 import { registeredCalSchedules } from "@/data/calendarData";
+import { ddayLabel } from "@/lib/dday";
 
 // ── 마감 임박 공고 ────────────────────────────────────────────────
 type DeadlineItem = { id: string; title: string; company: string; dday: number };
@@ -30,11 +31,7 @@ function buildDeadlineItems(): DeadlineItem[] {
 }
 const deadlineItems: DeadlineItem[] = buildDeadlineItems();
 
-function ddayLabel(d: number) {
-  if (d === 0) return "오늘";
-  if (d < 0)   return `D+${Math.abs(d)}`;
-  return `D-${d}`;
-}
+// 라벨은 lib/dday의 ddayLabel 정본을 쓴다. 색 규칙만 이 화면 고유(아래 ddayColor).
 function ddayColor(d: number) {
   if (d <= 1) return "text-destructive";
   if (d <= 3) return "text-orange-500";

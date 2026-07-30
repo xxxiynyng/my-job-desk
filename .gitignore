@@ -33,3 +33,7 @@ vitest.config.ts.timestamp-*.mjs
 .env*
 docs/HEALTH.md
 outputs/
+
+# 기기에서 rm이 불가해 삭제 대기용으로 쓰는 임시 폴더 — 커밋 금지
+_to_delete/
+_stale-backup/
