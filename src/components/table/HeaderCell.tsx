@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 import { HeaderFilterContent, type ColumnFilterProps } from "./HeaderFilter";
 
 // ── 테이블 헤더 공용 컴포넌트 (탭1·탭2 공용) ─────────────────────────
-// SSOT 6-2: 헤더 텍스트 text-xs font-medium text-gray-600 + whitespace-nowrap 필수.
+// SSOT 6-2: 헤더 텍스트 font-medium text-gray-600 + whitespace-nowrap 필수.
+// 크기는 2026-07-31 한 단계 상향(text-xs 13px → text-body 14px) — 본문과 같은 크기로 읽히게.
 //
 // hover 인터랙션 규칙 (2026-07-02 확정 — 좁은 컬럼에서도 넘치지 않게 최대 2개 버튼):
 //   [⠿ 그립: 좌측 절대배치 → 폭 미점유, 드래그=컬럼 이동] [라벨: 클릭=정렬 순환, 활성 시에만 ↑↓]
@@ -24,7 +25,7 @@ export type SortDir = "asc" | "desc" | null;
 
 /** 헤더 셀 공통 클래스 — th에 직접 클래스를 써야 하는 경우(dnd-kit useSortable 등) 재사용 */
 export const HEADER_CELL_CLASS =
-  "relative text-left px-4 py-3 text-xs font-medium text-gray-600 whitespace-nowrap group";
+  "relative text-left px-4 py-3 text-body font-medium text-gray-600 whitespace-nowrap group";
 
 /** 정렬 토글 버튼 — 라벨 + 활성 시에만 렌더되는 ↑↓ (비활성 시 공간을 차지하지 않음) */
 export function SortHeaderButton({

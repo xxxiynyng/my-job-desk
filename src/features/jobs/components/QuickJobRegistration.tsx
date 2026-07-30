@@ -57,19 +57,34 @@ const REGION_MATCH: Record<string, string[]> = Object.fromEntries(
 );
 const TYPE_FILTERS = ["신입", "인턴", "경력"] as const;
 
-type Filters = { job: JobCategory | null; region: string | null; type: string | null };
-const EMPTY_FILTERS: Filters = { job: null, region: null, type: null };
+// 세 축 모두 **다중 선택**(2026-07-31). 같은 축 안에서는 OR, 축끼리는 AND —
+// "부산 또는 울산에서, 사무·행정 또는 경영·기획을, 신입으로" 처럼 읽힌다.
+type Filters = { job: JobCategory[]; region: string[]; type: string[] };
+const EMPTY_FILTERS: Filters = { job: [], region: [], type: [] };
+
+/** 있으면 빼고 없으면 넣는다 — 칩 토글 */
+const toggle = <T,>(list: T[], v: T): T[] =>
+  list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+
+/** 채용형태 1종과 모집단위가 맞는가 */
+function matchType(pos: Posting["positions"][number], t: string): boolean {
+  if (t === "인턴") return pos.employmentType.includes("인턴");
+  if (t === "신입") return pos.recruitType.includes("신입") && !pos.employmentType.includes("인턴");
+  if (t === "경력") return pos.recruitType.includes("경력");
+  return true;
+}
 
 function matchPosting(p: Posting, f: Filters): boolean {
-  if (f.region) {
-    const aliases = REGION_MATCH[f.region] ?? [f.region];
-    if (!p.regions.some((r) => aliases.some((a) => r.includes(a)))) return false;
+  if (f.region.length) {
+    const hit = f.region.some((label) => {
+      const aliases = REGION_MATCH[label] ?? [label];
+      return p.regions.some((r) => aliases.some((a) => r.includes(a)));
+    });
+    if (!hit) return false;
   }
   const positions = p.positions.filter((pos) => {
-    if (f.job && pos.jobCategory !== f.job) return false;
-    if (f.type === "인턴") return pos.employmentType.includes("인턴");
-    if (f.type === "신입") return pos.recruitType.includes("신입") && !pos.employmentType.includes("인턴");
-    if (f.type === "경력") return pos.recruitType.includes("경력");
+    if (f.job.length && !f.job.includes(pos.jobCategory)) return false;
+    if (f.type.length && !f.type.some((t) => matchType(pos, t))) return false;
     return true;
   });
   return positions.length > 0;
@@ -97,7 +112,7 @@ export function QuickJobRegistration() {
   const blurTimer = useRef<number | null>(null);
 
   const hasQuery = q.trim().length > 0;
-  const hasFilter = !!(filters.job || filters.region || filters.type);
+  const hasFilter = filters.job.length + filters.region.length + filters.type.length > 0;
 
   const options: Option[] = useMemo(() => {
     if (!hasQuery) return [];
@@ -233,24 +248,35 @@ export function QuickJobRegistration() {
               <div className="flex">
                 {/* 좌: 필터로 찾기 */}
                 <div className="flex-1 min-w-0 p-5 border-r border-border">
-                  <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide mb-4">필터로 찾기</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-chip font-semibold text-muted-foreground/60 uppercase tracking-wide">필터로 찾기</p>
+                    {hasFilter && (
+                      <button
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setFilters(EMPTY_FILTERS)}
+                        className="text-chip text-muted-foreground/60 hover:text-foreground"
+                      >
+                        조건 지우기
+                      </button>
+                    )}
+                  </div>
                   <FilterSection
                     label="직무"
                     groups={JOB_GROUPS.map((g) => ({ sub: g.sub, values: [...g.values] }))}
-                    current={filters.job}
-                    onPick={(v) => setFilters((f) => ({ ...f, job: f.job === v ? null : (v as JobCategory) }))}
+                    selected={filters.job}
+                    onPick={(v) => setFilters((f) => ({ ...f, job: toggle(f.job, v as JobCategory) }))}
                   />
                   <FilterSection
                     label="지역"
                     groups={[{ sub: "", values: REGION_CHIPS.map((r) => r.label) }]}
-                    current={filters.region}
-                    onPick={(v) => setFilters((f) => ({ ...f, region: f.region === v ? null : v }))}
+                    selected={filters.region}
+                    onPick={(v) => setFilters((f) => ({ ...f, region: toggle(f.region, v) }))}
                   />
                   <FilterSection
                     label="형태"
                     groups={[{ sub: "", values: [...TYPE_FILTERS] }]}
-                    current={filters.type}
-                    onPick={(v) => setFilters((f) => ({ ...f, type: f.type === v ? null : v }))}
+                    selected={filters.type}
+                    onPick={(v) => setFilters((f) => ({ ...f, type: toggle(f.type, v) }))}
                   />
 
                   {hasFilter && (
@@ -335,39 +361,45 @@ export function QuickJobRegistration() {
 }
 
 function FilterSection({
-  label, groups, current, onPick,
+  label, groups, selected, onPick,
 }: {
   label: string;
   groups: { sub: string; values: string[] }[];
-  current: string | null;
+  /** 고른 값들 — 같은 축 안에서 여러 개를 고를 수 있다 */
+  selected: string[];
   onPick: (v: string) => void;
 }) {
   return (
     <div className="flex items-start gap-3 mb-5">
-      <span className="text-chip text-muted-foreground w-9 shrink-0 pt-1.5">{label}</span>
+      {/* 축 이름은 칩과 같은 크기로 — 작으면 무엇을 고르는 자리인지 먼저 안 읽힌다 */}
+      <span className="text-xs font-medium text-muted-foreground w-10 shrink-0 pt-1.5">{label}</span>
       <div className="min-w-0 flex-1 space-y-2">
         {groups.map((g) => (
           <div key={g.sub} className="flex items-start gap-3">
             {g.sub && (
-              <span className="text-mini text-muted-foreground/50 w-12 shrink-0 pt-1.5 text-right">{g.sub}</span>
+              <span className="text-chip text-muted-foreground/60 w-14 shrink-0 pt-1.5 text-right">{g.sub}</span>
             )}
             <div className="flex flex-wrap gap-1.5">
-              {g.values.map((v) => (
-                <button
-                  key={v}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => onPick(v)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-full border text-xs transition-colors",
-                    current === v
-                      ? "border-primary bg-accent text-primary font-medium"
-                      : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
-                  )}
-                >
-                  {v}
-                  {current === v && <X className="inline w-2.5 h-2.5 ml-0.5 -mt-px" />}
-                </button>
-              ))}
+              {g.values.map((v) => {
+                const on = selected.includes(v);
+                return (
+                  <button
+                    key={v}
+                    aria-pressed={on}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => onPick(v)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-full border text-xs transition-colors",
+                      on
+                        ? "border-primary bg-accent text-primary font-medium"
+                        : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
+                    )}
+                  >
+                    {v}
+                    {on && <X className="inline w-2.5 h-2.5 ml-0.5 -mt-px" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
