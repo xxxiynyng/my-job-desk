@@ -269,7 +269,7 @@ export function QuickJobRegistration() {
                     onPick={(v) => setFilters((f) => ({ ...f, region: toggle(f.region, v) }))}
                   />
                   <FilterSection
-                    label="형태"
+                    label="고용형태"
                     groups={[{ sub: "", values: [...TYPE_FILTERS] }]}
                     selected={filters.type}
                     onPick={(v) => setFilters((f) => ({ ...f, type: toggle(f.type, v) }))}
@@ -365,15 +365,21 @@ function FilterSection({
   selected: string[];
   onPick: (v: string) => void;
 }) {
+  // 라벨과 칩의 첫 줄이 어긋나지 않게, 라벨에도 칩과 **완전히 같은 세로 박스**를 준다.
+  // (py-1 + 투명 1px 테두리 = 칩의 py-1 + 테두리). pt-* 로 눈대중 맞추면 글자 크기가
+  // 조금만 달라져도 다시 어긋난다 — 실제로 하위 묶음명이 12px이라 13px 칩과 안 맞았다.
+  const LABEL_BOX = "py-1 border border-transparent leading-4 whitespace-nowrap shrink-0";
   return (
     <div className="flex items-start gap-3 mb-5">
-      {/* 축 이름은 칩과 같은 크기로 — 작으면 무엇을 고르는 자리인지 먼저 안 읽힌다 */}
-      <span className="text-xs font-medium text-muted-foreground w-10 shrink-0 pt-1.5">{label}</span>
-      <div className="min-w-0 flex-1 space-y-2">
+      {/* 축 이름·묶음명·칩 모두 같은 크기(text-xs). 위계는 색과 굵기로만 준다 */}
+      <span className={cn(LABEL_BOX, "text-xs font-medium text-foreground w-16")}>{label}</span>
+      <div className="min-w-0 flex-1 space-y-1.5">
         {groups.map((g) => (
           <div key={g.sub} className="flex items-start gap-3">
+            {/* 묶음명도 축 이름과 같이 왼쪽에서 시작한다 — 오른쪽 정렬이면
+                "관리·사무"와 "기술"의 시작점이 어긋나 두 번째 열로 안 읽힌다 */}
             {g.sub && (
-              <span className="text-chip text-muted-foreground/60 w-14 shrink-0 pt-1.5 text-right">{g.sub}</span>
+              <span className={cn(LABEL_BOX, "text-xs text-muted-foreground/60 w-16")}>{g.sub}</span>
             )}
             <div className="flex flex-wrap gap-1.5">
               {g.values.map((v) => {
@@ -385,7 +391,7 @@ function FilterSection({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => onPick(v)}
                     className={cn(
-                      "px-2.5 py-1 rounded-full border text-xs transition-colors",
+                      "px-2.5 py-1 rounded-full border text-xs leading-4 transition-colors",
                       on
                         ? "border-primary bg-accent text-primary font-medium"
                         : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
