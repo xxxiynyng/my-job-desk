@@ -189,6 +189,7 @@ src/
 │   ├── table/                           탭1·탭2 공용 테이블 부품
 │   │   ├── HeaderCell·HeaderFilter·SortableColumnHeader·ColumnDivider·DragHandle
 │   │   ├── StarToggle·BatchActionBar·useTableDividers·RowContextMenu(Job/Exp 양쪽)
+│   │   ├── autoFitColumn.ts             컬럼 경계 더블클릭 시 내용에 맞는 너비 실측 (탭1·탭2 공용)
 │   │   └── tableState.ts                ★ 컬럼 필터·정렬 setter 팩토리 (탭1·탭2 공용)
 │   ├── ds/                              디자인시스템 프리미티브 (6종, 전부 사용 중)
 │   │                                    StatusBadge·DdayChip·EssayStatus
@@ -239,6 +240,7 @@ pickd.trash.v1                     전역 통합 휴지통 스냅샷 (14일 보�
 pickd.onboarding.state.v1 / done.v1   온보딩 진행 상태(재개용) / 완료 플래그
 pickd.profile.v1                   온보딩 프로필 (PickdProfileV1 — 온보딩 SSOT §4 데이터 계약)
 cal.tasks.v1 / cal.carriedOver.v1  캘린더 할 일 / 이월 기록 (Calendar.tsx)
+cal.schedules.v1                   캘린더 사용자 일정 (CalSchedule[] — 담은 공고 파생분 id가 reg-* 인 항목은 저장 안 하고 매번 재생성)
 ```
 
 > 이 목록의 정본은 코드다. 전수 확인: `grep -rhoE '"(specs|pickd|cal)\.[A-Za-z.0-9]+"' src | sort -u`
