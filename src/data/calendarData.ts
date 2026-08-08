@@ -96,20 +96,46 @@ export const mockCalSchedules: CalSchedule[] = [
   { id: "s10", title: "서류 제출 마감", date: fmt(new Date(y, m, d + 4)), time: "18:00", scheduleType: "posting", linkedPosting: "한국전력공사", linkedPostingId: "a6", type: "마감" },
 ];
 
-export const mockCalEvents: CalendarEvent[] = [
-  { id: "e1", date: fmt(new Date(y, m, d)), title: "삼성전자 서류", type: "deadline", company: "삼성전자", postingId: "a1" },
-  { id: "e2", date: fmt(new Date(y, m, d)), title: "자소서 수정", type: "task" },
-  { id: "e3", date: fmt(new Date(y, m, d + 1)), title: "SK 면접", type: "interview", company: "SK하이닉스", postingId: "a2" },
-  { id: "e4", date: fmt(new Date(y, m, d + 2)), title: "네이버 마감", type: "deadline", company: "네이버", postingId: "a3" },
-  { id: "e5", date: fmt(new Date(y, m, d + 2)), title: "스터디 모임", type: "personal" },
-  { id: "e6", date: fmt(new Date(y, m, d + 2)), title: "카카오 서류", type: "deadline", company: "카카오", postingId: "a4" },
-  { id: "e7", date: fmt(new Date(y, m, d + 5)), title: "카카오 필기", type: "interview", company: "카카오", postingId: "a4" },
-  { id: "e8", date: fmt(new Date(y, m, d + 7)), title: "LG전자 발표", type: "deadline", company: "LG전자", postingId: "a5" },
-  { id: "e9", date: fmt(new Date(y, m, d + 10)), title: "현대차 면접", type: "interview", company: "현대자동차" },
-  { id: "e10", date: fmt(new Date(y, m, d - 1)), title: "토익 시험", type: "personal" },
-  { id: "e11", date: fmt(new Date(y, m, d + 3)), title: "운동", type: "personal" },
-  { id: "e12", date: fmt(new Date(y, m, d + 4)), title: "한전 마감", type: "deadline", company: "한국전력공사", postingId: "a6" },
-];
+/**
+ * 일정(CalSchedule) → 달력 칸 배지(CalendarEvent) 파생 — 캘린더 데이터 소스 단일화
+ * (기획 §8-2 #7, 2026-08-04).
+ *
+ * 전에는 달력 격자가 `mockCalEvents`라는 **별도 목록**을 그리고 오른쪽 패널만
+ * `scheduleList`를 그려서, 사용자가 추가한 일정이 오른쪽에는 뜨는데 달력에는
+ * 안 찍혔다. 이제 두 화면이 같은 목록(scheduleList)에서 파생한다 —
+ * 일정을 하나 추가하면 양쪽에 동시에 나타난다.
+ *
+ * 파생이므로 저장 대상이 아니다. 저장되는 것은 CalSchedule 쪽뿐(cal.schedules.v1).
+ */
+const SCHEDULE_TYPE_TO_EVENT: Record<string, EventType> = {
+  // 전형에 직접 참석하는 일정 — 파랑 계열 배지
+  면접: "interview",
+  시험: "interview",
+  검사: "interview",
+  // 날짜를 지키는 일정(마감·결과) — 빨강 계열 배지
+  마감: "deadline",
+  접수: "deadline",
+  서류: "deadline",
+  발표: "deadline",
+  입사: "deadline",
+};
+
+export function schedulesToEvents(schedules: CalSchedule[]): CalendarEvent[] {
+  return schedules.map((s) => ({
+    id: `ev-${s.id}`,
+    date: s.date,
+    // 달력 칸은 좁아 배지가 잘린다 — 공고 일정은 "회사명 + 유형"으로 줄이고,
+    // 개인 일정은 사용자가 적은 제목을 그대로 보여준다.
+    title: s.scheduleType === "posting" && s.linkedPosting
+      ? `${s.linkedPosting} ${s.type ?? ""}`.trim()
+      : s.title,
+    type: s.scheduleType === "personal"
+      ? "personal"
+      : (s.type ? SCHEDULE_TYPE_TO_EVENT[s.type] : undefined) ?? "deadline",
+    company: s.linkedPosting,
+    postingId: s.linkedPostingId,
+  }));
+}
 
 export const mockCalApplications: CalApplication[] = [
   {

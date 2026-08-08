@@ -1,12 +1,16 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { PickdSidebar } from "@/components/layout/PickdSidebar";
 import { MonthlyCalendar } from "@/features/calendar/components/MonthlyCalendar";
 import { ContextPanel } from "@/features/calendar/components/ContextPanel";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { mockCalTasks, mockCalCarriedOverTasks, mockCalEvents, mockCalApplications, mockCalSchedules, registeredCalApplications, registeredCalSchedules, CalTask, PostingFilterValue, CalApplication, CalSchedule } from "@/data/calendarData";
+import { mockCalTasks, mockCalCarriedOverTasks, mockCalApplications, mockCalSchedules, registeredCalApplications, registeredCalSchedules, schedulesToEvents, CalTask, PostingFilterValue, CalApplication, CalSchedule } from "@/data/calendarData";
 import type { JobStage } from "@/data/jobStatus";
 import { REGISTRATIONS_EVENT } from "@/data/jobStore";
+import { lsGet, lsSet } from "@/lib/storage";
 import { toast } from "sonner";
+
+/** 담은 공고에서 파생한 일정은 저장하지 않는다 — 공고를 빼면 같이 사라져야 하므로 매번 다시 만든다. */
+const isDerived = (s: CalSchedule) => s.id.startsWith("reg-");
 
 export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -32,9 +36,11 @@ export default function Calendar() {
     ...registeredCalApplications(),
     ...mockCalApplications,
   ]);
+  // 저장분(사용자가 추가한 일정)이 있으면 그것을, 없으면 목데이터를 시드로 쓴다.
+  // 담은 공고 파생분은 저장하지 않고 매번 다시 만든다(isDerived 참조).
   const [scheduleList, setScheduleList] = useState<CalSchedule[]>(() => [
     ...registeredCalSchedules(),
-    ...mockCalSchedules,
+    ...lsGet<CalSchedule[]>("cal.schedules.v1", mockCalSchedules),
   ]);
 
   // 담기/빼기 변경 시 파생분만 갱신 (사용자가 추가한 개인 일정은 유지)
@@ -46,7 +52,7 @@ export default function Calendar() {
       ]);
       setScheduleList((prev) => [
         ...registeredCalSchedules(),
-        ...prev.filter((sc) => !sc.id.startsWith("reg-")),
+        ...prev.filter((sc) => !isDerived(sc)),
       ]);
     };
     window.addEventListener(REGISTRATIONS_EVENT, sync);
@@ -64,6 +70,12 @@ export default function Calendar() {
   useEffect(() => {
     localStorage.setItem("cal.carriedOver.v1", JSON.stringify(carriedOver));
   }, [carriedOver]);
+  useEffect(() => {
+    lsSet("cal.schedules.v1", scheduleList.filter((s) => !isDerived(s)));
+  }, [scheduleList]);
+
+  // 달력 격자와 오른쪽 패널이 같은 목록을 본다 (기획 §8-2 #7 — 구 mockCalEvents 폐지)
+  const events = useMemo(() => schedulesToEvents(scheduleList), [scheduleList]);
 
   const handleToggleTask = useCallback((id: string) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -111,7 +123,7 @@ export default function Calendar() {
           <div className="h-full p-5 flex flex-col min-w-0">
             <MonthlyCalendar
               currentDate={currentDate} selectedDate={selectedDate}
-              events={mockCalEvents} applications={applications}
+              events={events} applications={applications}
               schedules={scheduleList} tasks={allTasks}
               onDateSelect={setSelectedDate} onMonthChange={setCurrentDate}
               postingFilter={postingFilter} onPostingFilterChange={setPostingFilter}
