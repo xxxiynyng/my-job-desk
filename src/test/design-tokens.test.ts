@@ -41,3 +41,29 @@ describe("--ui-scale 단일 값 유지", () => {
     }
   });
 });
+
+/**
+ * rounded-ds-*(tailwind.config.ts borderRadius)는 font-size 토큰과 달리 cn()의
+ * extendTailwindMerge classGroups에 등록돼 있지 않다(2026-08 헬스체크에서 발견,
+ * 폰트 토큰 사고와 같은 유형의 구조적 gap). 등록이 안 됐다는 뜻은 tailwind-merge가
+ * rounded-lg와 rounded-ds-md를 "같은 그룹"으로 보지 않는다는 것 — 그래서 지금은
+ * 조용히 삭제되는 대신 **둘 다 살아남는다**(충돌 인식 자체가 안 됨). 폰트 토큰
+ * 사고처럼 위험하진 않지만, 나중에 실수로 등록하면서 규칙을 잘못 적으면 이번엔
+ * 반대로 조용히 삭제되는 쪽으로 바뀔 수 있다 — 그 변화를 여기서 고정해 감지한다.
+ */
+describe("rounded-ds-* borderRadius classGroup 미등록 상태 고정(회귀 감시)", () => {
+  const config = readFileSync(resolve(__dirname, "../../tailwind.config.ts"), "utf8");
+  const dsRadiusKeys = [...config.matchAll(/"(ds-[a-z]+)":\s*"var\(--radius-[a-z]+\)"/g)].map((m) => m[1]);
+
+  it("tailwind.config.ts에서 ds-* 라운드 토큰을 찾는다(테스트 자체가 낡지 않았는지 확인)", () => {
+    expect(dsRadiusKeys.length).toBeGreaterThan(0);
+  });
+
+  for (const key of dsRadiusKeys) {
+    it(`rounded-${key}가 기본 rounded-lg와 같은 cn() 호출에서 삭제되지 않는다`, () => {
+      const merged = cn(`rounded-lg rounded-${key}`);
+      expect(merged).toContain("rounded-lg");
+      expect(merged).toContain(`rounded-${key}`);
+    });
+  }
+});
