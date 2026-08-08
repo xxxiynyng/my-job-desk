@@ -57,6 +57,7 @@ import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { BatchActionBar } from "@/components/table/BatchActionBar";
 import { type ColFilterShape, type ColumnFilterProps } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
+import { measureColumnFitWidth } from "@/components/table/autoFitColumn";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { StatusManagementModal, type FinalResult } from "./StatusManagementModal";
@@ -691,7 +692,7 @@ export function JobPostingTable() {
   const toggleCol = (k: ColumnKey) => setVisibleCols((p) => toggleInSet(p, k));
 
   // 컬럼 너비 (최소 너비 적용)
-  const { widths: rawWidths, onMouseDown, resizingKey } = useResizableCols(
+  const { widths: rawWidths, onMouseDown, setWidth, resizingKey } = useResizableCols(
     LS_JOB_COL_WIDTHS,
     DEFAULT_WIDTHS,
     COL_MIN_WIDTHS,
@@ -760,10 +761,16 @@ export function JobPostingTable() {
   const stickyProps = makeStickyProps(frozenMap, cn);
   // 컬럼 경계 세로 구분선 — 계산값이 아니라 실제 렌더된 th 경계를 실측(useTableDividers, 탭1·탭2 공용)
   const dividerBounds = useTableDividers(tableWrapRef, [widths, orderedCols, visibleCols]);
+  // 컬럼 경계 더블클릭 → 그 컬럼을 내용에 맞는 너비로 (탭1·탭2 공용 규칙)
+  const autoFitCol = (key: string) => {
+    const px = measureColumnFitWidth(tableWrapRef.current, key);
+    if (px != null) setWidth(key, px);
+  };
   const dividers = dividerBounds.map((b) => ({
     key: b.key,
     left: b.left,
     onResizeMouseDown: onMouseDown(b.key),
+    onResizeDoubleClick: () => autoFitCol(b.key),
     active: resizingKey === b.key,
   }));
   const colSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -1102,7 +1109,13 @@ export function JobPostingTable() {
             <>
             <div ref={tableWrapRef} className="overflow-x-auto relative">
               {dividers.map((d) => (
-                <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
+                <ColumnDivider
+                  key={d.key}
+                  left={d.left}
+                  onResizeMouseDown={d.onResizeMouseDown}
+                  onResizeDoubleClick={d.onResizeDoubleClick}
+                  active={d.active}
+                />
               ))}
               <DndContext sensors={colSensors} collisionDetection={closestCenter} onDragEnd={handleTableDragEnd}>
               <table className="w-full min-w-full text-body table-fixed">

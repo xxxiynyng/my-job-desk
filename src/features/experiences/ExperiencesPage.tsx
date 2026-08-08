@@ -80,6 +80,7 @@ import { HeaderCell } from "@/components/table/HeaderCell";
 import { SortableColumnHeader } from "@/components/table/SortableColumnHeader";
 import { type ColumnFilterProps, type ColFilterShape } from "@/components/table/HeaderFilter";
 import { useTableDividers } from "@/components/table/useTableDividers";
+import { measureColumnFitWidth } from "@/components/table/autoFitColumn";
 import { StarToggle } from "@/components/table/StarToggle";
 import { ExpRowContextMenu, ExpRowActionCell } from "@/components/table/RowContextMenu";
 import { toast } from "sonner";
@@ -540,7 +541,7 @@ export default function Experiences() {
     } catch {}
     return new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key));
   });
-  const { widths: colW, onMouseDown: onResize, resizingKey } = useResizableCols(
+  const { widths: colW, onMouseDown: onResize, setWidth: setColW, resizingKey } = useResizableCols(
     LS_EXP_COL_WIDTHS,
     DEFAULT_EXP_WIDTHS,
     MIN_EXP_WIDTHS,
@@ -613,10 +614,16 @@ export default function Experiences() {
   // table-fixed에서 남는 공간이 컬럼에 배분되면 계산값과 실제 경계가 어긋나던 문제 해결(2026-07-02)
   const expTableWrapRef = useRef<HTMLDivElement>(null);
   const dividerBounds = useTableDividers(expTableWrapRef, [colW, displayCols]);
+  // 컬럼 경계 더블클릭 → 그 컬럼을 내용에 맞는 너비로 (탭1·탭2 공용 규칙)
+  const autoFitCol = (key: string) => {
+    const px = measureColumnFitWidth(expTableWrapRef.current, key);
+    if (px != null) setColW(key, px);
+  };
   const dividers = dividerBounds.map((b) => ({
     key: b.key,
     left: b.left,
     onResizeMouseDown: onResize(b.key),
+    onResizeDoubleClick: () => autoFitCol(b.key),
     active: resizingKey === b.key,
   }));
 
@@ -1226,7 +1233,13 @@ export default function Experiences() {
               ) : view === "list" ? (
                 <div ref={expTableWrapRef} className="bg-card border border-border rounded-xl overflow-hidden relative">
                   {dividers.map((d) => (
-                    <ColumnDivider key={d.key} left={d.left} onResizeMouseDown={d.onResizeMouseDown} active={d.active} />
+                    <ColumnDivider
+                      key={d.key}
+                      left={d.left}
+                      onResizeMouseDown={d.onResizeMouseDown}
+                      onResizeDoubleClick={d.onResizeDoubleClick}
+                      active={d.active}
+                    />
                   ))}
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <table className="w-full min-w-full text-body table-fixed">

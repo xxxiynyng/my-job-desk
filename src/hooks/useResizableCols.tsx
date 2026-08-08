@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * 드래그로 컬럼 너비를 조절할 수 있는 간단한 훅.
  * - 각 컬럼 key 별 width(px)를 관리합니다.
  * - localStorage 에 저장해 새로고침 후에도 유지합니다.
+ * - setWidth(key, px)로 너비를 직접 지정할 수 있다(컬럼 자동 맞춤이 쓴다). 드래그와 같은
+ *   clamp를 타므로 min/max 밖으로 나갈 수 없다.
  * - maxWidths를 넘겨주면 저장된 값이 그보다 크더라도(과거 실수로 과도하게 늘려놓은 값
  *   포함) 읽어올 때/드래그 중 모두 그 상한으로 자동 clamp — 컬럼이 내용보다 훨씬
  *   넓어져서 헤더·본문 사이에 빈 공백이 크게 남는 문제를 막는다.
@@ -42,6 +44,12 @@ export function useResizableCols(
     } catch {}
   }, [storageKey, widths]);
 
+  /** 너비 직접 지정 — 자동 맞춤 등에서 쓴다. 드래그와 동일한 min/max clamp를 적용한다. */
+  const setWidth = useCallback(
+    (key: string, px: number) => setWidths((p) => ({ ...p, [key]: clamp(key, px) })),
+    [clamp],
+  );
+
   const [resizingKey, setResizingKey] = useState<string | null>(null);
   const resizingStartX = useRef<number>(0);
   const dragRef = useRef<{ key: string; startX: number; startW: number } | null>(null);
@@ -78,5 +86,5 @@ export function useResizableCols(
     [widths, defaults, clamp],
   );
 
-  return { widths, onMouseDown, resizingKey, resizingStartX };
+  return { widths, onMouseDown, setWidth, resizingKey, resizingStartX };
 }

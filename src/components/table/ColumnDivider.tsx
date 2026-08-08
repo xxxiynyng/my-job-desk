@@ -5,6 +5,8 @@ type ColumnDividerProps = {
   left: number;
   /** 리사이즈 가능한 경계만 전달. 없으면 정적 구분선(비인터랙티브)으로 렌더링 */
   onResizeMouseDown?: (e: React.MouseEvent) => void;
+  /** 더블클릭 시 이 컬럼을 내용에 맞는 너비로 (없으면 더블클릭 비활성) */
+  onResizeDoubleClick?: () => void;
   /** 현재 이 경계를 드래그로 리사이즈하는 중인지 — hover와 무관하게 진한 색 유지 */
   active?: boolean;
 };
@@ -27,7 +29,7 @@ type ColumnDividerProps = {
  * 두 레이어가 시각적으로 겹쳐 "선이 두 겹으로 보이는" 문제와 클릭이 엉뚱한 레이어로 새는
  * 문제를 근본적으로 차단한다.
  */
-export function ColumnDivider({ left, onResizeMouseDown, active }: ColumnDividerProps) {
+export function ColumnDivider({ left, onResizeMouseDown, onResizeDoubleClick, active }: ColumnDividerProps) {
   const x = Math.round(left);
   if (!onResizeMouseDown) {
     return null;
@@ -49,7 +51,9 @@ export function ColumnDivider({ left, onResizeMouseDown, active }: ColumnDivider
       <div
         className="absolute inset-y-0 left-0 w-2 -translate-x-[0.625rem] cursor-col-resize select-none"
         style={{ touchAction: "none" }}
+        title={onResizeDoubleClick ? "드래그로 너비 조절 · 더블클릭하면 내용에 맞춰집니다" : undefined}
         onMouseDown={onResizeMouseDown}
+        onDoubleClick={onResizeDoubleClick}
       />
     </div>
   );
