@@ -19,7 +19,8 @@
 - dead code/lint 경고 급증, `console.log` 잔존, localStorage 키 버전 누락(breaking 시 `.vN` 상향) 스팟 확인.
 
 ## B. 배포 정합 (infra)
-- `git fetch -q origin` → 미커밋(`git status --short`)·미푸시(`git log --oneline origin/main..HEAD`) 기록. 있으면 ❌ + "터미널 `git push` 필요"(자격증명 없어 직접 push 금지).
+- ⚠️ **git 명령에는 반드시 `--no-optional-locks`를 붙인다** (2026-08-04 신설). 마운트로 붙은 세션이 평범한 `git status`를 돌리면 `.git/index.lock`을 만들고 **컨테이너 권한으로는 지우지 못해** 로컬 git이 통째로 막힌다(2026-07-29 사고와 같은 증상). 예: `git --no-optional-locks status --short`.
+- `git --no-optional-locks fetch -q origin` → 미커밋(`git --no-optional-locks status --short`)·미푸시(`git log --oneline origin/main..HEAD`) 기록. 있으면 ❌ + "터미널 `git push` 필요"(자격증명 없어 직접 push 금지).
 - **한 레포 = Vercel 프로젝트 하나** 원칙 상기(둘 이상이면 도메인 충돌 1순위 — CLAUDE.md 배포 지침). web_fetch로 `https://pickd-seven.vercel.app/` 200 로드 확인. 가능하면 라이브 번들이 origin 코드와 맞는지 스팟(브라우저 도구 없으면 "수동 확인 권장").
 
 ## C. 문서 ↔ 코드 정합 (기획·디자인·온보딩 **모두**)
