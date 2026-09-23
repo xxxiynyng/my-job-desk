@@ -40,6 +40,7 @@ begin
   end if;
   if exists (select 1 from jsonb_array_elements(p->'body_sections') s
              where jsonb_typeof(s->'text') is distinct from 'string'
+                or s->>'kind' is null   -- kind 누락·null은 NOT IN 비교가 NULL이 되어 통과하므로 명시적으로 막는다
                 or s->>'kind' not in ('intro','duties','requirements','preferred','process','conditions','documents','etc')
                 or (s->'heading' is not null and jsonb_typeof(s->'heading') not in ('string','null'))) then
     raise exception 'INGEST_SCHEMA: body_sections 원소 형식 오류(kind 8종, text 문자열)';
