@@ -34,6 +34,20 @@ begin
     if v not in ('개발','기획','디자인','비즈니스','마케팅','경영지원','기타') then raise exception 'INGEST_SCHEMA: job_categories 값 %', v; end if;
   end loop;
   if p->>'body_text' is null then raise exception 'INGEST_SCHEMA: body_text 없음(빈 문자열은 허용)'; end if;
+  -- body_sections(2026-09-24 결정): 필수. 원소는 {kind, heading, text}, kind는 8종, 항목 text를 줄바꿈으로 이으면 body_text와 같아야 한다.
+  if jsonb_typeof(p->'body_sections') is distinct from 'array' then
+    raise exception 'INGEST_SCHEMA: body_sections 는 배열이어야 함';
+  end if;
+  if exists (select 1 from jsonb_array_elements(p->'body_sections') s
+             where jsonb_typeof(s->'text') is distinct from 'string'
+                or s->>'kind' not in ('intro','duties','requirements','preferred','process','conditions','documents','etc')
+                or (s->'heading' is not null and jsonb_typeof(s->'heading') not in ('string','null'))) then
+    raise exception 'INGEST_SCHEMA: body_sections 원소 형식 오류(kind 8종, text 문자열)';
+  end if;
+  if coalesce((select string_agg(s->>'text', E'\n' order by ord) from jsonb_array_elements(p->'body_sections') with ordinality as x(s, ord)), '')
+     is distinct from (p->>'body_text') then
+    raise exception 'INGEST_SCHEMA: body_sections 를 이어 붙인 결과가 body_text 와 다름';
+  end if;
 end $$;
 
 -- 입력: {run_id, source_id, content_hash, posting: normalized-posting-v1}

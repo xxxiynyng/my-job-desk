@@ -36,6 +36,7 @@ select posting_uid, posting_key, generation, snapshot_id, snapshot_version, cont
        (j->>'posted_at')::date                              as posted_at,
        coalesce((ov->>'deadline_at')::date, (j->>'deadline_at')::date) as deadline_at,
        j->>'body_text'                                      as body_text,
+       coalesce(j->'body_sections', '[]'::jsonb)          as body_sections,   -- 항목 분할(소개·업무·자격·우대·전형·근무·서류·기타)
        j->>'url'                                            as source_url,
        j->>'source_site'                                    as source_site,
        status, closed_at, closed_reason, needs_review, review_status,

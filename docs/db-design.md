@@ -56,6 +56,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | posted_at | date | ✓ | KST 날짜 `YYYY-MM-DD` |
 | deadline_at | date∣null | ✓ | null = 상시/채용 시 마감 (R-55) |
 | body_text | text | ✓ | 본문 전문(정리된 텍스트, R-04). 빈 문자열 허용, 표본 최대 10,479자 |
+| body_sections | array | ✓ | 본문을 표준 항목으로 나눈 것(2026-09-24 결정). 원소 `{kind, heading, text}`, 원문 순서. `kind`: `intro`(소개) `duties`(업무) `requirements`(자격) `preferred`(우대) `process`(전형) `conditions`(근무) `documents`(서류) `etc`(기타). `heading`은 소제목 줄 원문(첫 소제목 앞 내용은 null), `text`는 소제목 줄을 포함한 그 항목 전체. **모든 항목의 text를 `\n`으로 이으면 body_text와 같다**(전문 보존). 빈 본문이면 `[]` |
 | classification_source | object | ✓ | `{employment, career}` 각 `구조화`∣`추론`∣`미분류` |
 | career_basis | text∣null | ✓ | `title` `body_years` `body_hint` 또는 null |
 | review_reasons | text[] | ✓ | 검수 사유 |
@@ -141,7 +142,7 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 오류(예외, SQLSTATE):
 | 코드 | 상황 |
 |---|---|
-| `P0001` + `INGEST_SCHEMA` | schema_version 미지원, 필수 필드 없음, 열거값 범위 밖 |
+| `P0001` + `INGEST_SCHEMA` | schema_version 미지원, 필수 필드 없음, 열거값 범위 밖, `body_sections` 누락·형식 오류·이어 붙인 결과가 `body_text`와 다름 |
 | `P0001` + `INGEST_RUN` | run_id 없음 또는 이미 finish된 run |
 | `P0001` + `INGEST_SOURCE` | source_id가 sources에 없음/비활성 |
 멱등: 같은 run_id·posting_key·content_hash로 재호출하면 `unchanged`. 유니크 위반은 ON CONFLICT로 흡수한다.
@@ -172,6 +173,7 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 | locations, is_global | | 검수값 → payload |
 | posted_at, deadline_at | date | 검수값 → payload |
 | body_text | text | payload |
+| body_sections | jsonb | payload (자소서 툴의 직무 분석 입력) |
 | source_url, source_site | text | payload url |
 | status | text | `open` / `closed` (postings.status) |
 | closed_at, closed_reason | | postings |
@@ -179,8 +181,9 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 | first_seen_at, last_seen_at, fetched_at(=collected_at) | timestamptz | postings / payload |
 | classifier_version | text | payload |
 
+- 뷰는 `anon`(비로그인)도 읽는다. 공고 페이지는 로그인 없이 누구나 볼 수 있다는 결정(노션 R-57)에 따른 것이며 본문·`body_sections`도 공개 대상이다.
 - 공고 선택 화면: `status = 'open'`으로 필터. 마감 공고 검색은 필터를 풀면 된다(뷰는 closed도 포함, hidden만 제외).
-- `body_text`가 무거우면 목록용 `public.v_postings_list`(body 제외)를 따로 둔다. 초안에는 둘 다 만든다.
+- `body_text`·`body_sections`가 무거우면 목록용 `public.v_postings_list`(둘 다 제외)를 따로 둔다. 초안에는 둘 다 만든다.
 - 뷰 필드 추가는 허용, 삭제·의미 변경은 `public-posting-v2` 뷰를 새로 만든다.
 
 ## 7. `career.application_targets`가 받는 값 (경계)
