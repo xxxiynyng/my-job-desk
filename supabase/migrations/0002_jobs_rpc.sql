@@ -133,10 +133,10 @@ begin
     insert into jobs.posting_events (posting_uid, type, run_id, changed_fields, reason)
     values (v_uid, v_result, v_run,
             case when v_result = 'changed' then
-              (select array_agg(k) from jsonb_object_keys(v_post) k
+              coalesce((select array_agg(k) from jsonb_object_keys(v_post) k
                 where k not in ('collected_at','classifier_version','needs_review','review_reasons','classification_source')
                   and (v_post->k) is distinct from ((select payload from jobs.posting_snapshots
-                                                      where posting_uid = v_uid and version = v_ver - 1)->k))
+                                                      where posting_uid = v_uid and version = v_ver - 1)->k)), '{}')
             else '{}' end,
             null);
   end if;

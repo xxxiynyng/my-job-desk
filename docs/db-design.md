@@ -56,7 +56,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | posted_at | date | ✓ | KST 날짜 `YYYY-MM-DD` |
 | deadline_at | date∣null | ✓ | null = 상시/채용 시 마감 (R-55) |
 | body_text | text | ✓ | 본문 전문(정리된 텍스트, R-04). 빈 문자열 허용, 표본 최대 10,479자 |
-| body_sections | array | ✓ | 본문을 표준 항목으로 나눈 것(2026-09-24 결정). 원소 `{kind, heading, text}`, 원문 순서. `kind`: `intro`(소개) `duties`(업무) `requirements`(자격) `preferred`(우대) `process`(전형) `conditions`(근무) `documents`(서류) `etc`(기타). `heading`은 소제목 줄 원문(첫 소제목 앞 내용은 null), `text`는 소제목 줄을 포함한 그 항목 전체. **모든 항목의 text를 `\n`으로 이으면 body_text와 같다**(전문 보존). 빈 본문이면 `[]` |
+| body_sections | array | ✓ | 본문을 표준 항목으로 나눈 것(2026-09-24 결정). 원소 `{kind, heading, text}`, 원문 순서. `kind`: `intro`(소개) `duties`(업무) `requirements`(자격) `preferred`(우대) `process`(전형) `conditions`(근무) `documents`(서류) `notice`(지원 안내·유의사항) `resume_tips`(지원서 작성 안내) `team_message`(동료 한마디) `etc`(기타) — 11종(0005, 2026-09-24). `heading`은 소제목 줄 원문(첫 소제목 앞 내용은 null), `text`는 소제목 줄을 포함한 그 항목 전체. **모든 항목의 text를 `\n`으로 이으면 body_text와 같다**(전문 보존). 빈 본문이면 `[]` |
 | classification_source | object | ✓ | `{employment, career}` 각 `구조화`∣`추론`∣`미분류` |
 | career_basis | text∣null | ✓ | `title` `body_years` `body_hint` 또는 null |
 | review_reasons | text[] | ✓ | 검수 사유 |
@@ -106,7 +106,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
    - 14일은 D-결정. 관측으로 조정할 수 있고 상수 `jobs.regeneration_gap_days`로 둔다.
 
 **content_hash**: 수집기가 계산하고 RPC는 받은 값을 쓴다(재계산하지 않음). 대상 필드를 다음 순서로 JSON 직렬화(sort_keys, ensure_ascii=False)해 sha256 앞 16자:
-`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, raw_job_category, locations, posted_at, deadline_at, body_text`
+`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, raw_job_category, locations, posted_at, deadline_at, body_text, body_sections`
 - 분류 **코드**(employment_types·career_levels·job_categories·locations·company)가 바뀌면 해시가 바뀌어 새 스냅샷이 생긴다. 의도한 동작이다(그 시점의 분류 결과가 스냅샷에 남아야 함).
 - 표시용 한글 라벨(`employment_labels`, `career_labels`), `tags`, `is_global`, `show_employment_raw`, `classifier_version`, `needs_review`, `review_reasons`, `classification_source`, `career_basis`, `collected_at`은 해시에 넣지 않는다. 라벨 표기만 바뀌면 스냅샷은 그대로다.
 
