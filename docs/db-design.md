@@ -184,6 +184,7 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 - 뷰는 `anon`(비로그인)도 읽는다. 공고 페이지는 로그인 없이 누구나 볼 수 있다는 결정(노션 R-57)에 따른 것이며 본문·`body_sections`도 공개 대상이다.
 - 공고 선택 화면: `status = 'open'`으로 필터. 마감 공고 검색은 필터를 풀면 된다(뷰는 closed도 포함, hidden만 제외).
 - `body_text`·`body_sections`가 무거우면 목록용 `public.v_postings_list`(둘 다 제외)를 따로 둔다. 초안에는 둘 다 만든다.
+- `public.v_posting_sections`(0004): 항목 분할을 행 단위로 펼친 뷰(posting_uid, section_no, kind, heading, text). "자격 항목만" 같은 조회용. 2026-09-24 적용.
 - 뷰 필드 추가는 허용, 삭제·의미 변경은 `public-posting-v2` 뷰를 새로 만든다.
 
 ## 7. `career.application_targets`가 받는 값 (경계)
