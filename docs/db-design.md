@@ -56,7 +56,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | posted_at | date | ✓ | KST 날짜 `YYYY-MM-DD` |
 | deadline_at | date∣null | ✓ | null = 상시/채용 시 마감 (R-55) |
 | body_text | text | ✓ | 본문 전문(정리된 텍스트, R-04). 빈 문자열 허용, 표본 최대 10,479자 |
-| body_sections | array | ✓ | 본문을 표준 항목으로 나눈 것(2026-09-24 결정). 원소 `{kind, heading, text}`, 원문 순서. `kind`: `intro`(소개) `duties`(업무) `requirements`(자격) `preferred`(우대) `process`(전형) `conditions`(근무) `documents`(서류) `notice`(지원 안내·유의사항) `resume_tips`(지원서 작성 안내) `team_message`(동료 한마디) `etc`(기타) — 11종(0005, 2026-09-24). `heading`은 소제목 줄 원문(첫 소제목 앞 내용은 null), `text`는 소제목 줄을 포함한 그 항목 전체. **모든 항목의 text를 `\n`으로 이으면 body_text와 같다**(전문 보존). 빈 본문이면 `[]` |
+| body_sections | array | ✓ | 본문을 표준 항목으로 나눈 것(2026-09-24 결정). 원소 `{kind, heading, text}`, 원문 순서. `kind`: `intro`(소개) `duties`(업무) `requirements`(자격) `preferred`(우대) `process`(전형) `conditions`(근무) `notice`(지원 안내·유의사항) `resume_tips`(지원서 작성 안내) `team_message`(동료 한마디) `etc`(기타) — 10종(2026-09-24: 서류(documents)는 실제 내용이 지원 안내와 같아 notice로 합침. DB 검증은 documents도 허용값으로 남겨 둠). `heading`은 소제목 줄 원문(첫 소제목 앞 내용은 null), `text`는 소제목 줄을 포함한 그 항목 전체. **모든 항목의 text를 `\n`으로 이으면 body_text와 같다**(전문 보존). 빈 본문이면 `[]` |
 | classification_source | object | ✓ | `{employment, career}` 각 `구조화`∣`추론`∣`미분류` |
 | career_basis | text∣null | ✓ | `title` `body_years` `body_hint` 또는 null |
 | review_reasons | text[] | ✓ | 검수 사유 |
