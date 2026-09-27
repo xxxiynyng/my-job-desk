@@ -49,7 +49,8 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | career_labels | text[] | ✓ | 경력·신입·경력무관 |
 | min_years | int∣null | ✓ | 최소 연차 (1~30) |
 | tags | text[] | ✓ | `5년 이상` `전환검토` `임원` 등 표시용 |
-| job_categories | text[] | ✓ | 개발·기획·디자인·비즈니스·마케팅·경영지원·기타 (R-20). 빈 배열 = 직무 정보 없음(검수 대상) |
+| job_categories | text[] | ✓ | 대분류: 개발·기획·디자인·비즈니스·경영지원·마케팅·홍보·기타 (R-22, 2026-09-27 개정. 옛 이름 비즈니스·경영지원·마케팅은 뷰가 새 이름으로 합침). 빈 배열 = 직무 정보 없음(검수 대상) |
+| job_subcategories | text[] | | '대분류/소분류'(예: 개발/백엔드). 소분류 목록 정본은 수집기 job_taxonomy.json. 기타 대분류는 소분류 없음 |
 | raw_job_category | text | | 사이트 원문 직무 (예 `Engineering > Tech Management`) |
 | locations | text[] | ✓ | 지역명 `서울` `판교` `여의도` … 해외는 `도시(국가)` (R-30~32) |
 | is_global | bool | ✓ | 해외 근무지 포함 여부 |
@@ -106,7 +107,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
    - 14일은 D-결정. 관측으로 조정할 수 있고 상수 `jobs.regeneration_gap_days`로 둔다.
 
 **content_hash**: 수집기가 계산하고 RPC는 받은 값을 쓴다(재계산하지 않음). 대상 필드를 다음 순서로 JSON 직렬화(sort_keys, ensure_ascii=False)해 sha256 앞 16자:
-`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, raw_job_category, locations, posted_at, deadline_at, body_text, body_sections`
+`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, job_subcategories, raw_job_category, locations, posted_at, deadline_at, body_text, body_sections`
 - 분류 **코드**(employment_types·career_levels·job_categories·locations·company)가 바뀌면 해시가 바뀌어 새 스냅샷이 생긴다. 의도한 동작이다(그 시점의 분류 결과가 스냅샷에 남아야 함).
 - 표시용 한글 라벨(`employment_labels`, `career_labels`), `tags`, `is_global`, `show_employment_raw`, `classifier_version`, `needs_review`, `review_reasons`, `classification_source`, `career_basis`, `collected_at`은 해시에 넣지 않는다. 라벨 표기만 바뀌면 스냅샷은 그대로다.
 
@@ -154,7 +155,7 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 4장의 마감 판정을 수행하고 `{closed_missing, closed_deadline}` 건수 반환. runs.finished_at 기록.
 
 ### 5.5 검수: `jobs.set_override(p_posting_uid, p_field, p_value jsonb, p_note)`
-래퍼 `public.admin_set_override`, service_role만(검수 화면은 서버에서 호출). 허용 field: `employment_types, career_levels, job_categories, locations, company, is_global, deadline_at, hidden`. 저장 후 event `reviewed`, `postings.review_status = 'reviewed'`. `hidden=true`면 뷰에서 제외(잘못 수집된 공고 처리용).
+래퍼 `public.admin_set_override`, service_role만(검수 화면은 서버에서 호출). 허용 field: `employment_types, career_levels, job_categories, job_subcategories, locations, company, is_global, deadline_at, hidden`. 저장 후 event `reviewed`, `postings.review_status = 'reviewed'`. `hidden=true`면 뷰에서 제외(잘못 수집된 공고 처리용).
 
 ## 6. 공개 뷰 `public.v_postings` 필드 계약 (`public-posting-v1`)
 
