@@ -49,7 +49,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | career_labels | text[] | ✓ | 경력·신입·경력무관 |
 | min_years | int∣null | ✓ | 최소 연차 (1~30) |
 | tags | text[] | ✓ | `5년 이상` `전환검토` `임원` 등 표시용 |
-| job_categories | text[] | ✓ | 대분류: 개발·기획·디자인·비즈니스·경영지원·마케팅·홍보·기타 (R-22, 2026-09-27 개정. 옛 이름 비즈니스·경영지원·마케팅은 뷰가 새 이름으로 합침). 빈 배열 = 직무 정보 없음(검수 대상) |
+| job_categories | text[] | ✓ | 대분류: 개발·기획·디자인·경영·마케팅·홍보·기타 (R-22, 2026-09-28. 옛 이름 비즈니스·경영지원·비즈니스·경영지원·마케팅은 뷰가 새 이름으로 합침). 빈 배열 = 직무 정보 없음(검수 대상) |
 | job_subcategories | text[] | | '대분류/소분류'(예: 개발/백엔드). 소분류 목록 정본은 수집기 job_taxonomy.json. 기타 대분류는 소분류 없음 |
 | raw_job_category | text | | 사이트 원문 직무 (예 `Engineering > Tech Management`) |
 | locations | text[] | ✓ | 지역명 `서울` `판교` `여의도` … 해외는 `도시(국가)` (R-30~32) |
