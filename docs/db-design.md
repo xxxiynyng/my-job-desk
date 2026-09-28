@@ -83,7 +83,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | sources | source_id | group, platform, hosts[], role(main/subsidiary), robots_exception, enabled |
 | runs | run_id | 실행 1회: started_at, finished_at, status, classifier_version |
 | source_runs | (run_id, source_id, host) | status(ok/판정불가/실패), count, previous_count, fill_rates, warnings, notes, http_stats (R-41·R-43) |
-| postings | posting_uid | 현재 상태. posting_key, generation, source_id, status, current_snapshot_id, content_hash, first_seen_at, last_seen_at, last_seen_run_id, missed_runs, closed_at, closed_reason, needs_review, review_status |
+| postings | posting_uid | 현재 상태. posting_key, generation, source_id, status, current_snapshot_id, content_hash, first_seen_at, last_seen_at, last_checked_at, last_seen_run_id, missed_runs, closed_at, closed_reason, needs_review, review_status |
 | posting_snapshots | id | 원문 버전. posting_uid, version, content_hash, payload(normalized-posting-v1 전체), classifier_version, collected_at, run_id. **영구 보관** |
 | posting_events | id | posting_uid, type(created/changed/closed/reopened/regenerated/reviewed), run_id, changed_fields[], reason, occurred_at (R-42) |
 | classification_overrides | (posting_uid, field) | value(jsonb), author, note, created_at. 검수 수정 (R-44) |
@@ -111,14 +111,19 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 - 분류 **코드**(employment_types·career_levels·job_categories·locations·company)가 바뀌면 해시가 바뀌어 새 스냅샷이 생긴다. 의도한 동작이다(그 시점의 분류 결과가 스냅샷에 남아야 함).
 - 표시용 한글 라벨(`employment_labels`, `career_labels`), `tags`, `is_global`, `show_employment_raw`, `classifier_version`, `needs_review`, `review_reasons`, `classification_source`, `career_basis`, `collected_at`은 해시에 넣지 않는다. 라벨 표기만 바뀌면 스냅샷은 그대로다.
 
-**본 것 기록**: 해시가 같아도 `last_seen_at`, `last_seen_run_id`를 갱신하고 `missed_runs = 0`.
+**본 것 기록**: 해시가 같아도 `last_seen_at`, `last_seen_run_id`, `last_checked_at`을 갱신하고 `missed_runs = 0`.
+
+**오래된 결과 거부(0014, 2026-09-28)**: 결과의 `collected_at`이 공고의 `last_checked_at`(그 공고를 보거나 못 봤다고 센 수집 결과의 관측 시각 중 최신)보다 오래되면 `ingest_posting`은 아무것도 바꾸지 않고 `{"result":"unchanged","stale":true}`를 돌려준다. 옛 output을 새 run_id로 다시 보내도(`run.py push`) 본문·분류·상태·`missed_runs`가 과거로 돌아가지 않는다. 같은 시각의 결과를 다시 보내는 것은 지금처럼 멱등 처리한다. `ingest_posting`은 실행의 관측 시각 `runs.observed_at`(보낸 결과의 `collected_at` 최댓값)도 기록한다.
 
 ## 4. 스냅샷 생성 조건과 상태 전이
 
 스냅샷은 (a) 신규 (b) content_hash 변경 (c) 재게시 때만 만든다. 같은 실행에서 같은 공고를 두 번 보내도 두 번째는 `unchanged`.
 
 상태(`postings.status`): `open` → `closed`.
-- `jobs.finish_run(run_id)`: 그 실행에서 정상(ok) 처리된 source의 open 공고 중 이번에 보이지 않은 것은 `missed_runs += 1`. `missed_runs ≥ 2`면 closed, closed_reason `missing` (R-40 2회 연속). 판정불가·실패 source의 공고는 건드리지 않는다.
+- `jobs.finish_run(run_id)` (0014에서 다시 씀): 세 문장을 차례로 실행한다. 이전 판은 증가와 마감을 한 WITH 문에서 같은 행에 두 번 UPDATE해 마감(missing)이 한 번도 적용되지 않았다.
+  1. **미노출 카운트**: 이 실행에서 그 **사이트(host)** 수집이 `ok`였고, 실행 관측 시각 `observed_at`이 공고의 `last_checked_at`보다 새로우며, 이번에 보이지 않은(`last_seen_at < observed_at`) open 공고만 `missed_runs += 1`, `last_checked_at = observed_at`. 판정불가·실패 사이트의 공고, 옛 결과·같은 결과의 재전송은 세지 않는다.
+  2. **마감(missing)**: 1에서 이번에 센 공고 중 `missed_runs ≥ 2`면 closed, closed_reason `missing` (R-40 2회 연속).
+  3. **마감(deadline)**: 아래 항목.
 - `deadline_at < 오늘(KST)`이면 finish_run에서 closed, closed_reason `deadline`.
 - 사이트가 마감 표시한 공고(`raw.closed`)와 인재풀 공고는 수집기가 애초에 보내지 않는다(R-04·R-12). 이미 open이던 공고가 다음 실행에 빠지면 위 규칙으로 닫힌다.
 
