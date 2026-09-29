@@ -87,6 +87,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | posting_snapshots | id | 원문 버전. posting_uid, version, content_hash, payload(normalized-posting-v1 전체), classifier_version, collected_at, run_id. **영구 보관** |
 | posting_events | id | posting_uid, type(created/changed/closed/reopened/regenerated/reviewed), run_id, changed_fields[], reason, occurred_at (R-42) |
 | classification_overrides | (posting_uid, field) | value(jsonb), author, note, created_at. 검수 수정 (R-44) |
+| posting_detail_failures | id | posting_key(FK 없음, 신규 공고는 아직 postings에 없을 수 있음), run_id, kind(new/changed), reason, changed_fields[], occurred_at, resolved_at. 공고당 미해결 1건(부분 유니크 인덱스) (R-41, 0015) |
 
 제약:
 - `postings UNIQUE(posting_uid)`, `postings UNIQUE(posting_key, generation)`
@@ -161,6 +162,11 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 
 ### 5.5 검수: `jobs.set_override(p_posting_uid, p_field, p_value jsonb, p_note)`
 래퍼 `public.admin_set_override`, service_role만(검수 화면은 서버에서 호출). 허용 field: `employment_types, career_levels, job_categories, job_subcategories, locations, company, is_global, deadline_at, hidden`. 저장 후 event `reviewed`, `postings.review_status = 'reviewed'`. `hidden=true`면 뷰에서 제외(잘못 수집된 공고 처리용).
+
+### 5.6 상세 본문 수집 실패 기록 (0015, R-41)
+- `jobs.report_detail_failure(p jsonb) → boolean` (래퍼 `public.collector_report_detail_failure`): 입력 `{posting_key, run_id, kind(new|changed), reason, changed_fields?}`. 같은 posting_key에 미해결 실패가 이미 있으면 갱신(재발), 없으면 새로 만든다(`on conflict (posting_key) where resolved_at is null`). 반환값은 이번이 처음(신규 실패)인지 — 수집기가 이 값으로 처음 실패한 순간에만 `#수집-경고`에 올린다(재발은 조용히 기록만).
+- `jobs.resolve_detail_failure(p jsonb) → void` (래퍼 `public.collector_resolve_detail_failure`): 입력 `{posting_key}`. 미해결 실패를 `resolved_at = now()`로 닫는다. 없으면 아무 일도 하지 않는다.
+- 이력은 지우지 않는다(해제 후 다시 실패하면 새 행). "미해결 실패" 여부는 `resolved_at is null`로 판정하고, 관리자 페이지 "수집 경고" 탭·검수 사유 "본문 수집 실패"가 이 값을 읽는다.
 
 ## 6. 공개 뷰 `public.v_postings` 필드 계약 (`public-posting-v1`)
 
