@@ -108,9 +108,10 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
    - 14일은 D-결정. 관측으로 조정할 수 있고 상수 `jobs.regeneration_gap_days`로 둔다.
 
 **content_hash**: 수집기가 계산하고 RPC는 받은 값을 쓴다(재계산하지 않음). 대상 필드를 다음 순서로 JSON 직렬화(sort_keys, ensure_ascii=False)해 sha256 앞 16자:
-`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, job_subcategories, raw_job_category, locations, posted_at, deadline_at, body_text, body_sections`
+`title, company, employment_types, employment_raw, career_levels, min_years, job_categories, job_subcategories, raw_job_category, locations, posted_at, deadline_at, body_text, body_sections, tags, show_employment_raw, group, is_global, url, source_site`
 - 분류 **코드**(employment_types·career_levels·job_categories·locations·company)가 바뀌면 해시가 바뀌어 새 스냅샷이 생긴다. 의도한 동작이다(그 시점의 분류 결과가 스냅샷에 남아야 함).
-- 표시용 한글 라벨(`employment_labels`, `career_labels`), `tags`, `is_global`, `show_employment_raw`, `classifier_version`, `needs_review`, `review_reasons`, `classification_source`, `career_basis`, `collected_at`은 해시에 넣지 않는다. 라벨 표기만 바뀌면 스냅샷은 그대로다.
+- 원칙(2026-09-30): 공개 뷰가 payload에서 바로 읽는 화면 값은 **모두** 해시에 넣는다. 빠지면 규칙이 바뀌어도 새 스냅샷이 안 생겨 옛 값이 화면에 남는다(09-28 `tags`, 09-30 `show_employment_raw` 토스 5건). 이에 따라 `tags`(09-28), `show_employment_raw`·`group`·`is_global`·`url`·`source_site`(09-30)를 넣었다.
+- 넣지 않는 값: 표시용 한글 라벨(`employment_labels`, `career_labels` — 뷰가 코드에서 다시 만든다), 실행마다 바뀌는 `classifier_version`·`collected_at`, 검수·근거 기록용 `needs_review`, `review_reasons`, `classification_source`, `career_basis`, 화면에 아직 없는 `contract_months`.
 
 **본 것 기록**: 해시가 같아도 `last_seen_at`, `last_seen_run_id`, `last_checked_at`을 갱신하고 `missed_runs = 0`.
 
