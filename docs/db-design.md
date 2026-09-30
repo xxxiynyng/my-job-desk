@@ -88,6 +88,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | posting_events | id | posting_uid, type(created/changed/closed/reopened/regenerated/reviewed), run_id, changed_fields[], reason, occurred_at (R-42) |
 | classification_overrides | (posting_uid, field) | value(jsonb), author, note, created_at. 검수 수정 (R-44) |
 | posting_detail_failures | id | posting_key(FK 없음, 신규 공고는 아직 postings에 없을 수 있음), run_id, kind(new/changed), reason, changed_fields[], occurred_at, resolved_at. 공고당 미해결 1건(부분 유니크 인덱스) (R-41, 0015) |
+| site_redirects | id | source_id, from_host, to_host(둘이 유니크 키), sample_from/to_url, last_status, permanent, consecutive_permanent, target_robots_allowed, request_count, seen_runs, first/last_seen_at·run_id. 사이트가 다른 호스트로 넘긴 기록 (R-04·R-41, 0016) |
 
 제약:
 - `postings UNIQUE(posting_uid)`, `postings UNIQUE(posting_key, generation)`
@@ -168,6 +169,13 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 - `jobs.report_detail_failure(p jsonb) → boolean` (래퍼 `public.collector_report_detail_failure`): 입력 `{posting_key, run_id, kind(new|changed), reason, changed_fields?}`. 같은 posting_key에 미해결 실패가 이미 있으면 갱신(재발), 없으면 새로 만든다(`on conflict (posting_key) where resolved_at is null`). 반환값은 이번이 처음(신규 실패)인지 — 수집기가 이 값으로 처음 실패한 순간에만 `#수집-경고`에 올린다(재발은 조용히 기록만).
 - `jobs.resolve_detail_failure(p jsonb) → void` (래퍼 `public.collector_resolve_detail_failure`): 입력 `{posting_key}`. 미해결 실패를 `resolved_at = now()`로 닫는다. 없으면 아무 일도 하지 않는다.
 - 이력은 지우지 않는다(해제 후 다시 실패하면 새 행). "미해결 실패" 여부는 `resolved_at is null`로 판정하고, 관리자 페이지 "수집 경고" 탭·검수 사유 "본문 수집 실패"가 이 값을 읽는다.
+
+### 5.7 리다이렉트 기록 (0016, R-04·R-41)
+- `jobs.report_site_redirect(p jsonb) → jsonb` (래퍼 `public.collector_report_site_redirect`): 입력 `{run_id, source_id, from_host, to_host, from_url, to_url, last_status, permanent, target_robots_allowed, request_count}`(수집기가 한 실행 안에서 호스트 쌍마다 한 번 묶어 보냄). 반환 `{is_new, consecutive_permanent, first_seen_at}`.
+- 키는 (from_host, to_host). 넘어가는 호스트가 바뀌면 새 행 → `is_new`.
+- `consecutive_permanent`: 이 소스의 직전 실행(`source_runs` 기준)에도 영구 이동으로 봤으면 +1, 아니면 1, 임시 이동이면 0. 같은 실행에서 다시 불러도 한 번만 센다.
+- 알림 판단은 수집기: `is_new`면 1회, 영구 이동이 3회 연속이면 등록 주소(config/sites.json)를 바꿀 때까지 매 실행. 확인 처리 기능은 없다(2026-09-30 결정).
+- 관리자 페이지 "수집 경고" 탭과 Claude 알림("Pickd 수집 알림")이 이 표를 읽는다.
 
 ## 6. 공개 뷰 `public.v_postings` 필드 계약 (`public-posting-v1`)
 
