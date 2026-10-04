@@ -15,7 +15,7 @@
 | 디자인 SSOT | Notion「Pickd 디자인 시스템」`38e01b3f871381daac4dc686a06c3d54` | 색·타이포 토큰·컴포넌트·테이블·탭별 규칙 |
 | 온보딩 SSOT | Notion「Pickd 온보딩」`39301b3f871381478e31d3ea22b63b7b` | 온보딩 플로우 v2.2 (필수 2단계 + 선택 1단계 + 점진 수집) |
 | 일일 헬스체크 | `docs/tasks/DAILY_HEALTH_CHECK.md` → 리포트 `docs/HEALTH.md` | 코드·배포·문서 정합 자동 점검 (상시 운영 문서) |
-| DB 설계 정본 | `docs/db-design.md` + `supabase/migrations/` | Supabase 스키마(`jobs`·`career`·공개 뷰)·RPC·권한·보존. 공고 수집기(`~/Projects/pickd-collector`)와 자소서 툴이 이 규격을 따른다(2026-09-24 신설). 수집 규칙 자체는 Notion「Pickd 공고 수집 — IT기업 분류·표기 규칙」`3e401b3f871381a58f78e33294113910` |
+| DB 설계 정본 | ~~`docs/db-design.md` + `supabase/migrations/`~~ 비공개 저장소 `pickd-db`(2026-10-05 이동, 이 레포에는 이동 안내만) | Supabase 스키마(`jobs`·`career`·공개 뷰)·RPC·권한·보존. 공고 수집기(`~/Projects/pickd-collector`)와 자소서 툴이 이 규격을 따른다(2026-09-24 신설). 수집 규칙 자체는 Notion「Pickd 공고 수집 — IT기업 분류·표기 규칙」`3e401b3f871381a58f78e33294113910` |
 
 - **중복 금지(가장 중요)**: 같은 규칙을 두 곳에 적지 않는다. 코드·작업=이 파일 / 디자인 값=디자인 시스템 / 제품 결정=기획 정리본 / 온보딩=온보딩 SSOT. 각 규칙은 **한 곳에서만 최신값** 유지.
 - 그 외 md는 임시 산출물: `docs/tasks/`에 모으고, 실행 완료되면 삭제한다(git 히스토리로 복원 가능). 표준으로 굳은 내용만 위 정본에 승격.
@@ -23,7 +23,7 @@
 ## 1. 🚫 절대 금지
 
 - **백엔드 없음** — API 호출·fetch·서버 사이드 로직 금지. (예정된 예외: 파일함 저장소로 Notion API 프록시 도입 확정 — 기획 SSOT §4-6, 2026-07-12. 구현 착수 전에 이 규칙과 시크릿 취급 규칙을 먼저 개정할 것)
-  - **예외(2026-09-24 개정): Supabase DB.** 공고 수집기와 자소서 툴이 공유하는 Supabase 프로젝트 1개의 스키마 정본을 이 레포의 `supabase/migrations/`에 둔다(설계: `docs/db-design.md`). 이 레포의 프런트 코드는 아직 DB에 붙지 않는다 — 웹에서 공고를 읽는 작업을 시작할 때 `public.v_postings` 뷰 읽기(anon SELECT)만 허용하도록 이 항목을 다시 개정할 것. Supabase 키·DB 접속 문자열은 `.env*`에만 두고 커밋하지 않는다.
+  - **예외(2026-09-24 개정): Supabase DB.** 공고 수집기와 자소서 툴이 공유하는 Supabase 프로젝트 1개의 ~~스키마 정본을 이 레포의 `supabase/migrations/`에 둔다(설계: `docs/db-design.md`).~~ (2026-10-05 개정: 스키마 정본과 설계 문서는 비공개 저장소 `pickd-db`로 옮겼다. 이 레포의 `supabase/`·`docs/db-design.md`에는 이동 안내만 남는다) 이 레포의 프런트 코드는 아직 DB에 붙지 않는다 — 웹에서 공고를 읽는 작업을 시작할 때 `public.v_postings` 뷰 읽기(anon SELECT)만 허용하도록 이 항목을 다시 개정할 것. Supabase 키·DB 접속 문자열은 `.env*`에만 두고 커밋하지 않는다.
   - 단서(2026-07-30): 탭2 `src/features/experiences/story/api.ts`의 `tab2Api`는 **서버 경계로 설계**돼 있으나 현재 목 구현(`api.mock.ts`)이라 이 규칙을 지킨다. 실서버(`api.server.ts`) 교체 착수 전에 이 규칙을 먼저 개정할 것.
 - **폰트 크기 하드코딩 금지** — 임의 `text-[Npx]` 금지, 토큰만 사용: `text-mini`(11, **최소**) · `text-chip`(12) · `text-xs`(13) · `text-body`(14) · `text-sm`(15) · `text-title`(17) · `text-h2`(24) · `text-heading`(29) · `text-display`(33) — 전부 1.0배 스케일(10·11·12·13·14·15·22·26·30)에 ×1.1 반올림한 값이다(2026-07-30 배율 도입). **정의 위치: `src/lib/designTokens.ts`의 `FONT_SIZE`(단일 출처) — `tailwind.config.ts`와 `src/lib/utils.ts`가 여기서 파생**(2026-07-13 통합). `text-xs`·`text-sm`은 Tailwind 기본 토큰이라 `FONT_SIZE`가 아니라 같은 파일의 `TW_BASE_FONT_SIZE_OVERRIDE`에서 덮어쓴다(벤더 컴포넌트가 대량으로 써서 안 덮으면 화면이 섞인다). 여기에만 line-height를 함께 적는데, Tailwind 기본값이 원래 [크기, 줄간격] 쌍이라 크기만 덮으면 세로 리듬이 무너지기 때문 — 줄간격은 rem으로 두어 노브를 탄다. `text-micro`(9px)는 제거됨(2026-07-06) — 재도입 금지(대응 토큰이 없어 CSS가 안 붙는다). eslint 룰이 `text-[Npx]`·raw hex를 warn으로 감지.
 - **색 하드코딩 금지** — 임의 `bg-[#hex]`·`text-[#hex]` 금지. 색 값은 디자인 SSOT 2장이 정본. 파랑은 raw `blue-500`/`blue-600` 클래스 직접 사용 금지 — 역할 토큰(`action`=채움 버튼 / `brand`=표시)만 사용(디자인 SSOT §0 원칙 11, 2026-07-12).
@@ -112,7 +112,7 @@
 | 스타일 | Tailwind CSS + shadcn/ui (Radix UI 기반) |
 | 아이콘 | lucide-react |
 | 토스트 | sonner |
-| 상태 | localStorage (프런트는 서버/DB 없음). DB 스키마 정본만 `supabase/migrations/`에 보관 — §1 예외 참조 |
+| 상태 | localStorage (프런트는 서버/DB 없음). ~~DB 스키마 정본만 `supabase/migrations/`에 보관~~ DB 스키마 정본은 `pickd-db`(2026-10-05 이동) — §1 예외 참조 |
 | 날짜 | date-fns |
 | 드래그 | @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities |
 | 문서 내보내기 | xlsx (Excel), docx (Word). PDF는 브라우저 인쇄(라이브러리 없음) |
