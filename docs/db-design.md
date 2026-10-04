@@ -15,6 +15,7 @@
         │  public.v_postings (검수값 우선 합성, status 포함)   ← 웹·자소서 툴은 이 뷰만 읽음
         ▼
 [career 스키마]  application_targets.source_snapshot_id → jobs.posting_snapshots.id (FK, ON DELETE RESTRICT)
+                 └ 2026-09-30 폐기: 지원 기록은 공고 핵심 내용을 복사하고 jobs를 FK로 참조하지 않는다(7장)
                  experiences · stories · cover_letters … (GPT 툴 소유, RLS user_id = auth.uid())
 ```
 
@@ -25,7 +26,7 @@
 | `career` | 자소서 툴 | 사용자 본인(RLS) | 사용자 본인(RLS) |
 | `auth` | Supabase | Supabase | Supabase |
 
-Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(2026-09-24 확정, 7장). `jobs`는 `career`를 참조하지 않는다.
+Supabase 프로젝트는 1개. ~~`career` → `jobs` 방향으로만 FK를 둔다(2026-09-24 확정, 7장).~~ (2026-09-30 개정: 스키마 사이 FK를 두지 않는다. 지원 기록은 공고 내용을 복사한다, 7장) `jobs`는 `career`를 참조하지 않는다.
 
 ## 1. 입력 규격 `normalized-posting-v1`
 
@@ -84,7 +85,7 @@ Supabase 프로젝트는 1개. `career` → `jobs` 방향으로만 FK를 둔다(
 | runs | run_id | 실행 1회: started_at, finished_at, status, classifier_version |
 | source_runs | (run_id, source_id, host) | status(ok/판정불가/실패), count, previous_count, fill_rates, warnings, notes, http_stats (R-41·R-43) |
 | postings | posting_uid | 현재 상태. posting_key, generation, source_id, status, current_snapshot_id, content_hash, first_seen_at, last_seen_at, last_checked_at, last_seen_run_id, missed_runs, closed_at, closed_reason, needs_review, review_status |
-| posting_snapshots | id | 원문 버전. posting_uid, version, content_hash, payload(normalized-posting-v1 전체), classifier_version, collected_at, run_id. **영구 보관** |
+| posting_snapshots | id | 원문 버전. posting_uid, version, content_hash, payload(normalized-posting-v1 전체), classifier_version, collected_at, run_id. ~~**영구 보관**~~ 공고 마감 후 1년 보관 뒤 삭제(R-72, 2026-09-30 개정. 9장) |
 | posting_events | id | posting_uid, type(created/changed/closed/reopened/regenerated/reviewed), run_id, changed_fields[], reason, occurred_at (R-42) |
 | classification_overrides | (posting_uid, field) | value(jsonb), author, note, created_at. 검수 수정 (R-44) |
 | posting_detail_failures | id | posting_key(FK 없음, 신규 공고는 아직 postings에 없을 수 있음), run_id, kind(new/changed), reason, changed_fields[], occurred_at, resolved_at. 공고당 미해결 1건(부분 유니크 인덱스) (R-41, 0015) |
@@ -208,7 +209,30 @@ runs에 1행 만들고 run_id(`YYYYMMDDTHHMMSSZ`) 반환. 수집기는 run_id를
 - `public.v_posting_sections`(0004): 항목 분할을 행 단위로 펼친 뷰(posting_uid, section_no, kind, heading, text). "자격 항목만" 같은 조회용. 2026-09-24 적용.
 - 뷰 필드 추가는 허용, 삭제·의미 변경은 `public-posting-v2` 뷰를 새로 만든다.
 
-## 7. `career.application_targets`가 받는 값 (경계)
+## 7. 지원 기록이 공고에서 가져가는 값 (경계)
+
+**2026-09-30 개정(R-73, Notion 반영 2026-10-04)**: 지원 기록은 스냅샷을 참조하지 않는다. 지원을 시작할 때 자소서 툴이 공개 뷰(`public.v_postings`)의 한 행을 읽어 공고 핵심 내용을 **지원 기록 안에 복사**한다. 스냅샷과 원본은 공고 마감(`closed_at`) 후 1년이 지나면 예외 없이 지워지므로(R-72·R-75, 9장) 참조로는 지원 기록을 지킬 수 없다.
+
+| 복사하는 내용(R-73) | 읽는 뷰 필드 |
+|---|---|
+| 회사 | `group`, `company` |
+| 제목 | `title` |
+| 고용형태 | `employment_types`, `employment_labels` |
+| 직군 | `job_categories`, `job_subcategories` |
+| 경력 | `career_levels`, `career_labels`, `min_years` |
+| 마감일 | `deadline_at` |
+| 원문 링크 | `source_url` |
+| 본문 | `body_text` |
+
+- 복사한 값은 지원 기록의 것이다. 공고가 바뀌거나 스냅샷이 지워져도 지원 기록은 변하지 않는다. 지원 기록은 사용자가 지우거나 탈퇴할 때만 사라진다.
+- 지원 시점 상태(지원 기록에 복사한 값)와 현재 상태(뷰의 `status`)는 다른 정보이며 동기화하지 않는다.
+- `jobs`는 `career`를 참조하지 않는다. 지원 기록에서 `jobs`로 가는 FK도 두지 않는다(스냅샷이 지워져도 막히지 않게).
+- 지원 기록 기능은 아직 DB에 없다(2026-09-30 확인: `career` 스키마 없음, 스냅샷을 참조하는 FK 없음). 표 이름·열 구성, `body_sections`와 `posting_uid`도 함께 남길지는 지원 기록 기획 때 정한다(11장).
+- 아래 7-1의 `public.v_my_posting_snapshots` 뷰는 만들지 않는다.
+
+### 7-1. (2026-09-30 폐기) 2026-09-24 설계 — 스냅샷 FK 참조
+
+아래는 기록용이다. 스냅샷이 마감 후 1년에 지워지게 되면서(R-72) FK `ON DELETE RESTRICT`가 삭제를 막거나, 막지 않으면 지원 기록이 깨지게 되어 폐기했다.
 
 지원 시작 시 자소서 툴이 뷰의 한 행을 읽어 **그 시점의 스냅샷 id를 FK로 고정**한다. 원문·구조화 공고의 정본은 `jobs.posting_snapshots`이며(영구 보관, 6장·9장), 지원건에는 본문 전체를 다시 저장하지 않는다. (2026-09-24 확정: 하나의 제품·하나의 Supabase·영구 스냅샷이므로 복사본 방식 대신 FK 참조)
 
@@ -248,7 +272,7 @@ Supabase 기본 역할만 쓴다. 별도 DB 로그인 역할은 만들지 않는
 |---|---|
 | `service_role` (서버 전용 키: 수집기 GitHub Actions 시크릿, 검수 화면 서버) | `public.collector_*` 4개와 `public.admin_set_override` EXECUTE, `jobs` 테이블 SELECT. 브라우저에 키를 넣지 않는다 |
 | `anon`, `authenticated` | `public.v_postings`, `public.v_postings_list` SELECT만 |
-| `authenticated` (0100_career 이후) | `public.v_my_posting_snapshots` SELECT — 본인 지원건이 참조한 스냅샷만(7장) |
+| ~~`authenticated` (0100_career 이후)~~ | ~~`public.v_my_posting_snapshots` SELECT — 본인 지원건이 참조한 스냅샷만(7장)~~ 2026-09-30 폐기: 뷰를 만들지 않는다(7-1) |
 | `career.*` | RLS 활성, 모든 정책 `user_id = auth.uid()`. service_role은 우회 |
 
 PostgREST 노출 스키마: `public`(및 `career`). `jobs`는 노출하지 않는다. `jobs.*` 함수는 직접 실행 권한을 모두 회수했고, SECURITY DEFINER 래퍼는 `search_path`를 고정한다.
@@ -259,11 +283,12 @@ PostgREST 노출 스키마: `public`(및 `career`). `jobs`는 노출하지 않�
 |---|---|---|
 | 수집기 로컬 raw 응답 | 14일 | 수집기 `prune` |
 | 수집기 로컬 snapshots/runs | 30일 | 수집기 `prune` |
-| jobs.posting_snapshots | 영구 | 없음 |
+| jobs.posting_snapshots | ~~영구~~ 공고 마감(`closed_at`) 후 1년 (2026-09-30 개정, R-72) | ~~없음~~ 1년이 지나면 그 공고의 스냅샷 전부(옛 버전 포함)를 원본과 함께 지운다. 예외 없음. 모집 중인 공고는 지우지 않는다. 삭제 작업은 원본 저장 구현 뒤에 만든다(그 전까지는 지우지 않음) |
+| 원본(Supabase Storage `pickd-raw`, 원본 저장 구현 후) | 목록 원본: 받은 시각부터 1년. 공고별 조각·상세 원본: 그 공고의 마감 후 1년 (2026-10-04 결정) | 같은 공고키의 더 새 세대가 모집 중이면 그 세대의 원본은 지우지 않는다(원본에 세대를 기록). 설계는 0017 초안 |
 | jobs.posting_events | 영구 | 없음 |
-| jobs.postings (closed 포함) | 영구 | 없음. 잘못된 공고는 `hidden` 검수값으로 숨김 |
+| jobs.postings (closed 포함) | 영구 | 없음. 잘못된 공고는 `hidden` 검수값으로 숨김. 스냅샷을 지운 뒤에도 통계·재등록 판별용으로 남긴다(R-72) |
 | jobs.runs / source_runs | 2년 | 관리자 배치 |
-| career.application_targets 및 하위 | 사용자가 삭제할 때까지 | 사용자 본인(RLS). 삭제해도 jobs에는 영향 없음. 반대로 참조 중인 스냅샷은 FK RESTRICT로 삭제 불가 |
+| career.application_targets 및 하위 | 사용자가 삭제할 때까지 | 사용자 본인(RLS). 삭제해도 jobs에는 영향 없음. ~~반대로 참조 중인 스냅샷은 FK RESTRICT로 삭제 불가~~ (2026-09-30 개정: 스냅샷을 참조하지 않으므로 해당 없음, 7장) |
 
 ## 10. 진행 순서
 
@@ -272,7 +297,7 @@ PostgREST 노출 스키마: `public`(및 `career`). `jobs`는 노출하지 않�
 3. Supabase 프로젝트 생성, 마이그레이션 적용, service_role 키를 수집기 시크릿에 등록 (사용자 작업)
 4. 수집기에 `store/supabase.py` 추가: `collector_begin_run` → `collector_ingest_posting` × N → `collector_report_source_run` → `collector_finish_run` (PostgREST rpc, service_role 키)
 5. `output/*.json` 829건으로 초기 적재 후 뷰 대조
-6. career 마이그레이션은 GPT 툴 쪽에서 `0100_career_*.sql`로 이 저장소에 추가(`application_targets`의 FK는 7장 규격)
+6. career 마이그레이션은 GPT 툴 쪽에서 `0100_career_*.sql`로 이 저장소에 추가(~~`application_targets`의 FK는 7장 규격~~ 2026-09-30 개정: FK 없이 공고 내용을 복사, 7장)
 
 
 ### 10-1. 실DB 적용 기록 (커밋 메시지의 "미적용"은 커밋 당시 상태)
@@ -284,9 +309,11 @@ PostgREST 노출 스키마: `public`(및 `career`). `jobs`는 노출하지 않�
 | 0014 finish_run·오래된 결과 거부 | 2026-09-28 | 2026-09-30: 0001~0014 파일로 만든 DB와 실DB의 함수·뷰 22개 정의(md5)·컬럼 일치 |
 | 0015 posting_detail_failures | 2026-09-30 | 0001~0016 파일로 만든 DB와 실DB의 함수·뷰·새 표 컬럼 52개 일치, 실행 권한 service_role만 |
 | 0016 site_redirects | 2026-09-30 | 같음 |
+| 0015·0016 끝에 덧붙인 `grant select … to service_role` (두 기록 표 조회, R-74) | 2026-10-04 | 실DB에서 두 표의 service_role 권한이 SELECT 하나뿐임을 확인. 09-30 적용 때 빠뜨린 것을 파일과 실DB에 같이 추가 |
 
 ## 11. 미확인·보류
 
 - 재게시 간격 14일은 관측값이 없어 가정이다.
 - 회사명 표기(companies 테이블)와 수집기 사전의 동기 방식은 2단계에서 정한다(초안: 수집기가 사전을 seed SQL로 내보냄).
 - 자소서 툴이 Supabase 클라이언트(JS)로 붙는지, 서버에서 붙는지 미확인. 뷰 규격에는 영향 없다.
+- 지원 기록 표 설계(추후 기획, 7장): 복사할 내용은 R-73 개정 문장을 따른다. 본문 항목 분할(`body_sections`)과 원래 공고를 가리키는 `posting_uid`(FK 없이)도 함께 남길지는 그때 정한다.
