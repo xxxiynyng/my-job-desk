@@ -73,3 +73,4 @@ $$;
 revoke all on function jobs.report_site_redirect(jsonb), public.collector_report_site_redirect(jsonb)
   from public, anon, authenticated;
 grant execute on function public.collector_report_site_redirect(jsonb) to service_role;
+grant select on jobs.site_redirects to service_role;   -- 다른 jobs 표와 같이 조회만(R-74). 2026-10-04 추가, 같은 날 실DB 적용

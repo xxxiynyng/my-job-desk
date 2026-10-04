@@ -65,3 +65,4 @@ revoke all on function jobs.report_detail_failure(jsonb), jobs.resolve_detail_fa
   from public, anon, authenticated;
 grant execute on function public.collector_report_detail_failure(jsonb), public.collector_resolve_detail_failure(jsonb)
   to service_role;
+grant select on jobs.posting_detail_failures to service_role;   -- 다른 jobs 표와 같이 조회만(R-74). 2026-10-04 추가, 같은 날 실DB 적용
